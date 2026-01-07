@@ -333,12 +333,12 @@ export default function Home() {
       </section>
 
       {/* Mobile App - Dedicated Section */}
-      <section className="py-32 px-6 bg-gradient-to-b from-[#0a0a0a] via-[#0a0a0a] to-[#111111]/50 relative overflow-hidden">
+      <section className="pt-32 bg-linear-to-b from-[#0a0a0a] via-[#0a0a0a] to-[#111111]/50 relative overflow-hidden">
         {/* Background glows */}
         <div className="absolute top-1/4 left-0 w-[600px] h-[600px] bg-[#A855F7]/10 blur-[200px] rounded-full" />
         <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#0891B2]/10 blur-[150px] rounded-full" />
 
-        <div className="max-w-6xl mx-auto relative">
+        <div className="max-w-6xl mx-auto relative px-6">
           {/* Header */}
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#A855F7]/10 border border-[#A855F7]/20 text-[#A855F7] text-sm font-medium mb-6">
@@ -355,197 +355,19 @@ export default function Home() {
               Available for iOS and Android.
             </p>
           </div>
+        </div>
 
-          {/* Phone Showcase */}
-          <div className="relative flex justify-center items-end gap-4 md:gap-8 mb-16">
-            {/* Left Phone - Analytics */}
-            <div className="hidden md:block w-48 rounded-[2rem] bg-[#0a0a0a] border-4 border-zinc-800 p-1.5 shadow-2xl transform -rotate-6 translate-y-8">
-              <div className="w-full rounded-[1.5rem] bg-[#111111] overflow-hidden">
-                <div className="px-3 py-2 flex items-center justify-between border-b border-zinc-800">
-                  <span className="text-[10px] text-zinc-500">Analytics</span>
-                  <div className="w-2 h-2 rounded-full bg-[#A855F7]" />
-                </div>
-                <div className="p-3">
-                  {/* Mini chart */}
-                  <div className="h-20 flex items-end gap-1 mb-3">
-                    {[
-                      { id: "mon", h: 40 },
-                      { id: "tue", h: 65 },
-                      { id: "wed", h: 45 },
-                      { id: "thu", h: 80 },
-                      { id: "fri", h: 55 },
-                      { id: "sat", h: 90 },
-                      { id: "sun", h: 70 },
-                    ].map((bar) => (
-                      <div 
-                        key={bar.id}
-                        className="flex-1 bg-gradient-to-t from-[#A855F7] to-[#A855F7]/30 rounded-t"
-                        style={{ height: `${bar.h}%` }}
-                      />
-                    ))}
-                  </div>
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-[#A855F7]">$12,450</div>
-                    <div className="text-[9px] text-zinc-500">This Month</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+        {/* Phone Showcase - Full width app mockup image (outside container for full width) */}
+        {/* Using object-fit: cover with object-position: bottom to crop dark space from top */}
+        <div className="relative w-full mb-16 overflow-hidden">
+          <img
+            src="/app_mockup.jpg"
+            alt="PhotoBoothX Mobile App - Dashboard, Booths List, and Alerts screens"
+            className="w-full h-[350px] md:h-[420px] lg:h-[500px] object-cover object-bottom"
+          />
+        </div>
 
-            {/* Center Phone - Main Dashboard (larger) */}
-            <div className="w-64 sm:w-72 rounded-[3rem] bg-[#0a0a0a] border-8 border-zinc-800 p-2 shadow-2xl relative z-10">
-              {/* Notch */}
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-full z-20" />
-              <div className="w-full rounded-[2.2rem] bg-[#111111] overflow-hidden">
-                {/* Status bar */}
-                <div className="flex items-center justify-between px-6 py-3 pt-8">
-                  <span className="text-xs text-zinc-500">9:41</span>
-                  <div className="flex items-center gap-1.5">
-                    <svg className="w-3 h-3 text-zinc-500" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/>
-                    </svg>
-                    <svg className="w-3 h-3 text-zinc-500" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M17 4h-3V2h-4v2H7v18h10V4zm-2 16H9V6h6v14z"/>
-                    </svg>
-                  </div>
-                </div>
-                {/* App content */}
-                <div className="px-4 pb-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <div className="text-[10px] text-zinc-500">Good morning</div>
-                      <h4 className="font-semibold">Dashboard</h4>
-                    </div>
-                    <div className="relative">
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#0891B2] to-[#0E7490] flex items-center justify-center text-xs font-bold">
-                        JD
-                      </div>
-                      <div className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#EF4444] border-2 border-[#111111]" />
-                    </div>
-                  </div>
-
-                  {/* Stats row */}
-                  <div className="grid grid-cols-2 gap-2 mb-4">
-                    <div className="p-3 rounded-xl bg-[#0891B2]/10 border border-[#0891B2]/20">
-                      <div className="text-[10px] text-zinc-500 mb-0.5">Revenue</div>
-                      <div className="text-lg font-bold text-[#0891B2]">$2,847</div>
-                      <div className="flex items-center gap-0.5">
-                        <svg className="w-2 h-2 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden="true">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                        </svg>
-                        <span className="text-[9px] text-[#10B981]">+24%</span>
-                      </div>
-                    </div>
-                    <div className="p-3 rounded-xl bg-[#10B981]/10 border border-[#10B981]/20">
-                      <div className="text-[10px] text-zinc-500 mb-0.5">Photos</div>
-                      <div className="text-lg font-bold text-[#10B981]">1,247</div>
-                      <div className="text-[9px] text-zinc-500">today</div>
-                    </div>
-                  </div>
-
-                  {/* Booths section */}
-                  <div className="mb-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-medium text-zinc-400">Your Booths</span>
-                      <span className="text-[10px] text-[#0891B2]">See all</span>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-3 p-2.5 rounded-xl bg-zinc-900/80 border border-zinc-800">
-                        <div className="w-8 h-8 rounded-lg bg-[#10B981]/20 flex items-center justify-center">
-                          <div className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-xs font-medium truncate">Mall Booth #1</div>
-                          <div className="text-[9px] text-zinc-500">42 photos today</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-xs font-medium text-[#10B981]">$847</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-2.5 rounded-xl bg-zinc-900/80 border border-zinc-800">
-                        <div className="w-8 h-8 rounded-lg bg-[#F59E0B]/20 flex items-center justify-center">
-                          <div className="w-2 h-2 rounded-full bg-[#F59E0B]" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-xs font-medium truncate">Wedding Setup</div>
-                          <div className="text-[9px] text-zinc-500">Idle · 2h ago</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-xs font-medium text-zinc-400">$1,200</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Bottom nav hint */}
-                  <div className="flex justify-center gap-6 pt-2">
-                    <div className="w-6 h-6 rounded-lg bg-[#0891B2] flex items-center justify-center">
-                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                      </svg>
-                    </div>
-                    <div className="w-6 h-6 rounded-lg bg-zinc-800 flex items-center justify-center">
-                      <svg className="w-3 h-3 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                      </svg>
-                    </div>
-                    <div className="w-6 h-6 rounded-lg bg-zinc-800 flex items-center justify-center relative">
-                      <svg className="w-3 h-3 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                      </svg>
-                      <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#EF4444]" />
-                    </div>
-                    <div className="w-6 h-6 rounded-lg bg-zinc-800 flex items-center justify-center">
-                      <svg className="w-3 h-3 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Phone - Alerts */}
-            <div className="hidden md:block w-48 rounded-[2rem] bg-[#0a0a0a] border-4 border-zinc-800 p-1.5 shadow-2xl transform rotate-6 translate-y-8">
-              <div className="w-full rounded-[1.5rem] bg-[#111111] overflow-hidden">
-                <div className="px-3 py-2 flex items-center justify-between border-b border-zinc-800">
-                  <span className="text-[10px] text-zinc-500">Alerts</span>
-                  <div className="px-1.5 py-0.5 rounded-full bg-[#EF4444] text-[8px] font-bold">3</div>
-                </div>
-                <div className="p-2 space-y-2">
-                  <div className="p-2 rounded-lg bg-[#EF4444]/10 border border-[#EF4444]/20">
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="w-4 h-4 rounded-full bg-[#EF4444]/20 flex items-center justify-center">
-                        <span className="text-[8px]">⚠️</span>
-                      </div>
-                      <span className="text-[9px] font-medium text-[#EF4444]">Paper Low</span>
-                    </div>
-                    <p className="text-[8px] text-zinc-500">Mall Booth #1 · 12 prints left</p>
-                  </div>
-                  <div className="p-2 rounded-lg bg-[#F59E0B]/10 border border-[#F59E0B]/20">
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="w-4 h-4 rounded-full bg-[#F59E0B]/20 flex items-center justify-center">
-                        <span className="text-[8px]">📷</span>
-                      </div>
-                      <span className="text-[9px] font-medium text-[#F59E0B]">Camera Offline</span>
-                    </div>
-                    <p className="text-[8px] text-zinc-500">Wedding Setup · 5m ago</p>
-                  </div>
-                  <div className="p-2 rounded-lg bg-[#10B981]/10 border border-[#10B981]/20">
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="w-4 h-4 rounded-full bg-[#10B981]/20 flex items-center justify-center">
-                        <span className="text-[8px]">💰</span>
-                      </div>
-                      <span className="text-[9px] font-medium text-[#10B981]">Goal Reached!</span>
-                    </div>
-                    <p className="text-[8px] text-zinc-500">$2,500 daily target hit</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
+        <div className="max-w-6xl mx-auto relative px-6 pb-32">
           {/* Feature List + Download */}
           <div className="grid md:grid-cols-4 gap-6 mb-12">
             {[
