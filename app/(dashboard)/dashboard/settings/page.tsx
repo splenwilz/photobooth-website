@@ -39,24 +39,24 @@ interface SettingsItemProps {
 
 function SettingsItem({ icon, title, subtitle, value, showArrow = true, destructive = false, onClick }: SettingsItemProps) {
   const accentColor = destructive ? "#EF4444" : "#0891B2";
-  
+
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-4 p-4 rounded-xl bg-[#111111] border border-zinc-800 hover:border-zinc-700 transition-all text-left"
+      className="w-full flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all text-left"
     >
-      <div 
+      <div
         className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
         style={{ backgroundColor: `${accentColor}20` }}
       >
         <div style={{ color: accentColor }}>{icon}</div>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-medium">{title}</p>
+        <p className="font-medium text-zinc-900 dark:text-white">{title}</p>
         {subtitle && <p className="text-sm text-zinc-500 mt-0.5">{subtitle}</p>}
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        {value && <span className="text-sm text-zinc-400">{value}</span>}
+        {value && <span className="text-sm text-zinc-500 dark:text-zinc-400">{value}</span>}
         {showArrow && (
           <svg className="w-5 h-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
@@ -82,13 +82,13 @@ export default function SettingsPage() {
     <div className="space-y-6 max-w-4xl">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold">Settings</h1>
-        <p className="text-zinc-400 mt-1">Configure your booth and account preferences</p>
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Settings</h1>
+        <p className="text-zinc-500 dark:text-zinc-400 mt-1">Configure your booth and account preferences</p>
       </div>
 
       {/* Current Booth Info */}
       {!allBoothsMode && (
-        <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-xl bg-[#0891B2]/20 flex items-center justify-center">
               <svg className="w-7 h-7 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -97,7 +97,7 @@ export default function SettingsPage() {
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-lg">{selectedBooth.name}</h3>
+                <h3 className="font-semibold text-lg text-zinc-900 dark:text-white">{selectedBooth.name}</h3>
                 <div className={`w-2 h-2 rounded-full ${selectedBooth.status === "online" ? "bg-green-500" : "bg-red-500"}`} />
               </div>
               <p className="text-sm text-zinc-500">{selectedBooth.address}</p>
@@ -125,7 +125,7 @@ export default function SettingsPage() {
       {/* Credits Section */}
       {!allBoothsMode && (
         <section>
-          <h2 className="text-lg font-semibold mb-4">Credits</h2>
+          <h2 className="text-lg font-semibold mb-4 text-zinc-900 dark:text-white">Credits</h2>
           <div className="space-y-3">
             <SettingsItem
               icon={<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
@@ -145,12 +145,12 @@ export default function SettingsPage() {
       {/* Products & Pricing */}
       {!allBoothsMode && (
         <section>
-          <h2 className="text-lg font-semibold mb-4">Products & Pricing</h2>
+          <h2 className="text-lg font-semibold mb-4 text-zinc-900 dark:text-white">Products & Pricing</h2>
           <div className="space-y-3">
             {demoProducts.map((product) => (
               <div
                 key={product.id}
-                className="flex items-center gap-4 p-4 rounded-xl bg-[#111111] border border-zinc-800 hover:border-zinc-700 transition-all cursor-pointer"
+                className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer"
               >
                 <div className="w-10 h-10 rounded-xl bg-[#0891B2]/20 flex items-center justify-center">
                   <svg className="w-5 h-5 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -159,15 +159,15 @@ export default function SettingsPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="font-medium">{product.name}</p>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${product.enabled ? "bg-green-500/20 text-green-500" : "bg-zinc-700 text-zinc-400"}`}>
+                    <p className="font-medium text-zinc-900 dark:text-white">{product.name}</p>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${product.enabled ? "bg-green-500/20 text-green-500" : "bg-slate-200 dark:bg-zinc-700 text-zinc-500 dark:text-zinc-400"}`}>
                       {product.enabled ? "Active" : "Disabled"}
                     </span>
                   </div>
                   <p className="text-sm text-zinc-500">{product.description}</p>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="font-semibold">{formatCurrency(product.basePrice)}</p>
+                  <p className="font-semibold text-zinc-900 dark:text-white">{formatCurrency(product.basePrice)}</p>
                   <p className="text-xs text-zinc-500">+{formatCurrency(product.extraCopyPrice)} extra</p>
                 </div>
                 <svg className="w-5 h-5 text-zinc-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -182,7 +182,7 @@ export default function SettingsPage() {
       {/* Booth Management */}
       {!allBoothsMode && (
         <section>
-          <h2 className="text-lg font-semibold mb-4">Booth Management</h2>
+          <h2 className="text-lg font-semibold mb-4 text-zinc-900 dark:text-white">Booth Management</h2>
           <div className="space-y-3">
             <SettingsItem
               icon={<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>}
@@ -211,7 +211,7 @@ export default function SettingsPage() {
 
       {/* Account */}
       <section>
-        <h2 className="text-lg font-semibold mb-4">Account</h2>
+        <h2 className="text-lg font-semibold mb-4 text-zinc-900 dark:text-white">Account</h2>
         <div className="space-y-3">
           <SettingsItem
             icon={<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>}
@@ -233,7 +233,7 @@ export default function SettingsPage() {
 
       {/* Legal */}
       <section>
-        <h2 className="text-lg font-semibold mb-4">Legal</h2>
+        <h2 className="text-lg font-semibold mb-4 text-zinc-900 dark:text-white">Legal</h2>
         <div className="space-y-3">
           <SettingsItem
             icon={<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>}
@@ -250,11 +250,11 @@ export default function SettingsPage() {
 
       {/* App Info */}
       <section>
-        <h2 className="text-lg font-semibold mb-4">App Info</h2>
-        <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+        <h2 className="text-lg font-semibold mb-4 text-zinc-900 dark:text-white">App Info</h2>
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">PhotoBoothX Dashboard</p>
+              <p className="font-medium text-zinc-900 dark:text-white">PhotoBoothX Dashboard</p>
               <p className="text-sm text-zinc-500">Version 1.0.0</p>
             </div>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center">

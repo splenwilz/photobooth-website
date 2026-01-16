@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 /**
  * Admin Dashboard Layout
@@ -99,7 +100,7 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <button 
@@ -113,13 +114,13 @@ export default function AdminLayout({
       {/* Sidebar */}
       <aside className={`
         fixed lg:static inset-y-0 left-0 z-50
-        w-64 bg-[#111111] border-r border-zinc-800
+        w-64 bg-white dark:bg-[#111111] border-r border-[var(--border)]
         transform transition-transform duration-200 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="p-6 border-b border-zinc-800">
+          <div className="p-6 border-b border-[var(--border)]">
             <Link href="/admin" className="flex items-center gap-2.5">
               <div className="w-10 h-10 rounded-xl bg-linear-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center">
                 <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
@@ -127,7 +128,7 @@ export default function AdminLayout({
                 </svg>
               </div>
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-lg">PhotoBoothX</span>
+                <span className="font-semibold text-lg text-zinc-900 dark:text-white">PhotoBoothX</span>
                 <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#0891B2]/20 text-[#0891B2]">ADMIN</span>
               </div>
             </Link>
@@ -145,9 +146,9 @@ export default function AdminLayout({
                   href={item.href}
                   className={`
                     flex items-center gap-3 px-4 py-3 rounded-xl transition-all
-                    ${isActive 
-                      ? 'bg-[#0891B2]/20 text-[#0891B2]' 
-                      : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+                    ${isActive
+                      ? 'bg-[#0891B2]/20 text-[#0891B2]'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800/50'
                     }
                   `}
                   onClick={() => setSidebarOpen(false)}
@@ -165,18 +166,18 @@ export default function AdminLayout({
           </nav>
 
           {/* Admin User Section */}
-          <div className="p-4 border-t border-zinc-800">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-800/50">
+          <div className="p-4 border-t border-[var(--border)]">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-100 dark:bg-zinc-800/50">
               <div className="w-10 h-10 rounded-full bg-linear-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center font-bold text-sm">
                 SA
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate">Super Admin</p>
+                <p className="font-medium text-sm truncate text-zinc-900 dark:text-white">Super Admin</p>
                 <p className="text-xs text-zinc-500 truncate">admin@photoboothx.com</p>
               </div>
-              <button 
+              <button
                 type="button"
-                className="p-2 text-zinc-400 hover:text-white transition-colors"
+                className="p-2 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
                 aria-label="Logout"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
@@ -191,12 +192,12 @@ export default function AdminLayout({
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen">
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 bg-[#0a0a0a]/80 backdrop-blur-lg border-b border-zinc-800">
+        <header className="sticky top-0 z-30 bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-lg border-b border-[var(--border)]">
           <div className="flex items-center justify-between px-6 py-4">
             {/* Mobile Menu Button */}
-            <button 
+            <button
               type="button"
-              className="lg:hidden p-2 -ml-2 text-zinc-400 hover:text-white"
+              className="lg:hidden p-2 -ml-2 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
               onClick={() => setSidebarOpen(true)}
               aria-label="Open menu"
             >
@@ -206,22 +207,25 @@ export default function AdminLayout({
             </button>
 
             {/* System Status */}
-            <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-xl bg-zinc-800/50 border border-zinc-700/50">
+            <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700/50">
               <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center">
                 <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-medium">System Status</p>
+                <p className="text-sm font-medium text-zinc-900 dark:text-white">System Status</p>
                 <p className="text-xs text-zinc-500">All services operational</p>
               </div>
             </div>
 
             {/* Right Actions */}
             <div className="flex items-center gap-3">
+              {/* Theme Toggle */}
+              <ThemeToggle />
+
               {/* Notifications */}
-              <button type="button" className="relative p-2 text-zinc-400 hover:text-white transition-colors" aria-label="Notifications">
+              <button type="button" className="relative p-2 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors" aria-label="Notifications">
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                 </svg>
@@ -229,9 +233,9 @@ export default function AdminLayout({
               </button>
 
               {/* View Site */}
-              <Link 
+              <Link
                 href="/"
-                className="hidden sm:flex items-center gap-2 px-3 py-2 text-sm text-zinc-400 hover:text-white transition-colors"
+                className="hidden sm:flex items-center gap-2 px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />

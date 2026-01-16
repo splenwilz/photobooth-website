@@ -8,11 +8,11 @@ export const metadata: Metadata = {
 
 export default function SignUpPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex">
       {/* Left Panel - Decorative */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0891B2]/20 via-[#111111] to-[#10B981]/10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0891B2]/20 via-slate-100 to-[#10B981]/10 dark:via-[#111111]" />
         <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-[#0891B2]/20 blur-[150px] rounded-full" />
         <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-[#10B981]/20 blur-[100px] rounded-full" />
         
@@ -31,11 +31,11 @@ export default function SignUpPage() {
 
           {/* Main Content */}
           <div>
-            <h2 className="text-4xl font-bold mb-4 leading-tight">
+            <h2 className="text-4xl font-bold mb-4 leading-tight text-zinc-900 dark:text-white">
               Manage your booths<br />
               <span className="text-[#0891B2]">from anywhere.</span>
             </h2>
-            <p className="text-zinc-400 text-lg mb-8 max-w-md">
+            <p className="text-zinc-600 dark:text-zinc-400 text-lg mb-8 max-w-md">
               Real-time analytics, instant alerts, and complete control over your photo booth business.
             </p>
 
@@ -43,21 +43,21 @@ export default function SignUpPage() {
             <div className="flex gap-8">
               <div>
                 <div className="text-3xl font-bold text-[#10B981]">5,000+</div>
-                <div className="text-sm text-zinc-500">Active booths</div>
+                <div className="text-sm text-zinc-600 dark:text-zinc-500">Active booths</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-[#0891B2]">$2.4M</div>
-                <div className="text-sm text-zinc-500">Processed monthly</div>
+                <div className="text-sm text-zinc-600 dark:text-zinc-500">Processed monthly</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-[#A855F7]">99.9%</div>
-                <div className="text-sm text-zinc-500">Uptime</div>
+                <div className="text-sm text-zinc-600 dark:text-zinc-500">Uptime</div>
               </div>
             </div>
           </div>
 
           {/* Testimonial */}
-          <div className="p-6 rounded-2xl bg-[#111111]/80 border border-zinc-800/50 backdrop-blur-sm">
+          <div className="p-6 rounded-2xl bg-white/80 dark:bg-[#111111]/80 border border-slate-200/50 dark:border-zinc-800/50 backdrop-blur-sm">
             <div className="flex items-center gap-1 mb-3">
               {[...Array(5)].map((_, i) => (
                 <svg key={i} className="w-4 h-4 text-[#F59E0B]" fill="currentColor" viewBox="0 0 20 20">
@@ -65,16 +65,16 @@ export default function SignUpPage() {
                 </svg>
               ))}
             </div>
-            <p className="text-zinc-300 mb-4">
+            <p className="text-zinc-700 dark:text-zinc-300 mb-4">
               &quot;PhotoBoothX transformed our business. Revenue tracking in real-time and instant alerts when paper runs low — game changer.&quot;
             </p>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center font-bold">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center font-bold text-white">
                 MJ
               </div>
               <div>
-                <div className="font-medium">Michael Johnson</div>
-                <div className="text-sm text-zinc-500">SnapShot Events, 12 booths</div>
+                <div className="font-medium text-zinc-900 dark:text-white">Michael Johnson</div>
+                <div className="text-sm text-zinc-600 dark:text-zinc-500">SnapShot Events, 12 booths</div>
               </div>
             </div>
           </div>
@@ -99,8 +99,8 @@ export default function SignUpPage() {
 
           {/* Header */}
           <div className="text-center lg:text-left mb-8">
-            <h1 className="text-3xl font-bold mb-2">Create your account</h1>
-            <p className="text-zinc-400">
+            <h1 className="text-3xl font-bold mb-2 text-zinc-900 dark:text-white">Create your account</h1>
+            <p className="text-zinc-600 dark:text-zinc-400">
               Start your 14-day free trial. No credit card required.
             </p>
           </div>
@@ -110,7 +110,7 @@ export default function SignUpPage() {
             {/* Name Fields */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-zinc-300 mb-2">
+                <label htmlFor="firstName" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   First name
                 </label>
                 <input
@@ -118,11 +118,11 @@ export default function SignUpPage() {
                   id="firstName"
                   name="firstName"
                   placeholder="John"
-                  className="w-full px-4 py-3.5 rounded-xl bg-[#111111] border border-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-all"
+                  className="w-full px-4 py-3.5 rounded-xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] placeholder-zinc-500 focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-all"
                 />
               </div>
               <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-zinc-300 mb-2">
+                <label htmlFor="lastName" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   Last name
                 </label>
                 <input
@@ -130,13 +130,13 @@ export default function SignUpPage() {
                   id="lastName"
                   name="lastName"
                   placeholder="Doe"
-                  className="w-full px-4 py-3.5 rounded-xl bg-[#111111] border border-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-all"
+                  className="w-full px-4 py-3.5 rounded-xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] placeholder-zinc-500 focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-zinc-300 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                 Work email
               </label>
               <input
@@ -144,12 +144,12 @@ export default function SignUpPage() {
                 id="email"
                 name="email"
                 placeholder="john@company.com"
-                className="w-full px-4 py-3.5 rounded-xl bg-[#111111] border border-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-all"
+                className="w-full px-4 py-3.5 rounded-xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] placeholder-zinc-500 focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-all"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-zinc-300 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                 Password
               </label>
               <input
@@ -157,9 +157,9 @@ export default function SignUpPage() {
                 id="password"
                 name="password"
                 placeholder="Create a strong password"
-                className="w-full px-4 py-3.5 rounded-xl bg-[#111111] border border-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-all"
+                className="w-full px-4 py-3.5 rounded-xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] placeholder-zinc-500 focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-all"
               />
-              <p className="text-xs text-zinc-500 mt-2">
+              <p className="text-xs text-zinc-600 dark:text-zinc-500 mt-2">
                 Must be at least 8 characters with a number and symbol
               </p>
             </div>
@@ -169,9 +169,9 @@ export default function SignUpPage() {
               <input
                 type="checkbox"
                 id="terms"
-                className="w-4 h-4 mt-0.5 rounded bg-[#111111] border-zinc-700 text-[#10B981] focus:ring-[#10B981] focus:ring-offset-0"
+                className="w-4 h-4 mt-0.5 rounded bg-[var(--card)] border-[var(--border)] text-[#10B981] focus:ring-[#10B981] focus:ring-offset-0"
               />
-              <label htmlFor="terms" className="text-sm text-zinc-400">
+              <label htmlFor="terms" className="text-sm text-zinc-600 dark:text-zinc-400">
                 I agree to the{" "}
                 <Link href="/terms" className="text-[#10B981] hover:text-[#22D3EE]">Terms of Service</Link>
                 {" "}and{" "}
@@ -190,16 +190,16 @@ export default function SignUpPage() {
           {/* Divider */}
           <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-zinc-800" />
+              <div className="w-full border-t border-[var(--border)]" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="px-4 bg-[#0a0a0a] text-zinc-500 uppercase tracking-wider">or continue with</span>
+              <span className="px-4 bg-[var(--background)] text-[var(--muted)] uppercase tracking-wider">or continue with</span>
             </div>
           </div>
 
           {/* Social Buttons */}
           <div className="grid grid-cols-2 gap-4">
-            <button className="group flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#111111] border border-zinc-800 font-medium hover:bg-zinc-900 hover:border-zinc-700 transition-all">
+            <button className="group flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[var(--card)] border border-[var(--border)] font-medium hover:bg-slate-100 dark:hover:bg-zinc-900 hover:border-[var(--border)] transition-all">
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -208,7 +208,7 @@ export default function SignUpPage() {
               </svg>
               Google
             </button>
-            <button className="group flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#111111] border border-zinc-800 font-medium hover:bg-zinc-900 hover:border-zinc-700 transition-all">
+            <button className="group flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[var(--card)] border border-[var(--border)] font-medium hover:bg-slate-100 dark:hover:bg-zinc-900 hover:border-[var(--border)] transition-all">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
               </svg>
@@ -217,7 +217,7 @@ export default function SignUpPage() {
           </div>
 
           {/* Sign In Link */}
-          <p className="text-center text-sm text-zinc-500 mt-8">
+          <p className="text-center text-sm text-[var(--muted)] mt-8">
             Already have an account?{" "}
             <Link href="/signin" className="text-[#10B981] hover:text-[#22D3EE] font-medium transition-colors">
               Sign in
@@ -225,13 +225,13 @@ export default function SignUpPage() {
           </p>
 
           {/* Footer */}
-          <div className="mt-12 pt-8 border-t border-zinc-800">
-            <div className="flex items-center justify-center gap-6 text-xs text-zinc-500">
-              <Link href="/terms" className="hover:text-zinc-300 transition-colors">Terms</Link>
-              <Link href="/privacy" className="hover:text-zinc-300 transition-colors">Privacy</Link>
-              <Link href="/support" className="hover:text-zinc-300 transition-colors">Support</Link>
+          <div className="mt-12 pt-8 border-t border-[var(--border)]">
+            <div className="flex items-center justify-center gap-6 text-xs text-[var(--muted)]">
+              <Link href="/terms" className="hover:text-[var(--foreground-secondary)] transition-colors">Terms</Link>
+              <Link href="/privacy" className="hover:text-[var(--foreground-secondary)] transition-colors">Privacy</Link>
+              <Link href="/support" className="hover:text-[var(--foreground-secondary)] transition-colors">Support</Link>
             </div>
-            <p className="text-center text-xs text-zinc-600 mt-4">
+            <p className="text-center text-xs text-[var(--muted)] mt-4">
               © 2024 PhotoBoothX. All rights reserved.
             </p>
           </div>

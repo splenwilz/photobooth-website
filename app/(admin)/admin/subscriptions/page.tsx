@@ -69,8 +69,8 @@ export default function AdminSubscriptionsPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Subscriptions</h1>
-          <p className="text-zinc-400 mt-1">Manage customer billing and plans</p>
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Subscriptions</h1>
+          <p className="text-zinc-500 dark:text-zinc-400 mt-1">Manage customer billing and plans</p>
         </div>
         <button type="button" className="flex items-center gap-2 px-4 py-2.5 bg-[#0891B2] text-white font-medium rounded-xl hover:bg-[#0E7490] transition-colors">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -83,19 +83,19 @@ export default function AdminSubscriptionsPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-5 rounded-2xl bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20">
-          <p className="text-sm text-green-400">Monthly Recurring Revenue</p>
-          <p className="text-2xl font-bold mt-1">{formatCurrency(Math.round(totalMRR))}</p>
+          <p className="text-sm text-green-600 dark:text-green-400">Monthly Recurring Revenue</p>
+          <p className="text-2xl font-bold mt-1 text-zinc-900 dark:text-white">{formatCurrency(Math.round(totalMRR))}</p>
           <p className="text-xs text-zinc-500 mt-1">MRR</p>
         </div>
-        <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <p className="text-sm text-zinc-500">Starter Plans</p>
-          <p className="text-2xl font-bold mt-1">{stats.starter}</p>
+          <p className="text-2xl font-bold mt-1 text-zinc-900 dark:text-white">{stats.starter}</p>
         </div>
-        <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <p className="text-sm text-zinc-500">Pro Plans</p>
-          <p className="text-2xl font-bold mt-1 text-blue-400">{stats.pro}</p>
+          <p className="text-2xl font-bold mt-1 text-blue-500 dark:text-blue-400">{stats.pro}</p>
         </div>
-        <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <p className="text-sm text-zinc-500">Enterprise Plans</p>
           <p className="text-2xl font-bold mt-1 text-[#0891B2]">{stats.enterprise}</p>
         </div>
@@ -112,11 +112,11 @@ export default function AdminSubscriptionsPage() {
             placeholder="Search subscriptions..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#111111] border border-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] transition-all"
+            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] transition-all"
           />
         </div>
 
-        <div className="flex gap-1 p-1 bg-zinc-800/50 rounded-xl">
+        <div className="flex gap-1 p-1 bg-slate-200/50 dark:bg-zinc-800/50 rounded-xl">
           {(["all", "active", "past_due", "trial"] as FilterStatus[]).map((status) => (
             <button
               key={status}
@@ -125,7 +125,7 @@ export default function AdminSubscriptionsPage() {
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-all capitalize whitespace-nowrap ${
                 filterStatus === status
                   ? "bg-[#0891B2] text-white"
-                  : "text-zinc-400 hover:text-white"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
               }`}
             >
               {status === "past_due" ? "Past Due" : status}
@@ -138,16 +138,16 @@ export default function AdminSubscriptionsPage() {
       <div className="space-y-3">
         {filteredSubscriptions.map((sub) => {
           const statusConfig = getStatusConfig(sub.status);
-          
+
           return (
-            <div key={sub.id} className="p-4 rounded-xl bg-[#111111] border border-zinc-800 hover:border-zinc-700 transition-all cursor-pointer">
+            <div key={sub.id} className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center font-bold text-sm shrink-0">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center font-bold text-sm text-white shrink-0">
                   {sub.user.split(" ").map(n => n[0]).join("").slice(0, 2)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="font-medium truncate">{sub.user}</p>
+                    <p className="font-medium truncate text-zinc-900 dark:text-white">{sub.user}</p>
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusConfig.bg} ${statusConfig.text}`}>
                       {statusConfig.label}
                     </span>
@@ -157,14 +157,14 @@ export default function AdminSubscriptionsPage() {
                 <div className="hidden sm:block">
                   <span className={`text-xs font-medium px-2 py-1 rounded-full ${
                     sub.plan === "Enterprise" ? "bg-[#0891B2]/20 text-[#0891B2]" :
-                    sub.plan === "Pro" ? "bg-blue-500/20 text-blue-400" :
-                    "bg-zinc-700 text-zinc-400"
+                    sub.plan === "Pro" ? "bg-blue-500/20 text-blue-500 dark:text-blue-400" :
+                    "bg-slate-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400"
                   }`}>
                     {sub.plan}
                   </span>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium">{formatCurrency(sub.amount)}<span className="text-zinc-500 text-sm">/{sub.billingCycle === "yearly" ? "yr" : "mo"}</span></p>
+                  <p className="font-medium text-zinc-900 dark:text-white">{formatCurrency(sub.amount)}<span className="text-zinc-500 text-sm">/{sub.billingCycle === "yearly" ? "yr" : "mo"}</span></p>
                   <p className="text-xs text-zinc-500">Next: {sub.nextBilling}</p>
                 </div>
               </div>
@@ -173,8 +173,8 @@ export default function AdminSubscriptionsPage() {
         })}
 
         {filteredSubscriptions.length === 0 && (
-          <div className="p-12 rounded-2xl bg-[#111111] border border-zinc-800 text-center">
-            <p className="text-zinc-400">No subscriptions found</p>
+          <div className="p-12 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] text-center">
+            <p className="text-zinc-500 dark:text-zinc-400">No subscriptions found</p>
           </div>
         )}
       </div>

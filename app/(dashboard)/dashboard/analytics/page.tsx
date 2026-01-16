@@ -153,16 +153,16 @@ export default function AnalyticsPage() {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold">Analytics</h1>
-        <p className="text-zinc-400 mt-1">Revenue insights and transaction history</p>
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Analytics</h1>
+        <p className="text-zinc-500 dark:text-zinc-400 mt-1">Revenue insights and transaction history</p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {(["today", "week", "month", "year"] as const).map((period) => (
-          <div key={period} className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+          <div key={period} className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
             <p className="text-sm text-zinc-500 mb-1 capitalize">{period === "today" ? "Today" : `This ${period}`}</p>
-            <p className="text-2xl font-bold">{formatCurrency(demoStats[period].amount)}</p>
+            <p className="text-2xl font-bold text-zinc-900 dark:text-white">{formatCurrency(demoStats[period].amount)}</p>
             <div className="flex items-center gap-1 mt-2">
               <span className={`text-sm font-medium ${demoStats[period].change >= 0 ? "text-green-500" : "text-red-500"}`}>
                 {demoStats[period].change >= 0 ? "+" : ""}{demoStats[period].change}%
@@ -177,14 +177,14 @@ export default function AnalyticsPage() {
       <section>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-lg font-semibold">{chartPeriod === "week" ? "Daily Revenue" : "Monthly Revenue"}</h2>
+            <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">{chartPeriod === "week" ? "Daily Revenue" : "Monthly Revenue"}</h2>
             <p className="text-sm text-zinc-500">{chartPeriod === "week" ? "Last 7 days" : "Last 12 months"}</p>
           </div>
-          <div className="flex gap-1 p-1 bg-zinc-800/50 rounded-lg">
+          <div className="flex gap-1 p-1 bg-slate-200/50 dark:bg-zinc-800/50 rounded-lg">
             <button
               onClick={() => setChartPeriod("week")}
               className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
-                chartPeriod === "week" ? "bg-[#0891B2] text-white" : "text-zinc-400 hover:text-white"
+                chartPeriod === "week" ? "bg-[#0891B2] text-white" : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
               }`}
             >
               Week
@@ -192,7 +192,7 @@ export default function AnalyticsPage() {
             <button
               onClick={() => setChartPeriod("month")}
               className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
-                chartPeriod === "month" ? "bg-[#0891B2] text-white" : "text-zinc-400 hover:text-white"
+                chartPeriod === "month" ? "bg-[#0891B2] text-white" : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
               }`}
             >
               Month
@@ -200,11 +200,11 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <div className="flex items-end gap-2 h-48">
             {chartData.map((item, i) => (
               <div key={item.label} className="flex-1 flex flex-col items-center gap-2">
-                <div 
+                <div
                   className="w-full bg-[#0891B2] rounded-t-md transition-all hover:bg-[#22D3EE]"
                   style={{ height: `${(item.amount / maxChartValue) * 100}%` }}
                   title={formatCurrency(item.amount)}
@@ -221,21 +221,21 @@ export default function AnalyticsPage() {
         {/* By Product */}
         <section>
           <div className="mb-4">
-            <h2 className="text-lg font-semibold">Revenue by Product</h2>
+            <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Revenue by Product</h2>
             <p className="text-sm text-zinc-500">This month&apos;s breakdown</p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800 space-y-4">
+          <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] space-y-4">
             {demoByProduct.map((item, i) => (
               <div key={item.category}>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium">{formatProductName(item.category)}</span>
-                  <span className="text-sm text-zinc-400">{formatCurrency(item.amount)}</span>
+                  <span className="font-medium text-zinc-900 dark:text-white">{formatProductName(item.category)}</span>
+                  <span className="text-sm text-zinc-500 dark:text-zinc-400">{formatCurrency(item.amount)}</span>
                 </div>
-                <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
-                  <div 
+                <div className="h-2 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                  <div
                     className="h-full rounded-full transition-all"
-                    style={{ 
+                    style={{
                       width: `${item.percentage}%`,
                       backgroundColor: `rgba(8, 145, 178, ${1 - i * 0.2})`,
                     }}
@@ -250,16 +250,16 @@ export default function AnalyticsPage() {
         {/* By Payment */}
         <section>
           <div className="mb-4">
-            <h2 className="text-lg font-semibold">Payment Methods</h2>
+            <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Payment Methods</h2>
             <p className="text-sm text-zinc-500">Revenue by payment type</p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800 space-y-4">
+          <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] space-y-4">
             {demoByPayment.map((item, i) => (
               <div key={item.category}>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <div 
+                    <div
                       className="w-6 h-6 rounded-full flex items-center justify-center"
                       style={{ backgroundColor: item.category === "card" ? "rgba(8, 145, 178, 0.2)" : "rgba(16, 185, 129, 0.2)" }}
                     >
@@ -273,14 +273,14 @@ export default function AnalyticsPage() {
                         </svg>
                       )}
                     </div>
-                    <span className="font-medium">{formatPaymentMethod(item.category)}</span>
+                    <span className="font-medium text-zinc-900 dark:text-white">{formatPaymentMethod(item.category)}</span>
                   </div>
-                  <span className="text-sm text-zinc-400">{formatCurrency(item.amount)}</span>
+                  <span className="text-sm text-zinc-500 dark:text-zinc-400">{formatCurrency(item.amount)}</span>
                 </div>
-                <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
-                  <div 
+                <div className="h-2 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                  <div
                     className="h-full rounded-full transition-all"
-                    style={{ 
+                    style={{
                       width: `${item.percentage}%`,
                       backgroundColor: item.category === "card" ? "#0891B2" : "#10B981",
                     }}
@@ -297,7 +297,7 @@ export default function AnalyticsPage() {
       <section>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-lg font-semibold">Recent Transactions</h2>
+            <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Recent Transactions</h2>
             <p className="text-sm text-zinc-500">Latest sales activity</p>
           </div>
           <button className="text-sm text-[#0891B2] hover:text-[#22D3EE] transition-colors">
@@ -305,9 +305,9 @@ export default function AnalyticsPage() {
           </button>
         </div>
 
-        <div className="rounded-2xl bg-[#111111] border border-zinc-800 overflow-hidden">
+        <div className="rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] overflow-hidden">
           {/* Table Header */}
-          <div className="hidden md:grid grid-cols-6 gap-4 px-5 py-3 bg-zinc-900/50 text-sm text-zinc-500 font-medium">
+          <div className="hidden md:grid grid-cols-6 gap-4 px-5 py-3 bg-slate-50 dark:bg-zinc-900/50 text-sm text-zinc-500 font-medium">
             <span>Product</span>
             <span>Booth</span>
             <span>Amount</span>
@@ -317,7 +317,7 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Transactions */}
-          <div className="divide-y divide-zinc-800">
+          <div className="divide-y divide-slate-200 dark:divide-zinc-800">
             {demoTransactions.map((txn) => {
               const statusConfig = getPrintStatusConfig(txn.print_status);
               return (
@@ -325,18 +325,18 @@ export default function AnalyticsPage() {
                   {/* Desktop */}
                   <div className="hidden md:grid grid-cols-6 gap-4 items-center">
                     <div>
-                      <p className="font-medium">{formatProductName(txn.product)}</p>
+                      <p className="font-medium text-zinc-900 dark:text-white">{formatProductName(txn.product)}</p>
                       <p className="text-xs text-zinc-500">{txn.template}</p>
                     </div>
-                    <span className="text-sm text-zinc-400">{txn.booth_name}</span>
+                    <span className="text-sm text-zinc-500 dark:text-zinc-400">{txn.booth_name}</span>
                     <span className="font-semibold text-[#0891B2]">{formatCurrency(txn.amount)}</span>
-                    <span 
+                    <span
                       className="text-xs font-medium px-2 py-1 rounded-full w-fit"
                       style={{ backgroundColor: `${txn.payment_method === "card" ? "#0891B2" : "#10B981"}20`, color: txn.payment_method === "card" ? "#0891B2" : "#10B981" }}
                     >
                       {formatPaymentMethod(txn.payment_method)}
                     </span>
-                    <span 
+                    <span
                       className="text-xs font-medium px-2 py-1 rounded-full w-fit"
                       style={{ backgroundColor: `${statusConfig.color}20`, color: statusConfig.color }}
                     >
@@ -349,19 +349,19 @@ export default function AnalyticsPage() {
                   <div className="md:hidden space-y-2">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium">{formatProductName(txn.product)}</p>
+                        <p className="font-medium text-zinc-900 dark:text-white">{formatProductName(txn.product)}</p>
                         <p className="text-xs text-zinc-500">{txn.booth_name}</p>
                       </div>
                       <p className="font-semibold text-[#0891B2]">{formatCurrency(txn.amount)}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span 
+                      <span
                         className="text-xs font-medium px-2 py-1 rounded-full"
                         style={{ backgroundColor: `${txn.payment_method === "card" ? "#0891B2" : "#10B981"}20`, color: txn.payment_method === "card" ? "#0891B2" : "#10B981" }}
                       >
                         {formatPaymentMethod(txn.payment_method)}
                       </span>
-                      <span 
+                      <span
                         className="text-xs font-medium px-2 py-1 rounded-full"
                         style={{ backgroundColor: `${statusConfig.color}20`, color: statusConfig.color }}
                       >

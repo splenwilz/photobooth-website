@@ -222,7 +222,7 @@ export default function DownloadsPage() {
        * ============================================ */}
       <section className="py-24 px-6 relative overflow-hidden">
         {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#111111]/30 to-[#0a0a0a]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-100 via-slate-50 to-slate-100 dark:from-[#0a0a0a] dark:via-[#111111]/30 dark:to-[#0a0a0a]" />
         <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[#10B981]/5 blur-[150px] rounded-full -translate-y-1/2" />
         <div className="absolute top-1/2 right-0 w-[400px] h-[400px] bg-[#0891B2]/5 blur-[150px] rounded-full -translate-y-1/2" />
 
@@ -235,9 +235,9 @@ export default function DownloadsPage() {
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-[#10B981]"></span>
               </span>
               <span className="text-[#10B981] font-semibold">New Release</span>
-              <span className="h-4 w-px bg-zinc-700" />
+              <span className="h-4 w-px bg-slate-300 dark:bg-zinc-700" />
               <span className="text-[var(--foreground)] font-mono font-bold">v{currentVersion.version}</span>
-              <span className="h-4 w-px bg-zinc-700" />
+              <span className="h-4 w-px bg-slate-300 dark:bg-zinc-700" />
               <span className="text-[var(--muted)] text-sm">{currentVersion.releaseDate}</span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">
@@ -270,12 +270,12 @@ export default function DownloadsPage() {
                 >
                   {/* Type badge */}
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 transition-colors ${
-                    openChange === index 
+                    openChange === index
                       ? item.type === "new"
-                        ? "bg-[#10B981] text-[var(--foreground)]" 
+                        ? "bg-[#10B981] text-white"
                         : item.type === "improved"
-                          ? "bg-[#0891B2] text-[var(--foreground)]"
-                          : "bg-[#F59E0B] text-[var(--foreground)]"
+                          ? "bg-[#0891B2] text-white"
+                          : "bg-[#F59E0B] text-white"
                       : item.type === "new"
                         ? "bg-[#10B981]/20 text-[#10B981]"
                         : item.type === "improved"
@@ -303,13 +303,13 @@ export default function DownloadsPage() {
                     </span>
                   </div>
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${
-                    openChange === index 
+                    openChange === index
                       ? item.type === "new"
                         ? "bg-[#10B981]/20 rotate-180"
                         : item.type === "improved"
                           ? "bg-[#0891B2]/20 rotate-180"
                           : "bg-[#F59E0B]/20 rotate-180"
-                      : "bg-zinc-800 group-hover:bg-zinc-700"
+                      : "bg-slate-200 dark:bg-zinc-800 group-hover:bg-slate-300 dark:group-hover:bg-zinc-700"
                   }`}>
                     <svg 
                       className="w-4 h-4 text-[var(--muted)]" 
@@ -347,14 +347,14 @@ export default function DownloadsPage() {
                   {currentVersion.changelog.filter(c => c.type === "fixed").length}
                 </span>
               </div>
-              <div className="h-8 w-px bg-zinc-700" />
+              <div className="h-8 w-px bg-slate-300 dark:bg-zinc-700" />
               <div className="text-left">
                 <p className="font-medium text-[var(--foreground)]">Want to see all versions?</p>
                 <p className="text-sm text-[var(--muted)]">Browse the complete changelog</p>
               </div>
-              <Link 
-                href="/docs/changelog" 
-                className="ml-4 px-5 py-2.5 rounded-xl bg-[#0891B2] text-[var(--foreground)] font-semibold hover:bg-[#0E7490] transition-colors"
+              <Link
+                href="/docs/changelog"
+                className="ml-4 px-5 py-2.5 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-colors"
               >
                 View History
               </Link>
@@ -368,7 +368,7 @@ export default function DownloadsPage() {
        * ============================================ */}
       <section className="py-24 px-6 relative overflow-hidden">
         {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] to-[#111111]/50" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-100 to-slate-50 dark:from-[#0a0a0a] dark:to-[#111111]/50" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#0891B2]/5 blur-[200px] rounded-full" />
 
         <div className="relative max-w-5xl mx-auto">
@@ -389,7 +389,7 @@ export default function DownloadsPage() {
           <div className="max-w-4xl mx-auto">
             <div className="relative rounded-3xl overflow-hidden">
               {/* Background gradient */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#0891B2]/20 via-[#111111] to-[#111111]" />
+              <div className="absolute inset-0 bg-gradient-to-br from-[#0891B2]/20 via-slate-100 to-slate-100 dark:via-[#111111] dark:to-[#111111]" />
               <div className="absolute top-0 right-0 w-64 h-64 bg-[#0891B2]/20 blur-3xl rounded-full" />
               <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#10B981]/10 blur-3xl rounded-full" />
 
@@ -452,7 +452,7 @@ export default function DownloadsPage() {
                     {/* Minimum */}
                     <div className="p-5 rounded-2xl bg-[var(--background)]/80 border border-[var(--border)]">
                       <div className="flex items-center gap-3 mb-4">
-                        <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-zinc-800 flex items-center justify-center">
                           <svg className="w-4 h-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                           </svg>
@@ -480,7 +480,7 @@ export default function DownloadsPage() {
                     </div>
 
                     {/* Recommended */}
-                    <div className="p-5 rounded-2xl bg-gradient-to-br from-[#10B981]/10 to-[#0a0a0a]/80 border border-[#10B981]/20">
+                    <div className="p-5 rounded-2xl bg-gradient-to-br from-[#10B981]/10 to-slate-100 dark:to-[#0a0a0a]/80 border border-[#10B981]/20">
                       <div className="flex items-center gap-3 mb-4">
                         <div className="w-8 h-8 rounded-lg bg-[#10B981]/20 flex items-center justify-center">
                           <svg className="w-4 h-4 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -553,7 +553,7 @@ export default function DownloadsPage() {
 
           <div className="relative">
             {/* Timeline line */}
-            <div className="hidden md:block absolute top-12 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-zinc-700 to-transparent" />
+            <div className="hidden md:block absolute top-12 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-slate-300 dark:via-zinc-700 to-transparent" />
 
             <div className="grid md:grid-cols-4 gap-8">
               {installSteps.map((step, index) => (
@@ -583,7 +583,7 @@ export default function DownloadsPage() {
                         </svg>
                       )}
                     </div>
-                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-[#0891B2] text-[var(--foreground)] text-sm font-bold flex items-center justify-center">
+                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-[#0891B2] text-white text-sm font-bold flex items-center justify-center">
                       {step.step}
                     </div>
                   </div>
@@ -603,7 +603,7 @@ export default function DownloadsPage() {
       <section className="py-24 px-6 bg-[var(--card)]/30 border-y border-[var(--border)]/50">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-800 border border-[var(--border)] text-[var(--foreground-secondary)] text-sm font-medium mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-200 dark:bg-zinc-800 border border-[var(--border)] text-[var(--foreground-secondary)] text-sm font-medium mb-4">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -632,7 +632,7 @@ export default function DownloadsPage() {
                   className="group flex items-center justify-between p-5 rounded-2xl bg-[var(--background)] border border-[var(--border)] hover:border-[#0891B2]/30 transition-all"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-xl bg-slate-200 dark:bg-zinc-800 flex items-center justify-center">
                       <svg className="w-6 h-6 text-[var(--muted)]" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801" />
                       </svg>
@@ -640,7 +640,7 @@ export default function DownloadsPage() {
                     <div>
                       <div className="flex items-center gap-3 mb-1">
                         <span className="font-mono font-bold text-lg">v{version.version}</span>
-                        <span className="px-2 py-0.5 rounded bg-zinc-800 text-[var(--muted)] text-xs">{version.date}</span>
+                        <span className="px-2 py-0.5 rounded bg-slate-200 dark:bg-zinc-800 text-[var(--muted)] text-xs">{version.date}</span>
                         <span className="text-xs text-[var(--muted)]">{version.size}</span>
                       </div>
                       <p className="text-sm text-[var(--muted)]">{version.notes}</p>
@@ -648,7 +648,7 @@ export default function DownloadsPage() {
                   </div>
                   <a
                     href="#"
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-zinc-800 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-slate-200 dark:hover:bg-zinc-800 transition-colors"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -690,7 +690,7 @@ export default function DownloadsPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/docs/getting-started"
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0891B2] text-[var(--foreground)] font-medium hover:bg-[#0E7490] transition-colors"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0891B2] text-white font-medium hover:bg-[#0E7490] transition-colors"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -699,7 +699,7 @@ export default function DownloadsPage() {
             </Link>
             <Link
               href="/support"
-              className="flex items-center gap-2 px-6 py-3 rounded-xl border border-[var(--border)] text-[var(--foreground-secondary)] font-medium hover:bg-white/5 hover:text-[var(--foreground)] transition-colors"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl border border-[var(--border)] text-[var(--foreground-secondary)] font-medium hover:bg-slate-100 dark:hover:bg-white/5 hover:text-[var(--foreground)] transition-colors"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />

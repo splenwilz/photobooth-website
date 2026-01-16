@@ -141,8 +141,8 @@ export default function AlertsPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Alerts</h1>
-          <p className="text-zinc-400 mt-1">Notifications and system alerts</p>
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Alerts</h1>
+          <p className="text-zinc-500 dark:text-zinc-400 mt-1">Notifications and system alerts</p>
         </div>
         {unreadCounts.total > 0 && (
           <button className="px-4 py-2 text-sm font-medium text-[#0891B2] border border-[#0891B2] rounded-xl hover:bg-[#0891B2]/10 transition-colors">
@@ -153,7 +153,7 @@ export default function AlertsPage() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800 flex items-center gap-4">
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center">
             <svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -164,7 +164,7 @@ export default function AlertsPage() {
             <p className="text-sm text-zinc-500">Critical</p>
           </div>
         </div>
-        <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800 flex items-center gap-4">
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-yellow-500/20 flex items-center justify-center">
             <svg className="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -175,7 +175,7 @@ export default function AlertsPage() {
             <p className="text-sm text-zinc-500">Warnings</p>
           </div>
         </div>
-        <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800 flex items-center gap-4">
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-[#0891B2]/20 flex items-center justify-center">
             <svg className="w-6 h-6 text-[#0891B2]" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -201,7 +201,7 @@ export default function AlertsPage() {
                 className={`flex items-center gap-2 px-4 py-2 rounded-full border font-medium text-sm transition-all ${
                   filterSeverity === filter.value
                     ? "bg-[#0891B2] border-[#0891B2] text-white"
-                    : "border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+                    : "border-slate-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700"
                 }`}
               >
                 {filter.color && <div className="w-2 h-2 rounded-full" style={{ backgroundColor: filter.color }} />}
@@ -222,7 +222,7 @@ export default function AlertsPage() {
                 className={`px-4 py-2 rounded-full border font-medium text-sm transition-all ${
                   filterCategory === filter.value
                     ? "bg-[#0891B2] border-[#0891B2] text-white"
-                    : "border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+                    : "border-slate-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700"
                 }`}
               >
                 {filter.label}
@@ -235,7 +235,7 @@ export default function AlertsPage() {
       {/* Alerts List */}
       <section>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Notifications</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Notifications</h2>
           <p className="text-sm text-zinc-500">{filteredAlerts.length} alert{filteredAlerts.length !== 1 ? "s" : ""}</p>
         </div>
 
@@ -245,8 +245,8 @@ export default function AlertsPage() {
             return (
               <div
                 key={alert.id}
-                className={`p-4 rounded-xl bg-[#111111] border transition-all cursor-pointer hover:border-zinc-700 ${
-                  alert.isRead ? "border-zinc-800 opacity-60" : "border-zinc-700"
+                className={`p-4 rounded-xl bg-white dark:bg-[#111111] border transition-all cursor-pointer hover:border-slate-300 dark:hover:border-zinc-700 ${
+                  alert.isRead ? "border-slate-200 dark:border-zinc-800 opacity-60" : "border-slate-300 dark:border-zinc-700"
                 }`}
               >
                 <div className="flex items-start gap-4">
@@ -273,7 +273,7 @@ export default function AlertsPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="font-semibold">{alert.title}</p>
+                        <p className="font-semibold text-zinc-900 dark:text-white">{alert.title}</p>
                         <p className="text-xs text-zinc-500 mt-0.5">{alert.boothName}</p>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
@@ -283,7 +283,7 @@ export default function AlertsPage() {
                         )}
                       </div>
                     </div>
-                    <p className="text-sm text-zinc-400 mt-2">{alert.message}</p>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2">{alert.message}</p>
                     <div className="mt-3">
                       <span 
                         className="text-xs font-medium px-2.5 py-1 rounded-full"
@@ -299,11 +299,11 @@ export default function AlertsPage() {
           })}
 
           {filteredAlerts.length === 0 && (
-            <div className="p-12 rounded-xl bg-[#111111] border border-zinc-800 text-center">
-              <svg className="w-12 h-12 text-zinc-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+            <div className="p-12 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-center">
+              <svg className="w-12 h-12 text-zinc-400 dark:text-zinc-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.143 17.082a24.248 24.248 0 003.714.318c1.28 0 2.52-.1 3.714-.318M5.946 10.596A8.001 8.001 0 1118.054 10.6M12 3v3m0 10v.75" />
               </svg>
-              <p className="text-zinc-400 font-medium">No alerts match your filters</p>
+              <p className="text-zinc-600 dark:text-zinc-400 font-medium">No alerts match your filters</p>
               <p className="text-sm text-zinc-500 mt-1">Try adjusting your filter criteria</p>
             </div>
           )}

@@ -24,12 +24,12 @@ export default function AdminSettingsPage() {
     <div className="space-y-6 max-w-4xl">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold">Settings</h1>
-        <p className="text-zinc-400 mt-1">Configure platform settings and preferences</p>
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Settings</h1>
+        <p className="text-zinc-500 dark:text-zinc-400 mt-1">Configure platform settings and preferences</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 p-1 bg-zinc-800/50 rounded-xl w-fit">
+      <div className="flex gap-1 p-1 bg-slate-200/50 dark:bg-zinc-800/50 rounded-xl w-fit">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -38,7 +38,7 @@ export default function AdminSettingsPage() {
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
               activeTab === tab.id
                 ? "bg-[#0891B2] text-white"
-                : "text-zinc-400 hover:text-white"
+                : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
             }`}
           >
             {tab.label}
@@ -49,37 +49,37 @@ export default function AdminSettingsPage() {
       {/* General Settings */}
       {activeTab === "general" && (
         <div className="space-y-4">
-          <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
-            <label className="block text-sm font-medium mb-2">Platform Name</label>
+          <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+            <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">Platform Name</label>
             <input
               type="text"
               defaultValue="PhotoBoothX"
-              className="w-full px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white focus:outline-none focus:border-[#0891B2]"
+              className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#0891B2]"
             />
           </div>
-          <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
-            <label className="block text-sm font-medium mb-2">Support Email</label>
+          <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+            <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">Support Email</label>
             <input
               type="email"
               defaultValue="support@photoboothx.com"
-              className="w-full px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white focus:outline-none focus:border-[#0891B2]"
+              className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#0891B2]"
             />
           </div>
-          <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+          <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium">Maintenance Mode</p>
+                <p className="font-medium text-zinc-900 dark:text-white">Maintenance Mode</p>
                 <p className="text-sm text-zinc-500">Show maintenance page to all users</p>
               </div>
-              <button type="button" className="relative w-12 h-6 rounded-full bg-zinc-700 transition-colors">
+              <button type="button" className="relative w-12 h-6 rounded-full bg-slate-300 dark:bg-zinc-700 transition-colors">
                 <div className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform" />
               </button>
             </div>
           </div>
-          <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+          <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium">Allow New Signups</p>
+                <p className="font-medium text-zinc-900 dark:text-white">Allow New Signups</p>
                 <p className="text-sm text-zinc-500">Enable public registration</p>
               </div>
               <button type="button" className="relative w-12 h-6 rounded-full bg-[#0891B2] transition-colors">
@@ -98,40 +98,40 @@ export default function AdminSettingsPage() {
             { name: "Pro", price: 99, booths: 20, features: ["Advanced analytics", "Priority support", "Custom templates"] },
             { name: "Enterprise", price: 299, booths: "Unlimited", features: ["Full analytics", "24/7 support", "Custom branding", "API access"] },
           ].map((plan) => (
-            <div key={plan.name} className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+            <div key={plan.name} className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h3 className="font-semibold text-lg">{plan.name}</h3>
+                  <h3 className="font-semibold text-lg text-zinc-900 dark:text-white">{plan.name}</h3>
                   <p className="text-sm text-zinc-500">{plan.booths} booths</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-bold">${plan.price}<span className="text-sm text-zinc-500">/mo</span></p>
+                  <p className="text-2xl font-bold text-zinc-900 dark:text-white">${plan.price}<span className="text-sm text-zinc-500">/mo</span></p>
                 </div>
               </div>
               <div className="flex flex-wrap gap-2 mb-4">
                 {plan.features.map((feature) => (
-                  <span key={feature} className="text-xs px-2 py-1 rounded-full bg-zinc-800 text-zinc-400">
+                  <span key={feature} className="text-xs px-2 py-1 rounded-full bg-slate-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
                     {feature}
                   </span>
                 ))}
               </div>
-              <div className="flex gap-2 pt-4 border-t border-zinc-800">
+              <div className="flex gap-2 pt-4 border-t border-[var(--border)]">
                 <button type="button" className="text-sm font-medium text-[#0891B2] hover:text-[#22D3EE]">
                   Edit Plan
                 </button>
               </div>
             </div>
           ))}
-          
-          <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
-            <label className="block text-sm font-medium mb-2">Commission Rate (%)</label>
+
+          <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+            <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">Commission Rate (%)</label>
             <input
               type="number"
               defaultValue="1"
               min="0"
               max="100"
               step="0.1"
-              className="w-32 px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white focus:outline-none focus:border-[#0891B2]"
+              className="w-32 px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#0891B2]"
             />
             <p className="text-xs text-zinc-500 mt-2">Percentage taken from each transaction</p>
           </div>
@@ -148,15 +148,15 @@ export default function AdminSettingsPage() {
             { label: "Payout Completed", description: "Confirmation when payouts are processed", enabled: false },
             { label: "Weekly Report", description: "Weekly platform performance summary", enabled: false },
           ].map((notif) => (
-            <div key={notif.label} className="p-4 rounded-xl bg-[#111111] border border-zinc-800">
+            <div key={notif.label} className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)]">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium">{notif.label}</p>
+                  <p className="font-medium text-zinc-900 dark:text-white">{notif.label}</p>
                   <p className="text-sm text-zinc-500">{notif.description}</p>
                 </div>
                 <button
                   type="button"
-                  className={`relative w-12 h-6 rounded-full transition-colors ${notif.enabled ? "bg-[#0891B2]" : "bg-zinc-700"}`}
+                  className={`relative w-12 h-6 rounded-full transition-colors ${notif.enabled ? "bg-[#0891B2]" : "bg-slate-300 dark:bg-zinc-700"}`}
                 >
                   <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${notif.enabled ? "left-7" : "left-1"}`} />
                 </button>
@@ -169,10 +169,10 @@ export default function AdminSettingsPage() {
       {/* Security */}
       {activeTab === "security" && (
         <div className="space-y-4">
-          <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+          <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium">Two-Factor Authentication</p>
+                <p className="font-medium text-zinc-900 dark:text-white">Two-Factor Authentication</p>
                 <p className="text-sm text-zinc-500">Require 2FA for all admin accounts</p>
               </div>
               <button type="button" className="relative w-12 h-6 rounded-full bg-[#0891B2]">
@@ -181,22 +181,22 @@ export default function AdminSettingsPage() {
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
-            <label className="block text-sm font-medium mb-2">Session Timeout (minutes)</label>
+          <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+            <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">Session Timeout (minutes)</label>
             <input
               type="number"
               defaultValue="60"
               min="5"
               max="480"
-              className="w-32 px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white focus:outline-none focus:border-[#0891B2]"
+              className="w-32 px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#0891B2]"
             />
           </div>
 
           <div className="p-5 rounded-2xl bg-red-500/10 border border-red-500/20">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-red-400">Danger Zone</p>
-                <p className="text-sm text-red-400/60">Reset all admin sessions</p>
+                <p className="font-medium text-red-600 dark:text-red-400">Danger Zone</p>
+                <p className="text-sm text-red-500/60 dark:text-red-400/60">Reset all admin sessions</p>
               </div>
               <button type="button" className="px-4 py-2 text-sm font-medium bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors">
                 Force Logout All
@@ -207,7 +207,7 @@ export default function AdminSettingsPage() {
       )}
 
       {/* Save Button */}
-      <div className="flex justify-end pt-6 border-t border-zinc-800">
+      <div className="flex justify-end pt-6 border-t border-[var(--border)]">
         <button type="button" className="px-6 py-3 bg-[#0891B2] text-white font-medium rounded-xl hover:bg-[#0E7490] transition-colors">
           Save Changes
         </button>

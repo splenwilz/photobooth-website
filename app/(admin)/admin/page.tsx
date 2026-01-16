@@ -96,20 +96,20 @@ export default function AdminOverviewPage() {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-        <p className="text-zinc-400 mt-1">Platform overview and key metrics</p>
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Admin Dashboard</h1>
+        <p className="text-zinc-600 dark:text-zinc-400 mt-1">Platform overview and key metrics</p>
       </div>
 
       {/* Platform Stats */}
       <section>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-lg font-semibold">Platform Overview</h2>
+            <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Platform Overview</h2>
             <p className="text-sm text-zinc-500">{systemHealth.activeUsers.toLocaleString()} active users</p>
           </div>
 
           {/* Period Selector */}
-          <div className="flex gap-1 p-1 bg-zinc-800/50 rounded-xl">
+          <div className="flex gap-1 p-1 bg-slate-200/50 dark:bg-zinc-800/50 rounded-xl">
             {(["today", "week", "month", "year"] as Period[]).map((period) => (
               <button
                 key={period}
@@ -118,7 +118,7 @@ export default function AdminOverviewPage() {
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
                   selectedPeriod === period
                     ? "bg-[#0891B2] text-white"
-                    : "text-zinc-400 hover:text-white"
+                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
                 }`}
               >
                 {period.charAt(0).toUpperCase() + period.slice(1)}
@@ -130,7 +130,7 @@ export default function AdminOverviewPage() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Revenue */}
-          <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+          <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
             <div className="flex items-center gap-2 mb-1">
               <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
                 <svg className="w-3.5 h-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -139,12 +139,12 @@ export default function AdminOverviewPage() {
               </div>
               <p className="text-sm text-zinc-500">Revenue</p>
             </div>
-            <p className="text-2xl font-bold">{formatCurrency(stats.revenue)}</p>
+            <p className="text-2xl font-bold text-zinc-900 dark:text-white">{formatCurrency(stats.revenue)}</p>
             <p className="text-sm text-green-500 mt-2">+18.2% from last period</p>
           </div>
 
           {/* New Users */}
-          <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+          <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
             <div className="flex items-center gap-2 mb-1">
               <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center">
                 <svg className="w-3.5 h-3.5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -153,12 +153,12 @@ export default function AdminOverviewPage() {
               </div>
               <p className="text-sm text-zinc-500">New Users</p>
             </div>
-            <p className="text-2xl font-bold">{stats.users.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-zinc-900 dark:text-white">{stats.users.toLocaleString()}</p>
             <p className="text-sm text-zinc-500 mt-2">{(systemHealth.activeUsers / 100).toFixed(0)}% active rate</p>
           </div>
 
           {/* New Subscriptions */}
-          <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+          <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
             <div className="flex items-center gap-2 mb-1">
               <div className="w-6 h-6 rounded-full bg-[#0891B2]/20 flex items-center justify-center">
                 <svg className="w-3.5 h-3.5 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -167,12 +167,12 @@ export default function AdminOverviewPage() {
               </div>
               <p className="text-sm text-zinc-500">Subscriptions</p>
             </div>
-            <p className="text-2xl font-bold">{stats.subscriptions.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-zinc-900 dark:text-white">{stats.subscriptions.toLocaleString()}</p>
             <p className="text-sm text-zinc-500 mt-2">+{Math.round(stats.subscriptions * 0.12)} upgrades</p>
           </div>
 
           {/* Support Tickets */}
-          <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+          <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
             <div className="flex items-center gap-2 mb-1">
               <div className="w-6 h-6 rounded-full bg-yellow-500/20 flex items-center justify-center">
                 <svg className="w-3.5 h-3.5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -181,7 +181,7 @@ export default function AdminOverviewPage() {
               </div>
               <p className="text-sm text-zinc-500">Tickets</p>
             </div>
-            <p className="text-2xl font-bold">{stats.tickets}</p>
+            <p className="text-2xl font-bold text-zinc-900 dark:text-white">{stats.tickets}</p>
             <p className="text-sm text-yellow-500 mt-2">{Math.round(stats.tickets * 0.25)} open</p>
           </div>
         </div>
@@ -189,8 +189,8 @@ export default function AdminOverviewPage() {
 
       {/* System Health */}
       <section>
-        <h2 className="text-lg font-semibold mb-4">System Health</h2>
-        <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800 space-y-4">
+        <h2 className="text-lg font-semibold mb-4 text-zinc-900 dark:text-white">System Health</h2>
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] space-y-4">
           {/* Uptime */}
           <div>
             <div className="flex items-center justify-between mb-2">
@@ -200,11 +200,11 @@ export default function AdminOverviewPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <span className="font-medium">Platform Uptime</span>
+                <span className="font-medium text-zinc-900 dark:text-white">Platform Uptime</span>
               </div>
               <span className="text-sm text-green-500 font-medium">{systemHealth.uptime}%</span>
             </div>
-            <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+            <div className="h-2 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
               <div className="h-full bg-green-500 rounded-full" style={{ width: `${systemHealth.uptime}%` }} />
             </div>
           </div>
@@ -218,11 +218,11 @@ export default function AdminOverviewPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                   </svg>
                 </div>
-                <span className="font-medium">Booths Online</span>
+                <span className="font-medium text-zinc-900 dark:text-white">Booths Online</span>
               </div>
-              <span className="text-sm text-zinc-400">{systemHealth.onlineBooths.toLocaleString()}/{systemHealth.totalBooths.toLocaleString()}</span>
+              <span className="text-sm text-zinc-600 dark:text-zinc-400">{systemHealth.onlineBooths.toLocaleString()}/{systemHealth.totalBooths.toLocaleString()}</span>
             </div>
-            <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+            <div className="h-2 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
               <div className="h-full bg-[#0891B2] rounded-full" style={{ width: `${(systemHealth.onlineBooths / systemHealth.totalBooths) * 100}%` }} />
             </div>
           </div>
@@ -235,7 +235,7 @@ export default function AdminOverviewPage() {
         <section>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <h2 className="text-lg font-semibold">Recent Activity</h2>
+              <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Recent Activity</h2>
               <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-500/20">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                 <span className="text-xs font-medium text-green-400">Live</span>
@@ -246,12 +246,12 @@ export default function AdminOverviewPage() {
             </a>
           </div>
 
-          <div className="rounded-2xl bg-[#111111] border border-zinc-800 overflow-hidden">
-            <div className="divide-y divide-zinc-800">
+          <div className="rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] overflow-hidden">
+            <div className="divide-y divide-[var(--border)]">
               {recentActivity.map((activity, index) => {
                 const iconConfig = getActivityIcon(activity.type);
                 return (
-                  <div key={activity.id} className="p-4 hover:bg-zinc-800/30 transition-colors group">
+                  <div key={activity.id} className="p-4 hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors group">
                     <div className="flex items-start gap-3">
                       {/* Timeline connector */}
                       <div className="relative flex flex-col items-center">
@@ -259,18 +259,18 @@ export default function AdminOverviewPage() {
                           <span className={iconConfig.color}>{iconConfig.icon}</span>
                         </div>
                         {index < recentActivity.length - 1 && (
-                          <div className="w-0.5 h-8 bg-zinc-800 -mb-8 mt-2" />
+                          <div className="w-0.5 h-8 bg-slate-200 dark:bg-zinc-800 -mb-8 mt-2" />
                         )}
                       </div>
                       
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className="font-medium text-sm">{activity.action}</p>
+                          <p className="font-medium text-sm text-zinc-900 dark:text-white">{activity.action}</p>
                           {activity.isNew && (
                             <span className="px-1.5 py-0.5 text-[10px] font-semibold rounded bg-[#0891B2]/20 text-[#0891B2]">NEW</span>
                           )}
                         </div>
-                        <p className="text-sm text-zinc-300 mt-0.5">{activity.detail}</p>
+                        <p className="text-sm text-zinc-600 dark:text-zinc-300 mt-0.5">{activity.detail}</p>
                         <p className="text-xs text-zinc-500 mt-1">{activity.meta}</p>
                       </div>
                       
@@ -292,7 +292,7 @@ export default function AdminOverviewPage() {
         <section>
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-lg font-semibold">Top Users</h2>
+              <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Top Users</h2>
               <p className="text-sm text-zinc-500">By revenue this month</p>
             </div>
             <a href="/admin/users" className="text-sm text-[#0891B2] hover:text-[#22D3EE] transition-colors">
@@ -306,7 +306,7 @@ export default function AdminOverviewPage() {
               const percentage = (user.revenue / maxRevenue) * 100;
               
               return (
-                <div key={user.name} className="p-4 rounded-xl bg-[#111111] border border-zinc-800 hover:border-zinc-700 transition-all cursor-pointer group">
+                <div key={user.name} className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer group">
                   <div className="flex items-center gap-4">
                     {/* Rank + Avatar */}
                     <div className="relative">
@@ -326,11 +326,11 @@ export default function AdminOverviewPage() {
                     {/* User Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="font-medium truncate">{user.name}</p>
+                        <p className="font-medium truncate text-zinc-900 dark:text-white">{user.name}</p>
                         <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
                           user.plan === "Enterprise" ? "bg-[#0891B2]/20 text-[#0891B2]" :
                           user.plan === "Pro" ? "bg-blue-500/20 text-blue-400" :
-                          "bg-zinc-700 text-zinc-400"
+                          "bg-slate-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400"
                         }`}>
                           {user.plan}
                         </span>
@@ -339,7 +339,7 @@ export default function AdminOverviewPage() {
                       
                       {/* Progress Bar */}
                       <div className="mt-2 flex items-center gap-2">
-                        <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                        <div className="flex-1 h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                           <div 
                             className="h-full bg-linear-to-r from-[#0891B2] to-[#10B981] rounded-full transition-all duration-500"
                             style={{ width: `${percentage}%` }}
@@ -351,7 +351,7 @@ export default function AdminOverviewPage() {
                     
                     {/* Revenue + Growth */}
                     <div className="text-right">
-                      <p className="text-lg font-bold">{formatCurrency(user.revenue)}</p>
+                      <p className="text-lg font-bold text-zinc-900 dark:text-white">{formatCurrency(user.revenue)}</p>
                       <div className={`flex items-center justify-end gap-1 mt-1 ${user.growth >= 0 ? "text-green-500" : "text-red-500"}`}>
                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
                           <path strokeLinecap="round" strokeLinejoin="round" d={user.growth >= 0 ? "M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" : "M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"} />
@@ -366,13 +366,13 @@ export default function AdminOverviewPage() {
           </div>
           
           {/* Summary Row */}
-          <div className="mt-4 flex items-center justify-between p-4 rounded-xl bg-zinc-800/50 border border-zinc-700/50">
+          <div className="mt-4 flex items-center justify-between p-4 rounded-xl bg-slate-100 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700/50">
             <div className="flex items-center gap-4">
               <div className="text-center">
                 <p className="text-sm text-zinc-500">Total Revenue</p>
-                <p className="text-lg font-bold">{formatCurrency(topUsers.reduce((sum, u) => sum + u.revenue, 0))}</p>
+                <p className="text-lg font-bold text-zinc-900 dark:text-white">{formatCurrency(topUsers.reduce((sum, u) => sum + u.revenue, 0))}</p>
               </div>
-              <div className="w-px h-8 bg-zinc-700" />
+              <div className="w-px h-8 bg-slate-300 dark:bg-zinc-700" />
               <div className="text-center">
                 <p className="text-sm text-zinc-500">Avg. Growth</p>
                 <p className="text-lg font-bold text-green-500">+{Math.round(topUsers.reduce((sum, u) => sum + u.growth, 0) / topUsers.length)}%</p>

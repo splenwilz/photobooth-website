@@ -138,7 +138,7 @@ export default function PricingPage() {
           </p>
 
           {/* Billing Toggle */}
-          <div className="inline-flex items-center gap-4 p-1.5 rounded-full bg-zinc-900 border border-[var(--border)]">
+          <div className="inline-flex items-center gap-4 p-1.5 rounded-full bg-slate-200 dark:bg-zinc-900 border border-[var(--border)]">
             <button
               onClick={() => setIsAnnual(false)}
               className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
@@ -179,7 +179,7 @@ export default function PricingPage() {
                 key={plan.name}
                 className={`relative rounded-2xl p-8 transition-all ${
                   plan.highlighted
-                    ? "bg-gradient-to-b from-[#0891B2]/20 to-[#111111] border-2 border-[#0891B2]/50 scale-105 lg:-mt-4 lg:mb-4 shadow-xl shadow-[#0891B2]/10"
+                    ? "bg-gradient-to-b from-[#0891B2]/20 to-slate-100 dark:to-[#111111] border-2 border-[#0891B2]/50 scale-105 lg:-mt-4 lg:mb-4 shadow-xl shadow-[#0891B2]/10"
                     : "bg-[var(--card)] border border-[var(--border)] hover:border-[var(--border)]"
                 }`}
               >
@@ -232,8 +232,8 @@ export default function PricingPage() {
                   href={plan.ctaLink}
                   className={`block w-full py-3.5 rounded-xl font-semibold text-center transition-all mb-8 ${
                     plan.highlighted
-                      ? "bg-[#0891B2] text-[var(--foreground)] hover:bg-[#0E7490] shadow-lg shadow-[#0891B2]/30 hover:shadow-[#0891B2]/50"
-                      : "bg-zinc-800 text-[var(--foreground)] hover:bg-zinc-700"
+                      ? "bg-[#0891B2] text-white hover:bg-[#0E7490] shadow-lg shadow-[#0891B2]/30 hover:shadow-[#0891B2]/50"
+                      : "bg-slate-200 dark:bg-zinc-800 text-zinc-900 dark:text-white hover:bg-slate-300 dark:hover:bg-zinc-700"
                   }`}
                 >
                   {plan.cta}
@@ -253,7 +253,7 @@ export default function PricingPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       ) : (
-                        <svg className="w-5 h-5 text-zinc-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg className="w-5 h-5 text-slate-400 dark:text-zinc-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       )}
@@ -309,9 +309,9 @@ export default function PricingPage() {
               </thead>
               <tbody>
                 {comparisonFeatures.map((feature, index) => (
-                  <tr 
-                    key={feature.name} 
-                    className={`border-b border-[var(--border)]/50 ${index % 2 === 0 ? "" : "bg-zinc-900/30"}`}
+                  <tr
+                    key={feature.name}
+                    className={`border-b border-[var(--border)]/50 ${index % 2 === 0 ? "" : "bg-slate-100/50 dark:bg-zinc-900/30"}`}
                   >
                     <td className="py-4 px-4 text-sm">{feature.name}</td>
                     <td className="py-4 px-4 text-sm text-center text-[var(--muted)]">{feature.starter}</td>
@@ -328,13 +328,13 @@ export default function PricingPage() {
       {/* Testimonial */}
       <section className="px-6 pb-24">
         <div className="max-w-3xl mx-auto">
-          <div className="relative p-10 rounded-2xl bg-gradient-to-br from-[#0891B2]/10 to-[#111111] border border-[#0891B2]/20">
+          <div className="relative p-10 rounded-2xl bg-gradient-to-br from-[#0891B2]/10 to-slate-100 dark:to-[#111111] border border-[#0891B2]/20">
             {/* Quote mark */}
             <svg className="absolute top-6 left-8 w-10 h-10 text-[#0891B2]/20" fill="currentColor" viewBox="0 0 24 24">
               <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
             </svg>
             
-            <blockquote className="text-xl text-zinc-200 leading-relaxed mb-6 relative z-10">
+            <blockquote className="text-xl text-zinc-700 dark:text-zinc-200 leading-relaxed mb-6 relative z-10">
               &ldquo;Switching to Pro was a no-brainer. The ROI was immediate — we made back the annual 
               subscription in just one weekend event. The mobile app alone is worth the price.&rdquo;
             </blockquote>
@@ -398,23 +398,23 @@ export default function PricingPage() {
                 >
                   {/* Number badge */}
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 transition-colors ${
-                    openFaq === index 
-                      ? "bg-[#0891B2] text-[var(--foreground)]" 
-                      : "bg-zinc-800 text-[var(--muted)] group-hover:bg-[#0891B2]/20 group-hover:text-[#0891B2]"
+                    openFaq === index
+                      ? "bg-[#0891B2] text-white"
+                      : "bg-slate-200 dark:bg-zinc-800 text-[var(--muted)] group-hover:bg-[#0891B2]/20 group-hover:text-[#0891B2]"
                   }`}>
                     {String(index + 1).padStart(2, "0")}
                   </div>
                   <div className="flex-1">
                     <span className={`font-semibold block transition-colors ${
-                      openFaq === index ? "text-[#22D3EE]" : "text-[var(--foreground)] group-hover:text-[#22D3EE]"
+                      openFaq === index ? "text-[#0891B2] dark:text-[#22D3EE]" : "text-zinc-900 dark:text-white group-hover:text-[#0891B2] dark:group-hover:text-[#22D3EE]"
                     }`}>
                       {faq.question}
                     </span>
                   </div>
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${
-                    openFaq === index 
-                      ? "bg-[#0891B2]/20 rotate-180" 
-                      : "bg-zinc-800 group-hover:bg-zinc-700"
+                    openFaq === index
+                      ? "bg-[#0891B2]/20 rotate-180"
+                      : "bg-slate-200 dark:bg-zinc-800 group-hover:bg-slate-300 dark:group-hover:bg-zinc-700"
                   }`}>
                     <svg 
                       className="w-4 h-4 text-[var(--muted)]" 
@@ -494,7 +494,7 @@ export default function PricingPage() {
                 </Link>
                 <Link
                   href="/contact"
-                  className="px-6 py-3.5 rounded-xl border border-[var(--border)] text-[var(--foreground)] font-semibold hover:bg-zinc-800 transition-all flex items-center justify-center gap-2"
+                  className="px-6 py-3.5 rounded-xl border border-[var(--border)] text-[var(--foreground)] font-semibold hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all flex items-center justify-center gap-2"
                 >
                   Contact Sales
                 </Link>
@@ -534,18 +534,18 @@ export default function PricingPage() {
               <div className="relative bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 w-full max-w-xs">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                     </svg>
                   </div>
                   <div>
-                    <div className="text-[var(--foreground)]/60 text-xs">Your potential</div>
-                    <div className="text-[var(--foreground)] font-semibold">Monthly Revenue</div>
+                    <div className="text-white/60 text-xs">Your potential</div>
+                    <div className="text-white font-semibold">Monthly Revenue</div>
                   </div>
                 </div>
-                
-                <div className="text-4xl font-bold text-[var(--foreground)] mb-2">$8,500</div>
-                <div className="flex items-center gap-2 text-sm text-[var(--foreground)]/70 mb-6">
+
+                <div className="text-4xl font-bold text-white mb-2">$8,500</div>
+                <div className="flex items-center gap-2 text-sm text-white/70 mb-6">
                   <span className="px-2 py-0.5 rounded bg-[#10B981]/20 text-[#10B981] text-xs font-medium">+340%</span>
                   vs. manual operations
                 </div>
@@ -553,12 +553,12 @@ export default function PricingPage() {
                 {/* Mini stats */}
                 <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
                   <div>
-                    <div className="text-2xl font-bold text-[var(--foreground)]">2,400</div>
-                    <div className="text-xs text-[var(--foreground)]/50">Photos/month</div>
+                    <div className="text-2xl font-bold text-white">2,400</div>
+                    <div className="text-xs text-white/50">Photos/month</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-[var(--foreground)]">98%</div>
-                    <div className="text-xs text-[var(--foreground)]/50">Uptime</div>
+                    <div className="text-2xl font-bold text-white">98%</div>
+                    <div className="text-xs text-white/50">Uptime</div>
                   </div>
                 </div>
               </div>

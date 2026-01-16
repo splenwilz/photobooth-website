@@ -64,26 +64,26 @@ export default function AdminTicketsPage() {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold">Support Tickets</h1>
-        <p className="text-zinc-400 mt-1">Manage customer support requests</p>
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Support Tickets</h1>
+        <p className="text-zinc-500 dark:text-zinc-400 mt-1">Manage customer support requests</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <p className="text-sm text-zinc-500">Total Tickets</p>
-          <p className="text-2xl font-bold mt-1">{stats.total}</p>
+          <p className="text-2xl font-bold mt-1 text-zinc-900 dark:text-white">{stats.total}</p>
         </div>
-        <div className="p-5 rounded-2xl bg-[#111111] border border-red-500/30">
-          <p className="text-sm text-red-400">Critical</p>
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-red-500/30">
+          <p className="text-sm text-red-600 dark:text-red-400">Critical</p>
           <p className="text-2xl font-bold mt-1 text-red-500">{stats.critical}</p>
         </div>
-        <div className="p-5 rounded-2xl bg-[#111111] border border-blue-500/30">
-          <p className="text-sm text-blue-400">Open</p>
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-blue-500/30">
+          <p className="text-sm text-blue-600 dark:text-blue-400">Open</p>
           <p className="text-2xl font-bold mt-1 text-blue-500">{stats.open}</p>
         </div>
-        <div className="p-5 rounded-2xl bg-[#111111] border border-yellow-500/30">
-          <p className="text-sm text-yellow-400">Pending</p>
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-yellow-500/30">
+          <p className="text-sm text-yellow-600 dark:text-yellow-400">Pending</p>
           <p className="text-2xl font-bold mt-1 text-yellow-500">{stats.pending}</p>
         </div>
       </div>
@@ -99,11 +99,11 @@ export default function AdminTicketsPage() {
             placeholder="Search tickets..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#111111] border border-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] transition-all"
+            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] transition-all"
           />
         </div>
 
-        <div className="flex gap-1 p-1 bg-zinc-800/50 rounded-xl overflow-x-auto">
+        <div className="flex gap-1 p-1 bg-slate-200/50 dark:bg-zinc-800/50 rounded-xl overflow-x-auto">
           {(["all", "critical", "high", "medium", "low"] as FilterPriority[]).map((priority) => (
             <button
               key={priority}
@@ -112,7 +112,7 @@ export default function AdminTicketsPage() {
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all capitalize whitespace-nowrap ${
                 filterPriority === priority
                   ? "bg-[#0891B2] text-white"
-                  : "text-zinc-400 hover:text-white"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
               }`}
             >
               {priority !== "all" && <span className={`w-2 h-2 rounded-full ${getPriorityConfig(priority).dot}`} />}
@@ -127,9 +127,9 @@ export default function AdminTicketsPage() {
         {filteredTickets.map((ticket) => {
           const priorityConfig = getPriorityConfig(ticket.priority);
           const statusConfig = getStatusConfig(ticket.status);
-          
+
           return (
-            <div key={ticket.id} className="p-4 rounded-xl bg-[#111111] border border-zinc-800 hover:border-zinc-700 transition-all cursor-pointer">
+            <div key={ticket.id} className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer">
               <div className="flex items-start gap-4">
                 <div className={`w-10 h-10 rounded-xl ${priorityConfig.bg} flex items-center justify-center shrink-0`}>
                   <div className={`w-3 h-3 rounded-full ${priorityConfig.dot}`} />
@@ -144,12 +144,12 @@ export default function AdminTicketsPage() {
                       {statusConfig.label}
                     </span>
                   </div>
-                  <p className="font-medium mt-1">{ticket.subject}</p>
+                  <p className="font-medium mt-1 text-zinc-900 dark:text-white">{ticket.subject}</p>
                   <p className="text-sm text-zinc-500 mt-1">{ticket.user} · {ticket.email}</p>
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-xs text-zinc-500">{ticket.createdAt}</p>
-                  <p className="text-xs text-zinc-400 mt-1">{ticket.messages} messages</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{ticket.messages} messages</p>
                 </div>
               </div>
             </div>
@@ -157,8 +157,8 @@ export default function AdminTicketsPage() {
         })}
 
         {filteredTickets.length === 0 && (
-          <div className="p-12 rounded-2xl bg-[#111111] border border-zinc-800 text-center">
-            <p className="text-zinc-400">No tickets found matching your criteria</p>
+          <div className="p-12 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] text-center">
+            <p className="text-zinc-500 dark:text-zinc-400">No tickets found matching your criteria</p>
           </div>
         )}
       </div>

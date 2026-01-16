@@ -104,8 +104,8 @@ export default function BoothsPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Booths</h1>
-          <p className="text-zinc-400 mt-1">Manage your photo booth locations</p>
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Booths</h1>
+          <p className="text-zinc-500 dark:text-zinc-400 mt-1">Manage your photo booth locations</p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2.5 bg-[#0891B2] text-white font-medium rounded-xl hover:bg-[#0E7490] transition-colors">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -117,29 +117,29 @@ export default function BoothsPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <p className="text-sm text-zinc-500 mb-1">Total Booths</p>
-          <p className="text-2xl font-bold">{demoSummary.total_booths}</p>
+          <p className="text-2xl font-bold text-zinc-900 dark:text-white">{demoSummary.total_booths}</p>
           <p className="text-sm text-zinc-500 mt-2">{demoSummary.online_count} online</p>
         </div>
-        <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <p className="text-sm text-zinc-500 mb-1">Today&apos;s Revenue</p>
-          <p className="text-2xl font-bold">{formatCurrency(demoSummary.total_revenue_today)}</p>
+          <p className="text-2xl font-bold text-zinc-900 dark:text-white">{formatCurrency(demoSummary.total_revenue_today)}</p>
           <p className="text-sm text-zinc-500 mt-2">{demoSummary.total_transactions_today} transactions</p>
         </div>
-        <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-2 h-2 rounded-full bg-green-500" />
             <p className="text-sm text-zinc-500">Online</p>
           </div>
-          <p className="text-2xl font-bold">{demoSummary.online_count}</p>
+          <p className="text-2xl font-bold text-zinc-900 dark:text-white">{demoSummary.online_count}</p>
         </div>
-        <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-2 h-2 rounded-full bg-red-500" />
             <p className="text-sm text-zinc-500">Offline</p>
           </div>
-          <p className="text-2xl font-bold">{demoSummary.offline_count}</p>
+          <p className="text-2xl font-bold text-zinc-900 dark:text-white">{demoSummary.offline_count}</p>
         </div>
       </div>
 
@@ -155,7 +155,7 @@ export default function BoothsPage() {
             placeholder="Search booths..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#111111] border border-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] focus:ring-1 focus:ring-[#0891B2] transition-all"
+            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] focus:ring-1 focus:ring-[#0891B2] transition-all"
           />
         </div>
 
@@ -168,7 +168,7 @@ export default function BoothsPage() {
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all ${
                 filterStatus === status
                   ? "bg-[#0891B2] border-[#0891B2] text-white"
-                  : "border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+                  : "border-slate-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700"
               }`}
             >
               {status !== "all" && (
@@ -181,7 +181,7 @@ export default function BoothsPage() {
       </div>
 
       {/* All Booths Card */}
-      <div className="p-4 rounded-xl bg-[#111111] border-2 border-[#0891B2] flex items-center justify-between cursor-pointer hover:bg-zinc-900/50 transition-all">
+      <div className="p-4 rounded-xl bg-white dark:bg-[#111111] border-2 border-[#0891B2] flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-900/50 transition-all">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-[#0891B2]/20 flex items-center justify-center">
             <svg className="w-6 h-6 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -189,7 +189,7 @@ export default function BoothsPage() {
             </svg>
           </div>
           <div>
-            <p className="font-semibold">All Booths</p>
+            <p className="font-semibold text-zinc-900 dark:text-white">All Booths</p>
             <p className="text-sm text-zinc-500">{demoSummary.online_count} online · {demoSummary.offline_count} offline</p>
           </div>
         </div>
@@ -208,7 +208,7 @@ export default function BoothsPage() {
       {/* Booth List */}
       <section>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Your Booths</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Your Booths</h2>
           <p className="text-sm text-zinc-500">{filteredBooths.length} booth{filteredBooths.length !== 1 ? "s" : ""}</p>
         </div>
 
@@ -216,20 +216,20 @@ export default function BoothsPage() {
           {filteredBooths.map((booth) => (
             <div
               key={booth.id}
-              className="p-4 rounded-xl bg-[#111111] border border-zinc-800 hover:border-zinc-700 transition-all cursor-pointer"
+              className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
+                    <svg className="w-6 h-6 text-zinc-500 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
                     </svg>
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="font-semibold">{booth.name}</p>
-                      <div 
+                      <p className="font-semibold text-zinc-900 dark:text-white">{booth.name}</p>
+                      <div
                         className="w-2 h-2 rounded-full"
                         style={{ backgroundColor: getStatusColor(booth.status) }}
                       />
@@ -240,11 +240,11 @@ export default function BoothsPage() {
 
                 <div className="flex items-center gap-6">
                   <div className="text-right hidden sm:block">
-                    <p className="font-semibold">{formatCurrency(booth.todayRevenue)}</p>
+                    <p className="font-semibold text-zinc-900 dark:text-white">{formatCurrency(booth.todayRevenue)}</p>
                     <p className="text-xs text-zinc-500">{booth.todayTransactions} today</p>
                   </div>
                   <div className="text-right hidden md:block">
-                    <p className="text-sm text-zinc-400">{booth.credits} credits</p>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">{booth.credits} credits</p>
                   </div>
                   <svg className="w-5 h-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
@@ -255,11 +255,11 @@ export default function BoothsPage() {
           ))}
 
           {filteredBooths.length === 0 && (
-            <div className="p-12 rounded-xl bg-[#111111] border border-zinc-800 text-center">
-              <svg className="w-12 h-12 text-zinc-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+            <div className="p-12 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-center">
+              <svg className="w-12 h-12 text-zinc-400 dark:text-zinc-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
               </svg>
-              <p className="text-zinc-400 font-medium">No booths match your filters</p>
+              <p className="text-zinc-600 dark:text-zinc-400 font-medium">No booths match your filters</p>
               <p className="text-sm text-zinc-500 mt-1">Try adjusting your search or filter criteria</p>
             </div>
           )}

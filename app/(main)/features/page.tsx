@@ -115,7 +115,7 @@ export default function FeaturesPage() {
 
         <div className="relative max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0891B2]/10 border border-[#0891B2]/20 text-[#22D3EE] text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0891B2]/10 border border-[#0891B2]/20 text-[#0891B2] dark:text-[#22D3EE] text-sm font-medium mb-6">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
               </svg>
@@ -136,18 +136,18 @@ export default function FeaturesPage() {
             {/* Card 1 - Camera Integration */}
             <div className="group relative rounded-3xl overflow-hidden">
               {/* Background gradient */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#0891B2]/20 via-[#111111] to-[#111111]" />
-              <div className="absolute top-0 right-0 w-40 h-40 bg-[#0891B2]/20 blur-3xl rounded-full" />
-              
+              <div className="absolute inset-0 bg-gradient-to-br from-[#0891B2]/10 via-slate-100 to-slate-100 dark:from-[#0891B2]/20 dark:via-[#111111] dark:to-[#111111]" />
+              <div className="absolute top-0 right-0 w-40 h-40 bg-[#0891B2]/10 dark:bg-[#0891B2]/20 blur-3xl rounded-full" />
+
               <div className="relative p-8 border border-[#0891B2]/20 rounded-3xl h-full group-hover:border-[#0891B2]/50 transition-colors">
                 {/* Mini visual */}
-                <div className="mb-6 p-4 rounded-2xl bg-[var(--background)] border border-[var(--border)]">
+                <div className="mb-6 p-4 rounded-2xl bg-white dark:bg-[var(--background)] border border-slate-200 dark:border-[var(--border)]">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
                     <span className="text-xs text-[var(--muted)]">Logitech C920</span>
                     <span className="ml-auto text-xs text-[#0891B2]">1080p</span>
                   </div>
-                  <div className="aspect-video rounded-lg bg-zinc-900 border border-[var(--border)] flex items-center justify-center relative overflow-hidden">
+                  <div className="aspect-video rounded-lg bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-[var(--border)] flex items-center justify-center relative overflow-hidden">
                     <div className="w-12 h-12 border-2 border-[#0891B2] rounded-lg flex items-center justify-center">
                       <div className="w-3 h-3 bg-[#0891B2] rounded-full animate-pulse" />
                     </div>
@@ -164,7 +164,7 @@ export default function FeaturesPage() {
                     📷
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold group-hover:text-[#22D3EE] transition-colors">Camera Integration</h3>
+                    <h3 className="text-lg font-bold group-hover:text-[#0891B2] dark:group-hover:text-[#22D3EE] transition-colors">Camera Integration</h3>
                     <p className="text-xs text-[var(--muted)]">Webcam + DSLR support</p>
                   </div>
                 </div>
@@ -187,9 +187,9 @@ export default function FeaturesPage() {
             {/* Card 2 - Instant Printing */}
             <div className="group relative rounded-3xl overflow-hidden">
               {/* Background gradient */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#F59E0B]/20 via-[#111111] to-[#111111]" />
-              <div className="absolute top-0 right-0 w-40 h-40 bg-[#F59E0B]/20 blur-3xl rounded-full" />
-              
+              <div className="absolute inset-0 bg-gradient-to-br from-[#F59E0B]/10 via-slate-100 to-slate-100 dark:from-[#F59E0B]/20 dark:via-[#111111] dark:to-[#111111]" />
+              <div className="absolute top-0 right-0 w-40 h-40 bg-[#F59E0B]/10 dark:bg-[#F59E0B]/20 blur-3xl rounded-full" />
+
               <div className="relative p-8 border border-[#F59E0B]/20 rounded-3xl h-full group-hover:border-[#F59E0B]/50 transition-colors">
                 {/* Mini visual - Print preview */}
                 <div className="mb-6 flex items-center justify-center gap-4">
@@ -214,7 +214,7 @@ export default function FeaturesPage() {
                 </div>
 
                 {/* Printer status bar */}
-                <div className="mb-4 p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] flex items-center gap-3">
+                <div className="mb-4 p-3 rounded-xl bg-white dark:bg-[var(--background)] border border-slate-200 dark:border-[var(--border)] flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-[#10B981]/10 flex items-center justify-center">
                     <span className="text-lg">🖨️</span>
                   </div>
@@ -231,7 +231,7 @@ export default function FeaturesPage() {
                     🖨️
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold group-hover:text-[#F59E0B] transition-colors">Instant Printing</h3>
+                    <h3 className="text-lg font-bold group-hover:text-[#d97706] dark:group-hover:text-[#F59E0B] transition-colors">Instant Printing</h3>
                     <p className="text-xs text-[var(--muted)]">Lab-quality in seconds</p>
                   </div>
                 </div>
@@ -250,14 +250,14 @@ export default function FeaturesPage() {
             {/* Card 3 - Mobile Management */}
             <div className="group relative rounded-3xl overflow-hidden">
               {/* Background gradient */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#A855F7]/20 via-[#111111] to-[#111111]" />
-              <div className="absolute top-0 right-0 w-40 h-40 bg-[#A855F7]/20 blur-3xl rounded-full" />
-              
+              <div className="absolute inset-0 bg-gradient-to-br from-[#A855F7]/10 via-slate-100 to-slate-100 dark:from-[#A855F7]/20 dark:via-[#111111] dark:to-[#111111]" />
+              <div className="absolute top-0 right-0 w-40 h-40 bg-[#A855F7]/10 dark:bg-[#A855F7]/20 blur-3xl rounded-full" />
+
               <div className="relative p-8 border border-[#A855F7]/20 rounded-3xl h-full group-hover:border-[#A855F7]/50 transition-colors">
                 {/* Mini phone mockup */}
                 <div className="mb-6 flex justify-center">
-                  <div className="w-32 rounded-2xl bg-[var(--background)] border-4 border-[var(--border)] p-1.5 shadow-xl shadow-black/30">
-                    <div className="rounded-xl bg-[var(--card)] p-2">
+                  <div className="w-32 rounded-2xl bg-white dark:bg-[var(--background)] border-4 border-slate-200 dark:border-[var(--border)] p-1.5 shadow-xl shadow-black/10 dark:shadow-black/30">
+                    <div className="rounded-xl bg-slate-50 dark:bg-[var(--card)] p-2">
                       {/* Revenue */}
                       <div className="text-center mb-2 p-2 rounded-lg bg-[#A855F7]/10">
                         <div className="text-lg font-bold text-[#A855F7]">$2,847</div>
@@ -265,12 +265,12 @@ export default function FeaturesPage() {
                       </div>
                       {/* Booths */}
                       <div className="space-y-1">
-                        <div className="flex items-center gap-1.5 p-1.5 rounded bg-zinc-900">
+                        <div className="flex items-center gap-1.5 p-1.5 rounded bg-slate-100 dark:bg-zinc-900">
                           <div className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
                           <span className="text-[8px] flex-1">Mall #1</span>
                           <span className="text-[8px] text-[#10B981]">$847</span>
                         </div>
-                        <div className="flex items-center gap-1.5 p-1.5 rounded bg-zinc-900">
+                        <div className="flex items-center gap-1.5 p-1.5 rounded bg-slate-100 dark:bg-zinc-900">
                           <div className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
                           <span className="text-[8px] flex-1">Wedding</span>
                           <span className="text-[8px] text-[var(--muted)]">$1.2k</span>
@@ -281,7 +281,7 @@ export default function FeaturesPage() {
                 </div>
 
                 {/* Notification preview */}
-                <div className="mb-4 p-3 rounded-xl bg-[var(--background)] border border-[#A855F7]/20 flex items-center gap-3">
+                <div className="mb-4 p-3 rounded-xl bg-white dark:bg-[var(--background)] border border-[#A855F7]/20 flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-[#EF4444]/10 flex items-center justify-center">
                     <span className="text-sm">🔔</span>
                   </div>
@@ -297,7 +297,7 @@ export default function FeaturesPage() {
                     📱
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold group-hover:text-[#A855F7] transition-colors">Mobile Management</h3>
+                    <h3 className="text-lg font-bold group-hover:text-[#9333ea] dark:group-hover:text-[#A855F7] transition-colors">Mobile Management</h3>
                     <p className="text-xs text-[var(--muted)]">iOS & Android</p>
                   </div>
                 </div>
@@ -327,7 +327,7 @@ export default function FeaturesPage() {
         <div className="relative max-w-6xl mx-auto">
           {/* Section Header */}
           <div className="text-center mb-20">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0891B2]/10 border border-[#0891B2]/20 text-[#22D3EE] text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0891B2]/10 border border-[#0891B2]/20 text-[#0891B2] dark:text-[#22D3EE] text-sm font-medium mb-6">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
               </svg>
@@ -415,7 +415,7 @@ export default function FeaturesPage() {
                               {String(featureIndex + 1).padStart(2, "0")}
                             </div>
                             <div>
-                              <h4 className="font-semibold text-[var(--foreground)] mb-1 group-hover/item:text-[#22D3EE] transition-colors">
+                              <h4 className="font-semibold text-[var(--foreground)] mb-1 group-hover/item:text-[#0891B2] dark:group-hover/item:text-[#22D3EE] transition-colors">
                                 {feature.title}
                               </h4>
                               <p className="text-sm text-[var(--muted)] leading-relaxed">
@@ -440,9 +440,9 @@ export default function FeaturesPage() {
               { value: "100%", label: "Customizable", icon: "🎨" },
               { value: "24/7", label: "Available", icon: "🌐" },
             ].map((stat) => (
-              <div 
+              <div
                 key={stat.label}
-                className="p-6 rounded-2xl bg-[var(--card)] border border-[var(--border)] text-center"
+                className="p-6 rounded-2xl bg-white dark:bg-[var(--card)] border border-slate-200 dark:border-[var(--border)] text-center"
               >
                 <span className="text-2xl mb-2 block">{stat.icon}</span>
                 <div className="text-2xl font-bold text-[#0891B2] mb-1">{stat.value}</div>
@@ -456,7 +456,7 @@ export default function FeaturesPage() {
       {/* ============================================
        * Hardware Compatibility
        * ============================================ */}
-      <section className="py-24 px-6 bg-[var(--card)]/50 border-y border-[var(--border)]/50">
+      <section className="py-24 px-6 bg-slate-50 dark:bg-[var(--card)]/50 border-y border-slate-200 dark:border-[var(--border)]/50">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] text-sm font-medium mb-6">
@@ -478,7 +478,7 @@ export default function FeaturesPage() {
             {integrations.map((item) => (
               <div
                 key={item.name}
-                className="p-6 rounded-2xl bg-[var(--background)] border border-[var(--border)] text-center hover:border-[#0891B2]/30 transition-colors"
+                className="p-6 rounded-2xl bg-white dark:bg-[var(--background)] border border-slate-200 dark:border-[var(--border)] text-center hover:border-[#0891B2]/30 transition-colors"
               >
                 <div className="text-2xl font-bold text-[var(--foreground)] mb-1">{item.name}</div>
                 <div className="text-xs text-[var(--muted)]">{item.type}</div>
@@ -489,7 +489,7 @@ export default function FeaturesPage() {
           {/* Additional info */}
           <div className="mt-8 text-center">
             <p className="text-sm text-[var(--muted)]">
-              And many more. <Link href="/docs" className="text-[#22D3EE] hover:underline">See full compatibility list →</Link>
+              And many more. <Link href="/docs" className="text-[#0891B2] dark:text-[#22D3EE] hover:underline">See full compatibility list →</Link>
             </p>
           </div>
         </div>
@@ -500,7 +500,7 @@ export default function FeaturesPage() {
        * ============================================ */}
       <section className="py-32 px-6 relative overflow-hidden">
         {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#111111]/50 to-[#0a0a0a]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-100 via-slate-50 to-slate-100 dark:from-[#0a0a0a] dark:via-[#111111]/50 dark:to-[#0a0a0a]" />
         
         <div className="relative max-w-6xl mx-auto">
           {/* Section Header */}
@@ -523,7 +523,7 @@ export default function FeaturesPage() {
           <div className="relative">
             {/* Center Arrow/Divider - Desktop */}
             <div className="hidden lg:flex absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-              <div className="w-20 h-20 rounded-full bg-[var(--background)] border-4 border-[var(--border)] flex items-center justify-center">
+              <div className="w-20 h-20 rounded-full bg-white dark:bg-[var(--background)] border-4 border-slate-200 dark:border-[var(--border)] flex items-center justify-center shadow-lg">
                 <svg className="w-8 h-8 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
@@ -535,8 +535,8 @@ export default function FeaturesPage() {
               <div className="relative group">
                 {/* Red glow on hover */}
                 <div className="absolute inset-0 bg-red-500/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                
-                <div className="relative h-full p-8 md:p-10 rounded-3xl bg-[var(--card)] border border-red-500/20 group-hover:border-red-500/40 transition-colors">
+
+                <div className="relative h-full p-8 md:p-10 rounded-3xl bg-white dark:bg-[var(--card)] border border-red-500/20 group-hover:border-red-500/40 transition-colors">
                   {/* Header */}
                   <div className="flex items-center gap-4 mb-8">
                     <div className="w-14 h-14 rounded-2xl bg-red-500/10 flex items-center justify-center">
@@ -590,11 +590,11 @@ export default function FeaturesPage() {
               <div className="relative group">
                 {/* Green glow on hover */}
                 <div className="absolute inset-0 bg-[#10B981]/10 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                
-                <div className="relative h-full p-8 md:p-10 rounded-3xl bg-gradient-to-br from-[#10B981]/10 via-[#111111] to-[#0891B2]/5 border border-[#10B981]/30 group-hover:border-[#10B981]/50 transition-colors">
+
+                <div className="relative h-full p-8 md:p-10 rounded-3xl bg-gradient-to-br from-[#10B981]/10 via-white to-[#0891B2]/5 dark:from-[#10B981]/10 dark:via-[#111111] dark:to-[#0891B2]/5 border border-[#10B981]/30 group-hover:border-[#10B981]/50 transition-colors">
                   {/* Recommended badge */}
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <div className="px-4 py-1.5 rounded-full bg-[#10B981] text-[var(--foreground)] text-sm font-semibold shadow-lg shadow-[#10B981]/30">
+                    <div className="px-4 py-1.5 rounded-full bg-[#10B981] text-white text-sm font-semibold shadow-lg shadow-[#10B981]/30">
                       ✨ Recommended
                     </div>
                   </div>
@@ -655,7 +655,7 @@ export default function FeaturesPage() {
             <p className="text-[var(--muted)] mb-6">Ready to make the switch?</p>
             <Link
               href="/downloads"
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-[#0891B2] text-[var(--foreground)] font-semibold hover:bg-[#0E7490] transition-all hover:scale-105 shadow-lg shadow-[#0891B2]/20"
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-all hover:scale-105 shadow-lg shadow-[#0891B2]/20"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -669,7 +669,7 @@ export default function FeaturesPage() {
       {/* ============================================
        * Final CTA
        * ============================================ */}
-      <section className="py-24 px-6 border-t border-[var(--border)]/50">
+      <section className="py-24 px-6 border-t border-slate-200 dark:border-[var(--border)]/50">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl font-bold mb-6">
             Ready to experience all features?
@@ -681,7 +681,7 @@ export default function FeaturesPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
             <Link
               href="/downloads"
-              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#0891B2] text-[var(--foreground)] font-semibold hover:bg-[#0E7490] transition-all hover:scale-105 flex items-center justify-center gap-2 shadow-lg shadow-[#0891B2]/20"
+              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-all hover:scale-105 flex items-center justify-center gap-2 shadow-lg shadow-[#0891B2]/20"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -690,7 +690,7 @@ export default function FeaturesPage() {
             </Link>
             <Link
               href="/pricing"
-              className="w-full sm:w-auto px-8 py-4 rounded-xl border border-[var(--border)] text-[var(--foreground)] font-semibold hover:bg-zinc-800 transition-all flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-8 py-4 rounded-xl border border-[var(--border)] font-semibold hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all flex items-center justify-center gap-2"
             >
               View Pricing
             </Link>

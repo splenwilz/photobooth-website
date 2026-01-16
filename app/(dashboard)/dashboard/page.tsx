@@ -106,20 +106,20 @@ export default function DashboardPage() {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-zinc-400 mt-1">Overview of your photo booth business</p>
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Dashboard</h1>
+        <p className="text-zinc-500 dark:text-zinc-400 mt-1">Overview of your photo booth business</p>
       </div>
 
       {/* Revenue Overview */}
       <section>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-lg font-semibold">Revenue Overview</h2>
+            <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Revenue Overview</h2>
             <p className="text-sm text-zinc-500">4 booths total</p>
           </div>
 
           {/* Period Selector */}
-          <div className="flex gap-1 p-1 bg-zinc-800/50 rounded-xl">
+          <div className="flex gap-1 p-1 bg-slate-200/50 dark:bg-zinc-800/50 rounded-xl">
             {(["today", "week", "month", "year"] as RevenuePeriod[]).map((period) => (
               <button
                 key={period}
@@ -127,7 +127,7 @@ export default function DashboardPage() {
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
                   selectedPeriod === period
                     ? "bg-[#0891B2] text-white"
-                    : "text-zinc-400 hover:text-white"
+                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
                 }`}
               >
                 {period.charAt(0).toUpperCase() + period.slice(1)}
@@ -139,9 +139,9 @@ export default function DashboardPage() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Revenue Card */}
-          <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+          <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
             <p className="text-sm text-zinc-500 mb-1">Revenue</p>
-            <p className="text-2xl font-bold">{formatCurrency(stats.amount)}</p>
+            <p className="text-2xl font-bold text-zinc-900 dark:text-white">{formatCurrency(stats.amount)}</p>
             <div className="flex items-center gap-1 mt-2">
               <span className={`text-sm font-medium ${stats.change >= 0 ? "text-green-500" : "text-red-500"}`}>
                 {stats.change >= 0 ? "+" : ""}{stats.change}%
@@ -151,16 +151,16 @@ export default function DashboardPage() {
           </div>
 
           {/* Transactions Card */}
-          <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+          <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
             <p className="text-sm text-zinc-500 mb-1">Transactions</p>
-            <p className="text-2xl font-bold">{stats.transactions.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-zinc-900 dark:text-white">{stats.transactions.toLocaleString()}</p>
             <p className="text-sm text-zinc-500 mt-2">
               Avg: {formatCurrency(stats.amount / stats.transactions)}
             </p>
           </div>
 
           {/* Cash Revenue */}
-          <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+          <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
             <div className="flex items-center gap-2 mb-1">
               <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
                 <svg className="w-3.5 h-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -169,11 +169,11 @@ export default function DashboardPage() {
               </div>
               <p className="text-sm text-zinc-500">Cash</p>
             </div>
-            <p className="text-2xl font-bold">{formatCurrency(payment.cash)}</p>
+            <p className="text-2xl font-bold text-zinc-900 dark:text-white">{formatCurrency(payment.cash)}</p>
           </div>
 
           {/* Card Revenue */}
-          <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+          <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
             <div className="flex items-center gap-2 mb-1">
               <div className="w-6 h-6 rounded-full bg-[#0891B2]/20 flex items-center justify-center">
                 <svg className="w-3.5 h-3.5 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -182,7 +182,7 @@ export default function DashboardPage() {
               </div>
               <p className="text-sm text-zinc-500">Card</p>
             </div>
-            <p className="text-2xl font-bold">{formatCurrency(payment.card)}</p>
+            <p className="text-2xl font-bold text-zinc-900 dark:text-white">{formatCurrency(payment.card)}</p>
           </div>
         </div>
       </section>
@@ -193,12 +193,12 @@ export default function DashboardPage() {
         <section>
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-lg font-semibold">Hardware Overview</h2>
+              <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Hardware Overview</h2>
               <p className="text-sm text-zinc-500">4 booths</p>
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800 space-y-4">
+          <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] space-y-4">
             {/* Cameras */}
             <div>
               <div className="flex items-center justify-between mb-2">
@@ -208,14 +208,14 @@ export default function DashboardPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                     </svg>
                   </div>
-                  <span className="font-medium">Cameras</span>
+                  <span className="font-medium text-zinc-900 dark:text-white">Cameras</span>
                 </div>
-                <span className="text-sm text-zinc-400">
+                <span className="text-sm text-zinc-500 dark:text-zinc-400">
                   {demoHardwareSummary.cameras_online}/{demoHardwareSummary.cameras_total} online
                 </span>
               </div>
-              <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
-                <div 
+              <div className="h-2 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                <div
                   className="h-full bg-[#0891B2] rounded-full transition-all"
                   style={{ width: `${(demoHardwareSummary.cameras_online / demoHardwareSummary.cameras_total) * 100}%` }}
                 />
@@ -231,14 +231,14 @@ export default function DashboardPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
                     </svg>
                   </div>
-                  <span className="font-medium">Printers</span>
+                  <span className="font-medium text-zinc-900 dark:text-white">Printers</span>
                 </div>
-                <span className="text-sm text-zinc-400">
+                <span className="text-sm text-zinc-500 dark:text-zinc-400">
                   {demoHardwareSummary.printers_online}/{demoHardwareSummary.printers_total} online
                 </span>
               </div>
-              <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
-                <div 
+              <div className="h-2 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                <div
                   className="h-full bg-green-500 rounded-full transition-all"
                   style={{ width: `${(demoHardwareSummary.printers_online / demoHardwareSummary.printers_total) * 100}%` }}
                 />
@@ -246,16 +246,16 @@ export default function DashboardPage() {
             </div>
 
             {/* Supplies Alerts */}
-            <div className="flex gap-4 pt-2 border-t border-zinc-800">
+            <div className="flex gap-4 pt-2 border-t border-slate-200 dark:border-zinc-800">
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${demoHardwareSummary.low_paper_count > 0 ? 'bg-yellow-500' : 'bg-green-500'}`} />
-                <span className="text-sm text-zinc-400">
+                <span className="text-sm text-zinc-500 dark:text-zinc-400">
                   {demoHardwareSummary.low_paper_count} low paper
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${demoHardwareSummary.low_ink_count > 0 ? 'bg-yellow-500' : 'bg-green-500'}`} />
-                <span className="text-sm text-zinc-400">
+                <span className="text-sm text-zinc-500 dark:text-zinc-400">
                   {demoHardwareSummary.low_ink_count} low ink
                 </span>
               </div>
@@ -267,7 +267,7 @@ export default function DashboardPage() {
         <section>
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-lg font-semibold">Recent Alerts</h2>
+              <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Recent Alerts</h2>
               <p className="text-sm text-zinc-500">{demoAlerts.filter(a => !a.isRead).length} unread</p>
             </div>
             <a href="/dashboard/alerts" className="text-sm text-[#0891B2] hover:text-[#22D3EE] transition-colors">
@@ -279,12 +279,12 @@ export default function DashboardPage() {
             {demoAlerts.map((alert) => (
               <div
                 key={alert.id}
-                className={`p-4 rounded-xl bg-[#111111] border transition-all cursor-pointer hover:border-zinc-700 ${
-                  alert.isRead ? 'border-zinc-800 opacity-60' : 'border-zinc-700'
+                className={`p-4 rounded-xl bg-white dark:bg-[#111111] border transition-all cursor-pointer hover:border-slate-300 dark:hover:border-zinc-700 ${
+                  alert.isRead ? 'border-slate-200 dark:border-zinc-800 opacity-60' : 'border-slate-300 dark:border-zinc-700'
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  <div 
+                  <div
                     className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
                     style={{ backgroundColor: `${getSeverityColor(alert.severity)}20` }}
                   >
@@ -306,10 +306,10 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="font-medium text-sm truncate">{alert.title}</p>
+                      <p className="font-medium text-sm truncate text-zinc-900 dark:text-white">{alert.title}</p>
                       <span className="text-xs text-zinc-500 shrink-0">{formatRelativeTime(alert.timestamp)}</span>
                     </div>
-                    <p className="text-sm text-zinc-400 mt-1">{alert.message}</p>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">{alert.message}</p>
                     <p className="text-xs text-zinc-500 mt-1">{alert.boothName}</p>
                   </div>
                   {!alert.isRead && (

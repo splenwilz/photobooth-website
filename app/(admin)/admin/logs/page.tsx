@@ -63,10 +63,10 @@ export default function AdminLogsPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Audit Logs</h1>
-          <p className="text-zinc-400 mt-1">Track admin actions and system events</p>
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Audit Logs</h1>
+          <p className="text-zinc-500 dark:text-zinc-400 mt-1">Track admin actions and system events</p>
         </div>
-        <button type="button" className="flex items-center gap-2 px-4 py-2.5 border border-zinc-700 text-white font-medium rounded-xl hover:bg-zinc-800 transition-colors">
+        <button type="button" className="flex items-center gap-2 px-4 py-2.5 border border-[var(--border)] text-zinc-700 dark:text-white font-medium rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
           </svg>
@@ -85,11 +85,11 @@ export default function AdminLogsPage() {
             placeholder="Search logs..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#111111] border border-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] transition-all"
+            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] transition-all"
           />
         </div>
 
-        <div className="flex gap-1 p-1 bg-zinc-800/50 rounded-xl overflow-x-auto">
+        <div className="flex gap-1 p-1 bg-slate-200/50 dark:bg-zinc-800/50 rounded-xl overflow-x-auto">
           {categories.map((cat) => (
             <button
               key={cat.value}
@@ -98,7 +98,7 @@ export default function AdminLogsPage() {
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${
                 filterCategory === cat.value
                   ? "bg-[#0891B2] text-white"
-                  : "text-zinc-400 hover:text-white"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
               }`}
             >
               {cat.label}
@@ -111,9 +111,9 @@ export default function AdminLogsPage() {
       <div className="space-y-3">
         {filteredLogs.map((log) => {
           const catConfig = getCategoryConfig(log.category);
-          
+
           return (
-            <div key={log.id} className="p-4 rounded-xl bg-[#111111] border border-zinc-800 hover:border-zinc-700 transition-all">
+            <div key={log.id} className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all">
               <div className="flex items-start gap-4">
                 <div className={`w-10 h-10 rounded-xl ${catConfig.bg} flex items-center justify-center text-lg shrink-0`}>
                   {catConfig.icon}
@@ -121,11 +121,11 @@ export default function AdminLogsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="font-medium">{log.action}</p>
+                      <p className="font-medium text-zinc-900 dark:text-white">{log.action}</p>
                       <p className="text-sm text-zinc-500 mt-0.5">
-                        by <span className="text-zinc-400">{log.actor}</span>
+                        by <span className="text-zinc-600 dark:text-zinc-400">{log.actor}</span>
                         {log.target !== "-" && (
-                          <> → <span className="text-zinc-400">{log.target}</span></>
+                          <> → <span className="text-zinc-600 dark:text-zinc-400">{log.target}</span></>
                         )}
                       </p>
                     </div>
@@ -141,8 +141,8 @@ export default function AdminLogsPage() {
         })}
 
         {filteredLogs.length === 0 && (
-          <div className="p-12 rounded-2xl bg-[#111111] border border-zinc-800 text-center">
-            <p className="text-zinc-400">No logs found matching your criteria</p>
+          <div className="p-12 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] text-center">
+            <p className="text-zinc-500 dark:text-zinc-400">No logs found matching your criteria</p>
           </div>
         )}
       </div>
@@ -151,10 +151,10 @@ export default function AdminLogsPage() {
       <div className="flex items-center justify-between">
         <p className="text-sm text-zinc-500">Showing {filteredLogs.length} entries</p>
         <div className="flex gap-2">
-          <button type="button" className="px-4 py-2 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors">
+          <button type="button" className="px-4 py-2 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 transition-colors">
             Previous
           </button>
-          <button type="button" className="px-4 py-2 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors">
+          <button type="button" className="px-4 py-2 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 transition-colors">
             Next
           </button>
         </div>

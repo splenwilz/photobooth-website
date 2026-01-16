@@ -56,8 +56,8 @@ export default function AdminUsersPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Users</h1>
-          <p className="text-zinc-400 mt-1">Manage platform users and accounts</p>
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Users</h1>
+          <p className="text-zinc-500 dark:text-zinc-400 mt-1">Manage platform users and accounts</p>
         </div>
         <button type="button" className="flex items-center gap-2 px-4 py-2.5 bg-[#0891B2] text-white font-medium rounded-xl hover:bg-[#0E7490] transition-colors">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -69,21 +69,21 @@ export default function AdminUsersPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <p className="text-sm text-zinc-500">Total Users</p>
-          <p className="text-2xl font-bold mt-1">{stats.total}</p>
+          <p className="text-2xl font-bold mt-1 text-zinc-900 dark:text-white">{stats.total}</p>
         </div>
-        <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <p className="text-sm text-zinc-500">Active</p>
           <p className="text-2xl font-bold mt-1 text-green-500">{stats.active}</p>
         </div>
-        <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <p className="text-sm text-zinc-500">Suspended</p>
           <p className="text-2xl font-bold mt-1 text-red-500">{stats.suspended}</p>
         </div>
-        <div className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <p className="text-sm text-zinc-500">Total Revenue</p>
-          <p className="text-2xl font-bold mt-1">{formatCurrency(stats.totalRevenue)}</p>
+          <p className="text-2xl font-bold mt-1 text-zinc-900 dark:text-white">{formatCurrency(stats.totalRevenue)}</p>
         </div>
       </div>
 
@@ -98,11 +98,11 @@ export default function AdminUsersPage() {
             placeholder="Search users..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#111111] border border-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] transition-all"
+            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] transition-all"
           />
         </div>
 
-        <div className="flex gap-1 p-1 bg-zinc-800/50 rounded-xl">
+        <div className="flex gap-1 p-1 bg-slate-200/50 dark:bg-zinc-800/50 rounded-xl">
           {(["all", "active", "suspended"] as FilterStatus[]).map((status) => (
             <button
               key={status}
@@ -111,7 +111,7 @@ export default function AdminUsersPage() {
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-all capitalize ${
                 filterStatus === status
                   ? "bg-[#0891B2] text-white"
-                  : "text-zinc-400 hover:text-white"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
               }`}
             >
               {status}
@@ -123,16 +123,16 @@ export default function AdminUsersPage() {
       {/* Users List */}
       <div className="space-y-3">
         {filteredUsers.map((user) => (
-          <div key={user.id} className="p-4 rounded-xl bg-[#111111] border border-zinc-800 hover:border-zinc-700 transition-all cursor-pointer">
+          <div key={user.id} className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center font-bold text-sm shrink-0">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center font-bold text-sm text-white shrink-0">
                 {user.name.split(" ").map(n => n[0]).join("")}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="font-medium truncate">{user.name}</p>
+                  <p className="font-medium truncate text-zinc-900 dark:text-white">{user.name}</p>
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                    user.status === "active" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+                    user.status === "active" ? "bg-green-500/20 text-green-600 dark:text-green-400" : "bg-red-500/20 text-red-600 dark:text-red-400"
                   }`}>
                     {user.status}
                   </span>
@@ -142,25 +142,25 @@ export default function AdminUsersPage() {
               <div className="hidden sm:block text-right">
                 <span className={`text-xs font-medium px-2 py-1 rounded-full ${
                   user.plan === "Enterprise" ? "bg-[#0891B2]/20 text-[#0891B2]" :
-                  user.plan === "Pro" ? "bg-blue-500/20 text-blue-400" :
-                  "bg-zinc-700 text-zinc-400"
+                  user.plan === "Pro" ? "bg-blue-500/20 text-blue-500 dark:text-blue-400" :
+                  "bg-slate-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400"
                 }`}>
                   {user.plan}
                 </span>
               </div>
               <div className="hidden md:block text-right">
-                <p className="text-sm text-zinc-400">{user.booths} booths</p>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">{user.booths} booths</p>
               </div>
               <div className="text-right">
-                <p className="font-medium text-green-500">{formatCurrency(user.revenue)}</p>
+                <p className="font-medium text-green-600 dark:text-green-500">{formatCurrency(user.revenue)}</p>
               </div>
             </div>
           </div>
         ))}
 
         {filteredUsers.length === 0 && (
-          <div className="p-12 rounded-2xl bg-[#111111] border border-zinc-800 text-center">
-            <p className="text-zinc-400">No users found matching your criteria</p>
+          <div className="p-12 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] text-center">
+            <p className="text-zinc-500 dark:text-zinc-400">No users found matching your criteria</p>
           </div>
         )}
       </div>
@@ -169,10 +169,10 @@ export default function AdminUsersPage() {
       <div className="flex items-center justify-between">
         <p className="text-sm text-zinc-500">Showing {filteredUsers.length} of {demoUsers.length} users</p>
         <div className="flex gap-2">
-          <button type="button" className="px-4 py-2 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors">
+          <button type="button" className="px-4 py-2 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 transition-colors">
             Previous
           </button>
-          <button type="button" className="px-4 py-2 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors">
+          <button type="button" className="px-4 py-2 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 transition-colors">
             Next
           </button>
         </div>

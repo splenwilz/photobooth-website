@@ -190,16 +190,16 @@ export default function AdminBoothsPage() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold">All Booths</h1>
+            <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">All Booths</h1>
             <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-500/20">
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
               <span className="text-xs font-medium text-green-400">Live Monitoring</span>
             </div>
           </div>
-          <p className="text-zinc-400 mt-1">Platform-wide booth monitoring and management</p>
+          <p className="text-zinc-500 dark:text-zinc-400 mt-1">Platform-wide booth monitoring and management</p>
         </div>
         <div className="flex items-center gap-2">
-          <button type="button" className="p-2.5 rounded-xl border border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all">
+          <button type="button" className="p-2.5 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
             </svg>
@@ -215,59 +215,59 @@ export default function AdminBoothsPage() {
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
-        <div className="p-4 rounded-2xl bg-[#111111] border border-zinc-800">
-          <p className="text-2xl font-bold">{stats.total}</p>
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+          <p className="text-2xl font-bold text-zinc-900 dark:text-white">{stats.total}</p>
           <p className="text-sm text-zinc-500">Total Booths</p>
         </div>
-        <div className="p-4 rounded-2xl bg-[#111111] border border-zinc-800">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-green-500" />
-            <p className="text-2xl font-bold">{stats.online}</p>
+            <p className="text-2xl font-bold text-zinc-900 dark:text-white">{stats.online}</p>
           </div>
           <p className="text-sm text-zinc-500">Online</p>
         </div>
-        <div className="p-4 rounded-2xl bg-[#111111] border border-zinc-800">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-red-500" />
-            <p className="text-2xl font-bold">{stats.offline}</p>
+            <p className="text-2xl font-bold text-zinc-900 dark:text-white">{stats.offline}</p>
           </div>
           <p className="text-sm text-zinc-500">Offline</p>
         </div>
-        <div className="p-4 rounded-2xl bg-[#111111] border border-zinc-800">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-yellow-500" />
-            <p className="text-2xl font-bold">{stats.warning}</p>
+            <p className="text-2xl font-bold text-zinc-900 dark:text-white">{stats.warning}</p>
           </div>
           <p className="text-sm text-zinc-500">Warning</p>
         </div>
-        <div className="p-4 rounded-2xl bg-[#111111] border border-zinc-800">
-          <p className="text-2xl font-bold">{formatCurrency(stats.totalRevenue)}</p>
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+          <p className="text-2xl font-bold text-zinc-900 dark:text-white">{formatCurrency(stats.totalRevenue)}</p>
           <p className="text-sm text-zinc-500">Revenue (MTD)</p>
         </div>
-        <div className="p-4 rounded-2xl bg-[#111111] border border-zinc-800">
-          <p className="text-2xl font-bold">{stats.totalAlerts}</p>
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+          <p className="text-2xl font-bold text-zinc-900 dark:text-white">{stats.totalAlerts}</p>
           <p className="text-sm text-zinc-500">Active Alerts</p>
         </div>
       </div>
 
       {/* Top Performers */}
-      <section className="p-5 rounded-2xl bg-[#111111] border border-zinc-800">
+      <section className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold">Top Performing Booths</h3>
+          <h3 className="font-semibold text-zinc-900 dark:text-white">Top Performing Booths</h3>
           <span className="text-xs text-zinc-500">This Month</span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {topBooths.map((booth, i) => (
-            <div key={booth.id} className="flex items-center gap-3 p-3 rounded-xl bg-zinc-800/50">
-              <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-zinc-700 text-zinc-300">
+            <div key={booth.id} className="flex items-center gap-3 p-3 rounded-xl bg-slate-100 dark:bg-zinc-800/50">
+              <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-slate-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300">
                 {i + 1}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate">{booth.name}</p>
+                <p className="font-medium text-sm truncate text-zinc-900 dark:text-white">{booth.name}</p>
                 <p className="text-xs text-zinc-500">{booth.owner}</p>
               </div>
               <div className="text-right">
-                <p className="font-bold">{formatCurrency(booth.revenue)}</p>
+                <p className="font-bold text-zinc-900 dark:text-white">{formatCurrency(booth.revenue)}</p>
                 <span className="text-xs text-zinc-500">+{booth.growth}%</span>
               </div>
             </div>
@@ -286,12 +286,12 @@ export default function AdminBoothsPage() {
             placeholder="Search booths by name, owner..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#111111] border border-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] transition-all"
+            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] transition-all"
           />
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex gap-1 p-1 bg-zinc-800/50 rounded-xl">
+          <div className="flex gap-1 p-1 bg-slate-200/50 dark:bg-zinc-800/50 rounded-xl">
             {(["all", "online", "offline", "warning"] as FilterStatus[]).map((status) => (
               <button
                 key={status}
@@ -300,7 +300,7 @@ export default function AdminBoothsPage() {
                 className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all capitalize ${
                   filterStatus === status
                     ? "bg-[#0891B2] text-white"
-                    : "text-zinc-400 hover:text-white"
+                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
                 }`}
               >
                 {status !== "all" && <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusConfig(status).color }} />}
@@ -308,13 +308,13 @@ export default function AdminBoothsPage() {
               </button>
             ))}
           </div>
-          
+
           {/* View Toggle */}
-          <div className="flex gap-1 p-1 bg-zinc-800/50 rounded-xl">
+          <div className="flex gap-1 p-1 bg-slate-200/50 dark:bg-zinc-800/50 rounded-xl">
             <button
               type="button"
               onClick={() => setViewMode("grid")}
-              className={`p-2 rounded-lg transition-all ${viewMode === "grid" ? "bg-[#0891B2] text-white" : "text-zinc-400 hover:text-white"}`}
+              className={`p-2 rounded-lg transition-all ${viewMode === "grid" ? "bg-[#0891B2] text-white" : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"}`}
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
@@ -323,7 +323,7 @@ export default function AdminBoothsPage() {
             <button
               type="button"
               onClick={() => setViewMode("list")}
-              className={`p-2 rounded-lg transition-all ${viewMode === "list" ? "bg-[#0891B2] text-white" : "text-zinc-400 hover:text-white"}`}
+              className={`p-2 rounded-lg transition-all ${viewMode === "list" ? "bg-[#0891B2] text-white" : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"}`}
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
@@ -339,7 +339,7 @@ export default function AdminBoothsPage() {
           const statusConfig = getStatusConfig(booth.status);
           
           return viewMode === "grid" ? (
-            <div key={booth.id} className="p-5 rounded-2xl bg-[#111111] border border-zinc-800 hover:border-zinc-700 transition-all cursor-pointer group">
+            <div key={booth.id} className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer group">
               {/* Header */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -349,11 +349,11 @@ export default function AdminBoothsPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                       </svg>
                     </div>
-                    <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[#111111]" style={{ backgroundColor: statusConfig.color }} />
+                    <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-[#111111]" style={{ backgroundColor: statusConfig.color }} />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="font-semibold">{booth.name}</p>
+                      <p className="font-semibold text-zinc-900 dark:text-white">{booth.name}</p>
                       {booth.alerts > 0 && (
                         <span className="px-1.5 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded">
                           {booth.alerts}
@@ -366,10 +366,10 @@ export default function AdminBoothsPage() {
               </div>
 
               {/* Revenue & Growth */}
-              <div className="flex items-center justify-between mb-4 p-3 rounded-xl bg-zinc-800/50">
+              <div className="flex items-center justify-between mb-4 p-3 rounded-xl bg-slate-100 dark:bg-zinc-800/50">
                 <div>
                   <p className="text-xs text-zinc-500">Revenue (MTD)</p>
-                  <p className="text-lg font-bold">{formatCurrency(booth.revenue)}</p>
+                  <p className="text-lg font-bold text-zinc-900 dark:text-white">{formatCurrency(booth.revenue)}</p>
                 </div>
                 <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${booth.growth >= 0 ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
@@ -410,22 +410,22 @@ export default function AdminBoothsPage() {
               <div className="space-y-2 mb-4">
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-zinc-500 w-12">Paper</span>
-                  <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                  <div className="flex-1 h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                     <div className={`h-full rounded-full ${getSupplyColor(booth.supplies.paper)}`} style={{ width: `${booth.supplies.paper}%` }} />
                   </div>
-                  <span className="text-xs text-zinc-400 w-8">{booth.supplies.paper}%</span>
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400 w-8">{booth.supplies.paper}%</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-zinc-500 w-12">Ink</span>
-                  <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                  <div className="flex-1 h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                     <div className={`h-full rounded-full ${getSupplyColor(booth.supplies.ink)}`} style={{ width: `${booth.supplies.ink}%` }} />
                   </div>
-                  <span className="text-xs text-zinc-400 w-8">{booth.supplies.ink}%</span>
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400 w-8">{booth.supplies.ink}%</span>
                 </div>
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
+              <div className="flex items-center justify-between pt-4 border-t border-[var(--border)]">
                 <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusConfig.bg} ${statusConfig.text}`}>
                   {statusConfig.label}
                 </span>
@@ -441,7 +441,7 @@ export default function AdminBoothsPage() {
             </div>
           ) : (
             /* List View */
-            <div key={booth.id} className="p-4 rounded-xl bg-[#111111] border border-zinc-800 hover:border-zinc-700 transition-all cursor-pointer">
+            <div key={booth.id} className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer">
               <div className="flex items-center gap-4">
                 <div className="relative shrink-0">
                   <div className="w-12 h-12 rounded-xl bg-linear-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center">
@@ -449,12 +449,12 @@ export default function AdminBoothsPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                     </svg>
                   </div>
-                  <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[#111111]" style={{ backgroundColor: statusConfig.color }} />
+                  <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-[#111111]" style={{ backgroundColor: statusConfig.color }} />
                 </div>
-                
+
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="font-semibold truncate">{booth.name}</p>
+                    <p className="font-semibold truncate text-zinc-900 dark:text-white">{booth.name}</p>
                     {booth.alerts > 0 && (
                       <span className="px-1.5 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded">
                         {booth.alerts}
@@ -486,7 +486,7 @@ export default function AdminBoothsPage() {
                 </div>
                 
                 <div className="text-right shrink-0">
-                  <p className="font-bold">{formatCurrency(booth.revenue)}</p>
+                  <p className="font-bold text-zinc-900 dark:text-white">{formatCurrency(booth.revenue)}</p>
                   <div className={`flex items-center justify-end gap-1 ${booth.growth >= 0 ? "text-green-500" : "text-red-500"}`}>
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" d={booth.growth >= 0 ? "M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" : "M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"} />
@@ -494,7 +494,7 @@ export default function AdminBoothsPage() {
                     <span className="text-xs font-medium">{Math.abs(booth.growth)}%</span>
                   </div>
                 </div>
-                
+
                 <span className="text-xs text-zinc-500 shrink-0 hidden sm:block">{booth.lastSeen}</span>
               </div>
             </div>
@@ -503,11 +503,11 @@ export default function AdminBoothsPage() {
       </div>
 
       {filteredBooths.length === 0 && (
-        <div className="p-12 rounded-2xl bg-[#111111] border border-zinc-800 text-center">
-          <svg className="w-12 h-12 mx-auto text-zinc-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1} aria-hidden="true">
+        <div className="p-12 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] text-center">
+          <svg className="w-12 h-12 mx-auto text-zinc-400 dark:text-zinc-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
           </svg>
-          <p className="text-zinc-400 text-lg font-medium">No booths found</p>
+          <p className="text-zinc-600 dark:text-zinc-400 text-lg font-medium">No booths found</p>
           <p className="text-zinc-500 text-sm mt-1">Try adjusting your search or filters</p>
         </div>
       )}
@@ -516,10 +516,10 @@ export default function AdminBoothsPage() {
       <div className="flex items-center justify-between">
         <p className="text-sm text-zinc-500">Showing {filteredBooths.length} of {demoBooths.length} booths</p>
         <div className="flex gap-2">
-          <button type="button" className="px-4 py-2 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors">
+          <button type="button" className="px-4 py-2 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 transition-colors">
             Previous
           </button>
-          <button type="button" className="px-4 py-2 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors">
+          <button type="button" className="px-4 py-2 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 transition-colors">
             Next
           </button>
         </div>

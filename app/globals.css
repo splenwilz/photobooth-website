@@ -10,18 +10,31 @@
   --brand: #0891B2;
   --brand-dark: #0E7490;
   --brand-light: #22D3EE;
-  
-  /* Dark Theme */
-  --background: #0a0a0a;
-  --background-elevated: #111111;
-  --foreground: #f1f5f9;
-  --muted: #94a3b8;
-  --border: #1e293b;
-  
+
+  /* Light Theme (default) */
+  --background: #ffffff;
+  --background-elevated: #f8fafc;
+  --background-card: #f1f5f9;
+  --foreground: #0f172a;
+  --foreground-muted: #475569;
+  --muted: #64748b;
+  --border: #e2e8f0;
+
   /* Status Colors (same as app) */
   --success: #10B981;
   --warning: #F59E0B;
   --error: #EF4444;
+}
+
+.dark {
+  /* Dark Theme */
+  --background: #0a0a0a;
+  --background-elevated: #111111;
+  --background-card: #18181b;
+  --foreground: #f1f5f9;
+  --foreground-muted: #a1a1aa;
+  --muted: #94a3b8;
+  --border: #27272a;
 }
 
 @theme inline {

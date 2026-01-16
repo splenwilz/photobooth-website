@@ -288,7 +288,7 @@ export default function DocsPage() {
 
           <div className="relative">
             {/* Timeline line - desktop */}
-            <div className="hidden md:block absolute top-8 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-zinc-700 to-transparent" />
+            <div className="hidden md:block absolute top-8 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-slate-300 dark:via-zinc-700 to-transparent" />
 
             <div className="grid md:grid-cols-4 gap-6">
               {quickStartSteps.map((step, index) => (
@@ -299,12 +299,12 @@ export default function DocsPage() {
                 >
                   {/* Step number */}
                   <div className="relative flex justify-center md:justify-start mb-4">
-                    <div className="w-16 h-16 rounded-2xl bg-[#0891B2]/10 border border-[#0891B2]/30 flex items-center justify-center text-2xl font-bold text-[#0891B2] group-hover:bg-[#0891B2] group-hover:text-[var(--foreground)] transition-all z-10">
+                    <div className="w-16 h-16 rounded-2xl bg-[#0891B2]/10 border border-[#0891B2]/30 flex items-center justify-center text-2xl font-bold text-[#0891B2] group-hover:bg-[#0891B2] group-hover:text-white transition-all z-10">
                       {step.step}
                     </div>
                     {/* Connector line - mobile */}
                     {index < quickStartSteps.length - 1 && (
-                      <div className="md:hidden absolute top-16 left-1/2 w-0.5 h-6 bg-zinc-700" />
+                      <div className="md:hidden absolute top-16 left-1/2 w-0.5 h-6 bg-slate-300 dark:bg-zinc-700" />
                     )}
                   </div>
 
@@ -380,7 +380,7 @@ export default function DocsPage() {
                   {/* Start here badge for first card */}
                   {sectionIndex === 0 && (
                     <div className="absolute top-4 right-4 z-10">
-                      <span className="px-2.5 py-1 rounded-full bg-[#10B981] text-[var(--foreground)] text-xs font-semibold shadow-lg shadow-[#10B981]/30">
+                      <span className="px-2.5 py-1 rounded-full bg-[#10B981] text-white text-xs font-semibold shadow-lg shadow-[#10B981]/30">
                         ⚡ Start here
                       </span>
                     </div>
@@ -511,7 +511,7 @@ export default function DocsPage() {
        * ============================================ */}
       <section className="py-24 px-6 relative overflow-hidden">
         {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#111111]/50 to-[#0a0a0a]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-100 via-slate-50 to-slate-100 dark:from-[#0a0a0a] dark:via-[#111111]/50 dark:to-[#0a0a0a]" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#EF4444]/5 blur-[200px] rounded-full" />
 
         <div className="relative max-w-6xl mx-auto">
@@ -547,18 +547,18 @@ export default function DocsPage() {
                   
                   {/* Play button */}
                   <div className="relative z-10 w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-[#EF4444] flex items-center justify-center shadow-2xl shadow-[#EF4444]/40 group-hover:scale-110 transition-transform">
-                    <svg className="w-8 h-8 lg:w-10 lg:h-10 text-[var(--foreground)] ml-1" viewBox="0 0 24 24" fill="currentColor">
+                    <svg className="w-8 h-8 lg:w-10 lg:h-10 text-white ml-1" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M8 5v14l11-7z"/>
                     </svg>
                   </div>
 
                   {/* Featured badge */}
-                  <div className="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-[#EF4444] text-[var(--foreground)] text-xs font-semibold shadow-lg">
+                  <div className="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-[#EF4444] text-white text-xs font-semibold shadow-lg">
                     🔥 Most Popular
                   </div>
 
                   {/* Duration */}
-                  <div className="absolute bottom-4 right-4 px-3 py-1.5 rounded-lg bg-black/80 text-[var(--foreground)] text-sm font-medium backdrop-blur-sm">
+                  <div className="absolute bottom-4 right-4 px-3 py-1.5 rounded-lg bg-black/80 text-white text-sm font-medium backdrop-blur-sm">
                     {video.duration}
                   </div>
 
@@ -568,13 +568,13 @@ export default function DocsPage() {
                   {/* Info overlay */}
                   <div className="absolute bottom-0 left-0 right-0 p-6">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="px-2 py-0.5 rounded bg-zinc-800 text-[var(--muted)] text-xs">{video.category}</span>
-                      <span className="text-[var(--muted)] text-xs">{video.views} views</span>
+                      <span className="px-2 py-0.5 rounded bg-zinc-800 text-white/70 text-xs">{video.category}</span>
+                      <span className="text-white/70 text-xs">{video.views} views</span>
                     </div>
-                    <h3 className="text-xl lg:text-2xl font-bold text-[var(--foreground)] group-hover:text-[#EF4444] transition-colors">
+                    <h3 className="text-xl lg:text-2xl font-bold text-white group-hover:text-[#EF4444] transition-colors">
                       {video.title}
                     </h3>
-                    <p className="text-[var(--muted)] text-sm mt-2 hidden sm:block">{video.description}</p>
+                    <p className="text-white/70 text-sm mt-2 hidden sm:block">{video.description}</p>
                   </div>
                 </div>
               </Link>
@@ -594,7 +594,7 @@ export default function DocsPage() {
                     {/* Play icon overlay */}
                     <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
                       <div className="w-8 h-8 rounded-full bg-[#EF4444] flex items-center justify-center">
-                        <svg className="w-4 h-4 text-[var(--foreground)] ml-0.5" viewBox="0 0 24 24" fill="currentColor">
+                        <svg className="w-4 h-4 text-white ml-0.5" viewBox="0 0 24 24" fill="currentColor">
                           <path d="M8 5v14l11-7z"/>
                         </svg>
                       </div>
@@ -701,23 +701,23 @@ export default function DocsPage() {
                 >
                   {/* Number badge */}
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 transition-colors ${
-                    openFaq === index 
-                      ? "bg-[#0891B2] text-[var(--foreground)]" 
-                      : "bg-zinc-800 text-[var(--muted)] group-hover:bg-[#0891B2]/20 group-hover:text-[#0891B2]"
+                    openFaq === index
+                      ? "bg-[#0891B2] text-white"
+                      : "bg-slate-200 dark:bg-zinc-800 text-[var(--muted)] group-hover:bg-[#0891B2]/20 group-hover:text-[#0891B2]"
                   }`}>
                     {String(index + 1).padStart(2, "0")}
                   </div>
                   <div className="flex-1">
                     <span className={`font-semibold block transition-colors ${
-                      openFaq === index ? "text-[#22D3EE]" : "text-[var(--foreground)] group-hover:text-[#22D3EE]"
+                      openFaq === index ? "text-[#0891B2] dark:text-[#22D3EE]" : "text-zinc-900 dark:text-white group-hover:text-[#0891B2] dark:group-hover:text-[#22D3EE]"
                     }`}>
                       {faq.question}
                     </span>
                   </div>
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${
-                    openFaq === index 
-                      ? "bg-[#0891B2]/20 rotate-180" 
-                      : "bg-zinc-800 group-hover:bg-zinc-700"
+                    openFaq === index
+                      ? "bg-[#0891B2]/20 rotate-180"
+                      : "bg-slate-200 dark:bg-zinc-800 group-hover:bg-slate-300 dark:group-hover:bg-zinc-700"
                   }`}>
                     <svg 
                       className="w-4 h-4 text-[var(--muted)]" 
@@ -753,9 +753,9 @@ export default function DocsPage() {
                 <p className="font-medium text-[var(--foreground)]">Still have questions?</p>
                 <p className="text-sm text-[var(--muted)]">Our team is here to help</p>
               </div>
-              <Link 
-                href="/support" 
-                className="sm:ml-4 px-5 py-2.5 rounded-xl bg-[#0891B2] text-[var(--foreground)] font-semibold hover:bg-[#0E7490] transition-colors"
+              <Link
+                href="/support"
+                className="sm:ml-4 px-5 py-2.5 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-colors"
               >
                 Contact Support
               </Link>
@@ -769,7 +769,7 @@ export default function DocsPage() {
        * ============================================ */}
       <section className="py-24 px-6 relative overflow-hidden">
         {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#111111]/30 to-[#0a0a0a]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-100 via-slate-50 to-slate-100 dark:from-[#0a0a0a] dark:via-[#111111]/30 dark:to-[#0a0a0a]" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#0891B2]/5 blur-[200px] rounded-full" />
 
         <div className="relative max-w-6xl mx-auto">
@@ -794,7 +794,7 @@ export default function DocsPage() {
             {/* Support Card */}
             <div className="group relative rounded-3xl overflow-hidden">
               {/* Background gradient */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#0891B2]/20 via-[#111111] to-[#111111]" />
+              <div className="absolute inset-0 bg-gradient-to-br from-[#0891B2]/20 via-slate-100 to-slate-100 dark:via-[#111111] dark:to-[#111111]" />
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#0891B2]/30 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
               
               <div className="relative h-full p-8 border border-[#0891B2]/20 rounded-3xl group-hover:border-[#0891B2]/40 transition-colors">
@@ -834,7 +834,7 @@ export default function DocsPage() {
 
                 <Link
                   href="/support"
-                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[#0891B2] text-[var(--foreground)] font-medium hover:bg-[#0E7490] transition-colors group-hover:shadow-lg group-hover:shadow-[#0891B2]/20"
+                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[#0891B2] text-white font-medium hover:bg-[#0E7490] transition-colors group-hover:shadow-lg group-hover:shadow-[#0891B2]/20"
                 >
                   Contact Support
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -847,7 +847,7 @@ export default function DocsPage() {
             {/* Community Card */}
             <div className="group relative rounded-3xl overflow-hidden">
               {/* Background gradient */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#5865F2]/20 via-[#111111] to-[#111111]" />
+              <div className="absolute inset-0 bg-gradient-to-br from-[#5865F2]/20 via-slate-100 to-slate-100 dark:via-[#111111] dark:to-[#111111]" />
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#5865F2]/30 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
               
               <div className="relative h-full p-8 border border-[#5865F2]/20 rounded-3xl group-hover:border-[#5865F2]/40 transition-colors">
@@ -885,7 +885,7 @@ export default function DocsPage() {
                   href="https://discord.gg/photoboothx"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[#5865F2] text-[var(--foreground)] font-medium hover:bg-[#4752C4] transition-colors group-hover:shadow-lg group-hover:shadow-[#5865F2]/20"
+                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[#5865F2] text-white font-medium hover:bg-[#4752C4] transition-colors group-hover:shadow-lg group-hover:shadow-[#5865F2]/20"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
@@ -898,7 +898,7 @@ export default function DocsPage() {
             {/* Developer API Card */}
             <div className="group relative rounded-3xl overflow-hidden">
               {/* Background gradient */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#F59E0B]/20 via-[#111111] to-[#111111]" />
+              <div className="absolute inset-0 bg-gradient-to-br from-[#F59E0B]/20 via-slate-100 to-slate-100 dark:via-[#111111] dark:to-[#111111]" />
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#F59E0B]/30 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
               
               <div className="relative h-full p-8 border border-[#F59E0B]/20 rounded-3xl group-hover:border-[#F59E0B]/40 transition-colors">
@@ -932,7 +932,7 @@ export default function DocsPage() {
                 {/* API features */}
                 <div className="flex flex-wrap gap-2 mb-6 pb-6 border-b border-[var(--border)]">
                   {["RESTful", "Webhooks", "OAuth2"].map((tag) => (
-                    <span key={tag} className="px-2 py-1 rounded-md bg-zinc-800 text-[var(--muted)] text-xs">
+                    <span key={tag} className="px-2 py-1 rounded-md bg-slate-200 dark:bg-zinc-800 text-[var(--muted)] text-xs">
                       {tag}
                     </span>
                   ))}
@@ -957,7 +957,7 @@ export default function DocsPage() {
               href="/docs/changelog"
               className="group flex items-center gap-4 p-4 rounded-2xl bg-[var(--card)] border border-[var(--border)] hover:border-[var(--border)] transition-colors"
             >
-              <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center group-hover:bg-[#0891B2]/20 transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-[#0891B2]/20 transition-colors">
                 <svg className="w-5 h-5 text-[var(--muted)] group-hover:text-[#0891B2] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                 </svg>
@@ -972,7 +972,7 @@ export default function DocsPage() {
               href="/docs/roadmap"
               className="group flex items-center gap-4 p-4 rounded-2xl bg-[var(--card)] border border-[var(--border)] hover:border-[var(--border)] transition-colors"
             >
-              <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center group-hover:bg-[#A855F7]/20 transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-[#A855F7]/20 transition-colors">
                 <svg className="w-5 h-5 text-[var(--muted)] group-hover:text-[#A855F7] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                 </svg>
@@ -987,7 +987,7 @@ export default function DocsPage() {
               href="/docs/status"
               className="group flex items-center gap-4 p-4 rounded-2xl bg-[var(--card)] border border-[var(--border)] hover:border-[var(--border)] transition-colors"
             >
-              <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center group-hover:bg-[#10B981]/20 transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-[#10B981]/20 transition-colors">
                 <svg className="w-5 h-5 text-[var(--muted)] group-hover:text-[#10B981] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>

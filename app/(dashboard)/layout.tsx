@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 /**
  * Dashboard Layout
@@ -72,7 +73,7 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0a0a0a] text-zinc-900 dark:text-white flex">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div 
@@ -84,13 +85,13 @@ export default function DashboardLayout({
       {/* Sidebar */}
       <aside className={`
         fixed lg:static inset-y-0 left-0 z-50
-        w-64 bg-[#111111] border-r border-zinc-800
+        w-64 bg-white dark:bg-[#111111] border-r border-slate-200 dark:border-zinc-800
         transform transition-transform duration-200 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="p-6 border-b border-zinc-800">
+          <div className="p-6 border-b border-slate-200 dark:border-zinc-800">
             <Link href="/" className="flex items-center gap-2.5">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center">
                 <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -98,7 +99,7 @@ export default function DashboardLayout({
                   <circle cx="12" cy="13" r="3" />
                 </svg>
               </div>
-              <span className="font-semibold text-lg">PhotoBoothX</span>
+              <span className="font-semibold text-lg text-zinc-900 dark:text-white">PhotoBoothX</span>
             </Link>
           </div>
 
@@ -114,9 +115,9 @@ export default function DashboardLayout({
                   href={item.href}
                   className={`
                     flex items-center gap-3 px-4 py-3 rounded-xl transition-all
-                    ${isActive 
-                      ? 'bg-[#0891B2]/20 text-[#0891B2]' 
-                      : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+                    ${isActive
+                      ? 'bg-[#0891B2]/20 text-[#0891B2]'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800/50'
                     }
                   `}
                   onClick={() => setSidebarOpen(false)}
@@ -134,17 +135,17 @@ export default function DashboardLayout({
           </nav>
 
           {/* User Section */}
-          <div className="p-4 border-t border-zinc-800">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-800/50">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center font-bold text-sm">
+          <div className="p-4 border-t border-slate-200 dark:border-zinc-800">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-100 dark:bg-zinc-800/50">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center font-bold text-sm text-white">
                 JD
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate">John Doe</p>
+                <p className="font-medium text-sm truncate text-zinc-900 dark:text-white">John Doe</p>
                 <p className="text-xs text-zinc-500 truncate">john@company.com</p>
               </div>
-              <button 
-                className="p-2 text-zinc-400 hover:text-white transition-colors"
+              <button
+                className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
                 title="Logout"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -159,11 +160,11 @@ export default function DashboardLayout({
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen">
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 bg-[#0a0a0a]/80 backdrop-blur-lg border-b border-zinc-800">
+        <header className="sticky top-0 z-30 bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-lg border-b border-slate-200 dark:border-zinc-800">
           <div className="flex items-center justify-between px-6 py-4">
             {/* Mobile Menu Button */}
-            <button 
-              className="lg:hidden p-2 -ml-2 text-zinc-400 hover:text-white"
+            <button
+              className="lg:hidden p-2 -ml-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
               onClick={() => setSidebarOpen(true)}
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -172,14 +173,14 @@ export default function DashboardLayout({
             </button>
 
             {/* Booth Selector */}
-            <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-xl bg-zinc-800/50 border border-zinc-700/50">
+            <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700/50">
               <div className="w-8 h-8 rounded-lg bg-[#0891B2]/20 flex items-center justify-center">
                 <svg className="w-4 h-4 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 6.878V6a2.25 2.25 0 012.25-2.25h7.5A2.25 2.25 0 0118 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 004.5 9v.878m13.5-3A2.25 2.25 0 0119.5 9v.878m0 0a2.246 2.246 0 00-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0121 12v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6c0-.98.626-1.813 1.5-2.122" />
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-medium">All Booths</p>
+                <p className="text-sm font-medium text-zinc-900 dark:text-white">All Booths</p>
                 <p className="text-xs text-zinc-500">3 online · 1 offline</p>
               </div>
               <svg className="w-4 h-4 text-zinc-500 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -189,8 +190,11 @@ export default function DashboardLayout({
 
             {/* Right Actions */}
             <div className="flex items-center gap-3">
+              {/* Theme Toggle */}
+              <ThemeToggle />
+
               {/* Notifications */}
-              <button className="relative p-2 text-zinc-400 hover:text-white transition-colors">
+              <button className="relative p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                 </svg>
@@ -198,7 +202,7 @@ export default function DashboardLayout({
               </button>
 
               {/* Help */}
-              <button className="p-2 text-zinc-400 hover:text-white transition-colors">
+              <button className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
                 </svg>
