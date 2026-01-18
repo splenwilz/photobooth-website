@@ -2,7 +2,6 @@
 
 import { oauth, oauthCallback } from "./services"
 import type { OAuthCallbackRequest, OAuthRequest } from "./types"
-import type { AuthResponse } from "../types"
 import { setAuthCookies } from "@/lib/auth"
 import { ApiError } from "@/core/api/client"
 
@@ -20,8 +19,10 @@ export type OAuthInitiateActionResult =
     | { success: true; authorizationUrl: string }
     | { success: false; error: string }
 
+// Note: We don't return AuthResponse to avoid exposing tokens to client
+// Tokens are stored in httpOnly cookies by setAuthCookies
 export type OAuthCallbackActionResult =
-    | { success: true; data: AuthResponse }
+    | { success: true }
     | { success: false; error: string }
 
 /**
@@ -98,9 +99,9 @@ export async function oauthCallbackAction(
         // Set authentication cookies
         await setAuthCookies(authResponse)
 
+        // Don't return authResponse to client - tokens are in httpOnly cookies
         return {
             success: true,
-            data: authResponse,
         }
     } catch (error) {
         console.error('[AUTH] OAuth callback failed:', error)
