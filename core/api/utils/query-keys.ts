@@ -8,7 +8,7 @@
  */
 
 import type { AlertsParams } from "../alerts/types";
-import type { RevenueDashboardParams } from "../analytics/types";
+import type { BoothRevenueParams, RevenueDashboardParams } from "../analytics/types";
 import type { CreditsHistoryParams } from "../credits/types";
 
 export const queryKeys = {
@@ -32,7 +32,7 @@ export const queryKeys = {
 		all: () => ['analytics'] as const,
 		dashboard: (params?: RevenueDashboardParams) => ['analytics', 'dashboard', params] as const,
 		transactions: (pageSize: number) => ['analytics', 'transactions', pageSize] as const,
-		boothRevenue: (boothId: string) => ['analytics', 'booth', boothId] as const,
+		boothRevenue: (boothId: string, params?: Omit<BoothRevenueParams, 'booth_id'>) => ['analytics', 'booth', boothId, params] as const,
 	},
 
 	// Alerts queries

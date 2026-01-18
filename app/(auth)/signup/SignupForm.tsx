@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { signupAction, type SignupActionResult } from "@/core/api/auth/signup/actions";
+import { setAuthCookies } from "@/lib/auth";
+import type { AuthResponse } from "@/core/api/auth/types";
 
 export function SignupForm() {
   const router = useRouter();
@@ -19,7 +21,7 @@ export function SignupForm() {
   // Handle successful signup
   useEffect(() => {
     if (state?.success) {
-      const { signinResponse, email } = state.data;
+      const { signinResponse, signupResponse, email } = state.data;
 
       // Check if email verification is required
       if (signinResponse && 'requires_verification' in signinResponse && signinResponse.requires_verification) {
@@ -29,9 +31,19 @@ export function SignupForm() {
           token: signinResponse.pending_authentication_token,
         });
         router.push(`/verify-email?${params.toString()}`);
+      } else if (signinResponse && 'access_token' in signinResponse) {
+        // signinResponse has tokens - set cookies and redirect to dashboard
+        setAuthCookies(signinResponse as AuthResponse).then(() => {
+          router.push('/dashboard');
+        });
+      } else if (signupResponse && 'access_token' in signupResponse) {
+        // Fall back to signupResponse if it has tokens
+        setAuthCookies(signupResponse as AuthResponse).then(() => {
+          router.push('/dashboard');
+        });
       } else {
-        // No verification needed, redirect to dashboard
-        router.push('/dashboard');
+        // No tokens available, redirect to signin
+        router.push('/signin');
       }
     }
   }, [state, router]);

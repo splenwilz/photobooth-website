@@ -116,7 +116,7 @@ export async function oauthCallbackAction(
                 console.error('[AUTH] API Error details:', {
                     status: error.status,
                     message: error.message,
-                    code: data.code,
+                    // Don't log sensitive OAuth authorization code
                 })
 
                 // Provide more specific error messages based on status

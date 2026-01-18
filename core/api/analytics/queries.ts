@@ -123,7 +123,8 @@ export function useBoothRevenue(
 	params?: Omit<BoothRevenueParams, "booth_id">,
 ) {
 	return useQuery<BoothRevenueResponse>({
-		queryKey: queryKeys.analytics.boothRevenue(boothId ?? ""),
+		// Include params in query key to avoid cache collisions
+		queryKey: queryKeys.analytics.boothRevenue(boothId ?? "", params),
 		queryFn: () =>
 			getBoothRevenue({
 				booth_id: boothId!,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useCreateBooth } from "@/core/api/booths";
 import type { CreateBoothResponse } from "@/core/api/booths/types";
 
@@ -17,6 +17,12 @@ export function AddBoothModal({ isOpen, onClose }: AddBoothModalProps) {
   const [address, setAddress] = useState("");
   const [createdBooth, setCreatedBooth] = useState<CreateBoothResponse | null>(null);
 
+  // Track if modal is open to prevent stale onSuccess callbacks
+  const isOpenRef = useRef(isOpen);
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
+
   const { mutate: createBooth, isPending, error } = useCreateBooth();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -26,14 +32,20 @@ export function AddBoothModal({ isOpen, onClose }: AddBoothModalProps) {
       { name, address },
       {
         onSuccess: (data) => {
-          setCreatedBooth(data);
-          setStep("success");
+          // Only update state if modal is still open
+          if (isOpenRef.current) {
+            setCreatedBooth(data);
+            setStep("success");
+          }
         },
       }
     );
   };
 
   const handleClose = () => {
+    // Prevent closing while mutation is in flight
+    if (isPending) return;
+
     // Reset state when closing
     setStep("form");
     setName("");

@@ -103,32 +103,41 @@ describe('Token expiry detection', () => {
     expect(result).toEqual({ data: 'success' })
   })
 
-  it('should NOT detect expiry for invalid_token without expired description', async () => {
+  it('should attempt refresh for any 401 (backend enforces JWT expiry)', async () => {
     const { apiClient } = await import('../client')
 
     const mockFetch = vi.fn()
     global.fetch = mockFetch
     global.window = mockWindow as unknown as Window & typeof globalThis
 
-    // 401 with invalid_token but NOT expired
-    mockFetch.mockResolvedValueOnce({
-      ok: false,
-      status: 401,
-      headers: new Headers({
-        'WWW-Authenticate': 'Bearer realm="api", error="invalid_token"',
-      }),
-      text: async () => JSON.stringify({ detail: 'Invalid token format' }),
-      statusText: 'Unauthorized',
-      clone: function () {
-        return this
-      },
-    })
+    // 401 with invalid_token but NOT expired - still triggers refresh attempt
+    // because the backend is the source of truth for token validity
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        headers: new Headers({
+          'WWW-Authenticate': 'Bearer realm="api", error="invalid_token"',
+        }),
+        text: async () => JSON.stringify({ detail: 'Invalid token format' }),
+        statusText: 'Unauthorized',
+        clone: function () {
+          return this
+        },
+      })
+      // Refresh attempt fails
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        json: async () => ({ error: 'Invalid refresh token' }),
+      })
 
     await expect(apiClient('/api/v1/test')).rejects.toThrow()
 
-    // Should NOT have called refresh
-    expect(mockFetch).toHaveBeenCalledTimes(1)
-    expect(mockFetch).not.toHaveBeenCalledWith(
+    // Should have attempted refresh (implementation always tries on 401)
+    expect(mockFetch).toHaveBeenCalledTimes(2)
+    expect(mockFetch).toHaveBeenNthCalledWith(
+      2,
       '/api/auth/refresh',
       expect.objectContaining({
         method: 'POST',
