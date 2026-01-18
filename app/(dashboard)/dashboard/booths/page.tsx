@@ -2,68 +2,19 @@
 
 /**
  * Booths Management Page
- * 
+ *
  * List of all booths with filters, search, and status indicators.
- * Uses demo data matching the mobile app structure.
- * 
- * @see Mobile app - /app/(tabs)/booths.tsx
+ * Uses real API data from useBoothOverview hook.
+ *
+ * @see GET /api/v1/booths/overview
  */
 
 import { useState, useMemo } from "react";
+import { useBoothOverview } from "@/core/api/booths";
+import type { BoothStatus } from "@/core/api/booths";
+import { AddBoothModal } from "./AddBoothModal";
 
-// Demo booths data
-const demoBooths = [
-  {
-    id: "booth-1",
-    name: "Downtown Mall",
-    location: "123 Main Street, Suite 101",
-    status: "online" as const,
-    todayRevenue: 285.50,
-    todayTransactions: 14,
-    credits: 450,
-    lastUpdated: new Date(Date.now() - 5 * 60000).toISOString(),
-  },
-  {
-    id: "booth-2",
-    name: "Wedding Venue",
-    location: "456 Oak Avenue",
-    status: "online" as const,
-    todayRevenue: 420.00,
-    todayTransactions: 21,
-    credits: 325,
-    lastUpdated: new Date(Date.now() - 2 * 60000).toISOString(),
-  },
-  {
-    id: "booth-3",
-    name: "Convention Center",
-    location: "789 Expo Blvd",
-    status: "offline" as const,
-    todayRevenue: 0,
-    todayTransactions: 0,
-    credits: 180,
-    lastUpdated: new Date(Date.now() - 120 * 60000).toISOString(),
-  },
-  {
-    id: "booth-4",
-    name: "Beach Resort",
-    location: "321 Coastal Highway",
-    status: "online" as const,
-    todayRevenue: 142.00,
-    todayTransactions: 7,
-    credits: 520,
-    lastUpdated: new Date(Date.now() - 8 * 60000).toISOString(),
-  },
-];
-
-const demoSummary = {
-  total_booths: 4,
-  online_count: 3,
-  offline_count: 1,
-  total_revenue_today: 847.50,
-  total_transactions_today: 42,
-};
-
-type FilterStatus = "all" | "online" | "offline";
+type FilterStatus = "all" | "online" | "offline" | "warning" | "error";
 
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("en-US", {
@@ -72,32 +23,78 @@ function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
-function getStatusColor(status: "online" | "offline"): string {
-  return status === "online" ? "#10B981" : "#EF4444";
+function getStatusColor(status: BoothStatus): string {
+  switch (status) {
+    case "online": return "#10B981";
+    case "offline": return "#EF4444";
+    case "warning": return "#F59E0B";
+    case "error": return "#EF4444";
+    default: return "#6B7280";
+  }
 }
 
 export default function BoothsPage() {
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const { data, isLoading, error } = useBoothOverview();
+
+  const summary = data?.summary;
+  const booths = data?.booths ?? [];
 
   // Filter booths
   const filteredBooths = useMemo(() => {
-    return demoBooths.filter((booth) => {
+    return booths.filter((booth) => {
       // Filter by status
-      if (filterStatus !== "all" && booth.status !== filterStatus) {
+      if (filterStatus !== "all" && booth.booth_status !== filterStatus) {
         return false;
       }
       // Filter by search query
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         return (
-          booth.name.toLowerCase().includes(query) ||
-          booth.location.toLowerCase().includes(query)
+          booth.booth_name.toLowerCase().includes(query) ||
+          (booth.booth_address?.toLowerCase().includes(query) ?? false)
         );
       }
       return true;
     });
-  }, [filterStatus, searchQuery]);
+  }, [booths, filterStatus, searchQuery]);
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Booths</h1>
+            <p className="text-zinc-500 dark:text-zinc-400 mt-1">Manage your photo booth locations</p>
+          </div>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <div className="w-8 h-8 border-2 border-[#0891B2] border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Booths</h1>
+            <p className="text-zinc-500 dark:text-zinc-400 mt-1">Manage your photo booth locations</p>
+          </div>
+        </div>
+        <div className="p-6 rounded-2xl bg-red-500/10 border border-red-500/20 text-center">
+          <p className="text-red-500 font-medium">Failed to load booths</p>
+          <p className="text-sm text-zinc-500 mt-1">{error.message}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -107,7 +104,10 @@ export default function BoothsPage() {
           <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Booths</h1>
           <p className="text-zinc-500 dark:text-zinc-400 mt-1">Manage your photo booth locations</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2.5 bg-[#0891B2] text-white font-medium rounded-xl hover:bg-[#0E7490] transition-colors">
+        <button
+          onClick={() => setIsAddModalOpen(true)}
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#0891B2] text-white font-medium rounded-xl hover:bg-[#0E7490] transition-colors"
+        >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
@@ -119,27 +119,27 @@ export default function BoothsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <p className="text-sm text-zinc-500 mb-1">Total Booths</p>
-          <p className="text-2xl font-bold text-zinc-900 dark:text-white">{demoSummary.total_booths}</p>
-          <p className="text-sm text-zinc-500 mt-2">{demoSummary.online_count} online</p>
+          <p className="text-2xl font-bold text-zinc-900 dark:text-white">{summary?.total_booths ?? 0}</p>
+          <p className="text-sm text-zinc-500 mt-2">{summary?.online_count ?? 0} online</p>
         </div>
         <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <p className="text-sm text-zinc-500 mb-1">Today&apos;s Revenue</p>
-          <p className="text-2xl font-bold text-zinc-900 dark:text-white">{formatCurrency(demoSummary.total_revenue_today)}</p>
-          <p className="text-sm text-zinc-500 mt-2">{demoSummary.total_transactions_today} transactions</p>
+          <p className="text-2xl font-bold text-zinc-900 dark:text-white">{formatCurrency(summary?.total_revenue_today ?? 0)}</p>
+          <p className="text-sm text-zinc-500 mt-2">{summary?.total_transactions_today ?? 0} transactions</p>
         </div>
         <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-2 h-2 rounded-full bg-green-500" />
             <p className="text-sm text-zinc-500">Online</p>
           </div>
-          <p className="text-2xl font-bold text-zinc-900 dark:text-white">{demoSummary.online_count}</p>
+          <p className="text-2xl font-bold text-zinc-900 dark:text-white">{summary?.online_count ?? 0}</p>
         </div>
         <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-2 h-2 rounded-full bg-red-500" />
             <p className="text-sm text-zinc-500">Offline</p>
           </div>
-          <p className="text-2xl font-bold text-zinc-900 dark:text-white">{demoSummary.offline_count}</p>
+          <p className="text-2xl font-bold text-zinc-900 dark:text-white">{summary?.offline_count ?? 0}</p>
         </div>
       </div>
 
@@ -190,7 +190,7 @@ export default function BoothsPage() {
           </div>
           <div>
             <p className="font-semibold text-zinc-900 dark:text-white">All Booths</p>
-            <p className="text-sm text-zinc-500">{demoSummary.online_count} online · {demoSummary.offline_count} offline</p>
+            <p className="text-sm text-zinc-500">{summary?.online_count ?? 0} online · {summary?.offline_count ?? 0} offline</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -215,7 +215,7 @@ export default function BoothsPage() {
         <div className="space-y-3">
           {filteredBooths.map((booth) => (
             <div
-              key={booth.id}
+              key={booth.booth_id}
               className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer"
             >
               <div className="flex items-center justify-between">
@@ -228,23 +228,23 @@ export default function BoothsPage() {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="font-semibold text-zinc-900 dark:text-white">{booth.name}</p>
+                      <p className="font-semibold text-zinc-900 dark:text-white">{booth.booth_name}</p>
                       <div
                         className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: getStatusColor(booth.status) }}
+                        style={{ backgroundColor: getStatusColor(booth.booth_status) }}
                       />
                     </div>
-                    <p className="text-sm text-zinc-500">{booth.location}</p>
+                    <p className="text-sm text-zinc-500">{booth.booth_address ?? "No address"}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-6">
                   <div className="text-right hidden sm:block">
-                    <p className="font-semibold text-zinc-900 dark:text-white">{formatCurrency(booth.todayRevenue)}</p>
-                    <p className="text-xs text-zinc-500">{booth.todayTransactions} today</p>
+                    <p className="font-semibold text-zinc-900 dark:text-white">{formatCurrency(booth.revenue?.today ?? 0)}</p>
+                    <p className="text-xs text-zinc-500">{booth.transactions?.today_count ?? 0} today</p>
                   </div>
                   <div className="text-right hidden md:block">
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400">{booth.credits} credits</p>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">{booth.credits?.balance ?? 0} credits</p>
                   </div>
                   <svg className="w-5 h-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
@@ -265,6 +265,12 @@ export default function BoothsPage() {
           )}
         </div>
       </section>
+
+      {/* Add Booth Modal */}
+      <AddBoothModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+      />
     </div>
   );
 }
