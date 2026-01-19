@@ -3,7 +3,72 @@
 import Link from "next/link";
 import { useState } from "react";
 
-const plans = [
+// Hardware booth packages
+const hardwarePackages = [
+  {
+    name: "Essential",
+    description: "Perfect for getting started",
+    price: 2499,
+    features: [
+      { text: "15\" Touchscreen Monitor", included: true },
+      { text: "Compact Photo Booth Stand", included: true },
+      { text: "USB Webcam (1080p)", included: true },
+      { text: "Basic LED Ring Light", included: true },
+      { text: "Cable Management Kit", included: true },
+      { text: "DSLR Camera Mount", included: false },
+      { text: "Professional Printer", included: false },
+      { text: "Travel Case", included: false },
+    ],
+    cta: "Get Started",
+    ctaLink: "/contact?package=essential",
+    highlighted: false,
+    icon: "📷",
+    badge: null,
+  },
+  {
+    name: "Professional",
+    description: "Complete event-ready setup",
+    price: 4999,
+    features: [
+      { text: "21.5\" Touchscreen Monitor", included: true },
+      { text: "Premium Aluminum Stand", included: true },
+      { text: "DSLR Camera Mount + Bracket", included: true },
+      { text: "Professional LED Lighting", included: true },
+      { text: "DNP DS620A Photo Printer", included: true },
+      { text: "500 Print Media Sheets", included: true },
+      { text: "Padded Travel Case", included: true },
+      { text: "1-Year Hardware Warranty", included: true },
+    ],
+    cta: "Configure Setup",
+    ctaLink: "/contact?package=professional",
+    highlighted: true,
+    icon: "🎯",
+    badge: "Most Popular",
+  },
+  {
+    name: "Premium",
+    description: "Enterprise-grade equipment",
+    price: 7999,
+    features: [
+      { text: "27\" 4K Touchscreen Display", included: true },
+      { text: "Custom Branded Enclosure", included: true },
+      { text: "Canon DSLR Camera Included", included: true },
+      { text: "Studio Lighting System", included: true },
+      { text: "DNP DS820A Photo Printer", included: true },
+      { text: "1000 Print Media Sheets", included: true },
+      { text: "Flight Case + Accessories", included: true },
+      { text: "2-Year Hardware Warranty", included: true },
+    ],
+    cta: "Contact Sales",
+    ctaLink: "/contact?package=premium",
+    highlighted: false,
+    icon: "👑",
+    badge: null,
+  },
+];
+
+// Software subscription plans
+const softwarePlans = [
   {
     name: "Starter",
     description: "Perfect for trying out PhotoBoothX",
@@ -72,28 +137,36 @@ const plans = [
 
 const faqs = [
   {
-    question: "Is there a free trial for Pro?",
+    question: "What's included in the hardware packages?",
+    answer: "Each hardware package includes everything you need to start your photo booth business — monitor, stand, lighting, and depending on the tier, professional printers and cameras. All equipment is tested and configured before shipping.",
+  },
+  {
+    question: "Do I need to buy hardware from you?",
+    answer: "No! You can use your own equipment. Our software works with most webcams, DSLR cameras, and photo printers. Our hardware packages are a convenient option if you want a complete, tested setup.",
+  },
+  {
+    question: "Is there a free trial for Pro software?",
     answer: "Yes! You can try all Pro features free for 14 days. No credit card required. If you love it, upgrade to keep your features.",
   },
   {
-    question: "Can I cancel anytime?",
+    question: "Can I cancel my software subscription anytime?",
     answer: "Absolutely. Cancel anytime from your dashboard with no questions asked. Your booths will continue working on the Starter plan.",
   },
   {
-    question: "Do I need to pay per booth?",
-    answer: "No. Pro and Enterprise plans include unlimited booths at no extra cost. Add as many booths as you need.",
+    question: "Do hardware packages include the software?",
+    answer: "Hardware packages include 3 months of Pro software subscription free. After that, you can continue with Pro or switch to our free Starter plan.",
   },
   {
-    question: "What payment methods do you accept?",
-    answer: "We accept all major credit cards (Visa, Mastercard, Amex), PayPal, and bank transfers for annual plans.",
+    question: "What warranty comes with the hardware?",
+    answer: "Essential packages include 6-month warranty, Professional includes 1-year warranty, and Premium includes 2-year warranty. Extended warranties are available for purchase.",
   },
   {
-    question: "Is there a discount for annual billing?",
+    question: "Do you offer financing for hardware?",
+    answer: "Yes! We partner with financing providers to offer 0% APR financing for qualified buyers. Contact our sales team to learn more about payment plans.",
+  },
+  {
+    question: "Is there a discount for annual software billing?",
     answer: "Yes! Pay annually and save 20% — that's $39/month instead of $49/month. Plus, you get priority support.",
-  },
-  {
-    question: "Can I switch plans later?",
-    answer: "Yes, you can upgrade or downgrade at any time. When upgrading, you'll be prorated for the remaining billing period.",
   },
 ];
 
@@ -113,6 +186,10 @@ const comparisonFeatures = [
 export default function PricingPage() {
   const [isAnnual, setIsAnnual] = useState(true);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  
+  // Section IDs for anchor navigation
+  const hardwareSectionId = "hardware";
+  const softwareSectionId = "software";
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
@@ -120,61 +197,228 @@ export default function PricingPage() {
       <section className="relative pt-32 pb-16 px-6 overflow-hidden">
         {/* Background glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#0891B2]/10 blur-[150px] rounded-full" />
-        
+
         <div className="relative max-w-5xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] text-sm font-medium mb-6">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Checkmark" aria-hidden="true">
+              <title>Checkmark</title>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            14-day free trial on Pro
+            Hardware + Software Solutions
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-            Simple pricing,<br />
-            <span className="text-[#0891B2]">powerful features</span>
+            Everything you need to<br />
+            <span className="text-[#0891B2]">start your photo booth business</span>
           </h1>
           <p className="text-xl text-[var(--muted)] max-w-2xl mx-auto mb-10">
-            Start free, upgrade when you&apos;re ready. No hidden fees, no surprises. 
-            Cancel anytime.
+            Get complete booth setups or bring your own equipment.
+            Flexible software plans to match your business.
           </p>
 
-          {/* Billing Toggle */}
-          <div className="inline-flex items-center gap-4 p-1.5 rounded-full bg-slate-200 dark:bg-zinc-900 border border-[var(--border)]">
-            <button
-              onClick={() => setIsAnnual(false)}
-              className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
-                !isAnnual 
-                  ? "bg-white text-black" 
-                  : "text-[var(--muted)] hover:text-[var(--foreground)]"
-              }`}
+          {/* Quick nav tabs */}
+          <div className="inline-flex items-center gap-2 p-1.5 rounded-full bg-slate-200 dark:bg-zinc-900 border border-[var(--border)]">
+            <a
+              href={`#${hardwareSectionId}`}
+              className="px-5 py-2 rounded-full text-sm font-medium transition-all bg-white text-black flex items-center gap-2"
             >
-              Monthly
-            </button>
-            <button
-              onClick={() => setIsAnnual(true)}
-              className={`px-5 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
-                isAnnual 
-                  ? "bg-white text-black" 
-                  : "text-[var(--muted)] hover:text-[var(--foreground)]"
-              }`}
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Computer" aria-hidden="true">
+                <title>Computer</title>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Booth Packages
+            </a>
+            <a
+              href={`#${softwareSectionId}`}
+              className="px-5 py-2 rounded-full text-sm font-medium transition-all text-[var(--muted)] hover:text-[var(--foreground)] flex items-center gap-2"
             >
-              Annual
-              <span className={`text-xs px-2 py-0.5 rounded-full ${
-                isAnnual 
-                  ? "bg-[#10B981] text-[var(--foreground)]" 
-                  : "bg-[#10B981]/20 text-[#10B981]"
-              }`}>
-                Save 20%
-              </span>
-            </button>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Code" aria-hidden="true">
+                <title>Code</title>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+              </svg>
+              Software Plans
+            </a>
           </div>
         </div>
       </section>
 
-      {/* Pricing Cards */}
-      <section className="px-6 pb-24">
+      {/* Hardware Packages Section */}
+      <section id={hardwareSectionId} className="px-6 pb-24">
         <div className="max-w-5xl mx-auto">
+          {/* Section Header */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#F59E0B]/10 border border-[#F59E0B]/20 text-[#F59E0B] text-sm font-medium mb-4">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Computer" aria-hidden="true">
+                <title>Computer</title>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              One-Time Purchase
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+              Complete Booth Packages
+            </h2>
+            <p className="text-[var(--muted)] max-w-2xl mx-auto">
+              Event-ready photo booth setups with professional equipment.
+              Everything tested and configured — just unbox and start earning.
+            </p>
+          </div>
+
+          {/* Hardware Cards */}
           <div className="grid lg:grid-cols-3 gap-6">
-            {plans.map((plan) => (
+            {hardwarePackages.map((pkg) => (
+              <div
+                key={pkg.name}
+                className={`relative rounded-2xl p-8 transition-all ${
+                  pkg.highlighted
+                    ? "bg-gradient-to-b from-[#F59E0B]/20 to-slate-100 dark:to-[#111111] border-2 border-[#F59E0B]/50 scale-105 lg:-mt-4 lg:mb-4 shadow-xl shadow-[#F59E0B]/10"
+                    : "bg-[var(--card)] border border-[var(--border)] hover:border-[var(--border)]"
+                }`}
+              >
+                {/* Badge */}
+                {pkg.badge && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                    <span className="px-4 py-1.5 rounded-full bg-[#F59E0B] text-white text-sm font-semibold shadow-lg shadow-[#F59E0B]/30">
+                      {pkg.badge}
+                    </span>
+                  </div>
+                )}
+
+                {/* Header */}
+                <div className="mb-6">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-3xl">{pkg.icon}</span>
+                    <h3 className="text-xl font-bold">{pkg.name}</h3>
+                  </div>
+                  <p className="text-sm text-[var(--muted)]">{pkg.description}</p>
+                </div>
+
+                {/* Price */}
+                <div className="mb-8">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-5xl font-bold">${pkg.price.toLocaleString()}</span>
+                  </div>
+                  <p className="text-sm text-[var(--muted)] mt-1">
+                    One-time purchase + 3 months Pro software free
+                  </p>
+                </div>
+
+                {/* CTA */}
+                <Link
+                  href={pkg.ctaLink}
+                  className={`block w-full py-3.5 rounded-xl font-semibold text-center transition-all mb-8 ${
+                    pkg.highlighted
+                      ? "bg-[#F59E0B] text-white hover:bg-[#D97706] shadow-lg shadow-[#F59E0B]/30 hover:shadow-[#F59E0B]/50"
+                      : "bg-slate-200 dark:bg-zinc-800 text-zinc-900 dark:text-white hover:bg-slate-300 dark:hover:bg-zinc-700"
+                  }`}
+                >
+                  {pkg.cta}
+                </Link>
+
+                {/* Features */}
+                <ul className="space-y-3">
+                  {pkg.features.map((feature) => (
+                    <li
+                      key={feature.text}
+                      className={`flex items-center gap-3 text-sm ${
+                        feature.included ? "text-[var(--foreground-secondary)]" : "text-[var(--muted)]"
+                      }`}
+                    >
+                      {feature.included ? (
+                        <svg className="w-5 h-5 text-[#10B981] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Included">
+                          <title>Included</title>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5 text-slate-400 dark:text-zinc-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Not included">
+                          <title>Not included</title>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      )}
+                      {feature.text}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          {/* Additional Info */}
+          <div className="mt-12 grid sm:grid-cols-3 gap-6 text-center">
+            <div className="p-4 rounded-xl bg-[var(--card)] border border-[var(--border)]">
+              <div className="text-2xl mb-2">🚚</div>
+              <h4 className="font-semibold mb-1">Free Shipping</h4>
+              <p className="text-sm text-[var(--muted)]">Continental US orders</p>
+            </div>
+            <div className="p-4 rounded-xl bg-[var(--card)] border border-[var(--border)]">
+              <div className="text-2xl mb-2">🛠️</div>
+              <h4 className="font-semibold mb-1">Pre-Configured</h4>
+              <p className="text-sm text-[var(--muted)]">Tested before shipping</p>
+            </div>
+            <div className="p-4 rounded-xl bg-[var(--card)] border border-[var(--border)]">
+              <div className="text-2xl mb-2">💳</div>
+              <h4 className="font-semibold mb-1">0% Financing</h4>
+              <p className="text-sm text-[var(--muted)]">Available for qualified buyers</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Software Plans Section */}
+      <section id={softwareSectionId} className="px-6 pb-24">
+        <div className="max-w-5xl mx-auto">
+          {/* Section Header */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0891B2]/10 border border-[#0891B2]/20 text-[#0891B2] text-sm font-medium mb-4">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Code" aria-hidden="true">
+                <title>Code</title>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+              </svg>
+              Subscription Plans
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+              PhotoBoothX Software
+            </h2>
+            <p className="text-[var(--muted)] max-w-2xl mx-auto mb-8">
+              Powerful photo booth software that works with your existing equipment
+              or our hardware packages.
+            </p>
+
+            {/* Billing Toggle */}
+            <div className="inline-flex items-center gap-4 p-1.5 rounded-full bg-slate-200 dark:bg-zinc-900 border border-[var(--border)]">
+              <button
+                type="button"
+                onClick={() => setIsAnnual(false)}
+                className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
+                  !isAnnual
+                    ? "bg-white text-black"
+                    : "text-[var(--muted)] hover:text-[var(--foreground)]"
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsAnnual(true)}
+                className={`px-5 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
+                  isAnnual
+                    ? "bg-white text-black"
+                    : "text-[var(--muted)] hover:text-[var(--foreground)]"
+                }`}
+              >
+                Annual
+                <span className={`text-xs px-2 py-0.5 rounded-full ${
+                  isAnnual
+                    ? "bg-[#10B981] text-white"
+                    : "bg-[#10B981]/20 text-[#10B981]"
+                }`}>
+                  Save 20%
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Software Cards */}
+          <div className="grid lg:grid-cols-3 gap-6">
+            {softwarePlans.map((plan) => (
               <div
                 key={plan.name}
                 className={`relative rounded-2xl p-8 transition-all ${
@@ -214,7 +458,7 @@ export default function PricingPage() {
                       {plan.monthlyPrice > 0 && (
                         <p className="text-sm text-[var(--muted)] mt-1">
                           {isAnnual 
-                            ? `Billed $${plan.yearlyPrice! * 12}/year` 
+                            ? `Billed $${(plan.yearlyPrice ?? 0) * 12}/year` 
                             : "Billed monthly"
                           }
                         </p>
@@ -249,11 +493,13 @@ export default function PricingPage() {
                       }`}
                     >
                       {feature.included ? (
-                        <svg className="w-5 h-5 text-[#10B981] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg className="w-5 h-5 text-[#10B981] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Included">
+                          <title>Included</title>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       ) : (
-                        <svg className="w-5 h-5 text-slate-400 dark:text-zinc-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg className="w-5 h-5 text-slate-400 dark:text-zinc-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Not included">
+                          <title>Not included</title>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       )}
@@ -291,32 +537,32 @@ export default function PricingPage() {
       <section className="px-6 pb-24">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-4">
-            Compare plans
+            Compare software plans
           </h2>
           <p className="text-[var(--muted)] text-center mb-12">
             Find the perfect plan for your business
           </p>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--card)]">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[var(--border)]">
-                  <th className="text-left py-4 px-4 font-medium text-[var(--muted)]">Feature</th>
-                  <th className="text-center py-4 px-4 font-medium text-[var(--muted)]">Starter</th>
-                  <th className="text-center py-4 px-4 font-medium text-[#0891B2] bg-[#0891B2]/5 rounded-t-lg">Pro</th>
-                  <th className="text-center py-4 px-4 font-medium text-[var(--muted)]">Enterprise</th>
+                  <th className="text-left py-4 px-6 font-semibold text-zinc-900 dark:text-white">Feature</th>
+                  <th className="text-center py-4 px-4 font-semibold text-zinc-600 dark:text-white">Starter</th>
+                  <th className="text-center py-4 px-4 font-semibold bg-[#0891B2]/10 dark:bg-[#0891B2]/20 border-x border-[#0891B2]/20 dark:border-[#0891B2]/40 text-zinc-600 dark:text-white">Pro</th>
+                  <th className="text-center py-4 px-4 font-semibold text-zinc-600 dark:text-white">Enterprise</th>
                 </tr>
               </thead>
               <tbody>
-                {comparisonFeatures.map((feature, index) => (
+                {comparisonFeatures.map((feature) => (
                   <tr
                     key={feature.name}
-                    className={`border-b border-[var(--border)]/50 ${index % 2 === 0 ? "" : "bg-slate-100/50 dark:bg-zinc-900/30"}`}
+                    className="border-b border-[var(--border)]/50 last:border-b-0"
                   >
-                    <td className="py-4 px-4 text-sm">{feature.name}</td>
-                    <td className="py-4 px-4 text-sm text-center text-[var(--muted)]">{feature.starter}</td>
-                    <td className="py-4 px-4 text-sm text-center bg-[#0891B2]/5 font-medium">{feature.pro}</td>
-                    <td className="py-4 px-4 text-sm text-center text-[var(--muted)]">{feature.enterprise}</td>
+                    <td className="py-4 px-6 text-sm font-semibold text-zinc-800 dark:text-white">{feature.name}</td>
+                    <td className="py-4 px-4 text-sm text-center text-zinc-600 dark:text-white">{feature.starter}</td>
+                    <td className="py-4 px-4 text-sm text-center bg-[#0891B2]/10 dark:bg-[#0891B2]/20 border-x border-[#0891B2]/20 dark:border-[#0891B2]/40 font-semibold text-zinc-600 dark:text-white">{feature.pro}</td>
+                    <td className="py-4 px-4 text-sm text-center text-zinc-600 dark:text-white">{feature.enterprise}</td>
                   </tr>
                 ))}
               </tbody>
@@ -328,28 +574,30 @@ export default function PricingPage() {
       {/* Testimonial */}
       <section className="px-6 pb-24">
         <div className="max-w-3xl mx-auto">
-          <div className="relative p-10 rounded-2xl bg-gradient-to-br from-[#0891B2]/10 to-slate-100 dark:to-[#111111] border border-[#0891B2]/20">
+          <div className="relative p-10 rounded-2xl bg-[var(--card)] border border-[var(--border)]">
             {/* Quote mark */}
-            <svg className="absolute top-6 left-8 w-10 h-10 text-[#0891B2]/20" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="absolute top-6 left-8 w-10 h-10 text-[#0891B2]/30" fill="currentColor" viewBox="0 0 24 24" aria-label="Quote mark" aria-hidden="true">
+              <title>Quote mark</title>
               <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
             </svg>
-            
-            <blockquote className="text-xl text-zinc-700 dark:text-zinc-200 leading-relaxed mb-6 relative z-10">
-              &ldquo;Switching to Pro was a no-brainer. The ROI was immediate — we made back the annual 
+
+            <blockquote className="text-xl text-[var(--foreground)] leading-relaxed mb-6 relative z-10">
+              &ldquo;Switching to Pro was a no-brainer. The ROI was immediate — we made back the annual
               subscription in just one weekend event. The mobile app alone is worth the price.&rdquo;
             </blockquote>
-            
+
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#F59E0B] to-[#D97706] flex items-center justify-center text-[var(--foreground)] font-bold">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#F59E0B] to-[#D97706] flex items-center justify-center text-white font-bold">
                 SK
               </div>
               <div>
-                <div className="font-semibold">Sarah Kim</div>
+                <div className="font-semibold text-[var(--foreground)]">Sarah Kim</div>
                 <div className="text-sm text-[var(--muted)]">Owner, SnapBox Events · 8 booths</div>
               </div>
               <div className="ml-auto flex gap-0.5">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <svg key={star} className="w-5 h-5 text-[#F59E0B]" fill="currentColor" viewBox="0 0 20 20">
+                  <svg key={star} className="w-5 h-5 text-[#F59E0B]" fill="currentColor" viewBox="0 0 20 20" aria-label={`${star} star`} aria-hidden="true">
+                    <title>{star} star</title>
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                 ))}
@@ -368,7 +616,8 @@ export default function PricingPage() {
           {/* Header */}
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0891B2]/10 border border-[#0891B2]/20 text-[#22D3EE] text-sm font-medium mb-6">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Question mark" aria-hidden="true">
+                <title>Question mark</title>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               Got Questions?
@@ -384,15 +633,16 @@ export default function PricingPage() {
           {/* FAQ Grid - Two columns on desktop */}
           <div className="grid md:grid-cols-2 gap-4">
             {faqs.map((faq, index) => (
-              <div 
+              <div
                 key={faq.question}
                 className={`group rounded-2xl border overflow-hidden transition-all ${
-                  openFaq === index 
-                    ? "bg-[#0891B2]/5 border-[#0891B2]/30" 
-                    : "bg-[var(--card)] border-[var(--border)] hover:border-[var(--border)]"
+                  openFaq === index
+                    ? "bg-[#0891B2]/10 dark:bg-[#0891B2]/20 border-[#0891B2]/30"
+                    : "bg-[var(--card)] border-[var(--border)] hover:border-[#0891B2]/30"
                 }`}
               >
                 <button
+                  type="button"
                   onClick={() => setOpenFaq(openFaq === index ? null : index)}
                   className="w-full flex items-start gap-4 p-6 text-left"
                 >
@@ -400,13 +650,13 @@ export default function PricingPage() {
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 transition-colors ${
                     openFaq === index
                       ? "bg-[#0891B2] text-white"
-                      : "bg-slate-200 dark:bg-zinc-800 text-[var(--muted)] group-hover:bg-[#0891B2]/20 group-hover:text-[#0891B2]"
+                      : "bg-slate-200 dark:bg-zinc-600 text-zinc-600 dark:text-white group-hover:bg-[#0891B2]/20 group-hover:text-[#0891B2]"
                   }`}>
                     {String(index + 1).padStart(2, "0")}
                   </div>
                   <div className="flex-1">
                     <span className={`font-semibold block transition-colors ${
-                      openFaq === index ? "text-[#0891B2] dark:text-[#22D3EE]" : "text-zinc-900 dark:text-white group-hover:text-[#0891B2] dark:group-hover:text-[#22D3EE]"
+                      openFaq === index ? "text-[#0891B2] dark:text-[#22D3EE]" : "text-zinc-800 dark:text-white group-hover:text-[#0891B2] dark:group-hover:text-[#22D3EE]"
                     }`}>
                       {faq.question}
                     </span>
@@ -414,15 +664,17 @@ export default function PricingPage() {
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${
                     openFaq === index
                       ? "bg-[#0891B2]/20 rotate-180"
-                      : "bg-slate-200 dark:bg-zinc-800 group-hover:bg-slate-300 dark:group-hover:bg-zinc-700"
+                      : "bg-slate-200 dark:bg-zinc-700 group-hover:bg-slate-300 dark:group-hover:bg-zinc-600"
                   }`}>
-                    <svg 
-                      className="w-4 h-4 text-[var(--muted)]" 
-                      fill="none" 
-                      viewBox="0 0 24 24" 
-                      stroke="currentColor" 
+                    <svg
+                      className={`w-4 h-4 transition-colors ${openFaq === index ? "text-[#0891B2]" : "text-zinc-500 dark:text-zinc-400"}`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
                       strokeWidth={2}
+                      aria-label={openFaq === index ? "Collapse" : "Expand"}
                     >
+                      <title>{openFaq === index ? "Collapse" : "Expand"}</title>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                     </svg>
                   </div>
@@ -430,7 +682,7 @@ export default function PricingPage() {
                 <div className={`overflow-hidden transition-all duration-300 ${
                   openFaq === index ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
                 }`}>
-                  <div className="px-6 pb-6 pl-[4.5rem] text-[var(--muted)] leading-relaxed">
+                  <div className="px-6 pb-6 pl-[4.5rem] text-zinc-600 dark:text-white leading-relaxed">
                     {faq.answer}
                   </div>
                 </div>
@@ -442,7 +694,8 @@ export default function PricingPage() {
           <div className="mt-12 text-center">
             <div className="inline-flex items-center gap-4 p-4 rounded-2xl bg-[var(--card)] border border-[var(--border)]">
               <div className="w-12 h-12 rounded-xl bg-[#0891B2]/10 flex items-center justify-center">
-                <svg className="w-6 h-6 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-6 h-6 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Chat" aria-hidden="true">
+                  <title>Chat</title>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
               </div>
@@ -450,9 +703,9 @@ export default function PricingPage() {
                 <p className="font-medium text-[var(--foreground)]">Still have questions?</p>
                 <p className="text-sm text-[var(--muted)]">Our team is here to help</p>
               </div>
-              <Link 
-                href="/contact" 
-                className="ml-4 px-5 py-2.5 rounded-xl bg-[#0891B2] text-[var(--foreground)] font-semibold hover:bg-[#0E7490] transition-colors"
+              <Link
+                href="/contact"
+                className="ml-4 px-5 py-2.5 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-colors"
               >
                 Contact Us
               </Link>
@@ -487,7 +740,8 @@ export default function PricingPage() {
                   href="/downloads"
                   className="px-6 py-3.5 rounded-xl bg-[#0891B2] text-[var(--foreground)] font-semibold hover:bg-[#0E7490] transition-all hover:scale-[1.02] flex items-center justify-center gap-2 shadow-lg shadow-[#0891B2]/20"
                 >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Download" aria-hidden="true">
+                    <title>Download</title>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
                   Download Free
@@ -503,19 +757,22 @@ export default function PricingPage() {
               {/* Trust indicators */}
               <div className="flex flex-wrap gap-4 text-sm text-[var(--muted)]">
                 <span className="flex items-center gap-1.5">
-                  <svg className="w-4 h-4 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="w-4 h-4 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Checkmark" aria-hidden="true">
+                    <title>Checkmark</title>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                   Free trial
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <svg className="w-4 h-4 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="w-4 h-4 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Checkmark" aria-hidden="true">
+                    <title>Checkmark</title>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                   No credit card
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <svg className="w-4 h-4 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="w-4 h-4 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Checkmark" aria-hidden="true">
+                    <title>Checkmark</title>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                   Cancel anytime
@@ -534,7 +791,8 @@ export default function PricingPage() {
               <div className="relative bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 w-full max-w-xs">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Chart" aria-hidden="true">
+                      <title>Chart</title>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                     </svg>
                   </div>
