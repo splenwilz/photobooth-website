@@ -1,9 +1,10 @@
 'use server'
 
+import { ApiError } from "@/core/api/client"
+import { setAuthCookies } from "@/lib/auth"
+
 import { oauth, oauthCallback } from "./services"
 import type { OAuthCallbackRequest, OAuthRequest } from "./types"
-import { setAuthCookies } from "@/lib/auth"
-import { ApiError } from "@/core/api/client"
 
 // Map frontend provider names to backend provider values
 const PROVIDER_MAP = {
@@ -39,9 +40,12 @@ export async function oauthInitiateAction(
     provider: OAuthProvider
 ): Promise<OAuthInitiateActionResult> {
     try {
-        // Build redirect URI based on current environment
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-        const redirectUri = process.env.NEXT_PUBLIC_WORKOS_REDIRECT_URI || `${baseUrl}/api/auth/callback`
+        // Use configured redirect URI (required for production)
+        const redirectUri = process.env.NEXT_PUBLIC_WORKOS_REDIRECT_URI
+
+        if (!redirectUri) {
+            throw new Error('NEXT_PUBLIC_WORKOS_REDIRECT_URI environment variable is not configured')
+        }
 
         // Map frontend provider name to backend provider value
         const backendProvider = PROVIDER_MAP[provider]
