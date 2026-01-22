@@ -13,8 +13,9 @@ import { oauth } from "@/core/api/auth/oauth/services";
  */
 export async function GET(req: NextRequest) {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const redirectUri = process.env.NEXT_PUBLIC_WORKOS_REDIRECT_URI || `${baseUrl}/api/auth/callback`;
+    // Derive base URL from request to work in all environments
+    const { origin } = new URL(req.url);
+    const redirectUri = process.env.NEXT_PUBLIC_WORKOS_REDIRECT_URI || `${origin}/api/auth/callback`;
 
     // Store redirect URL in cookie if provided
     const { searchParams } = new URL(req.url);
@@ -42,9 +43,9 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error("[AUTH] Google OAuth initiate failed:", error);
 
-    // Redirect to signin page with error
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const errorUrl = new URL("/signin", baseUrl);
+    // Redirect to signin page with error (use request origin)
+    const { origin } = new URL(req.url);
+    const errorUrl = new URL("/signin", origin);
     errorUrl.searchParams.set("error", "oauth_failed");
     errorUrl.searchParams.set("message", "Failed to start Google sign in. Please try again.");
 

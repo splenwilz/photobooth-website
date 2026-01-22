@@ -18,7 +18,8 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ package: string }> }
 ) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  // Derive base URL from request to work in all environments
+  const { origin: baseUrl } = new URL(req.url);
 
   try {
     const { package: packageId } = await params;

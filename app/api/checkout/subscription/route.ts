@@ -19,7 +19,9 @@ import { SUBSCRIPTION_PRICES, PRO_TRIAL_DAYS } from "@/core/config/stripe";
  * This is a simple redirect endpoint - no JavaScript loading state required.
  */
 export async function GET(req: NextRequest) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  // Derive base URL from request to work in all environments
+  const { origin } = new URL(req.url);
+  const baseUrl = origin;
 
   try {
     // Check authentication
