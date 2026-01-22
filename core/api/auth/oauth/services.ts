@@ -9,8 +9,10 @@ import type { OAuthCallbackRequest, OAuthRequest, OAuthResponse } from "./types"
  * @see https://tanstack.com/query/latest/docs/react/guides/mutations
  */
 export async function oauth(data: OAuthRequest): Promise<OAuthResponse> {
+  const apiBaseUrl = process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
   console.log("[AUTH] OAuth service - calling backend:", {
     endpoint: "/api/v1/auth/authorize",
+    fullUrl: `${apiBaseUrl?.replace(/\/+$/, '')}/api/v1/auth/authorize`,
     provider: data.provider,
     redirect_uri: data.redirect_uri,
   });

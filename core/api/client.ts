@@ -53,9 +53,9 @@ async function parseErrorResponse(response: Response): Promise<string> {
 
 function getApiBaseUrl(): string {
   const serverUrl = process.env.API_BASE_URL
-  if (serverUrl) return serverUrl
+  if (serverUrl) return serverUrl.replace(/\/+$/, '') // Remove trailing slashes
   const clientUrl = process.env.NEXT_PUBLIC_API_BASE_URL
-  if (clientUrl) return clientUrl
+  if (clientUrl) return clientUrl.replace(/\/+$/, '') // Remove trailing slashes
   throw new Error("API base URL is not configured. Set API_BASE_URL or NEXT_PUBLIC_API_BASE_URL.")
 }
 
