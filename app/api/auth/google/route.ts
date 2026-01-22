@@ -17,6 +17,13 @@ export async function GET(req: NextRequest) {
     const { origin } = new URL(req.url);
     const redirectUri = process.env.NEXT_PUBLIC_WORKOS_REDIRECT_URI || `${origin}/api/auth/callback`;
 
+    console.log("[AUTH] Google OAuth initiate:", {
+      origin,
+      redirectUri,
+      envRedirectUri: process.env.NEXT_PUBLIC_WORKOS_REDIRECT_URI,
+      apiBaseUrl: process.env.API_BASE_URL,
+    });
+
     // Store redirect URL in cookie if provided
     const { searchParams } = new URL(req.url);
     const redirectTo = searchParams.get("redirect");
@@ -24,6 +31,10 @@ export async function GET(req: NextRequest) {
     const response = await oauth({
       provider: "GoogleOAuth",
       redirect_uri: redirectUri,
+    });
+
+    console.log("[AUTH] Google OAuth response received:", {
+      hasAuthorizationUrl: !!response.authorization_url,
     });
 
     const redirectResponse = NextResponse.redirect(response.authorization_url);
@@ -41,7 +52,12 @@ export async function GET(req: NextRequest) {
 
     return redirectResponse;
   } catch (error) {
-    console.error("[AUTH] Google OAuth initiate failed:", error);
+    console.error("[AUTH] Google OAuth initiate failed:", {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined,
+      fullError: error,
+    });
 
     // Redirect to signin page with error (use request origin)
     const { origin } = new URL(req.url);

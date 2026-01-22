@@ -9,11 +9,27 @@ import type { OAuthCallbackRequest, OAuthRequest, OAuthResponse } from "./types"
  * @see https://tanstack.com/query/latest/docs/react/guides/mutations
  */
 export async function oauth(data: OAuthRequest): Promise<OAuthResponse> {
-  const response = await apiClient<OAuthResponse>("/api/v1/auth/authorize", {
-    method: "POST",
-    body: JSON.stringify(data),
+  console.log("[AUTH] OAuth service - calling backend:", {
+    endpoint: "/api/v1/auth/authorize",
+    provider: data.provider,
+    redirect_uri: data.redirect_uri,
   });
-  return response;
+
+  try {
+    const response = await apiClient<OAuthResponse>("/api/v1/auth/authorize", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+
+    console.log("[AUTH] OAuth service - backend response success");
+    return response;
+  } catch (error) {
+    console.error("[AUTH] OAuth service - backend call failed:", {
+      error: error instanceof Error ? error.message : String(error),
+      name: error instanceof Error ? error.name : undefined,
+    });
+    throw error;
+  }
 }
 
 /**
