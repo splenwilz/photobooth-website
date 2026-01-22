@@ -8,7 +8,12 @@ export const metadata: Metadata = {
   description: "Sign in to your PhotoBoothX account to manage your booths and subscriptions.",
 };
 
-export default function SignInPage() {
+interface SignInPageProps {
+  searchParams: Promise<{ redirect?: string }>;
+}
+
+export default async function SignInPage({ searchParams }: SignInPageProps) {
+  const { redirect } = await searchParams;
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex">
       {/* Left Panel - Decorative */}
@@ -23,7 +28,7 @@ export default function SignInPage() {
           {/* Logo */}
           <Link href="/" className="inline-flex items-center gap-2.5 font-semibold text-xl w-fit">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <svg aria-label="Logo" aria-hidden="true" className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                 <circle cx="12" cy="13" r="3" />
               </svg>
@@ -61,8 +66,8 @@ export default function SignInPage() {
           {/* Testimonial */}
           <div className="p-6 rounded-2xl bg-white/80 dark:bg-[var(--card)]/80 border border-slate-200/50 dark:border-[var(--border)]/50 backdrop-blur-sm">
             <div className="flex items-center gap-1 mb-3">
-              {[...Array(5)].map((_, i) => (
-                <svg key={i} className="w-4 h-4 text-[#F59E0B]" fill="currentColor" viewBox="0 0 20 20">
+              {[1, 2, 3, 4, 5].map((starId) => (
+                <svg aria-label="Star" aria-hidden="true" key={starId} className="w-4 h-4 text-[#F59E0B]" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
               ))}
@@ -90,7 +95,7 @@ export default function SignInPage() {
           <div className="text-center mb-8 lg:hidden">
             <Link href="/" className="inline-flex items-center gap-2.5 font-semibold text-xl">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <svg aria-label="Logo" aria-hidden="true" className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                   <circle cx="12" cy="13" r="3" />
                 </svg>
@@ -109,7 +114,7 @@ export default function SignInPage() {
 
           {/* Social Buttons */}
           <div className="mb-8">
-            <OAuthButtons />
+            <OAuthButtons redirectTo={redirect} />
           </div>
 
           {/* Divider */}

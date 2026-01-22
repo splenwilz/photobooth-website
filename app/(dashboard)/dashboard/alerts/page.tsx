@@ -48,6 +48,10 @@ function formatCategory(category: string): string {
   return labels[category] || category.charAt(0).toUpperCase() + category.slice(1);
 }
 
+function Skeleton({ className = "" }: { className?: string }) {
+  return <div className={`animate-pulse bg-slate-200 dark:bg-zinc-800 rounded ${className}`} />;
+}
+
 export default function AlertsPage() {
   const [filterSeverity, setFilterSeverity] = useState<FilterSeverity>("all");
   const [filterCategory, setFilterCategory] = useState<FilterCategory>("all");
@@ -87,17 +91,79 @@ export default function AlertsPage() {
     { value: "revenue", label: "Revenue" },
   ];
 
-  // Loading state
+  // Loading state with skeletons
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Alerts</h1>
-          <p className="text-zinc-500 dark:text-zinc-400 mt-1">Notifications and system alerts</p>
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-20 rounded-lg" />
+            <Skeleton className="h-5 w-48 mt-2 rounded-lg" />
+          </div>
+          <Skeleton className="h-10 w-36 rounded-xl" />
         </div>
-        <div className="flex items-center justify-center py-12">
-          <div className="w-8 h-8 border-2 border-[#0891B2] border-t-transparent rounded-full animate-spin" />
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {["critical", "warning", "info"].map((key) => (
+            <div key={key} className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] flex items-center gap-4">
+              <Skeleton className="w-12 h-12 rounded-xl" />
+              <div>
+                <Skeleton className="h-8 w-12 rounded" />
+                <Skeleton className="h-4 w-16 mt-1 rounded" />
+              </div>
+            </div>
+          ))}
         </div>
+
+        {/* Filters */}
+        <div className="space-y-4">
+          <div>
+            <Skeleton className="h-4 w-16 mb-2 rounded" />
+            <div className="flex flex-wrap gap-2">
+              {["all", "critical", "warning", "info"].map((key) => (
+                <Skeleton key={key} className="h-9 w-20 rounded-full" />
+              ))}
+            </div>
+          </div>
+          <div>
+            <Skeleton className="h-4 w-16 mb-2 rounded" />
+            <div className="flex flex-wrap gap-2">
+              {["all", "hardware", "supplies", "network", "revenue"].map((key) => (
+                <Skeleton key={key} className="h-9 w-20 rounded-full" />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Alerts List */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <Skeleton className="h-6 w-28 rounded-lg" />
+            <Skeleton className="h-4 w-16 rounded" />
+          </div>
+          <div className="space-y-3">
+            {["alert-1", "alert-2", "alert-3", "alert-4"].map((key) => (
+              <div key={key} className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800">
+                <div className="flex items-start gap-4">
+                  <Skeleton className="w-10 h-10 rounded-full shrink-0" />
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <Skeleton className="h-5 w-40 rounded" />
+                        <Skeleton className="h-3 w-24 mt-1 rounded" />
+                      </div>
+                      <Skeleton className="h-3 w-12 rounded" />
+                    </div>
+                    <Skeleton className="h-4 w-full mt-3 rounded" />
+                    <Skeleton className="h-6 w-20 mt-3 rounded-full" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     );
   }

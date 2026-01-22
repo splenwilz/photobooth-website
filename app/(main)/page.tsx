@@ -19,7 +19,7 @@ export default function Home() {
       {/* ============================================
        * Hero Section
        * ============================================ */}
-      <section className="relative pt-28 pb-20 px-6">
+      <section className="relative pt-16 pb-20 px-6">
         {/* Animated grid background */}
         <div className="absolute inset-0 grid-pattern opacity-50 dark:opacity-100" />
 

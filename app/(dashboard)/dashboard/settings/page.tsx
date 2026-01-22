@@ -207,6 +207,10 @@ function SectionHeader({
   );
 }
 
+function Skeleton({ className = "" }: { className?: string }) {
+  return <div className={`animate-pulse bg-slate-200 dark:bg-zinc-800 rounded ${className}`} />;
+}
+
 export default function SettingsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -344,21 +348,106 @@ export default function SettingsPage() {
       ].filter((p) => p.pricing)
     : [];
 
-  // Loading state
+  // Loading state with skeletons
   if (boothsLoading) {
     return (
       <div className="space-y-6 max-w-4xl">
+        {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
-            Settings
-          </h1>
-          <p className="text-zinc-500 dark:text-zinc-400 mt-1">
-            Configure your booth and account preferences
-          </p>
+          <Skeleton className="h-8 w-24 rounded-lg" />
+          <Skeleton className="h-5 w-72 mt-2 rounded-lg" />
         </div>
-        <div className="flex items-center justify-center py-12">
-          <div className="w-8 h-8 border-2 border-[#0891B2] border-t-transparent rounded-full animate-spin" />
+
+        {/* User Profile Section */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+          <div className="flex items-center gap-4">
+            <Skeleton className="w-16 h-16 rounded-full" />
+            <div>
+              <Skeleton className="h-6 w-40 rounded" />
+              <Skeleton className="h-4 w-48 mt-2 rounded" />
+            </div>
+          </div>
         </div>
+
+        {/* Current Booth Section */}
+        <section>
+          <div className="mb-3">
+            <Skeleton className="h-6 w-32 rounded-lg" />
+            <Skeleton className="h-4 w-24 mt-1 rounded-lg" />
+          </div>
+          <div className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+            <div className="flex items-center gap-4">
+              <Skeleton className="w-10 h-10 rounded-xl" />
+              <div className="flex-1">
+                <Skeleton className="h-5 w-32 rounded" />
+                <Skeleton className="h-4 w-48 mt-1 rounded" />
+              </div>
+              <Skeleton className="w-5 h-5 rounded" />
+            </div>
+          </div>
+        </section>
+
+        {/* Credits Section */}
+        <section>
+          <div className="mb-3">
+            <Skeleton className="h-6 w-20 rounded-lg" />
+            <Skeleton className="h-4 w-36 mt-1 rounded-lg" />
+          </div>
+          <div className="p-6 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+            <div className="text-center mb-6">
+              <Skeleton className="h-3 w-28 mx-auto rounded" />
+              <Skeleton className="h-12 w-24 mx-auto mt-2 rounded" />
+              <Skeleton className="h-4 w-16 mx-auto mt-2 rounded" />
+            </div>
+            <div className="flex gap-3">
+              <Skeleton className="flex-1 h-12 rounded-xl" />
+              <Skeleton className="flex-1 h-12 rounded-xl" />
+            </div>
+          </div>
+        </section>
+
+        {/* Booth Management Section */}
+        <section>
+          <div className="mb-3">
+            <Skeleton className="h-6 w-40 rounded-lg" />
+            <Skeleton className="h-4 w-48 mt-1 rounded-lg" />
+          </div>
+          <div className="space-y-3">
+            {["item-1", "item-2", "item-3", "item-4"].map((key) => (
+              <div key={key} className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="w-10 h-10 rounded-xl" />
+                  <div className="flex-1">
+                    <Skeleton className="h-5 w-36 rounded" />
+                    <Skeleton className="h-4 w-48 mt-1 rounded" />
+                  </div>
+                  <Skeleton className="w-5 h-5 rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* About Section */}
+        <section>
+          <div className="mb-3">
+            <Skeleton className="h-6 w-16 rounded-lg" />
+          </div>
+          <div className="space-y-3">
+            {["about-1", "about-2", "about-3", "about-4"].map((key) => (
+              <div key={key} className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="w-10 h-10 rounded-xl" />
+                  <div className="flex-1">
+                    <Skeleton className="h-5 w-28 rounded" />
+                    <Skeleton className="h-4 w-44 mt-1 rounded" />
+                  </div>
+                  <Skeleton className="w-5 h-5 rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     );
   }

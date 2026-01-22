@@ -17,6 +17,10 @@ import { useDashboardOverview, useBoothDetail } from "@/core/api/booths";
 
 type RevenuePeriod = "today" | "week" | "month" | "year";
 
+function Skeleton({ className = "" }: { className?: string }) {
+  return <div className={`animate-pulse bg-slate-200 dark:bg-zinc-800 rounded ${className}`} />;
+}
+
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -66,14 +70,14 @@ export default function DashboardPage() {
 
   // Get stats for selected period - handle both data shapes
   const revenue = isAllBooths
-    ? dashboardData?.revenue[selectedPeriod]
-    : boothData?.revenue[selectedPeriod];
+    ? dashboardData?.revenue?.[selectedPeriod]
+    : boothData?.revenue?.[selectedPeriod];
   const payment = isAllBooths
-    ? dashboardData?.payment_breakdown[selectedPeriod]
-    : boothData?.payment_breakdown[selectedPeriod];
+    ? dashboardData?.payment_breakdown?.[selectedPeriod]
+    : boothData?.payment_breakdown?.[selectedPeriod];
   const upsale = isAllBooths
-    ? dashboardData?.upsale_breakdown[selectedPeriod]
-    : boothData?.upsale_breakdown[selectedPeriod];
+    ? dashboardData?.upsale_breakdown?.[selectedPeriod]
+    : boothData?.upsale_breakdown?.[selectedPeriod];
   const summary = dashboardData?.summary;
   const hardware = dashboardData?.hardware_summary;
   const boothHardware = boothData?.hardware;
@@ -91,16 +95,141 @@ export default function DashboardPage() {
   // Calculate upsale totals
   const totalUpsaleRevenue = (upsale?.extra_copies_revenue ?? 0) + (upsale?.cross_sell_revenue ?? 0);
 
-  // Loading state
+  // Loading state with skeletons
   if (isLoading) {
     return (
       <div className="space-y-6">
+        {/* Page Header Skeleton */}
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Dashboard</h1>
-          <p className="text-zinc-500 dark:text-zinc-400 mt-1">Overview of your photo booth business</p>
+          <Skeleton className="h-8 w-40 rounded-lg" />
+          <Skeleton className="h-5 w-64 mt-2 rounded-lg" />
         </div>
-        <div className="flex items-center justify-center py-12">
-          <div className="w-8 h-8 border-2 border-[#0891B2] border-t-transparent rounded-full animate-spin" />
+
+        {/* Revenue Overview Skeleton */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <Skeleton className="h-6 w-40 rounded-lg" />
+              <Skeleton className="h-4 w-24 mt-1 rounded-lg" />
+            </div>
+            <Skeleton className="h-10 w-64 rounded-xl" />
+          </div>
+
+          {/* Stats Cards Row 1 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {["revenue", "transactions", "upsale", "avg-order"].map((key) => (
+              <div key={key} className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+                <Skeleton className="h-4 w-20 rounded" />
+                <Skeleton className="h-8 w-28 mt-2 rounded" />
+                <Skeleton className="h-4 w-32 mt-3 rounded" />
+              </div>
+            ))}
+          </div>
+
+          {/* Stats Cards Row 2 */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+            {/* Payment Methods Skeleton */}
+            <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+              <Skeleton className="h-5 w-36 mb-4 rounded" />
+              <div className="space-y-3">
+                {["cash", "card", "manual"].map((key) => (
+                  <div key={key}>
+                    <div className="flex items-center justify-between mb-1">
+                      <Skeleton className="h-4 w-16 rounded" />
+                      <Skeleton className="h-4 w-24 rounded" />
+                    </div>
+                    <Skeleton className="h-2 w-full rounded-full" />
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-200 dark:border-zinc-800 flex items-center justify-between">
+                <Skeleton className="h-4 w-12 rounded" />
+                <Skeleton className="h-4 w-20 rounded" />
+              </div>
+            </div>
+
+            {/* Upsale Breakdown Skeleton */}
+            <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+              <Skeleton className="h-5 w-36 mb-4 rounded" />
+              <div className="space-y-4">
+                {["extra-copies", "cross-sell"].map((key) => (
+                  <div key={key} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="w-10 h-10 rounded-xl" />
+                      <div>
+                        <Skeleton className="h-4 w-24 rounded" />
+                        <Skeleton className="h-3 w-16 mt-1 rounded" />
+                      </div>
+                    </div>
+                    <Skeleton className="h-6 w-20 rounded" />
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-200 dark:border-zinc-800 flex items-center justify-between">
+                <Skeleton className="h-4 w-32 rounded" />
+                <Skeleton className="h-4 w-20 rounded" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Hardware & Alerts Row Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Hardware Overview Skeleton */}
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <Skeleton className="h-6 w-40 rounded-lg" />
+                <Skeleton className="h-4 w-20 mt-1 rounded-lg" />
+              </div>
+            </div>
+            <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] space-y-4">
+              {["booths", "printers", "payment"].map((key) => (
+                <div key={key}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="w-8 h-8 rounded-lg" />
+                      <Skeleton className="h-4 w-20 rounded" />
+                    </div>
+                    <Skeleton className="h-4 w-24 rounded" />
+                  </div>
+                  <Skeleton className="h-2 w-full rounded-full" />
+                </div>
+              ))}
+              <div className="flex gap-4 pt-2 border-t border-slate-200 dark:border-zinc-800">
+                <Skeleton className="h-4 w-28 rounded" />
+                <Skeleton className="h-4 w-28 rounded" />
+              </div>
+            </div>
+          </section>
+
+          {/* Recent Alerts Skeleton */}
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <Skeleton className="h-6 w-32 rounded-lg" />
+                <Skeleton className="h-4 w-20 mt-1 rounded-lg" />
+              </div>
+              <Skeleton className="h-4 w-16 rounded" />
+            </div>
+            <div className="space-y-3">
+              {["alert-1", "alert-2", "alert-3"].map((key) => (
+                <div key={key} className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800">
+                  <div className="flex items-start gap-3">
+                    <Skeleton className="w-8 h-8 rounded-full shrink-0" />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <Skeleton className="h-4 w-32 rounded" />
+                        <Skeleton className="h-3 w-12 rounded" />
+                      </div>
+                      <Skeleton className="h-4 w-full mt-2 rounded" />
+                      <Skeleton className="h-3 w-24 mt-2 rounded" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
         </div>
       </div>
     );

@@ -87,4 +87,12 @@ export const queryKeys = {
 	settings: {
 		all: () => ['settings'] as const,
 	},
+
+	// Payment queries
+	payments: {
+		all: () => ['payments'] as const,
+		access: () => ['payments', 'access'] as const,
+		subscription: () => ['payments', 'subscription'] as const,
+		checkoutSession: (sessionId: string) => ['payments', 'checkout', sessionId] as const,
+	},
 } as const;

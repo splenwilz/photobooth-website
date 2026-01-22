@@ -84,6 +84,10 @@ function getPrintStatusConfig(status: "completed" | "pending" | "failed") {
   }
 }
 
+function Skeleton({ className = "", style }: { className?: string; style?: React.CSSProperties }) {
+  return <div className={`animate-pulse bg-slate-200 dark:bg-zinc-800 rounded ${className}`} style={style} />;
+}
+
 export default function AnalyticsPage() {
   const [chartPeriod, setChartPeriod] = useState<ChartPeriod>("week");
   const searchParams = useSearchParams();
@@ -101,17 +105,134 @@ export default function AnalyticsPage() {
   const error = isAllBooths ? dashboardQuery.error : boothQuery.error;
   const data = isAllBooths ? dashboardQuery.data : boothQuery.data;
 
-  // Loading state
+  // Loading state with skeletons
   if (isLoading) {
     return (
       <div className="space-y-6">
+        {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Analytics</h1>
-          <p className="text-zinc-500 dark:text-zinc-400 mt-1">Revenue insights and transaction history</p>
+          <Skeleton className="h-8 w-28 rounded-lg" />
+          <Skeleton className="h-5 w-64 mt-2 rounded-lg" />
         </div>
-        <div className="flex items-center justify-center py-12">
-          <div className="w-8 h-8 border-2 border-[#0891B2] border-t-transparent rounded-full animate-spin" />
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {["today", "week", "month", "year"].map((key) => (
+            <div key={key} className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+              <Skeleton className="h-4 w-20 rounded" />
+              <Skeleton className="h-8 w-28 mt-2 rounded" />
+              <Skeleton className="h-4 w-32 mt-3 rounded" />
+            </div>
+          ))}
         </div>
+
+        {/* Revenue Chart */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <Skeleton className="h-6 w-32 rounded-lg" />
+              <Skeleton className="h-4 w-20 mt-1 rounded-lg" />
+            </div>
+            <Skeleton className="h-9 w-32 rounded-lg" />
+          </div>
+          <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+            <div className="flex items-end gap-1 h-44">
+              {["d1", "d2", "d3", "d4", "d5", "d6", "d7"].map((key) => (
+                <div key={key} className="flex-1 flex flex-col items-center justify-end h-full">
+                  <Skeleton className="w-full max-w-8 rounded-t" style={{ height: `${Math.random() * 60 + 20}%` }} />
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-1 mt-2">
+              {["d1", "d2", "d3", "d4", "d5", "d6", "d7"].map((key) => (
+                <div key={key} className="flex-1 text-center">
+                  <Skeleton className="h-3 w-8 mx-auto rounded" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Breakdowns Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* By Product */}
+          <section>
+            <div className="mb-4">
+              <Skeleton className="h-6 w-40 rounded-lg" />
+              <Skeleton className="h-4 w-32 mt-1 rounded-lg" />
+            </div>
+            <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] space-y-4">
+              {["product-1", "product-2", "product-3"].map((key) => (
+                <div key={key}>
+                  <div className="flex items-center justify-between mb-2">
+                    <Skeleton className="h-5 w-28 rounded" />
+                    <Skeleton className="h-4 w-16 rounded" />
+                  </div>
+                  <Skeleton className="h-2 w-full rounded-full" />
+                  <Skeleton className="h-3 w-20 mt-1 rounded" />
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* By Payment */}
+          <section>
+            <div className="mb-4">
+              <Skeleton className="h-6 w-36 rounded-lg" />
+              <Skeleton className="h-4 w-40 mt-1 rounded-lg" />
+            </div>
+            <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] space-y-4">
+              {["cash", "card"].map((key) => (
+                <div key={key}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="w-6 h-6 rounded-full" />
+                      <Skeleton className="h-5 w-16 rounded" />
+                    </div>
+                    <Skeleton className="h-4 w-16 rounded" />
+                  </div>
+                  <Skeleton className="h-2 w-full rounded-full" />
+                  <Skeleton className="h-3 w-20 mt-1 rounded" />
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        {/* Recent Transactions */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <Skeleton className="h-6 w-40 rounded-lg" />
+              <Skeleton className="h-4 w-32 mt-1 rounded-lg" />
+            </div>
+            <Skeleton className="h-4 w-16 rounded" />
+          </div>
+          <div className="rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] overflow-hidden">
+            <div className="hidden md:grid grid-cols-6 gap-4 px-5 py-3 bg-slate-50 dark:bg-zinc-900/50">
+              {["product", "booth", "amount", "payment", "status", "time"].map((key) => (
+                <Skeleton key={key} className="h-4 w-16 rounded" />
+              ))}
+            </div>
+            <div className="divide-y divide-slate-200 dark:divide-zinc-800">
+              {["txn-1", "txn-2", "txn-3"].map((key) => (
+                <div key={key} className="px-5 py-4">
+                  <div className="hidden md:grid grid-cols-6 gap-4 items-center">
+                    <div>
+                      <Skeleton className="h-5 w-24 rounded" />
+                      <Skeleton className="h-3 w-20 mt-1 rounded" />
+                    </div>
+                    <Skeleton className="h-4 w-20 rounded" />
+                    <Skeleton className="h-5 w-16 rounded" />
+                    <Skeleton className="h-6 w-14 rounded-full" />
+                    <Skeleton className="h-6 w-16 rounded-full" />
+                    <Skeleton className="h-4 w-16 rounded" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       </div>
     );
   }

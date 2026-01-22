@@ -33,6 +33,10 @@ function getStatusColor(status: BoothStatus): string {
   }
 }
 
+function Skeleton({ className = "" }: { className?: string }) {
+  return <div className={`animate-pulse bg-slate-200 dark:bg-zinc-800 rounded ${className}`} />;
+}
+
 export default function BoothsPage() {
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -61,19 +65,72 @@ export default function BoothsPage() {
     });
   }, [booths, filterStatus, searchQuery]);
 
-  // Loading state
+  // Loading state with skeletons
   if (isLoading) {
     return (
       <div className="space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Booths</h1>
-            <p className="text-zinc-500 dark:text-zinc-400 mt-1">Manage your photo booth locations</p>
+            <Skeleton className="h-8 w-24 rounded-lg" />
+            <Skeleton className="h-5 w-56 mt-2 rounded-lg" />
+          </div>
+          <Skeleton className="h-10 w-32 rounded-xl" />
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {["total", "revenue", "online", "offline"].map((key) => (
+            <div key={key} className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+              <Skeleton className="h-4 w-24 rounded" />
+              <Skeleton className="h-8 w-20 mt-2 rounded" />
+              <Skeleton className="h-4 w-28 mt-3 rounded" />
+            </div>
+          ))}
+        </div>
+
+        {/* Search and Filters */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Skeleton className="flex-1 h-12 rounded-xl" />
+          <div className="flex gap-2">
+            {["all", "online", "offline"].map((key) => (
+              <Skeleton key={key} className="h-10 w-20 rounded-xl" />
+            ))}
           </div>
         </div>
-        <div className="flex items-center justify-center py-12">
-          <div className="w-8 h-8 border-2 border-[#0891B2] border-t-transparent rounded-full animate-spin" />
-        </div>
+
+        {/* All Booths Card */}
+        <Skeleton className="h-20 rounded-xl" />
+
+        {/* Booth List */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <Skeleton className="h-6 w-28 rounded-lg" />
+            <Skeleton className="h-4 w-16 rounded" />
+          </div>
+          <div className="space-y-3">
+            {["booth-1", "booth-2", "booth-3"].map((key) => (
+              <div key={key} className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="w-12 h-12 rounded-xl" />
+                    <div>
+                      <Skeleton className="h-5 w-32 rounded" />
+                      <Skeleton className="h-4 w-40 mt-1 rounded" />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-right hidden sm:block">
+                      <Skeleton className="h-5 w-20 rounded" />
+                      <Skeleton className="h-3 w-16 mt-1 rounded" />
+                    </div>
+                    <Skeleton className="w-5 h-5 rounded" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     );
   }
@@ -105,10 +162,12 @@ export default function BoothsPage() {
           <p className="text-zinc-500 dark:text-zinc-400 mt-1">Manage your photo booth locations</p>
         </div>
         <button
+        type="button"
           onClick={() => setIsAddModalOpen(true)}
           className="flex items-center gap-2 px-4 py-2.5 bg-[#0891B2] text-white font-medium rounded-xl hover:bg-[#0E7490] transition-colors"
         >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Add Booth">
+            <title>Add Booth</title>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
           Add Booth
@@ -147,7 +206,8 @@ export default function BoothsPage() {
       <div className="flex flex-col sm:flex-row gap-4">
         {/* Search */}
         <div className="flex-1 relative">
-          <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-label="Search">
+            <title>Search</title>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
           <input
@@ -163,7 +223,8 @@ export default function BoothsPage() {
         <div className="flex gap-2">
           {(["all", "online", "offline"] as FilterStatus[]).map((status) => (
             <button
-              key={status}
+              type="button"
+                key={status}
               onClick={() => setFilterStatus(status)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all ${
                 filterStatus === status
@@ -184,7 +245,8 @@ export default function BoothsPage() {
       <div className="p-4 rounded-xl bg-white dark:bg-[#111111] border-2 border-[#0891B2] flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-900/50 transition-all">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-[#0891B2]/20 flex items-center justify-center">
-            <svg className="w-6 h-6 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <svg className="w-6 h-6 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-label="All Booths">
+              <title>All Booths</title>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 6.878V6a2.25 2.25 0 012.25-2.25h7.5A2.25 2.25 0 0118 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 004.5 9v.878m13.5-3A2.25 2.25 0 0119.5 9v.878m0 0a2.246 2.246 0 00-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0121 12v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6c0-.98.626-1.813 1.5-2.122" />
             </svg>
           </div>
@@ -195,11 +257,13 @@ export default function BoothsPage() {
         </div>
         <div className="flex items-center gap-3">
           <div className="w-5 h-5 rounded-full bg-[#0891B2] flex items-center justify-center">
-            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-label="Arrow Right">
+              <title>Arrow Right</title>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
           </div>
-          <svg className="w-5 h-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="w-5 h-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-label="Arrow Right">
+            <title>Arrow Right</title>
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
           </svg>
         </div>
@@ -221,7 +285,8 @@ export default function BoothsPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-zinc-500 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <svg className="w-6 h-6 text-zinc-500 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-label="Booth Icon">
+                      <title>Booth Icon</title>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
                     </svg>
@@ -246,7 +311,8 @@ export default function BoothsPage() {
                   <div className="text-right hidden md:block">
                     <p className="text-sm text-zinc-500 dark:text-zinc-400">{booth.credits?.balance ?? 0} credits</p>
                   </div>
-                  <svg className="w-5 h-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <svg className="w-5 h-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-label="Arrow Right">
+                    <title>Arrow Right</title>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
                 </div>
@@ -256,7 +322,8 @@ export default function BoothsPage() {
 
           {filteredBooths.length === 0 && (
             <div className="p-12 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-center">
-              <svg className="w-12 h-12 text-zinc-400 dark:text-zinc-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+              <svg className="w-12 h-12 text-zinc-400 dark:text-zinc-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1} aria-label="No Booths">
+                <title>No Booths</title>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
               </svg>
               <p className="text-zinc-600 dark:text-zinc-400 font-medium">No booths match your filters</p>

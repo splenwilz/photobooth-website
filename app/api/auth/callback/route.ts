@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import { oauthCallback } from '@/core/api/auth/oauth/services'
 import { setAuthCookies } from '@/lib/auth'
 import { ApiError } from '@/core/api/client'
@@ -6,7 +7,7 @@ import { ApiError } from '@/core/api/client'
 /**
  * OAuth callback route handler
  * Handles OAuth callback from provider and sets authentication cookies
- * 
+ *
  * This must be a Route Handler (not a Server Component) to modify cookies
  * @see https://nextjs.org/docs/app/api-reference/functions/cookies#cookiessetname-value-options
  */
@@ -31,8 +32,20 @@ export async function GET(req: NextRequest) {
         // Set authentication cookies
         await setAuthCookies(authResponse)
 
-        // Redirect to dashboard on success
-        return NextResponse.redirect(new URL('/dashboard', req.url))
+        // Check for redirect cookie (set when user started OAuth from a specific page)
+        const cookieStore = await cookies()
+        const redirectTo = cookieStore.get('auth_redirect')?.value
+
+        // Create redirect response
+        const redirectUrl = redirectTo || '/dashboard'
+        const response = NextResponse.redirect(new URL(redirectUrl, req.url))
+
+        // Clear the redirect cookie
+        if (redirectTo) {
+            response.cookies.delete('auth_redirect')
+        }
+
+        return response
     } catch (error) {
         console.error('[AUTH] OAuth callback failed:', error)
 

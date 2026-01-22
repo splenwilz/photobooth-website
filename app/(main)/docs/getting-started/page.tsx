@@ -83,7 +83,7 @@ The installation typically takes less than 2 minutes.`,
 
 export default function GettingStartedPage() {
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] pt-32 pb-24 px-6">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] pt-16 pb-24 px-6">
       <div className="max-w-3xl mx-auto">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-[var(--muted)] mb-8">

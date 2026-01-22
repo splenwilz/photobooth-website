@@ -2,10 +2,25 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useUser } from "@/hooks/use-user";
+import { useSubscriptionAccess } from "@/core/api/payments";
+import type { HardwarePackageId } from "@/core/config/stripe";
 
 // Hardware booth packages
-const hardwarePackages = [
+const hardwarePackages: Array<{
+  id: HardwarePackageId;
+  name: string;
+  description: string;
+  price: number;
+  features: Array<{ text: string; included: boolean }>;
+  cta: string;
+  ctaLink: string | null; // null = uses checkout, string = custom link
+  highlighted: boolean;
+  icon: string;
+  badge: string | null;
+}> = [
   {
+    id: "essential",
     name: "Essential",
     description: "Perfect for getting started",
     price: 2499,
@@ -19,13 +34,14 @@ const hardwarePackages = [
       { text: "Professional Printer", included: false },
       { text: "Travel Case", included: false },
     ],
-    cta: "Get Started",
-    ctaLink: "/contact?package=essential",
+    cta: "Buy Essential",
+    ctaLink: null, // Uses checkout
     highlighted: false,
     icon: "📷",
     badge: null,
   },
   {
+    id: "professional",
     name: "Professional",
     description: "Complete event-ready setup",
     price: 4999,
@@ -39,13 +55,14 @@ const hardwarePackages = [
       { text: "Padded Travel Case", included: true },
       { text: "1-Year Hardware Warranty", included: true },
     ],
-    cta: "Configure Setup",
-    ctaLink: "/contact?package=professional",
+    cta: "Buy Professional",
+    ctaLink: null, // Uses checkout
     highlighted: true,
     icon: "🎯",
     badge: "Most Popular",
   },
   {
+    id: "premium",
     name: "Premium",
     description: "Enterprise-grade equipment",
     price: 7999,
@@ -59,8 +76,8 @@ const hardwarePackages = [
       { text: "Flight Case + Accessories", included: true },
       { text: "2-Year Hardware Warranty", included: true },
     ],
-    cta: "Contact Sales",
-    ctaLink: "/contact?package=premium",
+    cta: "Buy Premium",
+    ctaLink: null, // Uses checkout
     highlighted: false,
     icon: "👑",
     badge: null,
@@ -70,6 +87,7 @@ const hardwarePackages = [
 // Software subscription plans
 const softwarePlans = [
   {
+    id: "starter",
     name: "Starter",
     description: "Perfect for trying out PhotoBoothX",
     monthlyPrice: 0,
@@ -89,8 +107,10 @@ const softwarePlans = [
     ctaLink: "/downloads",
     highlighted: false,
     icon: "🎯",
+    isPaid: false,
   },
   {
+    id: "pro",
     name: "Pro",
     description: "For professional operators",
     monthlyPrice: 49,
@@ -108,11 +128,13 @@ const softwarePlans = [
       { text: "Analytics dashboard", included: true },
     ],
     cta: "Start 14-Day Free Trial",
-    ctaLink: "/downloads",
+    ctaLink: null, // Will use checkout
     highlighted: true,
     icon: "⚡",
+    isPaid: true,
   },
   {
+    id: "enterprise",
     name: "Enterprise",
     description: "For large operations",
     monthlyPrice: null,
@@ -132,6 +154,7 @@ const softwarePlans = [
     ctaLink: "/contact",
     highlighted: false,
     icon: "🏢",
+    isPaid: false,
   },
 ];
 
@@ -186,15 +209,36 @@ const comparisonFeatures = [
 export default function PricingPage() {
   const [isAnnual, setIsAnnual] = useState(true);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  
+
+  // Auth state
+  const { isAuthenticated, isLoading: authLoading } = useUser();
+
+  // Subscription access check
+  const { data: accessData, isLoading: accessLoading } = useSubscriptionAccess({
+    enabled: isAuthenticated,
+  });
+  const hasActiveSubscription = accessData?.has_access ?? false;
+
   // Section IDs for anchor navigation
   const hardwareSectionId = "hardware";
   const softwareSectionId = "software";
 
+  // Get button text for Pro plan
+  const getProButtonText = () => {
+    if (authLoading || accessLoading) return "Loading...";
+    if (hasActiveSubscription) return "Manage Subscription";
+    return "Start 14-Day Free Trial";
+  };
+
+  // Get subscription checkout URL based on billing interval
+  const getSubscriptionCheckoutUrl = () => {
+    return `/api/checkout/subscription?interval=${isAnnual ? "annual" : "monthly"}`;
+  };
+
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       {/* Hero Section */}
-      <section className="relative pt-32 pb-16 px-6 overflow-hidden">
+      <section className="relative pt-16 pb-16 px-6 overflow-hidden">
         {/* Background glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#0891B2]/10 blur-[150px] rounded-full" />
 
@@ -256,10 +300,10 @@ export default function PricingPage() {
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">
               Complete Booth Packages
             </h2>
-            <p className="text-[var(--muted)] max-w-2xl mx-auto">
+            <p className="text-[var(--muted)] max-w-2xl mx-auto mb-20">
               Event-ready photo booth setups with professional equipment.
               Everything tested and configured — just unbox and start earning.
-            </p>
+          </p>
           </div>
 
           {/* Hardware Cards */}
@@ -302,16 +346,29 @@ export default function PricingPage() {
                 </div>
 
                 {/* CTA */}
-                <Link
-                  href={pkg.ctaLink}
-                  className={`block w-full py-3.5 rounded-xl font-semibold text-center transition-all mb-8 ${
-                    pkg.highlighted
-                      ? "bg-[#F59E0B] text-white hover:bg-[#D97706] shadow-lg shadow-[#F59E0B]/30 hover:shadow-[#F59E0B]/50"
-                      : "bg-slate-200 dark:bg-zinc-800 text-zinc-900 dark:text-white hover:bg-slate-300 dark:hover:bg-zinc-700"
-                  }`}
-                >
-                  {pkg.cta}
-                </Link>
+                {pkg.ctaLink ? (
+                  <Link
+                    href={pkg.ctaLink}
+                    className={`block w-full py-3.5 rounded-xl font-semibold text-center transition-all mb-8 ${
+                      pkg.highlighted
+                        ? "bg-[#F59E0B] text-white hover:bg-[#D97706] shadow-lg shadow-[#F59E0B]/30 hover:shadow-[#F59E0B]/50"
+                        : "bg-slate-200 dark:bg-zinc-800 text-zinc-900 dark:text-white hover:bg-slate-300 dark:hover:bg-zinc-700"
+                    }`}
+                  >
+                    {pkg.cta}
+                  </Link>
+                ) : (
+                  <a
+                    href={`/api/checkout/hardware/${pkg.id}`}
+                    className={`block w-full py-3.5 rounded-xl font-semibold text-center transition-all mb-8 ${
+                      pkg.highlighted
+                        ? "bg-[#F59E0B] text-white hover:bg-[#D97706] shadow-lg shadow-[#F59E0B]/30 hover:shadow-[#F59E0B]/50"
+                        : "bg-slate-200 dark:bg-zinc-800 text-zinc-900 dark:text-white hover:bg-slate-300 dark:hover:bg-zinc-700"
+                    }`}
+                  >
+                    {pkg.cta}
+                  </a>
+                )}
 
                 {/* Features */}
                 <ul className="space-y-3">
@@ -457,8 +514,8 @@ export default function PricingPage() {
                       </div>
                       {plan.monthlyPrice > 0 && (
                         <p className="text-sm text-[var(--muted)] mt-1">
-                          {isAnnual 
-                            ? `Billed $${(plan.yearlyPrice ?? 0) * 12}/year` 
+                          {isAnnual
+                            ? `Billed $${(plan.yearlyPrice ?? 0) * 12}/year`
                             : "Billed monthly"
                           }
                         </p>
@@ -472,22 +529,37 @@ export default function PricingPage() {
                 </div>
 
                 {/* CTA */}
-                <Link
-                  href={plan.ctaLink}
-                  className={`block w-full py-3.5 rounded-xl font-semibold text-center transition-all mb-8 ${
-                    plan.highlighted
-                      ? "bg-[#0891B2] text-white hover:bg-[#0E7490] shadow-lg shadow-[#0891B2]/30 hover:shadow-[#0891B2]/50"
-                      : "bg-slate-200 dark:bg-zinc-800 text-zinc-900 dark:text-white hover:bg-slate-300 dark:hover:bg-zinc-700"
-                  }`}
-                >
-                  {plan.cta}
-                </Link>
+                {plan.isPaid ? (
+                  <a
+                    href={getSubscriptionCheckoutUrl()}
+                    className={`block w-full py-3.5 rounded-xl font-semibold text-center transition-all mb-8 ${
+                      authLoading || accessLoading ? "opacity-70 pointer-events-none" : ""
+                    } ${
+                      plan.highlighted
+                        ? "bg-[#0891B2] text-white hover:bg-[#0E7490] shadow-lg shadow-[#0891B2]/30 hover:shadow-[#0891B2]/50"
+                        : "bg-slate-200 dark:bg-zinc-800 text-zinc-900 dark:text-white hover:bg-slate-300 dark:hover:bg-zinc-700"
+                    }`}
+                  >
+                    {getProButtonText()}
+                  </a>
+                ) : (
+                  <Link
+                    href={plan.ctaLink ?? "/downloads"}
+                    className={`block w-full py-3.5 rounded-xl font-semibold text-center transition-all mb-8 ${
+                      plan.highlighted
+                        ? "bg-[#0891B2] text-white hover:bg-[#0E7490] shadow-lg shadow-[#0891B2]/30 hover:shadow-[#0891B2]/50"
+                        : "bg-slate-200 dark:bg-zinc-800 text-zinc-900 dark:text-white hover:bg-slate-300 dark:hover:bg-zinc-700"
+                    }`}
+                  >
+                    {plan.cta}
+                  </Link>
+                )}
 
                 {/* Features */}
                 <ul className="space-y-3">
                   {plan.features.map((feature) => (
-                    <li 
-                      key={feature.text} 
+                    <li
+                      key={feature.text}
                       className={`flex items-center gap-3 text-sm ${
                         feature.included ? "text-[var(--foreground-secondary)]" : "text-[var(--muted)]"
                       }`}
@@ -594,10 +666,9 @@ export default function PricingPage() {
                 <div className="font-semibold text-[var(--foreground)]">Sarah Kim</div>
                 <div className="text-sm text-[var(--muted)]">Owner, SnapBox Events · 8 booths</div>
               </div>
-              <div className="ml-auto flex gap-0.5">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <svg key={star} className="w-5 h-5 text-[#F59E0B]" fill="currentColor" viewBox="0 0 20 20" aria-label={`${star} star`} aria-hidden="true">
-                    <title>{star} star</title>
+              <div className="ml-auto flex gap-0.5" role="img" aria-label="5 star rating">
+                {["star-1", "star-2", "star-3", "star-4", "star-5"].map((id) => (
+                  <svg key={id} className="w-5 h-5 text-[#F59E0B]" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                 ))}
@@ -611,7 +682,7 @@ export default function PricingPage() {
       <section className="px-6 pb-24 relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[#0891B2]/5 blur-[150px] rounded-full -translate-y-1/2" />
-        
+
         <div className="relative max-w-5xl mx-auto">
           {/* Header */}
           <div className="text-center mb-16">
@@ -724,13 +795,13 @@ export default function PricingPage() {
                 <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
                 Start in under 5 minutes
               </div>
-              
+
               <h2 className="text-3xl sm:text-4xl font-bold mb-4 leading-tight">
                 Ready to get started?
               </h2>
-              
+
               <p className="text-[var(--muted)] mb-8 leading-relaxed">
-                Download PhotoBoothX and start your 14-day free trial. 
+                Download PhotoBoothX and start your 14-day free trial.
                 No credit card required, cancel anytime.
               </p>
 

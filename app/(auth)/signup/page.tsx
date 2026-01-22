@@ -8,7 +8,12 @@ export const metadata: Metadata = {
   description: "Create your PhotoBoothX account and start managing your photo booths.",
 };
 
-export default function SignUpPage() {
+interface SignUpPageProps {
+  searchParams: Promise<{ redirect?: string }>;
+}
+
+export default async function SignUpPage({ searchParams }: SignUpPageProps) {
+  const { redirect } = await searchParams;
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex">
       {/* Left Panel - Decorative */}
@@ -121,7 +126,7 @@ export default function SignUpPage() {
           </div>
 
           {/* Social Buttons */}
-          <OAuthButtons />
+          <OAuthButtons redirectTo={redirect} />
 
           {/* Sign In Link */}
           <p className="text-center text-sm text-[var(--muted)] mt-8">

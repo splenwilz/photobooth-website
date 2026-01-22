@@ -88,7 +88,7 @@ export default function TemplatesPage() {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       {/* Hero Section */}
-      <section className="relative pt-32 pb-12 px-6 overflow-hidden">
+      <section className="relative pt-16 pb-12 px-6 overflow-hidden">
         {/* Background glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#0891B2]/10 blur-[150px] rounded-full" />
 

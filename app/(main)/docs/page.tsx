@@ -215,7 +215,7 @@ export default function DocsPage() {
       {/* ============================================
        * Hero Section
        * ============================================ */}
-      <section className="relative pt-32 pb-20 px-6 overflow-hidden">
+      <section className="relative pt-16 pb-20 px-6 overflow-hidden">
         {/* Background effects */}
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#0891B2]/10 blur-[200px] rounded-full" />
         <div className="absolute bottom-0 right-1/3 w-[400px] h-[400px] bg-[#A855F7]/10 blur-[150px] rounded-full" />
