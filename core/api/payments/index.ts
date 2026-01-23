@@ -56,6 +56,11 @@ export type {
   BillingInterval,
   SubscriptionPlan,
   HardwarePackage,
+
+  // Per-booth subscription types
+  BoothSubscriptionItem,
+  BoothSubscriptionsListResponse,
+  CreateBoothCheckoutRequest,
 } from "./types";
 
 // Services
@@ -75,6 +80,12 @@ export {
 
   // Customer portal services
   createPortalSession,
+
+  // Per-booth subscription services
+  getBoothSubscriptions,
+  getBoothSubscription,
+  createBoothCheckout,
+  cancelBoothSubscription,
 } from "./services";
 
 // React Query Hooks
@@ -97,4 +108,10 @@ export {
 
   // Utility hooks
   useSubscriptionStatus,
+
+  // Per-booth subscription hooks
+  useBoothSubscriptions,
+  useBoothSubscription,
+  useCreateBoothCheckout,
+  useCancelBoothSubscription,
 } from "./queries";
