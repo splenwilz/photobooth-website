@@ -10,20 +10,27 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "../utils/query-keys";
 import {
+  cancelBoothSubscription,
   cancelSubscription,
   checkSubscriptionAccess,
+  createBoothCheckout,
   createPortalSession,
   createProductCheckout,
   createProductsCheckout,
   createSubscriptionCheckout,
+  getBoothSubscription,
+  getBoothSubscriptions,
   getCheckoutSession,
   getSubscriptionInfo,
 } from "./services";
 import type {
+  BoothSubscriptionItem,
+  BoothSubscriptionsListResponse,
   CancelSubscriptionParams,
   CancelSubscriptionResponse,
   CheckoutResponse,
   CheckoutSessionResponse,
+  CreateBoothCheckoutRequest,
   CreatePortalSessionRequest,
   CreatePortalSessionResponse,
   CreateProductCheckoutRequest,
@@ -350,4 +357,121 @@ export function useSubscriptionStatus() {
       subscriptionQuery.refetch();
     },
   };
+}
+
+// ============================================================================
+// PER-BOOTH SUBSCRIPTION HOOKS
+// ============================================================================
+
+/**
+ * Hook to get all booth subscriptions for user
+ * Returns all user's booths with their subscription status
+ *
+ * @returns React Query result with list of booth subscriptions
+ *
+ * @example
+ * ```tsx
+ * const { data } = useBoothSubscriptions();
+ * const activeBooths = data?.items.filter(b => b.is_active);
+ * ```
+ */
+export function useBoothSubscriptions() {
+  return useQuery<BoothSubscriptionsListResponse>({
+    queryKey: queryKeys.payments.boothSubscriptions(),
+    queryFn: getBoothSubscriptions,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+/**
+ * Hook to get single booth subscription status
+ * Returns subscription details for a specific booth
+ * Automatically disabled when boothId is null
+ *
+ * @param boothId - Booth ID to get subscription for (null to disable)
+ * @returns React Query result with booth subscription status
+ *
+ * @example
+ * ```tsx
+ * const { data, isLoading } = useBoothSubscription(selectedBoothId);
+ * if (data?.is_active) {
+ *   // Booth has active subscription
+ * }
+ * ```
+ */
+export function useBoothSubscription(boothId: string | null) {
+  return useQuery<BoothSubscriptionItem>({
+    queryKey: queryKeys.payments.boothSubscription(boothId ?? ""),
+    queryFn: () => getBoothSubscription(boothId!),
+    enabled: !!boothId,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+/**
+ * Hook to create booth subscription checkout session
+ * Creates a Stripe checkout session for a specific booth
+ *
+ * @returns React Query mutation for creating booth checkout
+ *
+ * @example
+ * ```tsx
+ * const { mutate, isPending } = useCreateBoothCheckout();
+ *
+ * const handleSubscribe = (boothId: string) => {
+ *   mutate({
+ *     booth_id: boothId,
+ *     success_url: `${window.location.origin}/checkout/success`,
+ *     cancel_url: `${window.location.origin}/pricing`,
+ *   }, {
+ *     onSuccess: (data) => {
+ *       window.location.href = data.checkout_url;
+ *     },
+ *   });
+ * };
+ * ```
+ */
+export function useCreateBoothCheckout() {
+  return useMutation<CheckoutResponse, Error, CreateBoothCheckoutRequest>({
+    mutationFn: (data) => createBoothCheckout(data),
+  });
+}
+
+/**
+ * Hook to cancel booth subscription
+ * Cancels subscription for a specific booth
+ *
+ * @returns React Query mutation for cancelling booth subscription
+ *
+ * @example
+ * ```tsx
+ * const { mutate, isPending } = useCancelBoothSubscription();
+ *
+ * const handleCancel = (boothId: string) => {
+ *   mutate({ boothId, immediately: false }, {
+ *     onSuccess: () => alert('Subscription will cancel at end of period'),
+ *   });
+ * };
+ * ```
+ */
+export function useCancelBoothSubscription() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    BoothSubscriptionItem,
+    Error,
+    { boothId: string; immediately?: boolean }
+  >({
+    mutationFn: ({ boothId, immediately = false }) =>
+      cancelBoothSubscription(boothId, immediately),
+    onSuccess: (_, variables) => {
+      // Invalidate booth subscription queries to refetch updated status
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.payments.boothSubscriptions(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.payments.boothSubscription(variables.boothId),
+      });
+    },
+  });
 }

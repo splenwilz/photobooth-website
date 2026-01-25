@@ -9,10 +9,13 @@
 
 import { apiClient } from "../client";
 import type {
+  BoothSubscriptionItem,
+  BoothSubscriptionsListResponse,
   CancelSubscriptionParams,
   CancelSubscriptionResponse,
   CheckoutResponse,
   CheckoutSessionResponse,
+  CreateBoothCheckoutRequest,
   CreatePortalSessionRequest,
   CreatePortalSessionResponse,
   CreateProductCheckoutRequest,
@@ -266,4 +269,76 @@ export async function createPortalSession(
     method: "POST",
     body: JSON.stringify(data),
   });
+}
+
+// ============================================================================
+// PER-BOOTH SUBSCRIPTION SERVICES
+// ============================================================================
+
+/**
+ * Get all booth subscriptions for user
+ * Returns all user's booths with their subscription status
+ *
+ * @returns Promise resolving to list of booths with subscription status
+ * @see GET /api/v1/payments/booths/subscriptions
+ */
+export async function getBoothSubscriptions(): Promise<BoothSubscriptionsListResponse> {
+  return apiClient<BoothSubscriptionsListResponse>(
+    "/api/v1/payments/booths/subscriptions",
+    { method: "GET" }
+  );
+}
+
+/**
+ * Get single booth subscription status
+ * Returns subscription details for a specific booth
+ *
+ * @param boothId - Booth ID to get subscription for
+ * @returns Promise resolving to booth subscription status
+ * @see GET /api/v1/booths/{booth_id}/subscription
+ */
+export async function getBoothSubscription(
+  boothId: string
+): Promise<BoothSubscriptionItem> {
+  return apiClient<BoothSubscriptionItem>(
+    `/api/v1/booths/${boothId}/subscription`,
+    { method: "GET" }
+  );
+}
+
+/**
+ * Create checkout session for booth subscription
+ * Creates a Stripe checkout session for a specific booth
+ *
+ * @param data - Checkout configuration with booth ID and URLs
+ * @returns Promise resolving to checkout URL and session ID
+ * @see POST /api/v1/booths/{booth_id}/subscription/checkout
+ */
+export async function createBoothCheckout(
+  data: CreateBoothCheckoutRequest
+): Promise<CheckoutResponse> {
+  return apiClient<CheckoutResponse>(
+    `/api/v1/booths/${data.booth_id}/subscription/checkout`,
+    {
+      method: "POST",
+      body: JSON.stringify(data),
+    }
+  );
+}
+
+/**
+ * Cancel booth subscription
+ * Cancels subscription for a specific booth
+ *
+ * @param boothId - Booth ID to cancel subscription for
+ * @param cancelImmediately - If true, cancels immediately instead of at period end
+ * @returns Promise resolving to updated booth subscription state
+ * @see POST /api/v1/booths/{booth_id}/subscription/cancel
+ */
+export async function cancelBoothSubscription(
+  boothId: string,
+  cancelImmediately = false
+): Promise<BoothSubscriptionItem> {
+  const url = `/api/v1/booths/${boothId}/subscription/cancel${cancelImmediately ? "?cancel_immediately=true" : ""}`;
+  return apiClient<BoothSubscriptionItem>(url, { method: "POST" });
 }

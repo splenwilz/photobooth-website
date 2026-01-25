@@ -291,3 +291,60 @@ export interface HardwarePackage {
   highlighted?: boolean;
   badge?: string;
 }
+
+// ============================================================================
+// PER-BOOTH SUBSCRIPTIONS
+// ============================================================================
+
+/**
+ * Per-booth subscription status
+ * Used in both list endpoint and single booth subscription endpoint
+ *
+ * @see GET /api/v1/payments/booths/subscriptions - List all booth subscriptions
+ * @see GET /api/v1/booths/{booth_id}/subscription - Get single booth subscription
+ */
+export interface BoothSubscriptionItem {
+  /** Booth ID */
+  booth_id: string;
+  /** Booth name for display */
+  booth_name: string;
+  /** Stripe subscription ID or null if no subscription */
+  subscription_id: string | null;
+  /** Current subscription status or null if no subscription */
+  status: SubscriptionStatus | null;
+  /** Whether booth has active subscription */
+  is_active: boolean;
+  /** End of current billing period (ISO 8601) or null */
+  current_period_end: string | null;
+  /** Whether subscription will cancel at period end */
+  cancel_at_period_end: boolean;
+  /** Stripe price ID or null */
+  price_id: string | null;
+}
+
+/**
+ * GET /api/v1/payments/booths/subscriptions response
+ * Lists all user's booths with their subscription status
+ */
+export interface BoothSubscriptionsListResponse {
+  /** List of booths with subscription status */
+  items: BoothSubscriptionItem[];
+  /** Total number of booths */
+  total: number;
+}
+
+/**
+ * POST /api/v1/booths/{booth_id}/subscription/checkout request body
+ */
+export interface CreateBoothCheckoutRequest {
+  /** Booth ID to create subscription for */
+  booth_id: string;
+  /** Stripe price ID (optional - uses default if not provided) */
+  price_id?: string;
+  /** URL to redirect to on successful payment */
+  success_url: string;
+  /** URL to redirect to if payment is cancelled */
+  cancel_url: string;
+  /** Optional trial period in days */
+  trial_period_days?: number;
+}

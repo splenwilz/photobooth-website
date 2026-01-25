@@ -94,5 +94,8 @@ export const queryKeys = {
 		access: () => ['payments', 'access'] as const,
 		subscription: () => ['payments', 'subscription'] as const,
 		checkoutSession: (sessionId: string) => ['payments', 'checkout', sessionId] as const,
+		// Per-booth subscription queries
+		boothSubscriptions: () => ['payments', 'booths', 'subscriptions'] as const,
+		boothSubscription: (boothId: string) => ['payments', 'booths', 'subscription', boothId] as const,
 	},
 } as const;
