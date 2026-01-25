@@ -41,6 +41,7 @@ function formatShortDate(dateString: string): string {
 
 /**
  * Get Windows asset from release (with fallbacks)
+ * Returns undefined if no Windows asset is found
  */
 function getWindowsAsset(release: Release): ReleaseAsset | undefined {
   if (!release.assets || release.assets.length === 0) {
@@ -58,14 +59,20 @@ function getWindowsAsset(release: Release): ReleaseAsset | undefined {
   if (asset) return asset;
 
   // Try by filename (case-insensitive)
+  // Note: Use "windows" or extension checks, avoid "win" as it matches "darwin"
   asset = release.assets.find((a) => {
     const name = a.name.toLowerCase();
-    return name.includes("win") || name.includes(".exe") || name.includes(".msi");
+    // Exclude macOS/Linux explicitly
+    if (name.includes("darwin") || name.includes("macos") || name.includes("linux")) {
+      return false;
+    }
+    // Match Windows-specific patterns
+    return name.includes("windows") || name.endsWith(".exe") || name.endsWith(".msi");
   });
   if (asset) return asset;
 
-  // Fallback: return first asset
-  return release.assets[0];
+  // No Windows asset found - return undefined instead of wrong platform
+  return undefined;
 }
 
 /**
