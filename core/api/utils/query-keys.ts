@@ -10,6 +10,7 @@
 import type { AlertsParams } from "../alerts/types";
 import type { BoothRevenueParams, RevenueDashboardParams } from "../analytics/types";
 import type { CreditsHistoryParams } from "../credits/types";
+import type { ReleasesParams } from "../releases/types";
 
 export const queryKeys = {
 	// Booth-related queries
@@ -97,5 +98,12 @@ export const queryKeys = {
 		// Per-booth subscription queries
 		boothSubscriptions: () => ['payments', 'booths', 'subscriptions'] as const,
 		boothSubscription: (boothId: string) => ['payments', 'booths', 'subscription', boothId] as const,
+	},
+
+	// Releases queries (public - GitHub releases)
+	releases: {
+		all: () => ['releases'] as const,
+		list: (params?: ReleasesParams) => ['releases', 'list', params] as const,
+		latest: () => ['releases', 'latest'] as const,
 	},
 } as const;
