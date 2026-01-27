@@ -13,6 +13,13 @@ export function TemplateCard({ template, onQuickView }: TemplateCardProps) {
   const { addItem, isInCart, openCart } = useCartStore();
   const inCart = isInCart(template.id);
 
+  const price = parseFloat(template.price);
+  const originalPrice = template.original_price
+    ? parseFloat(template.original_price)
+    : null;
+  const isFree = price === 0;
+  const rating = parseFloat(template.rating_average) || 0;
+
   const handleAddToCart = () => {
     if (inCart) {
       openCart();
@@ -23,7 +30,7 @@ export function TemplateCard({ template, onQuickView }: TemplateCardProps) {
   };
 
   // Different heights for different template types
-  const isPortrait = template.category === "4x6-portrait";
+  const isPortrait = template.template_type === "photo_4x6";
   const imageHeight = isPortrait ? "h-[300px]" : "h-[400px]";
 
   return (
@@ -31,7 +38,7 @@ export function TemplateCard({ template, onQuickView }: TemplateCardProps) {
       {/* Image Container */}
       <div className={`relative ${imageHeight} bg-slate-100 dark:bg-zinc-900 overflow-hidden`}>
         <Image
-          src={template.previewImage}
+          src={template.preview_url}
           alt={template.name}
           fill
           className="object-contain p-1 transition-transform duration-300 group-hover:scale-105"
@@ -40,17 +47,17 @@ export function TemplateCard({ template, onQuickView }: TemplateCardProps) {
 
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
-          {template.isNew && (
+          {template.is_new && (
             <span className="px-2.5 py-1 rounded-full bg-[#10B981] text-white text-xs font-semibold">
               New
             </span>
           )}
-          {template.isFree && (
+          {isFree && (
             <span className="px-2.5 py-1 rounded-full bg-[#0891B2] text-white text-xs font-semibold">
               Free
             </span>
           )}
-          {template.originalPrice && !template.isFree && (
+          {originalPrice && !isFree && (
             <span className="px-2.5 py-1 rounded-full bg-[#EF4444] text-white text-xs font-semibold">
               Sale
             </span>
@@ -99,7 +106,7 @@ export function TemplateCard({ template, onQuickView }: TemplateCardProps) {
         {/* Category Tag */}
         <div className="mb-2">
           <span className="text-xs text-[var(--muted)] uppercase tracking-wide">
-            {template.layoutType.replace(/-/g, " ")}
+            {template.layout?.layout_key?.replace(/-/g, " ") || template.template_type.replace(/_/g, " ")}
           </span>
         </div>
 
@@ -115,7 +122,7 @@ export function TemplateCard({ template, onQuickView }: TemplateCardProps) {
               <svg aria-label="Star" aria-hidden="true"
                 key={star}
                 className={`w-3.5 h-3.5 ${
-                  star <= Math.round(template.rating) ? "text-[#F59E0B]" : "text-slate-300 dark:text-zinc-700"
+                  star <= Math.round(rating) ? "text-[#F59E0B]" : "text-slate-300 dark:text-zinc-700"
                 }`}
                 fill="currentColor"
                 viewBox="0 0 20 20"
@@ -125,22 +132,22 @@ export function TemplateCard({ template, onQuickView }: TemplateCardProps) {
               </svg>
             ))}
           </div>
-          <span className="text-xs text-[var(--muted)]">({template.reviewCount})</span>
+          <span className="text-xs text-[var(--muted)]">({template.review_count})</span>
         </div>
 
         {/* Price & Add to Cart */}
         <div className="flex items-center justify-between">
           <div className="flex items-baseline gap-2">
-            {template.isFree ? (
+            {isFree ? (
               <span className="text-lg font-bold text-[#10B981]">Free</span>
             ) : (
               <>
                 <span className="text-lg font-bold text-[var(--foreground)]">
-                  ${template.price.toFixed(2)}
+                  ${price.toFixed(2)}
                 </span>
-                {template.originalPrice && (
+                {originalPrice && (
                   <span className="text-sm text-[var(--muted)] line-through">
-                    ${template.originalPrice.toFixed(2)}
+                    ${originalPrice.toFixed(2)}
                   </span>
                 )}
               </>

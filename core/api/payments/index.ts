@@ -34,6 +34,10 @@ export type {
   CheckoutLineItem,
   CreateProductsCheckoutRequest,
 
+  // Template checkout (database prices)
+  TemplateCheckoutLineItem,
+  CreateTemplateCheckoutRequest,
+
   // Checkout session
   CheckoutSessionResponse,
 
@@ -69,6 +73,7 @@ export {
   createSubscriptionCheckout,
   createProductCheckout,
   createProductsCheckout,
+  createTemplateCheckout,
   getCheckoutSession,
 
   // Subscription access services
@@ -94,6 +99,7 @@ export {
   useSubscriptionCheckout,
   useProductCheckout,
   useProductsCheckout,
+  useTemplateCheckout,
   useCheckoutSession,
 
   // Subscription access hooks

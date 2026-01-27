@@ -24,7 +24,8 @@ export function proxy(request: NextRequest) {
     // Protected routes that require authentication
     const protectedRoutes = [
         '/dashboard',
-        // Add more protected routes here
+        '/admin',
+        '/templates',
     ]
 
     // Check if route is public

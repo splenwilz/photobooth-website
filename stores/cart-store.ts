@@ -8,8 +8,8 @@ interface CartState {
 
   // Actions
   addItem: (template: Template) => void;
-  removeItem: (templateId: string) => void;
-  updateQuantity: (templateId: string, quantity: number) => void;
+  removeItem: (templateId: number) => void;
+  updateQuantity: (templateId: number, quantity: number) => void;
   clearCart: () => void;
   toggleCart: () => void;
   openCart: () => void;
@@ -18,7 +18,7 @@ interface CartState {
   // Computed values (as functions)
   getSubtotal: () => number;
   getItemCount: () => number;
-  isInCart: (templateId: string) => boolean;
+  isInCart: (templateId: number) => boolean;
 }
 
 export const useCartStore = create<CartState>()(
@@ -41,14 +41,14 @@ export const useCartStore = create<CartState>()(
         });
       },
 
-      removeItem: (templateId: string) => {
+      removeItem: (templateId: number) => {
         const { items } = get();
         set({
           items: items.filter((item) => item.template.id !== templateId),
         });
       },
 
-      updateQuantity: (templateId: string, quantity: number) => {
+      updateQuantity: (templateId: number, quantity: number) => {
         const { items } = get();
         if (quantity <= 0) {
           set({
@@ -81,7 +81,10 @@ export const useCartStore = create<CartState>()(
 
       getSubtotal: () => {
         const { items } = get();
-        return items.reduce((total, item) => total + item.template.price * item.quantity, 0);
+        return items.reduce(
+          (total, item) => total + parseFloat(item.template.price) * item.quantity,
+          0
+        );
       },
 
       getItemCount: () => {
@@ -89,7 +92,7 @@ export const useCartStore = create<CartState>()(
         return items.reduce((count, item) => count + item.quantity, 0);
       },
 
-      isInCart: (templateId: string) => {
+      isInCart: (templateId: number) => {
         const { items } = get();
         return items.some((item) => item.template.id === templateId);
       },

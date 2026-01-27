@@ -1,95 +1,83 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { TemplateCard } from "@/components/templates/TemplateCard";
 import { CartDrawer } from "@/components/templates/CartDrawer";
 import { QuickViewModal } from "@/components/templates/QuickViewModal";
 import { useCartStore } from "@/stores/cart-store";
-import {
-  templates,
-  searchTemplates,
-} from "@/core/api/templates/data";
-import { Template } from "@/core/api/templates/types";
+import { useTemplates } from "@/core/api/templates/queries";
+import { Template, TemplatesQueryParams } from "@/core/api/templates/types";
 
-type TemplateType = "strips" | "4x6";
+type TemplateType = "strip" | "photo_4x6";
 type FilterTab = "all" | "featured" | "new" | "free";
 type SortOption = "popular" | "newest" | "price-low" | "price-high" | "rating";
 
+function mapSortToApi(sort: SortOption): string | undefined {
+  switch (sort) {
+    case "popular": return "popular";
+    case "newest": return "newest";
+    case "price-low": return "price_asc";
+    case "price-high": return "price_desc";
+    case "rating": return "rating";
+    default: return undefined;
+  }
+}
+
 export default function TemplatesPage() {
-  const [templateType, setTemplateType] = useState<TemplateType>("strips");
+  const [templateType, setTemplateType] = useState<TemplateType>("strip");
   const [activeTab, setActiveTab] = useState<FilterTab>("all");
   const [sortBy, setSortBy] = useState<SortOption>("popular");
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [quickViewTemplate, setQuickViewTemplate] = useState<Template | null>(null);
 
   const { openCart, getItemCount } = useCartStore();
-  const itemCount = getItemCount();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const itemCount = mounted ? getItemCount() : 0;
 
-  // Get templates by type
-  const stripTemplates = templates.filter((t) => t.category !== "4x6-portrait");
-  const portraitTemplates = templates.filter((t) => t.category === "4x6-portrait");
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
-  // Filter and sort templates
-  const filteredTemplates = useMemo(() => {
-    // Start with the correct type
-    let result = templateType === "strips" ? [...stripTemplates] : [...portraitTemplates];
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [templateType, activeTab, sortBy, debouncedSearch]);
 
-    // Apply tab filter
-    switch (activeTab) {
-      case "featured":
-        result = result.filter((t) => t.isFeatured);
-        break;
-      case "new":
-        result = result.filter((t) => t.isNew);
-        break;
-      case "free":
-        result = result.filter((t) => t.isFree);
-        break;
-    }
+  // Build query params
+  const queryParams: TemplatesQueryParams = {
+    page,
+    per_page: 24,
+    template_type: templateType,
+    sort_by: mapSortToApi(sortBy),
+    ...(debouncedSearch && { search: debouncedSearch }),
+    ...(activeTab === "featured" && { is_featured: true }),
+    ...(activeTab === "new" && { is_new: true }),
+    ...(activeTab === "free" && { is_free: true }),
+  };
 
-    // Apply search
-    if (searchQuery.trim()) {
-      const searchResults = searchTemplates(searchQuery);
-      result = result.filter((t) => searchResults.some((sr) => sr.id === t.id));
-    }
+  const { data, isLoading, isError } = useTemplates(queryParams);
 
-    // Apply sorting
-    switch (sortBy) {
-      case "newest":
-        result.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
-        break;
-      case "price-low":
-        result.sort((a, b) => a.price - b.price);
-        break;
-      case "price-high":
-        result.sort((a, b) => b.price - a.price);
-        break;
-      case "rating":
-        result.sort((a, b) => b.rating - a.rating);
-        break;
-      case "popular":
-      default:
-        result.sort((a, b) => b.downloads - a.downloads);
-    }
+  const templates = data?.templates ?? [];
+  const totalCount = data?.total ?? 0;
+  const totalPages = data?.total_pages ?? 1;
 
-    return result;
-  }, [templateType, activeTab, sortBy, searchQuery, stripTemplates, portraitTemplates]);
-
-  // Calculate tab counts for current type
-  const currentTypeTemplates = templateType === "strips" ? stripTemplates : portraitTemplates;
-  const tabs: { id: FilterTab; label: string; count: number }[] = [
-    { id: "all", label: "All", count: currentTypeTemplates.length },
-    { id: "featured", label: "Featured", count: currentTypeTemplates.filter((t) => t.isFeatured).length },
-    { id: "new", label: "New", count: currentTypeTemplates.filter((t) => t.isNew).length },
-    { id: "free", label: "Free", count: currentTypeTemplates.filter((t) => t.isFree).length },
+  const tabs: { id: FilterTab; label: string }[] = [
+    { id: "all", label: "All" },
+    { id: "featured", label: "Featured" },
+    { id: "new", label: "New" },
+    { id: "free", label: "Free" },
   ];
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       {/* Hero Section */}
       <section className="relative pt-16 pb-12 px-6 overflow-hidden">
-        {/* Background glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#0891B2]/10 blur-[150px] rounded-full" />
 
         <div className="relative max-w-6xl mx-auto text-center">
@@ -97,7 +85,7 @@ export default function TemplatesPage() {
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
             </svg>
-            {templates.length}+ Premium Templates
+            Premium Templates
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
             Beautiful print templates<br />
@@ -113,11 +101,11 @@ export default function TemplatesPage() {
             <button
               type="button"
               onClick={() => {
-                setTemplateType("strips");
+                setTemplateType("strip");
                 setActiveTab("all");
               }}
               className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all ${
-                templateType === "strips"
+                templateType === "strip"
                   ? "bg-[#0891B2] text-white shadow-lg shadow-[#0891B2]/30"
                   : "text-[var(--muted)] hover:text-[var(--foreground)]"
               }`}
@@ -126,20 +114,15 @@ export default function TemplatesPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
               Photo Strips
-              <span className={`px-2 py-0.5 rounded-full text-xs ${
-                templateType === "strips" ? "bg-white/20" : "bg-slate-300 dark:bg-zinc-700"
-              }`}>
-                {stripTemplates.length}
-              </span>
             </button>
             <button
               type="button"
               onClick={() => {
-                setTemplateType("4x6");
+                setTemplateType("photo_4x6");
                 setActiveTab("all");
               }}
               className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all ${
-                templateType === "4x6"
+                templateType === "photo_4x6"
                   ? "bg-[#0891B2] text-white shadow-lg shadow-[#0891B2]/30"
                   : "text-[var(--muted)] hover:text-[var(--foreground)]"
               }`}
@@ -148,11 +131,6 @@ export default function TemplatesPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               4x6 Portrait
-              <span className={`px-2 py-0.5 rounded-full text-xs ${
-                templateType === "4x6" ? "bg-white/20" : "bg-slate-300 dark:bg-zinc-700"
-              }`}>
-                {portraitTemplates.length}
-              </span>
             </button>
           </div>
 
@@ -214,20 +192,12 @@ export default function TemplatesPage() {
                   }`}
                 >
                   {tab.label}
-                  <span className={`ml-2 px-1.5 py-0.5 rounded text-xs ${
-                    activeTab === tab.id
-                      ? "bg-white/20"
-                      : "bg-slate-200 dark:bg-zinc-700"
-                  }`}>
-                    {tab.count}
-                  </span>
                 </button>
               ))}
             </div>
 
             {/* Right side controls */}
             <div className="flex items-center gap-3">
-              {/* Sort */}
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
@@ -240,7 +210,6 @@ export default function TemplatesPage() {
                 <option value="rating">Highest Rated</option>
               </select>
 
-              {/* Cart Button (Desktop) */}
               <button
                 type="button"
                 onClick={openCart}
@@ -262,15 +231,50 @@ export default function TemplatesPage() {
           {/* Results Count */}
           <div className="mb-6">
             <p className="text-sm text-[var(--muted)]">
-              Showing {filteredTemplates.length} {templateType === "strips" ? "strip" : "portrait"} {filteredTemplates.length === 1 ? "template" : "templates"}
-              {searchQuery && ` for "${searchQuery}"`}
+              {isLoading
+                ? "Loading templates..."
+                : `Showing ${templates.length} of ${totalCount} ${templateType === "strip" ? "strip" : "portrait"} ${totalCount === 1 ? "template" : "templates"}`}
+              {debouncedSearch && ` for "${debouncedSearch}"`}
             </p>
           </div>
 
-          {/* Template Grid */}
-          {filteredTemplates.length > 0 ? (
+          {/* Loading State */}
+          {isLoading && (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6">
-              {filteredTemplates.map((template) => (
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="rounded-2xl bg-[var(--card)] border border-[var(--border)] overflow-hidden animate-pulse">
+                  <div className="h-[300px] bg-slate-200 dark:bg-zinc-800" />
+                  <div className="p-4 space-y-3">
+                    <div className="h-3 bg-slate-200 dark:bg-zinc-800 rounded w-1/3" />
+                    <div className="h-4 bg-slate-200 dark:bg-zinc-800 rounded w-2/3" />
+                    <div className="h-3 bg-slate-200 dark:bg-zinc-800 rounded w-1/4" />
+                    <div className="flex justify-between">
+                      <div className="h-5 bg-slate-200 dark:bg-zinc-800 rounded w-16" />
+                      <div className="h-8 bg-slate-200 dark:bg-zinc-800 rounded w-14" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Error State */}
+          {isError && !isLoading && (
+            <div className="text-center py-20">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-[#EF4444]/10 flex items-center justify-center">
+                <svg className="w-10 h-10 text-[#EF4444]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-[var(--foreground)] mb-2">Failed to load templates</h3>
+              <p className="text-[var(--muted)] mb-6">Something went wrong. Please try again.</p>
+            </div>
+          )}
+
+          {/* Template Grid */}
+          {!isLoading && !isError && templates.length > 0 && (
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6">
+              {templates.map((template) => (
                 <TemplateCard
                   key={template.id}
                   template={template}
@@ -278,7 +282,10 @@ export default function TemplatesPage() {
                 />
               ))}
             </div>
-          ) : (
+          )}
+
+          {/* Empty State */}
+          {!isLoading && !isError && templates.length === 0 && (
             <div className="text-center py-20">
               <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
                 <svg className="w-10 h-10 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -301,6 +308,31 @@ export default function TemplatesPage() {
               </button>
             </div>
           )}
+
+          {/* Pagination */}
+          {!isLoading && totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-12">
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="px-4 py-2 rounded-xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#0891B2]/50 transition-colors"
+              >
+                Previous
+              </button>
+              <span className="text-sm text-[var(--muted)] px-4">
+                Page {page} of {totalPages}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="px-4 py-2 rounded-xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#0891B2]/50 transition-colors"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -308,7 +340,6 @@ export default function TemplatesPage() {
       <section className="px-6 pb-24">
         <div className="max-w-4xl mx-auto">
           <div className="relative p-10 md:p-14 rounded-3xl bg-gradient-to-br from-[#0891B2] to-[#0E7490] overflow-hidden">
-            {/* Decorative elements */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl" />
 

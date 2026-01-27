@@ -17,7 +17,8 @@ async function forward(req: NextRequest, method: 'GET' | 'POST' | 'PUT' | 'PATCH
     }
 
     const token = (await cookies()).get('auth_access_token')?.value
-    const body = method === 'GET' ? undefined : await req.text()
+    const rawBody = method === 'GET' ? undefined : await req.text()
+    const body = rawBody || undefined
 
     try {
         // Forward request to backend with 30 second timeout
@@ -31,6 +32,11 @@ async function forward(req: NextRequest, method: 'GET' | 'POST' | 'PUT' | 'PATCH
             body,
             signal: AbortSignal.timeout(30000), // 30 second timeout
         })
+
+        // 204 No Content cannot have a body
+        if (res.status === 204) {
+            return new NextResponse(null, { status: 204 })
+        }
 
         const text = await res.text()
         return new NextResponse(text, {

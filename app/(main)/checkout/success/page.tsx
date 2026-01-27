@@ -242,7 +242,7 @@ function CheckoutSuccessContent() {
         return {
           title: "Purchase Complete!",
           description: "Your templates have been added to your library. Start using them right away!",
-          primaryAction: { href: "/dashboard", label: "Go to Dashboard" },
+          primaryAction: { href: "/dashboard/templates", label: "Download Templates" },
           secondaryAction: { href: "/templates", label: "Browse More Templates" },
           features: [
             "Templates available immediately",
