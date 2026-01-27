@@ -120,6 +120,38 @@ export interface CreateProductsCheckoutRequest {
 }
 
 // ============================================================================
+// TEMPLATE CHECKOUT (Database Prices)
+// ============================================================================
+
+/**
+ * Line item for template checkout
+ */
+export interface TemplateCheckoutLineItem {
+  /** Database template ID */
+  template_id: number;
+  /** Quantity of this item */
+  quantity: number;
+}
+
+/**
+ * Request body for creating a template checkout session
+ * Uses database prices (price_data) instead of Stripe Price IDs
+ * @see POST /api/v1/payments/checkout/templates
+ */
+export interface CreateTemplateCheckoutRequest {
+  /** Array of template items to purchase */
+  items: TemplateCheckoutLineItem[];
+  /** URL to redirect after successful payment */
+  success_url: string;
+  /** URL to redirect if user cancels checkout */
+  cancel_url: string;
+  /** Customer email (optional) */
+  customer_email?: string;
+  /** Custom metadata to attach to the payment */
+  metadata?: Record<string, string>;
+}
+
+// ============================================================================
 // CHECKOUT SESSION STATUS
 // ============================================================================
 

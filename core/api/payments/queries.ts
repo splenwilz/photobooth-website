@@ -18,6 +18,7 @@ import {
   createProductCheckout,
   createProductsCheckout,
   createSubscriptionCheckout,
+  createTemplateCheckout,
   getBoothSubscription,
   getBoothSubscriptions,
   getCheckoutSession,
@@ -36,6 +37,7 @@ import type {
   CreateProductCheckoutRequest,
   CreateProductsCheckoutRequest,
   CreateSubscriptionCheckoutRequest,
+  CreateTemplateCheckoutRequest,
   SubscriptionAccessResponse,
   SubscriptionInfoResponse,
 } from "./types";
@@ -133,6 +135,16 @@ export function useProductCheckout() {
 export function useProductsCheckout() {
   return useMutation<CheckoutResponse, Error, CreateProductsCheckoutRequest>({
     mutationFn: (data) => createProductsCheckout(data),
+  });
+}
+
+/**
+ * Hook to create a template checkout session
+ * Uses database prices instead of Stripe Price IDs
+ */
+export function useTemplateCheckout() {
+  return useMutation<CheckoutResponse, Error, CreateTemplateCheckoutRequest>({
+    mutationFn: (data) => createTemplateCheckout(data),
   });
 }
 

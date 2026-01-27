@@ -174,21 +174,15 @@ export async function apiClient<T>(url: string, options?: RequestInit): Promise<
 
   let res = await makeRequest()
 
-  // On 401, always attempt to refresh the token
-  // The backend enforces actual JWT expiry - we just try to refresh
+  // On 401, attempt to refresh the token
   if (res.status === 401) {
-    // Clone response before reading body (can only read once)
-    const resClone = res.clone()
-
-    // Try to refresh the token
     const refreshed = await triggerRefresh()
     if (refreshed) {
-      // Retry the original request with new token
+      // Retry with new token
       res = await makeRequest()
     } else {
       // Refresh failed - session is truly expired
-      // Parse error from original response for better error message
-      const msg = await parseErrorResponse(resClone)
+      const msg = await parseErrorResponse(res.clone())
       throw new ApiError(401, msg || 'Session expired. Please sign in again.', undefined, true)
     }
   }
@@ -196,6 +190,10 @@ export async function apiClient<T>(url: string, options?: RequestInit): Promise<
   if (!res.ok) {
     const errorMessage = await parseErrorResponse(res);
     throw new ApiError(res.status, errorMessage);
+  }
+
+  if (res.status === 204) {
+    return undefined as T;
   }
 
   return res.json();

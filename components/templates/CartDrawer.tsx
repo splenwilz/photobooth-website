@@ -102,7 +102,7 @@ export function CartDrawer() {
                   {/* Image */}
                   <div className="relative w-20 h-28 rounded-lg overflow-hidden bg-slate-100 dark:bg-zinc-900 shrink-0">
                     <Image
-                      src={item.template.previewImage}
+                      src={item.template.preview_url}
                       alt={item.template.name}
                       fill
                       className="object-cover"
@@ -116,19 +116,19 @@ export function CartDrawer() {
                       {item.template.name}
                     </h4>
                     <p className="text-xs text-[var(--muted)] mb-2">
-                      {item.template.layoutType.replace(/-/g, " ")}
+                      {item.template.layout?.layout_key?.replace(/-/g, " ") || item.template.template_type.replace(/_/g, " ")}
                     </p>
                     <div className="flex items-center gap-2">
-                      {item.template.isFree ? (
+                      {parseFloat(item.template.price) === 0 ? (
                         <span className="text-sm font-bold text-[#10B981]">Free</span>
                       ) : (
                         <span className="text-sm font-bold text-[var(--foreground)]">
-                          ${item.template.price.toFixed(2)}
+                          ${parseFloat(item.template.price).toFixed(2)}
                         </span>
                       )}
-                      {item.template.originalPrice && (
+                      {item.template.original_price && (
                         <span className="text-xs text-[var(--muted)] line-through">
-                          ${item.template.originalPrice.toFixed(2)}
+                          ${parseFloat(item.template.original_price).toFixed(2)}
                         </span>
                       )}
                     </div>

@@ -21,6 +21,7 @@ import type {
   CreateProductCheckoutRequest,
   CreateProductsCheckoutRequest,
   CreateSubscriptionCheckoutRequest,
+  CreateTemplateCheckoutRequest,
   SubscriptionAccessResponse,
   SubscriptionInfoResponse,
 } from "./types";
@@ -112,6 +113,23 @@ export async function createProductsCheckout(
   data: CreateProductsCheckoutRequest
 ): Promise<CheckoutResponse> {
   return apiClient<CheckoutResponse>("/api/v1/payments/checkout/products", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * Create a template checkout session
+ * Uses database prices (price_data) instead of Stripe Price IDs
+ *
+ * @param data - Template checkout request with template IDs
+ * @returns Promise resolving to checkout URL and session ID
+ * @see POST /api/v1/payments/checkout/templates
+ */
+export async function createTemplateCheckout(
+  data: CreateTemplateCheckoutRequest
+): Promise<CheckoutResponse> {
+  return apiClient<CheckoutResponse>("/api/v1/payments/checkout/templates", {
     method: "POST",
     body: JSON.stringify(data),
   });
