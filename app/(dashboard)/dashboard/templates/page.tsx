@@ -23,7 +23,7 @@ export default function DashboardTemplatesPage() {
   const [page, setPage] = useState(1);
   const perPage = 20;
 
-  const { data, isLoading, isError } = usePurchasedTemplates({ page, per_page: perPage });
+  const { data, isLoading, isError, refetch } = usePurchasedTemplates({ page, per_page: perPage });
   const downloadMutation = useDownloadTemplate();
 
   const purchases = data?.purchases ?? [];
@@ -38,14 +38,16 @@ export default function DashboardTemplatesPage() {
     setDownloadError(null);
     try {
       const result = await downloadMutation.mutateAsync(purchase.template.id);
-      if (result.download_url) {
-        await downloadTemplateAsZip({
-          name: purchase.template.name,
-          downloadUrl: result.download_url,
-          previewUrl: purchase.template.preview_url,
-          fileType: purchase.template.file_type,
-        });
+      if (!result.download_url) {
+        setDownloadError("Download link not available. Please try again.");
+        return;
       }
+      await downloadTemplateAsZip({
+        name: purchase.template.name,
+        downloadUrl: result.download_url,
+        previewUrl: purchase.template.preview_url,
+        fileType: purchase.template.file_type,
+      });
     } catch {
       setDownloadError("Failed to download template. Please try again.");
     } finally {
@@ -103,7 +105,13 @@ export default function DashboardTemplatesPage() {
             </svg>
           </div>
           <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-1">Failed to load templates</h3>
-          <p className="text-sm text-zinc-500">Please try again later.</p>
+          <p className="text-sm text-zinc-500 mb-4">Please try again later.</p>
+          <button
+            onClick={() => refetch()}
+            className="px-4 py-2.5 rounded-xl bg-[#0891B2] text-white text-sm font-semibold hover:bg-[#0E7490] transition-colors"
+          >
+            Try Again
+          </button>
         </div>
       )}
 
