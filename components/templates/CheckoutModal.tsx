@@ -43,9 +43,9 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
       {
         onSuccess: (data) => {
           if (data.success && data.checkout_url) {
-            clearCart();
             closeCart();
             window.location.href = data.checkout_url;
+            clearCart();
           } else {
             setError(data.error_message || "Failed to create checkout session.");
           }

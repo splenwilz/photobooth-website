@@ -31,9 +31,11 @@ export default function DashboardTemplatesPage() {
   const total = data?.total ?? 0;
 
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const handleDownload = async (purchase: TemplatePurchase) => {
     setDownloadingId(purchase.template.id);
+    setDownloadError(null);
     try {
       const result = await downloadMutation.mutateAsync(purchase.template.id);
       if (result.download_url) {
@@ -45,7 +47,7 @@ export default function DashboardTemplatesPage() {
         });
       }
     } catch {
-      // Error handled by mutation state
+      setDownloadError("Failed to download template. Please try again.");
     } finally {
       setDownloadingId(null);
     }
@@ -68,6 +70,14 @@ export default function DashboardTemplatesPage() {
           Browse Templates
         </Link>
       </div>
+
+      {/* Download Error */}
+      {downloadError && (
+        <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-400 flex items-center justify-between">
+          <span>{downloadError}</span>
+          <button onClick={() => setDownloadError(null)} className="ml-2 font-medium hover:underline">Dismiss</button>
+        </div>
+      )}
 
       {/* Loading */}
       {isLoading && (
