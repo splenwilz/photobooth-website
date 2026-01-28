@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { usePurchasedTemplates, useDownloadTemplate } from "@/core/api/templates/queries";
 import { downloadTemplateAsZip } from "@/lib/download-zip";
 import type { TemplatePurchase } from "@/core/api/templates/types";
@@ -20,10 +21,12 @@ function formatDate(dateString: string): string {
 }
 
 export default function DashboardTemplatesPage() {
+  const searchParams = useSearchParams();
+  const boothId = searchParams.get("booth") ?? "";
   const [page, setPage] = useState(1);
   const perPage = 20;
 
-  const { data, isLoading, isError, refetch } = usePurchasedTemplates({ page, per_page: perPage });
+  const { data, isLoading, isError, refetch } = usePurchasedTemplates({ booth_id: boothId, page, per_page: perPage });
   const downloadMutation = useDownloadTemplate();
 
   const purchases = data?.purchases ?? [];
@@ -73,8 +76,21 @@ export default function DashboardTemplatesPage() {
         </Link>
       </div>
 
+      {/* No booth selected */}
+      {!boothId && (
+        <div className="text-center py-16">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
+            <svg className="w-8 h-8 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-1">Select a booth</h3>
+          <p className="text-sm text-zinc-500">Choose a booth from the dropdown above to view its purchased templates.</p>
+        </div>
+      )}
+
       {/* Download Error */}
-      {downloadError && (
+      {boothId && downloadError && (
         <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-400 flex items-center justify-between">
           <span>{downloadError}</span>
           <button onClick={() => setDownloadError(null)} className="ml-2 font-medium hover:underline">Dismiss</button>
@@ -82,11 +98,11 @@ export default function DashboardTemplatesPage() {
       )}
 
       {/* Loading */}
-      {isLoading && (
+      {boothId && isLoading && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="bg-white dark:bg-[#111111] rounded-2xl border border-slate-200 dark:border-zinc-800 overflow-hidden">
-              <Skeleton className="w-full aspect-[3/4]" />
+              <Skeleton className="w-full h-[350px]" />
               <div className="p-4 space-y-2">
                 <Skeleton className="h-4 w-3/4" />
                 <Skeleton className="h-3 w-1/2" />
@@ -97,7 +113,7 @@ export default function DashboardTemplatesPage() {
       )}
 
       {/* Error */}
-      {isError && !isLoading && (
+      {boothId && isError && !isLoading && (
         <div className="text-center py-16">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
             <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -116,7 +132,7 @@ export default function DashboardTemplatesPage() {
       )}
 
       {/* Empty State */}
-      {!isLoading && !isError && purchases.length === 0 && (
+      {boothId && !isLoading && !isError && purchases.length === 0 && (
         <div className="text-center py-16">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
             <svg className="w-8 h-8 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -135,7 +151,7 @@ export default function DashboardTemplatesPage() {
       )}
 
       {/* Templates Grid */}
-      {!isLoading && !isError && purchases.length > 0 && (
+      {boothId && !isLoading && !isError && purchases.length > 0 && (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {purchases.map((purchase) => (
@@ -144,12 +160,12 @@ export default function DashboardTemplatesPage() {
                 className="bg-white dark:bg-[#111111] rounded-2xl border border-slate-200 dark:border-zinc-800 overflow-hidden group"
               >
                 {/* Preview */}
-                <div className="relative aspect-[3/4] bg-slate-100 dark:bg-zinc-900">
+                <div className="relative h-[350px] bg-slate-100 dark:bg-zinc-900">
                   <Image
                     src={purchase.template.preview_url}
                     alt={purchase.template.name}
                     fill
-                    className="object-cover"
+                    className="object-contain p-1"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   />
                   {/* Download overlay */}

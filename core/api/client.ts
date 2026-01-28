@@ -182,6 +182,9 @@ export async function apiClient<T>(url: string, options?: RequestInit): Promise<
       res = await makeRequest()
     } else {
       // Refresh failed - session is truly expired
+      if (isClient) {
+        window.location.href = `/signin?redirect=${encodeURIComponent(window.location.pathname)}`
+      }
       const msg = await parseErrorResponse(res.clone())
       throw new ApiError(401, msg || 'Session expired. Please sign in again.', undefined, true)
     }

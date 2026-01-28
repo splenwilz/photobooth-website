@@ -30,7 +30,7 @@ export const templateKeys = {
   layouts: ["template-layouts"] as const,
   reviews: (templateId: number) =>
     [...templateKeys.all, "reviews", templateId] as const,
-  purchased: (params: { page?: number; per_page?: number }) =>
+  purchased: (params: { booth_id: string; page?: number; per_page?: number }) =>
     [...templateKeys.all, "purchased", params] as const,
 };
 
@@ -166,11 +166,12 @@ export function useDeleteReview() {
 }
 
 export function usePurchasedTemplates(
-  params: { page?: number; per_page?: number } = {}
+  params: { booth_id: string; page?: number; per_page?: number }
 ) {
   return useQuery({
     queryKey: templateKeys.purchased(params),
     queryFn: () => getPurchasedTemplates(params),
+    enabled: !!params.booth_id,
     staleTime: 60 * 1000,
   });
 }
