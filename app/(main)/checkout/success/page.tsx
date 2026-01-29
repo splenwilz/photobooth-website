@@ -14,6 +14,7 @@ function CheckoutSuccessContent() {
   const sessionId = searchParams.get("session_id");
   const checkoutType = (searchParams.get("type") as CheckoutType) ?? "subscription";
   const hardwarePackage = searchParams.get("package");
+  const boothId = searchParams.get("booth_id");
 
   const [licenseData, setLicenseData] = useState<RedeemLicenseResponse | null>(null);
   const [redeemError, setRedeemError] = useState<string | null>(null);
@@ -25,6 +26,11 @@ function CheckoutSuccessContent() {
   const [offlineLicenseData, setOfflineLicenseData] = useState<RedeemLicenseResponse | null>(null);
   const [offlineError, setOfflineError] = useState<string | null>(null);
   const [isGeneratingOffline, setIsGeneratingOffline] = useState(false);
+
+  // Mobile app redirect state
+  const [isMobileUser, setIsMobileUser] = useState(false);
+  const [showAppButton, setShowAppButton] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Fetch checkout session to verify payment
   const {
@@ -65,6 +71,48 @@ function CheckoutSuccessContent() {
       );
     }
   }, [checkoutType, session, sessionId, hasAttemptedRedeem, redeemLicense]);
+
+  // Mobile detection and app redirect for templates/subscription purchases
+  useEffect(() => {
+    // Only run on client
+    if (typeof window === "undefined") return;
+
+    // Check if user is on mobile
+    const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+    setIsMobileUser(isMobile);
+
+    // Only redirect for templates or subscription purchases (not hardware - users need to see license key)
+    if (
+      isMobile &&
+      session?.payment_status === "paid" &&
+      sessionId &&
+      (checkoutType === "templates" || checkoutType === "subscription")
+    ) {
+      setIsRedirecting(true);
+
+      // Construct the appropriate deep link
+      let deepLink: string;
+      if (checkoutType === "templates") {
+        deepLink = `boothiq://template-purchase-success?session_id=${sessionId}`;
+      } else {
+        // subscription
+        deepLink = `boothiq://payment-success?session_id=${sessionId}`;
+        if (boothId) {
+          deepLink += `&booth_id=${boothId}`;
+        }
+      }
+
+      // Attempt to redirect to the app
+      window.location.href = deepLink;
+
+      // Show fallback button after 2 seconds in case redirect didn't work
+      const timer = setTimeout(() => {
+        setShowAppButton(true);
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [session, sessionId, checkoutType, boothId]);
 
   // Handle offline license generation
   const handleGenerateOfflineLicense = () => {
@@ -169,6 +217,60 @@ function CheckoutSuccessContent() {
           >
             Refresh Status
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Mobile app redirect view for templates/subscription purchases
+  if (
+    isMobileUser &&
+    isRedirecting &&
+    session?.payment_status === "paid" &&
+    (checkoutType === "templates" || checkoutType === "subscription")
+  ) {
+    const deepLink =
+      checkoutType === "templates"
+        ? `boothiq://template-purchase-success?session_id=${sessionId}`
+        : `boothiq://payment-success?session_id=${sessionId}${boothId ? `&booth_id=${boothId}` : ""}`;
+
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--background)] px-6">
+        <div className="max-w-md w-full text-center">
+          <div className="w-20 h-20 rounded-full bg-[#10B981]/10 flex items-center justify-center mx-auto mb-6">
+            <svg className="w-10 h-10 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold mb-2">Payment Successful!</h1>
+          <p className="text-[var(--muted)] mb-8">
+            {showAppButton
+              ? "Tap the button below to return to the BoothIQ app."
+              : "Redirecting you back to the BoothIQ app..."}
+          </p>
+
+          {!showAppButton && (
+            <div className="w-8 h-8 border-2 border-[#0891B2] border-t-transparent rounded-full animate-spin mx-auto mb-6" />
+          )}
+
+          {showAppButton && (
+            <a
+              href={deepLink}
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-all hover:scale-[1.02] shadow-lg shadow-[#0891B2]/20"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+              Open BoothIQ App
+            </a>
+          )}
+
+          <p className="text-sm text-[var(--muted)] mt-8">
+            Don&apos;t have the app?{" "}
+            <Link href="/downloads" className="text-[#0891B2] hover:underline">
+              Download it here
+            </Link>
+          </p>
         </div>
       </div>
     );
