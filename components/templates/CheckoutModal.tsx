@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { useCartStore } from "@/stores/cart-store";
 import { useTemplateCheckout } from "@/core/api/payments";
+import { useBoothList } from "@/core/api/booths/queries";
 import { ApiError } from "@/core/api/client";
 
 interface CheckoutModalProps {
@@ -14,12 +15,20 @@ interface CheckoutModalProps {
 export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const { items, getSubtotal, clearCart, closeCart } = useCartStore();
   const [error, setError] = useState<string | null>(null);
+  const [selectedBoothId, setSelectedBoothId] = useState<string>("");
   const templateCheckout = useTemplateCheckout();
+  const { data: boothListData, isLoading: boothsLoading, isError: boothsError } = useBoothList();
 
+  const booths = boothListData?.booths ?? [];
   const subtotal = getSubtotal();
 
   const handleCheckout = async () => {
     setError(null);
+
+    if (!selectedBoothId) {
+      setError("Please select a booth for this purchase.");
+      return;
+    }
 
     // Filter out free templates — they use download, not checkout
     const paidItems = items.filter(
@@ -33,6 +42,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
     templateCheckout.mutate(
       {
+        booth_id: selectedBoothId,
         items: paidItems.map((item) => ({
           template_id: item.template.id,
           quantity: item.quantity,
@@ -101,6 +111,34 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
         {/* Content */}
         <div className="p-6">
+          {/* Booth Selector */}
+          <div className="mb-6">
+            <label htmlFor="booth-select" className="block text-sm font-medium text-[var(--foreground)] mb-2">
+              Purchase for booth
+            </label>
+            {boothsLoading ? (
+              <div className="h-11 rounded-xl bg-slate-100 dark:bg-zinc-900 animate-pulse" />
+            ) : boothsError ? (
+              <p className="text-sm text-red-500">Failed to load booths. Please try again.</p>
+            ) : booths.length === 0 ? (
+              <p className="text-sm text-red-500">No booths found. Please create a booth first.</p>
+            ) : (
+              <select
+                id="booth-select"
+                value={selectedBoothId}
+                onChange={(e) => setSelectedBoothId(e.target.value)}
+                className="w-full h-11 px-3 rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#0891B2]"
+              >
+                <option value="">Select a booth...</option>
+                {booths.map((booth) => (
+                  <option key={booth.id} value={booth.id}>
+                    {booth.name}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
           {/* Order Items */}
           <div className="space-y-3 mb-6">
             {items.map((item) => {
@@ -169,7 +207,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
             <button
               type="button"
               onClick={handleCheckout}
-              disabled={templateCheckout.isPending || subtotal === 0}
+              disabled={templateCheckout.isPending || subtotal === 0 || !selectedBoothId}
               className="flex-1 py-3.5 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {templateCheckout.isPending ? (

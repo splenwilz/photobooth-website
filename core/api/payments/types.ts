@@ -139,6 +139,8 @@ export interface TemplateCheckoutLineItem {
  * @see POST /api/v1/payments/checkout/templates
  */
 export interface CreateTemplateCheckoutRequest {
+  /** UUID of the booth this purchase is for */
+  booth_id: string;
   /** Array of template items to purchase */
   items: TemplateCheckoutLineItem[];
   /** URL to redirect after successful payment */
