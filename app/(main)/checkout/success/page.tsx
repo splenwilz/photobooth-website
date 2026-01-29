@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useCheckoutSession } from "@/core/api/payments";
 import { useRedeemLicense } from "@/core/api/licenses";
 import type { RedeemLicenseResponse } from "@/core/api/licenses";
@@ -31,6 +31,7 @@ function CheckoutSuccessContent() {
   const [isMobileUser, setIsMobileUser] = useState(false);
   const [showAppButton, setShowAppButton] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const hasAttemptedRedirect = useRef(false);
 
   // Fetch checkout session to verify payment
   const {
@@ -82,12 +83,15 @@ function CheckoutSuccessContent() {
     setIsMobileUser(isMobile);
 
     // Only redirect for templates or subscription purchases (not hardware - users need to see license key)
+    // Guard against duplicate redirect attempts (e.g., from React Query refetch)
     if (
       isMobile &&
       session?.payment_status === "paid" &&
       sessionId &&
-      (checkoutType === "templates" || checkoutType === "subscription")
+      (checkoutType === "templates" || checkoutType === "subscription") &&
+      !hasAttemptedRedirect.current
     ) {
+      hasAttemptedRedirect.current = true;
       setIsRedirecting(true);
 
       // Construct the appropriate deep link with URL-encoded parameters
