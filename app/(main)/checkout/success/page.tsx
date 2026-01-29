@@ -90,15 +90,16 @@ function CheckoutSuccessContent() {
     ) {
       setIsRedirecting(true);
 
-      // Construct the appropriate deep link
+      // Construct the appropriate deep link with URL-encoded parameters
       let deepLink: string;
+      const encodedSessionId = encodeURIComponent(sessionId);
       if (checkoutType === "templates") {
-        deepLink = `boothiq://template-purchase-success?session_id=${sessionId}`;
+        deepLink = `boothiq://template-purchase-success?session_id=${encodedSessionId}`;
       } else {
         // subscription
-        deepLink = `boothiq://payment-success?session_id=${sessionId}`;
+        deepLink = `boothiq://payment-success?session_id=${encodedSessionId}`;
         if (boothId) {
-          deepLink += `&booth_id=${boothId}`;
+          deepLink += `&booth_id=${encodeURIComponent(boothId)}`;
         }
       }
 
@@ -229,10 +230,11 @@ function CheckoutSuccessContent() {
     session?.payment_status === "paid" &&
     (checkoutType === "templates" || checkoutType === "subscription")
   ) {
+    const encodedSessionId = encodeURIComponent(sessionId || "");
     const deepLink =
       checkoutType === "templates"
-        ? `boothiq://template-purchase-success?session_id=${sessionId}`
-        : `boothiq://payment-success?session_id=${sessionId}${boothId ? `&booth_id=${boothId}` : ""}`;
+        ? `boothiq://template-purchase-success?session_id=${encodedSessionId}`
+        : `boothiq://payment-success?session_id=${encodedSessionId}${boothId ? `&booth_id=${encodeURIComponent(boothId)}` : ""}`;
 
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--background)] px-6">
