@@ -113,7 +113,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         <div className="p-6">
           {/* Booth Selector */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-[var(--foreground)] mb-2">
+            <label htmlFor="booth-select" className="block text-sm font-medium text-[var(--foreground)] mb-2">
               Purchase for booth
             </label>
             {boothsLoading ? (
@@ -124,6 +124,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
               <p className="text-sm text-red-500">No booths found. Please create a booth first.</p>
             ) : (
               <select
+                id="booth-select"
                 value={selectedBoothId}
                 onChange={(e) => setSelectedBoothId(e.target.value)}
                 className="w-full h-11 px-3 rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#0891B2]"
