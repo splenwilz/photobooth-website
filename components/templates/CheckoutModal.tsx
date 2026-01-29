@@ -17,7 +17,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const [error, setError] = useState<string | null>(null);
   const [selectedBoothId, setSelectedBoothId] = useState<string>("");
   const templateCheckout = useTemplateCheckout();
-  const { data: boothListData, isLoading: boothsLoading } = useBoothList();
+  const { data: boothListData, isLoading: boothsLoading, isError: boothsError } = useBoothList();
 
   const booths = boothListData?.booths ?? [];
   const subtotal = getSubtotal();
@@ -118,6 +118,8 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
             </label>
             {boothsLoading ? (
               <div className="h-11 rounded-xl bg-slate-100 dark:bg-zinc-900 animate-pulse" />
+            ) : boothsError ? (
+              <p className="text-sm text-red-500">Failed to load booths. Please try again.</p>
             ) : booths.length === 0 ? (
               <p className="text-sm text-red-500">No booths found. Please create a booth first.</p>
             ) : (
