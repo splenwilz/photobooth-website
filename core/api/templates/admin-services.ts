@@ -301,3 +301,63 @@ export async function deleteColorConfig(templateId: number): Promise<void> {
     method: "DELETE",
   });
 }
+
+// ============================================================================
+// BROADCAST SYNC
+// ============================================================================
+
+export interface BroadcastSyncResponse {
+  total_booths: number;
+  delivered: number;
+  queued: number;
+  message: string;
+}
+
+/**
+ * Broadcast sync layouts to all booths
+ */
+export async function broadcastSyncLayouts(): Promise<BroadcastSyncResponse> {
+  return apiClient("/api/v1/booths/broadcast/sync-layouts", {
+    method: "POST",
+  });
+}
+
+/**
+ * Broadcast sync categories to all booths
+ */
+export async function broadcastSyncCategories(): Promise<BroadcastSyncResponse> {
+  return apiClient("/api/v1/booths/broadcast/sync-categories", {
+    method: "POST",
+  });
+}
+
+/**
+ * Broadcast sync templates to all booths
+ */
+export async function broadcastSyncTemplates(): Promise<BroadcastSyncResponse> {
+  return apiClient("/api/v1/booths/broadcast/sync-templates", {
+    method: "POST",
+  });
+}
+
+/**
+ * Add a photo area to a layout (admin)
+ */
+export async function addPhotoAreaToLayout(
+  layoutId: string,
+  data: {
+    photo_index: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    rotation?: number;
+    border_radius?: number;
+    shape_type?: string;
+  }
+): Promise<{ id: number; layout_id: string }> {
+  return apiClient(`${TEMPLATES_BASE}/layouts/${layoutId}/photo-areas`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}

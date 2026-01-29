@@ -10,11 +10,22 @@ import {
   getAdminTemplate,
   getTemplateCategories,
   getTemplateLayouts,
+  getTemplateLayout,
   getPresignedUrls,
   uploadFileToS3,
   createTemplate,
   updateTemplate,
   deleteTemplate,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+  createLayout,
+  updateLayout,
+  deleteLayout,
+  addPhotoAreaToLayout,
+  broadcastSyncLayouts,
+  broadcastSyncCategories,
+  broadcastSyncTemplates,
 } from "./admin-services";
 import type {
   AdminTemplatesQueryParams,
@@ -161,5 +172,162 @@ export function useDeleteTemplate() {
       // Invalidate lists
       queryClient.invalidateQueries({ queryKey: adminTemplateKeys.lists() });
     },
+  });
+}
+
+// ============================================================================
+// CATEGORY HOOKS
+// ============================================================================
+
+/**
+ * Hook to create a category
+ */
+export function useCreateCategory() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: Parameters<typeof createCategory>[0]) => createCategory(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminTemplateKeys.categories });
+    },
+  });
+}
+
+/**
+ * Hook to update a category
+ */
+export function useUpdateCategory() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Parameters<typeof updateCategory>[1] }) =>
+      updateCategory(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminTemplateKeys.categories });
+    },
+  });
+}
+
+/**
+ * Hook to delete a category
+ */
+export function useDeleteCategory() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => deleteCategory(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminTemplateKeys.categories });
+    },
+  });
+}
+
+// ============================================================================
+// LAYOUT HOOKS
+// ============================================================================
+
+/**
+ * Hook to fetch a single layout
+ */
+export function useTemplateLayout(id: string) {
+  return useQuery({
+    queryKey: [...adminTemplateKeys.layouts, "detail", id],
+    queryFn: () => getTemplateLayout(id),
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+/**
+ * Hook to create a layout
+ */
+export function useCreateLayout() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: Parameters<typeof createLayout>[0]) => createLayout(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminTemplateKeys.layouts });
+    },
+  });
+}
+
+/**
+ * Hook to update a layout
+ */
+export function useUpdateLayout() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Parameters<typeof updateLayout>[1] }) =>
+      updateLayout(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminTemplateKeys.layouts });
+    },
+  });
+}
+
+/**
+ * Hook to delete a layout
+ */
+export function useDeleteLayout() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => deleteLayout(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminTemplateKeys.layouts });
+    },
+  });
+}
+
+/**
+ * Hook to add a photo area to a layout
+ */
+export function useAddPhotoArea() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      layoutId,
+      data,
+    }: {
+      layoutId: string;
+      data: Parameters<typeof addPhotoAreaToLayout>[1];
+    }) => addPhotoAreaToLayout(layoutId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminTemplateKeys.layouts });
+    },
+  });
+}
+
+// ============================================================================
+// BROADCAST SYNC HOOKS
+// ============================================================================
+
+/**
+ * Hook to broadcast sync layouts to all booths
+ */
+export function useBroadcastSyncLayouts() {
+  return useMutation({
+    mutationFn: () => broadcastSyncLayouts(),
+  });
+}
+
+/**
+ * Hook to broadcast sync categories to all booths
+ */
+export function useBroadcastSyncCategories() {
+  return useMutation({
+    mutationFn: () => broadcastSyncCategories(),
+  });
+}
+
+/**
+ * Hook to broadcast sync templates to all booths
+ */
+export function useBroadcastSyncTemplates() {
+  return useMutation({
+    mutationFn: () => broadcastSyncTemplates(),
   });
 }
