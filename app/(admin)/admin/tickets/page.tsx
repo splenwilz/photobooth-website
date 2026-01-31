@@ -79,6 +79,8 @@ function getStatusConfig(status: string) {
 function formatDate(dateString: string | null): string {
   if (!dateString) return "—";
   const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "—";
+
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
 
@@ -206,7 +208,10 @@ export default function AdminTicketsPage() {
             type="text"
             placeholder="Search by ticket number or subject..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
             className="w-full pl-12 pr-4 py-3 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] transition-all"
           />
         </div>
@@ -293,8 +298,16 @@ export default function AdminTicketsPage() {
               return (
                 <div
                   key={ticket.id}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => handleTicketClick(ticket.id)}
-                  className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleTicketClick(ticket.id);
+                    }
+                  }}
+                  className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:ring-offset-2 dark:focus:ring-offset-[#0a0a0a]"
                 >
                   <div className="flex items-start gap-4">
                     <div className={`w-10 h-10 rounded-xl ${priorityConfig.bg} flex items-center justify-center shrink-0`}>
@@ -363,7 +376,7 @@ export default function AdminTicketsPage() {
       )}
 
       {/* Ticket Detail Panel */}
-      {selectedTicketId && (
+      {selectedTicketId !== null && (
         <TicketDetailPanel
           ticketId={selectedTicketId}
           onClose={handleClosePanel}

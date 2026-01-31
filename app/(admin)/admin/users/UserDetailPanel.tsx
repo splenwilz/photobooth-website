@@ -34,8 +34,14 @@ function formatRelativeTime(dateString: string | null): string {
   if (!dateString) return "Never";
 
   const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "Never";
+
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
+
+  // Handle future timestamps
+  if (diffMs < 0) return "Just now";
+
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
@@ -101,9 +107,10 @@ export default function UserDetailPanel({ userId, onClose }: UserDetailPanelProp
 
   // Prevent body scroll when panel is open
   useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
     };
   }, []);
 

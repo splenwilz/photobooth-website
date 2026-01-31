@@ -42,8 +42,8 @@ function formatDate(dateString: string): string {
 function formatFileSize(bytes: number): string {
   if (!isFinite(bytes) || bytes <= 0) return "—";
   const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const sizes = ["B", "KB", "MB", "GB", "TB", "PB"];
+  const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), sizes.length - 1);
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 }
 
@@ -151,7 +151,9 @@ function AttachmentItem({ attachment, isUser }: { attachment: TicketAttachment; 
 
 export default function TicketDetailPage() {
   const params = useParams();
-  const ticketId = parseInt(params.ticketId as string, 10);
+  const parsedTicketId = parseInt(params.ticketId as string, 10);
+  const isValidTicketId = Number.isInteger(parsedTicketId) && parsedTicketId > 0;
+  const ticketId = isValidTicketId ? parsedTicketId : 0;
 
   const [replyMessage, setReplyMessage] = useState("");
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
@@ -249,6 +251,27 @@ export default function TicketDetailPage() {
       }
     );
   };
+
+  // Handle invalid ticket ID
+  if (!isValidTicketId) {
+    return (
+      <div className="space-y-6">
+        <Link
+          href="/dashboard/support"
+          className="inline-flex items-center gap-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+          Back to Support
+        </Link>
+
+        <div className="p-6 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-center">
+          <p className="text-red-600 dark:text-red-400">Invalid ticket ID.</p>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
