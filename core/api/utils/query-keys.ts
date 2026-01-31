@@ -8,11 +8,13 @@
  */
 
 import type { AdminTransactionsQueryParams } from "../admin/billing/types";
+import type { AdminTicketsQueryParams } from "../admin/tickets/types";
 import type { AdminUsersQueryParams } from "../admin/users/types";
 import type { AlertsParams } from "../alerts/types";
 import type { BoothRevenueParams, RevenueDashboardParams } from "../analytics/types";
 import type { CreditsHistoryParams } from "../credits/types";
 import type { ReleasesParams } from "../releases/types";
+import type { TicketsQueryParams } from "../tickets/types";
 
 export const queryKeys = {
 	// Booth-related queries
@@ -68,6 +70,15 @@ export const queryKeys = {
 		issues: () => ['admin-billing', 'issues'] as const,
 	},
 
+	// Admin tickets queries
+	adminTickets: {
+		all: () => ['admin-tickets'] as const,
+		lists: () => ['admin-tickets', 'list'] as const,
+		list: (params?: AdminTicketsQueryParams) => ['admin-tickets', 'list', params] as const,
+		details: () => ['admin-tickets', 'detail'] as const,
+		detail: (ticketId: number) => ['admin-tickets', 'detail', ticketId] as const,
+	},
+
 	// Subscription queries (for admin)
 	subscriptions: {
 		all: () => ['subscriptions'] as const,
@@ -76,11 +87,13 @@ export const queryKeys = {
 		detail: (subscriptionId: string) => ['subscriptions', 'detail', subscriptionId] as const,
 	},
 
-	// Support tickets queries (for admin)
+	// Support tickets queries (for user dashboard)
 	tickets: {
 		all: () => ['tickets'] as const,
-		list: () => ['tickets', 'list'] as const,
-		detail: (ticketId: string) => ['tickets', 'detail', ticketId] as const,
+		lists: () => ['tickets', 'list'] as const,
+		list: (params?: TicketsQueryParams) => ['tickets', 'list', params] as const,
+		details: () => ['tickets', 'detail'] as const,
+		detail: (ticketId: number) => ['tickets', 'detail', ticketId] as const,
 	},
 
 	// Logs/audit queries (for admin)
