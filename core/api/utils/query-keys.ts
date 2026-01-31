@@ -7,6 +7,8 @@
  * @see https://tanstack.com/query/latest/docs/react/guides/query-keys
  */
 
+import type { AdminTransactionsQueryParams } from "../admin/billing/types";
+import type { AdminUsersQueryParams } from "../admin/users/types";
 import type { AlertsParams } from "../alerts/types";
 import type { BoothRevenueParams, RevenueDashboardParams } from "../analytics/types";
 import type { CreditsHistoryParams } from "../credits/types";
@@ -51,9 +53,19 @@ export const queryKeys = {
 
 	// User-related queries (for admin)
 	users: {
-		all: () => ['users'] as const,
-		list: () => ['users', 'list'] as const,
-		detail: (userId: string) => ['users', 'detail', userId] as const,
+		all: () => ['admin-users'] as const,
+		lists: () => ['admin-users', 'list'] as const,
+		list: (params?: AdminUsersQueryParams) => ['admin-users', 'list', params] as const,
+		details: () => ['admin-users', 'detail'] as const,
+		detail: (userId: string) => ['admin-users', 'detail', userId] as const,
+	},
+
+	// Billing queries (for admin)
+	billing: {
+		all: () => ['admin-billing'] as const,
+		overview: () => ['admin-billing', 'overview'] as const,
+		transactions: (params?: AdminTransactionsQueryParams) => ['admin-billing', 'transactions', params] as const,
+		issues: () => ['admin-billing', 'issues'] as const,
 	},
 
 	// Subscription queries (for admin)
