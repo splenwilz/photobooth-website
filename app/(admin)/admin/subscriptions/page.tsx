@@ -70,12 +70,12 @@ export default function AdminBillingPage() {
 
   // Fetch data
   const { data: overview, isLoading: overviewLoading, error: overviewError } = useAdminBillingOverview();
-  const { data: transactionsData, isLoading: transactionsLoading } = useAdminBillingTransactions({
+  const { data: transactionsData, isLoading: transactionsLoading, error: transactionsError } = useAdminBillingTransactions({
     page: transactionsPage,
     per_page: 20,
     status: transactionsStatus,
   });
-  const { data: issuesData, isLoading: issuesLoading } = useAdminBillingIssues();
+  const { data: issuesData, isLoading: issuesLoading, error: issuesError } = useAdminBillingIssues();
 
   const issuesCount = issuesData?.total ?? 0;
 
@@ -419,6 +419,14 @@ export default function AdminBillingPage() {
             ))}
           </div>
 
+          {/* Error State */}
+          {transactionsError && (
+            <div className="p-6 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-center">
+              <p className="text-red-600 dark:text-red-400">Failed to load transactions. Please try again.</p>
+            </div>
+          )}
+
+          {!transactionsError && (
           <div className="p-6 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
             {transactionsLoading ? (
               <div className="animate-pulse space-y-4">
@@ -511,13 +519,21 @@ export default function AdminBillingPage() {
               </div>
             )}
           </div>
+          )}
         </div>
       )}
 
       {/* Issues Tab */}
       {activeTab === "issues" && (
         <div className="space-y-4">
-          {issuesLoading ? (
+          {/* Error State */}
+          {issuesError && (
+            <div className="p-6 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-center">
+              <p className="text-red-600 dark:text-red-400">Failed to load billing issues. Please try again.</p>
+            </div>
+          )}
+
+          {!issuesError && issuesLoading && (
             <div className="space-y-3 animate-pulse">
               {[...Array(3)].map((_, i) => (
                 <div key={i} className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)]">
@@ -532,7 +548,9 @@ export default function AdminBillingPage() {
                 </div>
               ))}
             </div>
-          ) : issuesData?.issues.length === 0 ? (
+          )}
+
+          {!issuesError && !issuesLoading && issuesData?.issues.length === 0 && (
             <div className="p-12 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] text-center">
               <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -542,9 +560,11 @@ export default function AdminBillingPage() {
               <p className="text-zinc-900 dark:text-white font-medium">All clear!</p>
               <p className="text-zinc-500 mt-1">No billing issues need attention</p>
             </div>
-          ) : (
+          )}
+
+          {!issuesError && !issuesLoading && issuesData?.issues && issuesData.issues.length > 0 && (
             <div className="space-y-3">
-              {issuesData?.issues.map((issue) => {
+              {issuesData.issues.map((issue) => {
                 const statusLabel = issue.status === "uncollectible" ? "Payment failed" : "Payment pending";
                 return (
                   <div key={issue.id} className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-red-200 dark:border-red-900/50 hover:border-red-300 dark:hover:border-red-800 transition-all">
