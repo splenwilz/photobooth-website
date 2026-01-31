@@ -48,11 +48,13 @@ function formatRelativeTime(dateString: string | null): string {
 }
 
 function getInitials(name: string): string {
-  return name
-    .split(" ")
+  const parts = name.trim().split(/\s+/).filter(part => part.length > 0);
+  if (parts.length === 0) return "?";
+  return parts
     .map((n) => n[0])
     .join("")
-    .toUpperCase();
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 function getBoothStatusColor(status: string): string {

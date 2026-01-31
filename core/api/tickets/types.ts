@@ -53,7 +53,7 @@ export interface TicketAttachment {
   id: number;
   filename: string;
   file_size: number;
-  file_type: string;
+  file_type: string | null;
   download_url: string;
 }
 

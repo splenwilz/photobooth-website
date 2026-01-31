@@ -41,7 +41,7 @@ function formatDate(dateString: string): string {
 
 // Format file size
 function formatFileSize(bytes: number): string {
-  if (bytes === 0) return "—";
+  if (!isFinite(bytes) || bytes <= 0) return "—";
   const k = 1024;
   const sizes = ["B", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -216,9 +216,12 @@ export default function TicketDetailPanel({ ticketId, onClose }: TicketDetailPan
                 (() => {
                   // Get user info from ticket or first user message
                   const firstUserMessage = ticket.messages.find(m => m.sender_type === "user");
-                  const userName = ticket.user_name || firstUserMessage?.sender_name || "Unknown User";
+                  const userName = (ticket.user_name || firstUserMessage?.sender_name || "").trim() || "Unknown User";
                   const userEmail = ticket.user_email || "";
-                  const userInitials = userName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+                  const nameParts = userName.split(" ").filter(part => part.length > 0);
+                  const userInitials = nameParts.length > 0
+                    ? nameParts.map(n => n[0]).join("").slice(0, 2).toUpperCase()
+                    : "?";
 
                   return (
                 <>
