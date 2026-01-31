@@ -114,7 +114,7 @@ function MessageBubble({ message, isUser }: { message: TicketMessage; isUser: bo
 
 // Attachment display component
 function AttachmentItem({ attachment, isUser }: { attachment: TicketAttachment; isUser: boolean }) {
-  const isImage = attachment.file_type.startsWith("image/");
+  const isImage = attachment.file_type?.startsWith("image/") ?? false;
 
   return (
     <a
