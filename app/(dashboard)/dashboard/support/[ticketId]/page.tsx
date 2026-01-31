@@ -156,6 +156,7 @@ export default function TicketDetailPage() {
   const [replyMessage, setReplyMessage] = useState("");
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: ticket, isLoading, error } = useTicketDetail(ticketId);
@@ -186,6 +187,7 @@ export default function TicketDetailPage() {
     // Upload files first if any
     if (pendingFiles.length > 0) {
       setUploadingFiles(true);
+      setUploadError(null);
       try {
         for (const file of pendingFiles) {
           const { upload_url, s3_key } = await getUploadUrl({
@@ -194,16 +196,21 @@ export default function TicketDetailPage() {
           });
 
           // Upload to S3
-          await fetch(upload_url, {
+          const uploadResponse = await fetch(upload_url, {
             method: "PUT",
             headers: { "Content-Type": file.type || "application/octet-stream" },
             body: file,
           });
 
+          if (!uploadResponse.ok) {
+            throw new Error(`Failed to upload ${file.name}: ${uploadResponse.status} ${uploadResponse.statusText}`);
+          }
+
           attachmentKeys.push(s3_key);
         }
-      } catch {
+      } catch (err) {
         setUploadingFiles(false);
+        setUploadError(err instanceof Error ? err.message : "Failed to upload files. Please try again.");
         return;
       }
       setUploadingFiles(false);
@@ -384,6 +391,25 @@ export default function TicketDetailPage() {
                   </button>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Upload Error */}
+          {uploadError && (
+            <div className="mt-3 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-start gap-2">
+              <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+              </svg>
+              <div className="flex-1">
+                <p className="text-sm text-red-600 dark:text-red-400">{uploadError}</p>
+                <button
+                  type="button"
+                  onClick={() => setUploadError(null)}
+                  className="text-xs text-red-500 hover:text-red-700 dark:hover:text-red-300 mt-1 underline"
+                >
+                  Dismiss
+                </button>
+              </div>
             </div>
           )}
 
