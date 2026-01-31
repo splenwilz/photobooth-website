@@ -29,7 +29,7 @@ function Skeleton({ className = "" }: { className?: string }) {
 
 // Format date for display
 function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString("en-US", {
+  return new Date(dateString).toLocaleString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -157,6 +157,8 @@ export default function TicketDetailPage() {
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadedAttachmentKeys, setUploadedAttachmentKeys] = useState<string[]>([]);
+  const [sendError, setSendError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: ticket, isLoading, error } = useTicketDetail(ticketId);
@@ -169,6 +171,8 @@ export default function TicketDetailPage() {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     setPendingFiles((prev) => [...prev, ...files]);
+    // Clear uploaded keys since file list changed
+    setUploadedAttachmentKeys([]);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -176,16 +180,22 @@ export default function TicketDetailPage() {
 
   const removeFile = (index: number) => {
     setPendingFiles((prev) => prev.filter((_, i) => i !== index));
+    // Clear uploaded keys since file list changed
+    setUploadedAttachmentKeys([]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canReply) return;
 
-    let attachmentKeys: string[] = [];
+    // Clear any previous send error
+    setSendError(null);
 
-    // Upload files first if any
-    if (pendingFiles.length > 0) {
+    // Reuse already-uploaded keys if retrying after a send failure
+    let attachmentKeys = [...uploadedAttachmentKeys];
+
+    // Upload files only if we have pending files that haven't been uploaded yet
+    if (pendingFiles.length > 0 && uploadedAttachmentKeys.length === 0) {
       setUploadingFiles(true);
       setUploadError(null);
       try {
@@ -208,12 +218,14 @@ export default function TicketDetailPage() {
 
           attachmentKeys.push(s3_key);
         }
+        // Store uploaded keys so retries don't re-upload
+        setUploadedAttachmentKeys(attachmentKeys);
       } catch (err) {
-        setUploadingFiles(false);
         setUploadError(err instanceof Error ? err.message : "Failed to upload files. Please try again.");
         return;
+      } finally {
+        setUploadingFiles(false);
       }
-      setUploadingFiles(false);
     }
 
     // Send message
@@ -224,8 +236,15 @@ export default function TicketDetailPage() {
       },
       {
         onSuccess: () => {
+          // Clear all states on success
           setReplyMessage("");
           setPendingFiles([]);
+          setUploadedAttachmentKeys([]);
+          setSendError(null);
+          setUploadError(null);
+        },
+        onError: (err) => {
+          setSendError(err instanceof Error ? err.message : "Failed to send message. Please try again.");
         },
       }
     );
@@ -409,6 +428,19 @@ export default function TicketDetailPage() {
                 >
                   Dismiss
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* Send Error */}
+          {sendError && (
+            <div className="mt-3 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-start gap-2">
+              <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+              </svg>
+              <div className="flex-1">
+                <p className="text-sm text-red-600 dark:text-red-400">{sendError}</p>
+                <p className="text-xs text-red-500 mt-1">Click &quot;Send Reply&quot; to retry. Your files are already uploaded.</p>
               </div>
             </div>
           )}
