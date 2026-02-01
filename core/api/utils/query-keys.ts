@@ -7,10 +7,15 @@
  * @see https://tanstack.com/query/latest/docs/react/guides/query-keys
  */
 
+import type { AdminTransactionsQueryParams } from "../admin/billing/types";
+import type { AdminBoothsQueryParams } from "../admin/booths/types";
+import type { AdminTicketsQueryParams } from "../admin/tickets/types";
+import type { AdminUsersQueryParams } from "../admin/users/types";
 import type { AlertsParams } from "../alerts/types";
 import type { BoothRevenueParams, RevenueDashboardParams } from "../analytics/types";
 import type { CreditsHistoryParams } from "../credits/types";
 import type { ReleasesParams } from "../releases/types";
+import type { TicketsQueryParams } from "../tickets/types";
 
 export const queryKeys = {
 	// Booth-related queries
@@ -51,9 +56,35 @@ export const queryKeys = {
 
 	// User-related queries (for admin)
 	users: {
-		all: () => ['users'] as const,
-		list: () => ['users', 'list'] as const,
-		detail: (userId: string) => ['users', 'detail', userId] as const,
+		all: () => ['admin-users'] as const,
+		lists: () => ['admin-users', 'list'] as const,
+		list: (params?: AdminUsersQueryParams) => ['admin-users', 'list', params] as const,
+		details: () => ['admin-users', 'detail'] as const,
+		detail: (userId: string) => ['admin-users', 'detail', userId] as const,
+	},
+
+	// Billing queries (for admin)
+	billing: {
+		all: () => ['admin-billing'] as const,
+		overview: () => ['admin-billing', 'overview'] as const,
+		transactions: (params?: AdminTransactionsQueryParams) => ['admin-billing', 'transactions', params] as const,
+		issues: () => ['admin-billing', 'issues'] as const,
+	},
+
+	// Admin tickets queries
+	adminTickets: {
+		all: () => ['admin-tickets'] as const,
+		lists: () => ['admin-tickets', 'list'] as const,
+		list: (params?: AdminTicketsQueryParams) => ['admin-tickets', 'list', params] as const,
+		details: () => ['admin-tickets', 'detail'] as const,
+		detail: (ticketId: number) => ['admin-tickets', 'detail', ticketId] as const,
+	},
+
+	// Admin booths queries
+	adminBooths: {
+		all: () => ['admin-booths'] as const,
+		lists: () => ['admin-booths', 'list'] as const,
+		list: (params?: AdminBoothsQueryParams) => ['admin-booths', 'list', params] as const,
 	},
 
 	// Subscription queries (for admin)
@@ -64,11 +95,13 @@ export const queryKeys = {
 		detail: (subscriptionId: string) => ['subscriptions', 'detail', subscriptionId] as const,
 	},
 
-	// Support tickets queries (for admin)
+	// Support tickets queries (for user dashboard)
 	tickets: {
 		all: () => ['tickets'] as const,
-		list: () => ['tickets', 'list'] as const,
-		detail: (ticketId: string) => ['tickets', 'detail', ticketId] as const,
+		lists: () => ['tickets', 'list'] as const,
+		list: (params?: TicketsQueryParams) => ['tickets', 'list', params] as const,
+		details: () => ['tickets', 'detail'] as const,
+		detail: (ticketId: number) => ['tickets', 'detail', ticketId] as const,
 	},
 
 	// Logs/audit queries (for admin)

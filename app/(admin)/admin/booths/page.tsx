@@ -2,137 +2,45 @@
 
 /**
  * Admin All Booths Page
- * 
- * Enhanced platform-wide booth monitoring with rich visuals.
+ *
+ * Platform-wide booth monitoring with rich visuals.
  */
 
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
+import {
+  useAdminBooths,
+  exportBoothsCsv,
+  type AdminBoothListItem,
+  type AdminBoothStatus,
+  type StatusIconValue,
+} from "@/core/api/admin/booths";
 
-const demoBooths = [
-  { 
-    id: "1", 
-    name: "Downtown Mall", 
-    owner: "SnapShot Events",
-    ownerEmail: "contact@snapshot.com",
-    status: "online" as const,
-    revenue: 12500, 
-    transactions: 625,
-    growth: 18,
-    lastSeen: "2 min ago",
-    hardware: { camera: true, printer: true, wifi: true },
-    supplies: { paper: 85, ink: 72 },
-    location: "New York, NY",
-    alerts: 0,
-  },
-  { 
-    id: "2", 
-    name: "Wedding Venue", 
-    owner: "SnapShot Events",
-    ownerEmail: "contact@snapshot.com",
-    status: "online" as const,
-    revenue: 8900, 
-    transactions: 445,
-    growth: 12,
-    lastSeen: "5 min ago",
-    hardware: { camera: true, printer: true, wifi: true },
-    supplies: { paper: 45, ink: 68 },
-    location: "Los Angeles, CA",
-    alerts: 1,
-  },
-  { 
-    id: "3", 
-    name: "Convention Center", 
-    owner: "Party Pics Pro",
-    ownerEmail: "hello@partypics.com",
-    status: "offline" as const,
-    revenue: 6200, 
-    transactions: 310,
-    growth: -5,
-    lastSeen: "3h ago",
-    hardware: { camera: false, printer: false, wifi: false },
-    supplies: { paper: 90, ink: 85 },
-    location: "Chicago, IL",
-    alerts: 3,
-  },
-  { 
-    id: "4", 
-    name: "Beach Resort", 
-    owner: "Party Pics Pro",
-    ownerEmail: "hello@partypics.com",
-    status: "online" as const,
-    revenue: 9800, 
-    transactions: 490,
-    growth: 24,
-    lastSeen: "3 min ago",
-    hardware: { camera: true, printer: true, wifi: true },
-    supplies: { paper: 62, ink: 55 },
-    location: "Miami, FL",
-    alerts: 0,
-  },
-  { 
-    id: "5", 
-    name: "City Park", 
-    owner: "EventPix Studios",
-    ownerEmail: "info@eventpix.com",
-    status: "online" as const,
-    revenue: 5400, 
-    transactions: 270,
-    growth: 8,
-    lastSeen: "1 min ago",
-    hardware: { camera: true, printer: true, wifi: true },
-    supplies: { paper: 78, ink: 82 },
-    location: "Seattle, WA",
-    alerts: 0,
-  },
-  { 
-    id: "6", 
-    name: "Shopping Center", 
-    owner: "EventPix Studios",
-    ownerEmail: "info@eventpix.com",
-    status: "warning" as const,
-    revenue: 7200, 
-    transactions: 360,
-    growth: 3,
-    lastSeen: "15 min ago",
-    hardware: { camera: true, printer: false, wifi: true },
-    supplies: { paper: 12, ink: 25 },
-    location: "Denver, CO",
-    alerts: 2,
-  },
-  { 
-    id: "7", 
-    name: "Hotel Lobby", 
-    owner: "Celebrate Moments",
-    ownerEmail: "team@celebrate.io",
-    status: "online" as const,
-    revenue: 4300, 
-    transactions: 215,
-    growth: 15,
-    lastSeen: "8 min ago",
-    hardware: { camera: true, printer: true, wifi: true },
-    supplies: { paper: 95, ink: 88 },
-    location: "Boston, MA",
-    alerts: 0,
-  },
-  { 
-    id: "8", 
-    name: "Airport Terminal", 
-    owner: "Flash Photography",
-    ownerEmail: "flash@photo.com",
-    status: "online" as const,
-    revenue: 11200, 
-    transactions: 560,
-    growth: 22,
-    lastSeen: "4 min ago",
-    hardware: { camera: true, printer: true, wifi: true },
-    supplies: { paper: 58, ink: 45 },
-    location: "San Francisco, CA",
-    alerts: 0,
-  },
-];
+// Debounce hook for search input
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
-type FilterStatus = "all" | "online" | "offline" | "warning";
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
+type FilterStatus = "all" | AdminBoothStatus;
 type ViewMode = "grid" | "list";
+
+// Loading skeleton component
+function Skeleton({ className = "" }: { className?: string }) {
+  return (
+    <div className={`animate-pulse bg-zinc-200 dark:bg-zinc-700 rounded ${className}`} />
+  );
+}
 
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("en-US", {
@@ -151,38 +59,74 @@ function getStatusConfig(status: string) {
   }
 }
 
-function getSupplyColor(level: number) {
+function getSupplyColor(level: number | null) {
+  if (level === null) return "bg-zinc-500";
   if (level >= 60) return "bg-green-500";
   if (level >= 30) return "bg-yellow-500";
   return "bg-red-500";
+}
+
+function getStatusIconConfig(value: StatusIconValue) {
+  switch (value) {
+    case "ok": return { color: "bg-green-500/20", icon: "text-green-500" };
+    case "warning": return { color: "bg-yellow-500/20", icon: "text-yellow-500" };
+    case "error": return { color: "bg-red-500/20", icon: "text-red-500" };
+    default: return { color: "bg-zinc-500/20", icon: "text-zinc-500" };
+  }
 }
 
 export default function AdminBoothsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [page, setPage] = useState(1);
 
-  const filteredBooths = useMemo(() => {
-    return demoBooths.filter((booth) => {
-      if (filterStatus !== "all" && booth.status !== filterStatus) return false;
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        return booth.name.toLowerCase().includes(query) || booth.owner.toLowerCase().includes(query);
-      }
-      return true;
-    });
-  }, [searchQuery, filterStatus]);
+  const debouncedSearch = useDebounce(searchQuery, 300);
 
-  const stats = {
-    total: demoBooths.length,
-    online: demoBooths.filter(b => b.status === "online").length,
-    offline: demoBooths.filter(b => b.status === "offline").length,
-    warning: demoBooths.filter(b => b.status === "warning").length,
-    totalRevenue: demoBooths.reduce((sum, b) => sum + b.revenue, 0),
-    totalAlerts: demoBooths.reduce((sum, b) => sum + b.alerts, 0),
+  const { data, isLoading, error, refetch, isFetching } = useAdminBooths({
+    page,
+    per_page: 20,
+    status: filterStatus,
+    search: debouncedSearch || undefined,
+  });
+
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleRefresh = () => {
+    refetch();
   };
 
-  const topBooths = [...demoBooths].sort((a, b) => b.revenue - a.revenue).slice(0, 3);
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      await exportBoothsCsv({
+        status: filterStatus,
+        search: debouncedSearch || undefined,
+      });
+    } catch (error) {
+      console.error("Export failed:", error);
+      alert("Export failed. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleFilterChange = (status: FilterStatus) => {
+    setFilterStatus(status);
+    setPage(1);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setPage(1);
+  };
+
+  // Extract data
+  const summary = data?.summary;
+  const topBooths = data?.top_performing || [];
+  const booths = data?.booths || [];
+  const totalPages = data?.total_pages || 1;
+  const total = data?.total || 0;
 
   return (
     <div className="space-y-6">
@@ -199,55 +143,83 @@ export default function AdminBoothsPage() {
           <p className="text-zinc-500 dark:text-zinc-400 mt-1">Platform-wide booth monitoring and management</p>
         </div>
         <div className="flex items-center gap-2">
-          <button type="button" className="p-2.5 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={isFetching}
+            className="p-2.5 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all disabled:opacity-50"
+            title="Refresh data"
+          >
+            <svg className={`w-5 h-5 ${isFetching ? "animate-spin" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
             </svg>
           </button>
-          <button type="button" className="flex items-center gap-2 px-4 py-2.5 bg-[#0891B2] text-white font-medium rounded-xl hover:bg-[#0E7490] transition-colors">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-            </svg>
-            Export
+          <button
+            type="button"
+            onClick={handleExport}
+            disabled={isExporting || isLoading}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#0891B2] text-white font-medium rounded-xl hover:bg-[#0E7490] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isExporting ? (
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              </svg>
+            )}
+            {isExporting ? "Exporting..." : "Export"}
           </button>
         </div>
       </div>
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
-        <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
-          <p className="text-2xl font-bold text-zinc-900 dark:text-white">{stats.total}</p>
-          <p className="text-sm text-zinc-500">Total Booths</p>
-        </div>
-        <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-green-500" />
-            <p className="text-2xl font-bold text-zinc-900 dark:text-white">{stats.online}</p>
-          </div>
-          <p className="text-sm text-zinc-500">Online</p>
-        </div>
-        <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-red-500" />
-            <p className="text-2xl font-bold text-zinc-900 dark:text-white">{stats.offline}</p>
-          </div>
-          <p className="text-sm text-zinc-500">Offline</p>
-        </div>
-        <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-yellow-500" />
-            <p className="text-2xl font-bold text-zinc-900 dark:text-white">{stats.warning}</p>
-          </div>
-          <p className="text-sm text-zinc-500">Warning</p>
-        </div>
-        <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
-          <p className="text-2xl font-bold text-zinc-900 dark:text-white">{formatCurrency(stats.totalRevenue)}</p>
-          <p className="text-sm text-zinc-500">Revenue (MTD)</p>
-        </div>
-        <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
-          <p className="text-2xl font-bold text-zinc-900 dark:text-white">{stats.totalAlerts}</p>
-          <p className="text-sm text-zinc-500">Active Alerts</p>
-        </div>
+        {isLoading ? (
+          <>
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+                <Skeleton className="w-12 h-8 mb-1" />
+                <Skeleton className="w-20 h-4" />
+              </div>
+            ))}
+          </>
+        ) : (
+          <>
+            <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+              <p className="text-2xl font-bold text-zinc-900 dark:text-white">{summary?.total_booths ?? 0}</p>
+              <p className="text-sm text-zinc-500">Total Booths</p>
+            </div>
+            <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-green-500" />
+                <p className="text-2xl font-bold text-zinc-900 dark:text-white">{summary?.online ?? 0}</p>
+              </div>
+              <p className="text-sm text-zinc-500">Online</p>
+            </div>
+            <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-red-500" />
+                <p className="text-2xl font-bold text-zinc-900 dark:text-white">{summary?.offline ?? 0}</p>
+              </div>
+              <p className="text-sm text-zinc-500">Offline</p>
+            </div>
+            <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-yellow-500" />
+                <p className="text-2xl font-bold text-zinc-900 dark:text-white">{summary?.warning ?? 0}</p>
+              </div>
+              <p className="text-sm text-zinc-500">Warning</p>
+            </div>
+            <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+              <p className="text-2xl font-bold text-zinc-900 dark:text-white">{formatCurrency(summary?.revenue_mtd ?? 0)}</p>
+              <p className="text-sm text-zinc-500">Revenue (MTD)</p>
+            </div>
+            <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+              <p className="text-2xl font-bold text-zinc-900 dark:text-white">{summary?.active_alerts ?? 0}</p>
+              <p className="text-sm text-zinc-500">Active Alerts</p>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Top Performers */}
@@ -256,23 +228,47 @@ export default function AdminBoothsPage() {
           <h3 className="font-semibold text-zinc-900 dark:text-white">Top Performing Booths</h3>
           <span className="text-xs text-zinc-500">This Month</span>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {topBooths.map((booth, i) => (
-            <div key={booth.id} className="flex items-center gap-3 p-3 rounded-xl bg-slate-100 dark:bg-zinc-800/50">
-              <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-slate-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300">
-                {i + 1}
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate text-zinc-900 dark:text-white">{booth.name}</p>
-                <p className="text-xs text-zinc-500">{booth.owner}</p>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-slate-100 dark:bg-zinc-800/50">
+                <Skeleton className="w-6 h-6 rounded-full" />
+                <div className="flex-1">
+                  <Skeleton className="w-24 h-4 mb-1" />
+                  <Skeleton className="w-16 h-3" />
+                </div>
+                <div className="text-right">
+                  <Skeleton className="w-16 h-5 mb-1" />
+                  <Skeleton className="w-10 h-3" />
+                </div>
               </div>
-              <div className="text-right">
-                <p className="font-bold text-zinc-900 dark:text-white">{formatCurrency(booth.revenue)}</p>
-                <span className="text-xs text-zinc-500">+{booth.growth}%</span>
+            ))}
+          </div>
+        ) : topBooths.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {topBooths.map((booth) => (
+              <div key={booth.id} className="flex items-center gap-3 p-3 rounded-xl bg-slate-100 dark:bg-zinc-800/50">
+                <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-slate-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300">
+                  {booth.rank}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm truncate text-zinc-900 dark:text-white">{booth.name}</p>
+                  <p className="text-xs text-zinc-500">{booth.owner_name || "Unknown"}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-zinc-900 dark:text-white">{formatCurrency(booth.revenue)}</p>
+                  {booth.revenue_change_percent !== null && (
+                    <span className={`text-xs ${booth.revenue_change_percent >= 0 ? "text-green-500" : "text-red-500"}`}>
+                      {booth.revenue_change_percent >= 0 ? "+" : ""}{booth.revenue_change_percent.toFixed(1)}%
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-zinc-500 text-center py-4">No booth data available</p>
+        )}
       </section>
 
       {/* Filters */}
@@ -283,9 +279,9 @@ export default function AdminBoothsPage() {
           </svg>
           <input
             type="text"
-            placeholder="Search booths by name, owner..."
+            placeholder="Search booths by name or address..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="w-full pl-12 pr-4 py-3 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] transition-all"
           />
         </div>
@@ -296,7 +292,7 @@ export default function AdminBoothsPage() {
               <button
                 key={status}
                 type="button"
-                onClick={() => setFilterStatus(status)}
+                onClick={() => handleFilterChange(status)}
                 className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all capitalize ${
                   filterStatus === status
                     ? "bg-[#0891B2] text-white"
@@ -333,176 +329,48 @@ export default function AdminBoothsPage() {
         </div>
       </div>
 
-      {/* Booths Grid */}
-      <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" : "space-y-3"}>
-        {filteredBooths.map((booth) => {
-          const statusConfig = getStatusConfig(booth.status);
-          
-          return viewMode === "grid" ? (
-            <div key={booth.id} className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer group">
-              {/* Header */}
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <div className="w-12 h-12 rounded-xl bg-linear-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center">
-                      <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                      </svg>
-                    </div>
-                    <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-[#111111]" style={{ backgroundColor: statusConfig.color }} />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold text-zinc-900 dark:text-white">{booth.name}</p>
-                      {booth.alerts > 0 && (
-                        <span className="px-1.5 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded">
-                          {booth.alerts}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-zinc-500">{booth.owner}</p>
-                  </div>
-                </div>
-              </div>
+      {/* Error State */}
+      {error && (
+        <div className="p-6 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-center">
+          <p className="text-red-600 dark:text-red-400">Failed to load booths. Please try again.</p>
+        </div>
+      )}
 
-              {/* Revenue & Growth */}
-              <div className="flex items-center justify-between mb-4 p-3 rounded-xl bg-slate-100 dark:bg-zinc-800/50">
+      {/* Loading State */}
+      {isLoading && (
+        <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" : "space-y-3"}>
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+              <div className="flex items-start gap-3 mb-4">
+                <Skeleton className="w-12 h-12 rounded-xl" />
                 <div>
-                  <p className="text-xs text-zinc-500">Revenue (MTD)</p>
-                  <p className="text-lg font-bold text-zinc-900 dark:text-white">{formatCurrency(booth.revenue)}</p>
-                </div>
-                <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${booth.growth >= 0 ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" d={booth.growth >= 0 ? "M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" : "M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"} />
-                  </svg>
-                  <span className="text-xs font-medium">{Math.abs(booth.growth)}%</span>
+                  <Skeleton className="w-32 h-5 mb-1" />
+                  <Skeleton className="w-24 h-4" />
                 </div>
               </div>
-
-              {/* Hardware Status */}
-              <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center gap-1.5" title="Camera">
-                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${booth.hardware.camera ? "bg-green-500/20" : "bg-red-500/20"}`}>
-                    <svg className={`w-3.5 h-3.5 ${booth.hardware.camera ? "text-green-500" : "text-red-500"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5" title="Printer">
-                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${booth.hardware.printer ? "bg-green-500/20" : "bg-red-500/20"}`}>
-                    <svg className={`w-3.5 h-3.5 ${booth.hardware.printer ? "text-green-500" : "text-red-500"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5" title="WiFi">
-                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${booth.hardware.wifi ? "bg-green-500/20" : "bg-red-500/20"}`}>
-                    <svg className={`w-3.5 h-3.5 ${booth.hardware.wifi ? "text-green-500" : "text-red-500"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="flex-1" />
-                <span className="text-xs text-zinc-500">{booth.location}</span>
+              <Skeleton className="w-full h-16 rounded-xl mb-4" />
+              <div className="flex gap-2 mb-4">
+                <Skeleton className="w-6 h-6 rounded-lg" />
+                <Skeleton className="w-6 h-6 rounded-lg" />
+                <Skeleton className="w-6 h-6 rounded-lg" />
               </div>
-
-              {/* Supplies */}
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-zinc-500 w-12">Paper</span>
-                  <div className="flex-1 h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full ${getSupplyColor(booth.supplies.paper)}`} style={{ width: `${booth.supplies.paper}%` }} />
-                  </div>
-                  <span className="text-xs text-zinc-500 dark:text-zinc-400 w-8">{booth.supplies.paper}%</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-zinc-500 w-12">Ink</span>
-                  <div className="flex-1 h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full ${getSupplyColor(booth.supplies.ink)}`} style={{ width: `${booth.supplies.ink}%` }} />
-                  </div>
-                  <span className="text-xs text-zinc-500 dark:text-zinc-400 w-8">{booth.supplies.ink}%</span>
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div className="flex items-center justify-between pt-4 border-t border-[var(--border)]">
-                <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusConfig.bg} ${statusConfig.text}`}>
-                  {statusConfig.label}
-                </span>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-zinc-500">{booth.lastSeen}</span>
-                  <button type="button" className="text-[#0891B2] hover:text-[#22D3EE] opacity-0 group-hover:opacity-100 transition-opacity">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
+              <Skeleton className="w-full h-8" />
             </div>
-          ) : (
-            /* List View */
-            <div key={booth.id} className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer">
-              <div className="flex items-center gap-4">
-                <div className="relative shrink-0">
-                  <div className="w-12 h-12 rounded-xl bg-linear-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center">
-                    <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                    </svg>
-                  </div>
-                  <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-[#111111]" style={{ backgroundColor: statusConfig.color }} />
-                </div>
+          ))}
+        </div>
+      )}
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold truncate text-zinc-900 dark:text-white">{booth.name}</p>
-                    {booth.alerts > 0 && (
-                      <span className="px-1.5 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded">
-                        {booth.alerts}
-                      </span>
-                    )}
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusConfig.bg} ${statusConfig.text}`}>
-                      {statusConfig.label}
-                    </span>
-                  </div>
-                  <p className="text-sm text-zinc-500">{booth.owner} · {booth.location}</p>
-                </div>
-                
-                <div className="hidden md:flex items-center gap-2">
-                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${booth.hardware.camera ? "bg-green-500/20" : "bg-red-500/20"}`}>
-                    <svg className={`w-3.5 h-3.5 ${booth.hardware.camera ? "text-green-500" : "text-red-500"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                    </svg>
-                  </div>
-                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${booth.hardware.printer ? "bg-green-500/20" : "bg-red-500/20"}`}>
-                    <svg className={`w-3.5 h-3.5 ${booth.hardware.printer ? "text-green-500" : "text-red-500"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
-                    </svg>
-                  </div>
-                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${booth.hardware.wifi ? "bg-green-500/20" : "bg-red-500/20"}`}>
-                    <svg className={`w-3.5 h-3.5 ${booth.hardware.wifi ? "text-green-500" : "text-red-500"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z" />
-                    </svg>
-                  </div>
-                </div>
-                
-                <div className="text-right shrink-0">
-                  <p className="font-bold text-zinc-900 dark:text-white">{formatCurrency(booth.revenue)}</p>
-                  <div className={`flex items-center justify-end gap-1 ${booth.growth >= 0 ? "text-green-500" : "text-red-500"}`}>
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d={booth.growth >= 0 ? "M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" : "M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"} />
-                    </svg>
-                    <span className="text-xs font-medium">{Math.abs(booth.growth)}%</span>
-                  </div>
-                </div>
+      {/* Booths Grid */}
+      {!isLoading && !error && (
+        <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" : "space-y-3"}>
+          {booths.map((booth) => (
+            <BoothCard key={booth.id} booth={booth} viewMode={viewMode} />
+          ))}
+        </div>
+      )}
 
-                <span className="text-xs text-zinc-500 shrink-0 hidden sm:block">{booth.lastSeen}</span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {filteredBooths.length === 0 && (
+      {/* Empty State */}
+      {!isLoading && !error && booths.length === 0 && (
         <div className="p-12 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] text-center">
           <svg className="w-12 h-12 mx-auto text-zinc-400 dark:text-zinc-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
@@ -513,14 +381,200 @@ export default function AdminBoothsPage() {
       )}
 
       {/* Pagination */}
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-zinc-500">Showing {filteredBooths.length} of {demoBooths.length} booths</p>
-        <div className="flex gap-2">
-          <button type="button" className="px-4 py-2 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 transition-colors">
-            Previous
-          </button>
-          <button type="button" className="px-4 py-2 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 transition-colors">
-            Next
+      {!isLoading && !error && booths.length > 0 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-zinc-500">
+            Showing {booths.length} of {total} booths
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-4 py-2 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+              className="px-4 py-2 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Booth Card Component
+function BoothCard({ booth, viewMode }: { booth: AdminBoothListItem; viewMode: ViewMode }) {
+  const statusConfig = getStatusConfig(booth.status);
+  const cameraStatus = getStatusIconConfig(booth.status_icons.camera);
+  const paymentStatus = getStatusIconConfig(booth.status_icons.payment);
+  const printerStatus = getStatusIconConfig(booth.status_icons.printer);
+
+  if (viewMode === "list") {
+    return (
+      <div className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer">
+        <div className="flex items-center gap-4">
+          <div className="relative shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+              </svg>
+            </div>
+            <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-[#111111]" style={{ backgroundColor: statusConfig.color }} />
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="font-semibold truncate text-zinc-900 dark:text-white">{booth.name}</p>
+              {booth.alert_count > 0 && (
+                <span className="px-1.5 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded">
+                  {booth.alert_count}
+                </span>
+              )}
+              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusConfig.bg} ${statusConfig.text}`}>
+                {statusConfig.label}
+              </span>
+            </div>
+            <p className="text-sm text-zinc-500">{booth.owner_name || "Unknown"} · {booth.address || "No address"}</p>
+          </div>
+
+          <div className="hidden md:flex items-center gap-2">
+            <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${cameraStatus.color}`} title="Camera">
+              <svg className={`w-3.5 h-3.5 ${cameraStatus.icon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+              </svg>
+            </div>
+            <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${printerStatus.color}`} title="Printer">
+              <svg className={`w-3.5 h-3.5 ${printerStatus.icon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
+              </svg>
+            </div>
+            <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${paymentStatus.color}`} title="Payment">
+              <svg className={`w-3.5 h-3.5 ${paymentStatus.icon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+              </svg>
+            </div>
+          </div>
+
+          <div className="text-right shrink-0">
+            <p className="font-bold text-zinc-900 dark:text-white">{formatCurrency(booth.revenue_mtd)}</p>
+            {booth.revenue_change_percent !== null && (
+              <div className={`flex items-center justify-end gap-1 ${booth.revenue_change_percent >= 0 ? "text-green-500" : "text-red-500"}`}>
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d={booth.revenue_change_percent >= 0 ? "M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" : "M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"} />
+                </svg>
+                <span className="text-xs font-medium">{Math.abs(booth.revenue_change_percent).toFixed(1)}%</span>
+              </div>
+            )}
+          </div>
+
+          <span className="text-xs text-zinc-500 shrink-0 hidden sm:block">{booth.last_heartbeat_ago || "Never"}</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Grid View
+  return (
+    <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer group">
+      {/* Header */}
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+              </svg>
+            </div>
+            <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-[#111111]" style={{ backgroundColor: statusConfig.color }} />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="font-semibold text-zinc-900 dark:text-white">{booth.name}</p>
+              {booth.alert_count > 0 && (
+                <span className="px-1.5 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded">
+                  {booth.alert_count}
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-zinc-500">{booth.owner_name || "Unknown"}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Revenue & Growth */}
+      <div className="flex items-center justify-between mb-4 p-3 rounded-xl bg-slate-100 dark:bg-zinc-800/50">
+        <div>
+          <p className="text-xs text-zinc-500">Revenue (MTD)</p>
+          <p className="text-lg font-bold text-zinc-900 dark:text-white">{formatCurrency(booth.revenue_mtd)}</p>
+        </div>
+        {booth.revenue_change_percent !== null && (
+          <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${booth.revenue_change_percent >= 0 ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d={booth.revenue_change_percent >= 0 ? "M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" : "M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"} />
+            </svg>
+            <span className="text-xs font-medium">{Math.abs(booth.revenue_change_percent).toFixed(1)}%</span>
+          </div>
+        )}
+      </div>
+
+      {/* Hardware Status */}
+      <div className="flex items-center gap-3 mb-4">
+        <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${cameraStatus.color}`} title="Camera">
+          <svg className={`w-3.5 h-3.5 ${cameraStatus.icon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+          </svg>
+        </div>
+        <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${printerStatus.color}`} title="Printer">
+          <svg className={`w-3.5 h-3.5 ${printerStatus.icon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
+          </svg>
+        </div>
+        <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${paymentStatus.color}`} title="Payment">
+          <svg className={`w-3.5 h-3.5 ${paymentStatus.icon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+          </svg>
+        </div>
+        <div className="flex-1" />
+        <span className="text-xs text-zinc-500">{booth.address || "No address"}</span>
+      </div>
+
+      {/* Supplies */}
+      <div className="space-y-2 mb-4">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-zinc-500 w-12">Paper</span>
+          <div className="flex-1 h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+            <div className={`h-full rounded-full ${getSupplyColor(booth.paper_percent)}`} style={{ width: `${booth.paper_percent ?? 0}%` }} />
+          </div>
+          <span className="text-xs text-zinc-500 dark:text-zinc-400 w-8">{booth.paper_percent ?? 0}%</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-zinc-500 w-12">Ink</span>
+          <div className="flex-1 h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+            <div className={`h-full rounded-full ${getSupplyColor(booth.ink_percent)}`} style={{ width: `${booth.ink_percent ?? 0}%` }} />
+          </div>
+          <span className="text-xs text-zinc-500 dark:text-zinc-400 w-8">{booth.ink_percent ?? 0}%</span>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between pt-4 border-t border-[var(--border)]">
+        <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusConfig.bg} ${statusConfig.text}`}>
+          {statusConfig.label}
+        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-zinc-500">{booth.last_heartbeat_ago || "Never"}</span>
+          <button type="button" className="text-[#0891B2] hover:text-[#22D3EE] opacity-0 group-hover:opacity-100 transition-opacity" aria-label="Open booth details" title="Open booth details">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+            </svg>
           </button>
         </div>
       </div>
