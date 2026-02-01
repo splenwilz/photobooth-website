@@ -68,10 +68,10 @@ function getSupplyColor(level: number | null) {
 
 function getStatusIconConfig(value: StatusIconValue) {
   switch (value) {
-    case "ok": return { ok: true, color: "bg-green-500/20", icon: "text-green-500" };
-    case "warning": return { ok: true, color: "bg-yellow-500/20", icon: "text-yellow-500" };
-    case "error": return { ok: false, color: "bg-red-500/20", icon: "text-red-500" };
-    default: return { ok: false, color: "bg-zinc-500/20", icon: "text-zinc-500" };
+    case "ok": return { color: "bg-green-500/20", icon: "text-green-500" };
+    case "warning": return { color: "bg-yellow-500/20", icon: "text-yellow-500" };
+    case "error": return { color: "bg-red-500/20", icon: "text-red-500" };
+    default: return { color: "bg-zinc-500/20", icon: "text-zinc-500" };
   }
 }
 
@@ -571,7 +571,7 @@ function BoothCard({ booth, viewMode }: { booth: AdminBoothListItem; viewMode: V
         </span>
         <div className="flex items-center gap-2">
           <span className="text-xs text-zinc-500">{booth.last_heartbeat_ago || "Never"}</span>
-          <button type="button" className="text-[#0891B2] hover:text-[#22D3EE] opacity-0 group-hover:opacity-100 transition-opacity">
+          <button type="button" className="text-[#0891B2] hover:text-[#22D3EE] opacity-0 group-hover:opacity-100 transition-opacity" aria-label="Open booth details" title="Open booth details">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
             </svg>
