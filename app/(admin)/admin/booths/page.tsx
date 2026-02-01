@@ -105,6 +105,7 @@ export default function AdminBoothsPage() {
       });
     } catch (error) {
       console.error("Export failed:", error);
+      alert("Export failed. Please try again.");
     } finally {
       setIsExporting(false);
     }
