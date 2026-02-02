@@ -9,7 +9,7 @@
  * 2. Local Master Password (8 digits) - works offline on booth, generated via API
  */
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   useGenerateEmergencyPassword,
   useGenerateLocalMasterPasswordApi,
@@ -51,6 +51,16 @@ export function EmergencyPasswordModal({
   // Shared state
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const copyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Hooks
   const { mutateAsync: generateCloudPassword, isPending: isCloudPending } =
@@ -114,7 +124,11 @@ export function EmergencyPasswordModal({
       try {
         await navigator.clipboard.writeText(password);
         setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        // Clear any existing timeout before setting a new one
+        if (copyTimeoutRef.current) {
+          clearTimeout(copyTimeoutRef.current);
+        }
+        copyTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
       } catch (err) {
         console.error("Failed to copy to clipboard:", err);
         setError("Failed to copy to clipboard. Please select and copy manually.");
