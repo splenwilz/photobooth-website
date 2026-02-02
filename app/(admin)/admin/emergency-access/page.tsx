@@ -292,7 +292,7 @@ export default function EmergencyAccessPage() {
               {activeCount}
             </p>
           </div>
-          <p className="text-sm text-zinc-500">Active</p>
+          <p className="text-sm text-zinc-500">Active (this page)</p>
         </div>
         <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-zinc-200 dark:border-zinc-800">
           <div className="flex items-center gap-2">
@@ -301,7 +301,7 @@ export default function EmergencyAccessPage() {
               {usedCount}
             </p>
           </div>
-          <p className="text-sm text-zinc-500">Used</p>
+          <p className="text-sm text-zinc-500">Used (this page)</p>
         </div>
         <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-zinc-200 dark:border-zinc-800">
           <div className="flex items-center gap-2">
@@ -310,7 +310,7 @@ export default function EmergencyAccessPage() {
               {revokedCount}
             </p>
           </div>
-          <p className="text-sm text-zinc-500">Revoked</p>
+          <p className="text-sm text-zinc-500">Revoked (this page)</p>
         </div>
       </div>
 

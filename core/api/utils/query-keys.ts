@@ -9,7 +9,6 @@
 
 import type { AdminTransactionsQueryParams } from "../admin/billing/types";
 import type { AdminBoothsQueryParams } from "../admin/booths/types";
-import type { EmergencyPasswordsQueryParams } from "../admin/emergency-password/types";
 import type { AdminTicketsQueryParams } from "../admin/tickets/types";
 import type { AdminUsersQueryParams } from "../admin/users/types";
 import type { AlertsParams } from "../alerts/types";
@@ -86,13 +85,6 @@ export const queryKeys = {
 		all: () => ['admin-booths'] as const,
 		lists: () => ['admin-booths', 'list'] as const,
 		list: (params?: AdminBoothsQueryParams) => ['admin-booths', 'list', params] as const,
-	},
-
-	// Emergency password queries (master password recovery)
-	emergencyPasswords: {
-		all: () => ['emergency-passwords'] as const,
-		lists: () => ['emergency-passwords', 'list'] as const,
-		list: (params?: EmergencyPasswordsQueryParams) => ['emergency-passwords', 'list', params] as const,
 	},
 
 	// Subscription queries (for admin)

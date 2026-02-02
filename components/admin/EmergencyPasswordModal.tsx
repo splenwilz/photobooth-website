@@ -111,9 +111,14 @@ export function EmergencyPasswordModal({
         : generatedLocalPassword?.password;
 
     if (password) {
-      await navigator.clipboard.writeText(password);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      try {
+        await navigator.clipboard.writeText(password);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (err) {
+        console.error("Failed to copy to clipboard:", err);
+        setError("Failed to copy to clipboard. Please select and copy manually.");
+      }
     }
   };
 
