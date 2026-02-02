@@ -43,6 +43,19 @@ function Skeleton({ className = "" }: { className?: string }) {
   );
 }
 
+// Tooltip component that appears above the element
+function Tooltip({ children, text }: { children: React.ReactNode; text: string }) {
+  return (
+    <span className="relative group">
+      {children}
+      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-zinc-900 dark:bg-zinc-700 rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">
+        {text}
+        <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-zinc-900 dark:border-t-zinc-700" />
+      </span>
+    </span>
+  );
+}
+
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -74,6 +87,23 @@ function getStatusIconConfig(value: StatusIconValue) {
     case "error": return { color: "bg-red-500/20", icon: "text-red-500" };
     default: return { color: "bg-zinc-500/20", icon: "text-zinc-500" };
   }
+}
+
+/**
+ * Get connectivity status (online/offline) - based on heartbeat only
+ * The "warning" status from API should be treated as "online with issues"
+ */
+function getConnectivityStatus(status: AdminBoothStatus): "online" | "offline" {
+  // If status is "warning", the booth is still online (has fresh heartbeat)
+  // but has hardware issues - connectivity is still "online"
+  return status === "offline" ? "offline" : "online";
+}
+
+/**
+ * Check if printer is unavailable (can't report supply levels)
+ */
+function isPrinterUnavailable(printerStatus: StatusIconValue): boolean {
+  return printerStatus === "error" || printerStatus === "unknown";
 }
 
 export default function AdminBoothsPage() {
@@ -438,10 +468,17 @@ function BoothCard({
   viewMode: ViewMode;
   onEmergencyAccess: () => void;
 }) {
-  const statusConfig = getStatusConfig(booth.status);
+  // Connectivity status (online/offline based on heartbeat)
+  const connectivityStatus = getConnectivityStatus(booth.status);
+  const statusConfig = getStatusConfig(connectivityStatus);
+  // Hardware error indicator (from API)
+  const hasError = booth.has_error;
+  const errorDetails = booth.error_details;
   const cameraStatus = getStatusIconConfig(booth.status_icons.camera);
   const paymentStatus = getStatusIconConfig(booth.status_icons.payment);
   const printerStatus = getStatusIconConfig(booth.status_icons.printer);
+  // Check if printer is unavailable (supplies can't be read)
+  const printerUnavailable = isPrinterUnavailable(booth.status_icons.printer);
 
   if (viewMode === "list") {
     return (
@@ -467,6 +504,16 @@ function BoothCard({
               <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusConfig.bg} ${statusConfig.text}`}>
                 {statusConfig.label}
               </span>
+              {hasError && (
+                <Tooltip text={errorDetails || "Hardware error detected"}>
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-500 flex items-center gap-1 cursor-help">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                    Error
+                  </span>
+                </Tooltip>
+              )}
             </div>
             <p className="text-sm text-zinc-500">{booth.owner_name || "Unknown"} · {booth.address || "No address"}</p>
           </div>
@@ -592,25 +639,62 @@ function BoothCard({
       <div className="space-y-2 mb-4">
         <div className="flex items-center gap-2">
           <span className="text-xs text-zinc-500 w-12">Paper</span>
-          <div className="flex-1 h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-            <div className={`h-full rounded-full ${getSupplyColor(booth.paper_percent)}`} style={{ width: `${booth.paper_percent ?? 0}%` }} />
-          </div>
-          <span className="text-xs text-zinc-500 dark:text-zinc-400 w-8">{booth.paper_percent ?? 0}%</span>
+          {printerUnavailable ? (
+            <>
+              <div className="flex-1 h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                <div className="h-full rounded-full bg-zinc-400 dark:bg-zinc-600 w-full opacity-30" />
+              </div>
+              <Tooltip text="Printer offline - unable to read supply levels">
+                <span className="text-xs text-zinc-400 dark:text-zinc-500 w-8 cursor-help">N/A</span>
+              </Tooltip>
+            </>
+          ) : (
+            <>
+              <div className="flex-1 h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                <div className={`h-full rounded-full ${getSupplyColor(booth.paper_percent)}`} style={{ width: `${booth.paper_percent ?? 0}%` }} />
+              </div>
+              <span className="text-xs text-zinc-500 dark:text-zinc-400 w-8">{booth.paper_percent ?? 0}%</span>
+            </>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-zinc-500 w-12">Ink</span>
-          <div className="flex-1 h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-            <div className={`h-full rounded-full ${getSupplyColor(booth.ink_percent)}`} style={{ width: `${booth.ink_percent ?? 0}%` }} />
-          </div>
-          <span className="text-xs text-zinc-500 dark:text-zinc-400 w-8">{booth.ink_percent ?? 0}%</span>
+          {printerUnavailable ? (
+            <>
+              <div className="flex-1 h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                <div className="h-full rounded-full bg-zinc-400 dark:bg-zinc-600 w-full opacity-30" />
+              </div>
+              <Tooltip text="Printer offline - unable to read supply levels">
+                <span className="text-xs text-zinc-400 dark:text-zinc-500 w-8 cursor-help">N/A</span>
+              </Tooltip>
+            </>
+          ) : (
+            <>
+              <div className="flex-1 h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                <div className={`h-full rounded-full ${getSupplyColor(booth.ink_percent)}`} style={{ width: `${booth.ink_percent ?? 0}%` }} />
+              </div>
+              <span className="text-xs text-zinc-500 dark:text-zinc-400 w-8">{booth.ink_percent ?? 0}%</span>
+            </>
+          )}
         </div>
       </div>
 
       {/* Footer */}
       <div className="flex items-center justify-between pt-4 border-t border-[var(--border)]">
-        <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusConfig.bg} ${statusConfig.text}`}>
-          {statusConfig.label}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusConfig.bg} ${statusConfig.text}`}>
+            {statusConfig.label}
+          </span>
+          {hasError && (
+            <Tooltip text={errorDetails || "Hardware error detected"}>
+              <span className="text-xs font-medium px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-500 flex items-center gap-1 cursor-help">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+              </span>
+            </Tooltip>
+          )}
+        </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-zinc-500">{booth.last_heartbeat_ago || "Never"}</span>
           {/* Emergency Access Button */}
@@ -626,11 +710,6 @@ function BoothCard({
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
-            </svg>
-          </button>
-          <button type="button" className="text-[#0891B2] hover:text-[#22D3EE] opacity-0 group-hover:opacity-100 transition-opacity" aria-label="Open booth details" title="Open booth details">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
             </svg>
           </button>
         </div>
