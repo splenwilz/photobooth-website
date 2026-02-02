@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useAdminTickets } from "@/core/api/admin/tickets";
 
 /**
  * Admin Dashboard Layout
@@ -41,15 +42,14 @@ const navItems = [
       </svg>
     )
   },
-  { 
-    name: "Tickets", 
-    href: "/admin/tickets", 
+  {
+    name: "Tickets",
+    href: "/admin/tickets",
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
         <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
       </svg>
-    ),
-    badge: 12
+    )
   },
   {
     name: "Booths",
@@ -117,6 +117,9 @@ export default function AdminLayout({
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Fetch open tickets count for sidebar badge
+  const { data: ticketsData } = useAdminTickets({ status: "open", per_page: 1 });
+
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex">
       {/* Mobile Sidebar Overlay */}
@@ -173,11 +176,11 @@ export default function AdminLayout({
                 >
                   {item.icon}
                   <span className="font-medium">{item.name}</span>
-                  {item.badge && (
+                  {item.name === "Tickets" && ticketsData?.summary?.open_tickets ? (
                     <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                      {item.badge}
+                      {ticketsData.summary.open_tickets}
                     </span>
-                  )}
+                  ) : null}
                 </Link>
               );
             })}
