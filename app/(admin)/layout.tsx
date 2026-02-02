@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useAdminTickets } from "@/core/api/admin/tickets";
 
 /**
  * Admin Dashboard Layout
@@ -41,15 +42,14 @@ const navItems = [
       </svg>
     )
   },
-  { 
-    name: "Tickets", 
-    href: "/admin/tickets", 
+  {
+    name: "Tickets",
+    href: "/admin/tickets",
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
         <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
       </svg>
-    ),
-    badge: 12
+    )
   },
   {
     name: "Booths",
@@ -58,6 +58,15 @@ const navItems = [
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
         <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
         <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+      </svg>
+    )
+  },
+  {
+    name: "Emergency Access",
+    href: "/admin/emergency-access",
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
       </svg>
     )
   },
@@ -107,6 +116,9 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Fetch open tickets count for sidebar badge
+  const { data: ticketsData } = useAdminTickets({ status: "open", per_page: 1 });
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex">
@@ -164,11 +176,11 @@ export default function AdminLayout({
                 >
                   {item.icon}
                   <span className="font-medium">{item.name}</span>
-                  {item.badge && (
+                  {item.name === "Tickets" && ticketsData?.summary?.open_tickets ? (
                     <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                      {item.badge}
+                      {ticketsData.summary.open_tickets}
                     </span>
-                  )}
+                  ) : null}
                 </Link>
               );
             })}
