@@ -14,6 +14,7 @@ import {
   type AdminBoothStatus,
   type StatusIconValue,
 } from "@/core/api/admin/booths";
+import { EmergencyPasswordModal } from "@/components/admin/EmergencyPasswordModal";
 
 // Debounce hook for search input
 function useDebounce<T>(value: T, delay: number): T {
@@ -80,6 +81,10 @@ export default function AdminBoothsPage() {
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [page, setPage] = useState(1);
+  const [emergencyModalBooth, setEmergencyModalBooth] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   const debouncedSearch = useDebounce(searchQuery, 300);
 
@@ -364,7 +369,12 @@ export default function AdminBoothsPage() {
       {!isLoading && !error && (
         <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" : "space-y-3"}>
           {booths.map((booth) => (
-            <BoothCard key={booth.id} booth={booth} viewMode={viewMode} />
+            <BoothCard
+              key={booth.id}
+              booth={booth}
+              viewMode={viewMode}
+              onEmergencyAccess={() => setEmergencyModalBooth({ id: booth.id, name: booth.name })}
+            />
           ))}
         </div>
       )}
@@ -406,12 +416,28 @@ export default function AdminBoothsPage() {
           </div>
         </div>
       )}
+
+      {/* Emergency Password Modal */}
+      <EmergencyPasswordModal
+        isOpen={emergencyModalBooth !== null}
+        onClose={() => setEmergencyModalBooth(null)}
+        boothId={emergencyModalBooth?.id ?? ""}
+        boothName={emergencyModalBooth?.name ?? ""}
+      />
     </div>
   );
 }
 
 // Booth Card Component
-function BoothCard({ booth, viewMode }: { booth: AdminBoothListItem; viewMode: ViewMode }) {
+function BoothCard({
+  booth,
+  viewMode,
+  onEmergencyAccess,
+}: {
+  booth: AdminBoothListItem;
+  viewMode: ViewMode;
+  onEmergencyAccess: () => void;
+}) {
   const statusConfig = getStatusConfig(booth.status);
   const cameraStatus = getStatusIconConfig(booth.status_icons.camera);
   const paymentStatus = getStatusIconConfig(booth.status_icons.payment);
@@ -476,6 +502,22 @@ function BoothCard({ booth, viewMode }: { booth: AdminBoothListItem; viewMode: V
           </div>
 
           <span className="text-xs text-zinc-500 shrink-0 hidden sm:block">{booth.last_heartbeat_ago || "Never"}</span>
+
+          {/* Emergency Access Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEmergencyAccess();
+            }}
+            className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 transition-colors shrink-0"
+            title="Generate emergency password"
+            aria-label="Generate emergency password"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+            </svg>
+          </button>
         </div>
       </div>
     );
@@ -571,6 +613,21 @@ function BoothCard({ booth, viewMode }: { booth: AdminBoothListItem; viewMode: V
         </span>
         <div className="flex items-center gap-2">
           <span className="text-xs text-zinc-500">{booth.last_heartbeat_ago || "Never"}</span>
+          {/* Emergency Access Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEmergencyAccess();
+            }}
+            className="p-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 opacity-0 group-hover:opacity-100 transition-all"
+            title="Generate emergency password"
+            aria-label="Generate emergency password"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+            </svg>
+          </button>
           <button type="button" className="text-[#0891B2] hover:text-[#22D3EE] opacity-0 group-hover:opacity-100 transition-opacity" aria-label="Open booth details" title="Open booth details">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />

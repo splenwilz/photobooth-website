@@ -2,11 +2,12 @@
 
 /**
  * Admin Settings Page
- * 
+ *
  * Platform configuration with clean card design.
  */
 
 import { useState } from "react";
+import { BaseSecretConfig } from "@/components/admin/BaseSecretConfig";
 
 type Tab = "general" | "pricing" | "notifications" | "security";
 
@@ -191,6 +192,9 @@ export default function AdminSettingsPage() {
               className="w-32 px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#0891B2]"
             />
           </div>
+
+          {/* Base Secret for Emergency Access */}
+          <BaseSecretConfig />
 
           <div className="p-5 rounded-2xl bg-red-500/10 border border-red-500/20">
             <div className="flex items-center justify-between">
