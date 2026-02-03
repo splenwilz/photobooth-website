@@ -43,12 +43,12 @@ function Skeleton({ className = "" }: { className?: string }) {
   );
 }
 
-// Tooltip component that appears above the element
+// Tooltip component that appears above the element (keyboard-only)
 function Tooltip({ children, text }: { children: React.ReactNode; text: string }) {
   return (
-    <span className="relative group">
+    <span className="relative group outline-none focus:ring-2 focus:ring-[#0891B2] focus:ring-offset-1 rounded" tabIndex={0} role="button" aria-label={text}>
       {children}
-      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-zinc-900 dark:bg-zinc-700 rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">
+      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-zinc-900 dark:bg-zinc-700 rounded-lg whitespace-nowrap opacity-0 invisible group-focus:opacity-100 group-focus:visible transition-all z-50 pointer-events-none" role="tooltip">
         {text}
         <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-zinc-900 dark:border-t-zinc-700" />
       </span>
