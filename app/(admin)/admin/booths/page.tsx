@@ -6,7 +6,7 @@
  * Platform-wide booth monitoring with rich visuals.
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useId } from "react";
 import {
   useAdminBooths,
   exportBoothsCsv,
@@ -45,7 +45,7 @@ function Skeleton({ className = "" }: { className?: string }) {
 
 // Tooltip component that appears above the element (keyboard-only)
 function Tooltip({ children, text }: { children: React.ReactNode; text: string }) {
-  const tooltipId = `tooltip-${Math.random().toString(36).slice(2, 9)}`;
+  const tooltipId = useId();
   return (
     <span className="relative group outline-none focus:ring-2 focus:ring-[#0891B2] focus:ring-offset-1 rounded" tabIndex={0} aria-describedby={tooltipId}>
       {children}
