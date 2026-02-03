@@ -57,6 +57,8 @@ export interface AdminBoothListItem {
   owner_name: string | null;
   address: string | null;
   status: AdminBoothStatus;
+  has_error: boolean;
+  error_details: string | null;
   last_heartbeat: string | null;
   last_heartbeat_ago: string | null;
   revenue_mtd: number;
