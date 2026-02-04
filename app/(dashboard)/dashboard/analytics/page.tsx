@@ -137,9 +137,9 @@ export default function AnalyticsPage() {
           </div>
           <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
             <div className="flex items-end gap-1 h-44">
-              {["d1", "d2", "d3", "d4", "d5", "d6", "d7"].map((key) => (
-                <div key={key} className="flex-1 flex flex-col items-center justify-end h-full">
-                  <Skeleton className="w-full max-w-8 rounded-t" style={{ height: `${Math.random() * 60 + 20}%` }} />
+              {[65, 45, 80, 35, 55, 70, 40].map((height, i) => (
+                <div key={`skeleton-bar-${i}`} className="flex-1 flex flex-col items-center justify-end h-full">
+                  <Skeleton className="w-full max-w-8 rounded-t" style={{ height: `${height}%` }} />
                 </div>
               ))}
             </div>

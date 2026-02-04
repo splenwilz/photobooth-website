@@ -103,7 +103,7 @@ export async function getSetting(
   key: string
 ): Promise<AdminSettingResponse> {
   return apiClient<AdminSettingResponse>(
-    `${ADMIN_SETTINGS_BASE}/${category}/${key}`
+    `${ADMIN_SETTINGS_BASE}/${category}/${encodeURIComponent(key)}`
   );
 }
 
@@ -131,7 +131,7 @@ export async function updateSetting(
   reason?: string
 ): Promise<AdminSettingResponse> {
   return apiClient<AdminSettingResponse>(
-    `${ADMIN_SETTINGS_BASE}/${category}/${key}`,
+    `${ADMIN_SETTINGS_BASE}/${category}/${encodeURIComponent(key)}`,
     {
       method: "PUT",
       body: JSON.stringify({ value, reason }),
@@ -183,7 +183,7 @@ export async function resetSetting(
   key: string
 ): Promise<AdminSettingResponse> {
   return apiClient<AdminSettingResponse>(
-    `${ADMIN_SETTINGS_BASE}/reset/${category}/${key}`,
+    `${ADMIN_SETTINGS_BASE}/reset/${category}/${encodeURIComponent(key)}`,
     {
       method: "POST",
     }

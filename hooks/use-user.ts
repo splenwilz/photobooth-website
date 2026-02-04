@@ -50,6 +50,7 @@ export function useUser() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- read cookie on mount
     setUser(getUserFromCookie());
     setIsAuthenticated(isAuthenticatedFromCookie());
     setIsLoading(false);

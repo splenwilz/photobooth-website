@@ -194,7 +194,7 @@ export default function TicketDetailPage() {
     setSendError(null);
 
     // Reuse already-uploaded keys if retrying after a send failure
-    let attachmentKeys = [...uploadedAttachmentKeys];
+    const attachmentKeys = [...uploadedAttachmentKeys];
 
     // Upload files only if we have pending files that haven't been uploaded yet
     if (pendingFiles.length > 0 && uploadedAttachmentKeys.length === 0) {

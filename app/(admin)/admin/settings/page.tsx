@@ -49,6 +49,7 @@ function SettingInput({
 
   // Sync local value when setting changes from server (e.g., after reset)
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync state with props
     setLocalValue(setting.current_value);
   }, [setting.current_value]);
 
@@ -276,7 +277,7 @@ function PricingPlansSettings() {
     return (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+          <div key={`plan-skeleton-${i}`} className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
             <Skeleton className="w-48 h-6 mb-2" />
             <Skeleton className="w-72 h-4 mb-4" />
             <Skeleton className="w-32 h-8" />
@@ -389,7 +390,8 @@ function CategorySettings({ category }: { category: SettingCategory }) {
   const handleReset = (setting: AdminSetting) => {
     // Remove from pending changes if exists
     setPendingChanges((prev) => {
-      const { [setting.name]: _, ...rest } = prev;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [setting.name]: _removed, ...rest } = prev;
       return rest;
     });
     resetMutation.mutate({
@@ -404,7 +406,7 @@ function CategorySettings({ category }: { category: SettingCategory }) {
     return (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+          <div key={`setting-skeleton-${i}`} className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
             <Skeleton className="w-48 h-5 mb-2" />
             <Skeleton className="w-72 h-4 mb-4" />
             <Skeleton className="w-32 h-10" />

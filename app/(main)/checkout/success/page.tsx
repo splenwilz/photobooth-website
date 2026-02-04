@@ -61,6 +61,7 @@ function CheckoutSuccessContent() {
       session?.payment_status === "paid" &&
       !hasAttemptedBoothFetch
     ) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- guard flag for one-time fetch
       setHasAttemptedBoothFetch(true);
       getBoothSubscription(boothId)
         .then((data) => {
@@ -81,6 +82,7 @@ function CheckoutSuccessContent() {
       !redeemLicense.isPending &&
       sessionId
     ) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- guard flag for one-time effect
       setHasAttemptedRedeem(true);
       redeemLicense.mutate(
         {
@@ -109,6 +111,7 @@ function CheckoutSuccessContent() {
 
     // Check if user is on mobile
     const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- detect device on mount
     setIsMobileUser(isMobile);
 
     // Only redirect for templates or subscription purchases (not hardware - users need to see license key)

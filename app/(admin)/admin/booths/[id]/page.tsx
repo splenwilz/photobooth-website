@@ -8,7 +8,6 @@
  */
 
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import {
   useAdminBoothDetail,
   type StatusIconValue,
@@ -164,7 +163,7 @@ export default function AdminBoothDetailPage() {
             onClick={() => router.back()}
             className="p-2 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all"
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
             </svg>
           </button>
@@ -196,7 +195,7 @@ export default function AdminBoothDetailPage() {
             onClick={() => router.back()}
             className="p-2 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all"
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
             </svg>
           </button>
@@ -208,7 +207,7 @@ export default function AdminBoothDetailPage() {
               </span>
               {booth.status.has_error && (
                 <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-yellow-500/20 text-yellow-500 flex items-center gap-1">
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                   </svg>
                   Error
@@ -226,7 +225,7 @@ export default function AdminBoothDetailPage() {
             className="p-2.5 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all disabled:opacity-50"
             title="Refresh data"
           >
-            <svg className={`w-5 h-5 ${isFetching ? "animate-spin" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <svg aria-hidden="true" className={`w-5 h-5 ${isFetching ? "animate-spin" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
             </svg>
           </button>
@@ -235,7 +234,7 @@ export default function AdminBoothDetailPage() {
             onClick={() => setEmergencyModalOpen(true)}
             className="flex items-center gap-2 px-4 py-2.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-medium rounded-xl hover:bg-amber-500/20 transition-colors"
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
             </svg>
             Emergency Access
@@ -246,15 +245,15 @@ export default function AdminBoothDetailPage() {
       {/* Alerts */}
       {booth.alerts.length > 0 && (
         <div className="space-y-2">
-          {booth.alerts.map((alert, index) => {
+          {booth.alerts.map((alert) => {
             const alertColor = getAlertColor(alert.severity);
             return (
               <div
-                key={index}
+                key={`${alert.type}-${alert.message}`}
                 className={`p-4 rounded-xl border ${alertColor.bg} ${alertColor.border}`}
               >
                 <div className="flex items-center gap-3">
-                  <svg className={`w-5 h-5 ${alertColor.text}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg aria-hidden="true" className={`w-5 h-5 ${alertColor.text}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                   </svg>
                   <span className={`font-medium ${alertColor.text}`}>{alert.message}</span>
@@ -307,7 +306,7 @@ export default function AdminBoothDetailPage() {
               model={booth.hardware.printer.model}
               error={booth.hardware.printer.error}
               icon={
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
                 </svg>
               }
@@ -319,7 +318,7 @@ export default function AdminBoothDetailPage() {
               extra={booth.hardware.camera.cameras_detected !== null ? `${booth.hardware.camera.cameras_detected} detected` : undefined}
               error={booth.hardware.camera.error}
               icon={
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                 </svg>
               }
@@ -329,7 +328,7 @@ export default function AdminBoothDetailPage() {
               status={booth.hardware.payment.status}
               error={booth.hardware.payment.error}
               icon={
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
                 </svg>
               }
@@ -364,20 +363,20 @@ export default function AdminBoothDetailPage() {
           <div className="space-y-4">
             <ResourceItem
               label="CPU"
-              value={booth.system.cpu_percent !== null ? `${booth.system.cpu_percent.toFixed(1)}%` : "N/A"}
-              status={booth.system.cpu_percent !== null && booth.system.cpu_percent > 80 ? "high" : "ok"}
+              value={booth.system.cpu_percent !== null ? `${booth.system.cpu_percent.toFixed(1)}%` : "Unknown"}
+              status={booth.system.cpu_percent === null ? "unknown" : booth.system.cpu_percent > 80 ? "high" : "ok"}
             />
             <ResourceItem
               label="Memory"
-              value={booth.system.memory.used_percent !== null ? `${booth.system.memory.used_percent.toFixed(1)}%` : "N/A"}
-              extra={booth.system.memory.total_mb !== null ? `${(booth.system.memory.used_mb || 0).toLocaleString()} / ${booth.system.memory.total_mb.toLocaleString()} MB` : undefined}
-              status={booth.system.memory.status}
+              value={booth.system.memory.used_percent !== null ? `${booth.system.memory.used_percent.toFixed(1)}%` : "Unknown"}
+              extra={booth.system.memory.total_mb !== null && booth.system.memory.used_mb !== null ? `${booth.system.memory.used_mb.toLocaleString()} / ${booth.system.memory.total_mb.toLocaleString()} MB` : undefined}
+              status={booth.system.memory.used_percent === null ? "unknown" : booth.system.memory.status}
             />
             <ResourceItem
               label="Disk"
-              value={booth.system.disk.used_percent !== null ? `${booth.system.disk.used_percent.toFixed(1)}%` : "N/A"}
-              extra={booth.system.disk.total_gb !== null ? `${booth.system.disk.free_gb || 0} GB free of ${booth.system.disk.total_gb} GB` : undefined}
-              status={booth.system.disk.status}
+              value={booth.system.disk.used_percent !== null ? `${booth.system.disk.used_percent.toFixed(1)}%` : "Unknown"}
+              extra={booth.system.disk.total_gb !== null && booth.system.disk.free_gb !== null ? `${booth.system.disk.free_gb} GB free of ${booth.system.disk.total_gb} GB` : undefined}
+              status={booth.system.disk.used_percent === null ? "unknown" : booth.system.disk.status}
             />
             <div className="pt-4 border-t border-[var(--border)]">
               <div className="grid grid-cols-2 gap-4 text-sm">
@@ -439,7 +438,7 @@ export default function AdminBoothDetailPage() {
             </div>
           ) : (
             <div className="text-center py-8">
-              <svg className="w-12 h-12 mx-auto text-zinc-400 dark:text-zinc-600 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+              <svg aria-hidden="true" className="w-12 h-12 mx-auto text-zinc-400 dark:text-zinc-600 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
               </svg>
               <p className="text-zinc-500">No active subscription</p>
@@ -482,7 +481,7 @@ export default function AdminBoothDetailPage() {
           </div>
         ) : (
           <div className="text-center py-8">
-            <svg className="w-12 h-12 mx-auto text-zinc-400 dark:text-zinc-600 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+            <svg aria-hidden="true" className="w-12 h-12 mx-auto text-zinc-400 dark:text-zinc-600 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
             </svg>
             <p className="text-zinc-500">No recent transactions</p>
@@ -658,8 +657,8 @@ function LoadingSkeleton() {
 
       {/* Info Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+        {["owner", "status", "subscription", "heartbeat"].map((id) => (
+          <div key={id} className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
             <Skeleton className="w-16 h-4 mb-2" />
             <Skeleton className="w-24 h-6" />
           </div>
@@ -668,8 +667,8 @@ function LoadingSkeleton() {
 
       {/* Revenue Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+        {["today", "week", "month", "year", "total", "average"].map((id) => (
+          <div key={id} className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
             <Skeleton className="w-20 h-8 mb-2" />
             <Skeleton className="w-16 h-4" />
           </div>
@@ -678,8 +677,8 @@ function LoadingSkeleton() {
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="p-6 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+        {["hardware", "supplies", "system", "transactions"].map((id) => (
+          <div key={id} className="p-6 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
             <Skeleton className="w-32 h-6 mb-4" />
             <div className="space-y-4">
               <Skeleton className="w-full h-12" />

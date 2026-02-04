@@ -122,7 +122,7 @@ export interface AddMessageRequest {
 /**
  * Response from POST /tickets/{id}/messages
  */
-export interface AddMessageResponse extends TicketMessage {}
+export type AddMessageResponse = TicketMessage;
 
 /**
  * Request body for getting upload URL

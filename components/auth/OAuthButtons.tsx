@@ -1,5 +1,5 @@
 "use client";
-import { Loader, Loader2 } from "lucide-react";
+import { Loader } from "lucide-react";
 import { useState } from "react";
 import { oauthInitiateAction, type OAuthProvider } from "@/core/api/auth/oauth/actions";
 
@@ -8,7 +8,7 @@ interface OAuthButtonsProps {
   redirectTo?: string;
 }
 
-export function OAuthButtons({ disabled = false, redirectTo }: OAuthButtonsProps) {
+export function OAuthButtons({ disabled = false, redirectTo: _redirectTo }: OAuthButtonsProps) {
   const [isLoading, setIsLoading] = useState<OAuthProvider | null>(null);
   const [error, setError] = useState<string | null>(null);
 

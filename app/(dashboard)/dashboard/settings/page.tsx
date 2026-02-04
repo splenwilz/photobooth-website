@@ -250,6 +250,7 @@ export default function SettingsPage() {
 
   // Load user from cookie on mount
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- read cookie on mount
     setUser(getUserFromCookie());
   }, []);
 

@@ -261,6 +261,7 @@ export default function AdminTemplatesPage() {
 
   // Reset page when filters change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset pagination on filter change
     setPage(1);
   }, [filterCategory, filterStatus, filterTemplateType]);
 
@@ -276,7 +277,7 @@ export default function AdminTemplatesPage() {
         template.description.toLowerCase().includes(query) ||
         template.tags.toLowerCase().includes(query)
     );
-  }, [templatesData?.templates, searchQuery]);
+  }, [templatesData, searchQuery]);
 
   // Stats
   const stats = useMemo(() => {
@@ -294,7 +295,7 @@ export default function AdminTemplatesPage() {
     if (!layoutsData?.layouts) return [];
     const productCategoryId = templateFormData.template_type === "strip" ? 1 : 2;
     return layoutsData.layouts.filter((l) => l.product_category_id === productCategoryId);
-  }, [layoutsData?.layouts, templateFormData.template_type]);
+  }, [layoutsData, templateFormData.template_type]);
 
   const categories = categoriesData?.categories ?? [];
   const layouts = layoutsData?.layouts ?? [];
@@ -344,27 +345,47 @@ export default function AdminTemplatesPage() {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") {
-      type === "template" ? setDragActiveTemplate(true) : setDragActivePreview(true);
+      if (type === "template") {
+        setDragActiveTemplate(true);
+      } else {
+        setDragActivePreview(true);
+      }
     } else if (e.type === "dragleave") {
-      type === "template" ? setDragActiveTemplate(false) : setDragActivePreview(false);
+      if (type === "template") {
+        setDragActiveTemplate(false);
+      } else {
+        setDragActivePreview(false);
+      }
     }
   };
 
   const handleDrop = (e: React.DragEvent, type: "template" | "preview") => {
     e.preventDefault();
     e.stopPropagation();
-    type === "template" ? setDragActiveTemplate(false) : setDragActivePreview(false);
+    if (type === "template") {
+      setDragActiveTemplate(false);
+    } else {
+      setDragActivePreview(false);
+    }
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
       if (file.type.startsWith("image/")) {
-        type === "template" ? setTemplateFile(file) : setPreviewFile(file);
+        if (type === "template") {
+          setTemplateFile(file);
+        } else {
+          setPreviewFile(file);
+        }
       }
     }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "template" | "preview") => {
     if (e.target.files && e.target.files[0]) {
-      type === "template" ? setTemplateFile(e.target.files[0]) : setPreviewFile(e.target.files[0]);
+      if (type === "template") {
+        setTemplateFile(e.target.files[0]);
+      } else {
+        setPreviewFile(e.target.files[0]);
+      }
     }
   };
 
@@ -476,7 +497,7 @@ export default function AdminTemplatesPage() {
     try {
       const result = await broadcastSyncTemplatesMutation.mutateAsync();
       setSyncResult({ success: true, message: result.message });
-    } catch (error) {
+    } catch {
       setSyncResult({ success: false, message: "Failed to sync templates to booths" });
     }
   };
@@ -547,7 +568,7 @@ export default function AdminTemplatesPage() {
     try {
       const result = await broadcastSyncCategoriesMutation.mutateAsync();
       setSyncResult({ success: true, message: result.message });
-    } catch (error) {
+    } catch {
       setSyncResult({ success: false, message: "Failed to sync categories to booths" });
     }
   };
@@ -583,7 +604,7 @@ export default function AdminTemplatesPage() {
     e.preventDefault();
     try {
       if (editingLayoutId) {
-        const { photo_areas, ...updateData } = layoutFormData;
+        const { photo_areas: _photo_areas, ...updateData } = layoutFormData;
         await updateLayoutMutation.mutateAsync({ id: editingLayoutId, data: updateData });
       } else {
         await createLayoutMutation.mutateAsync(layoutFormData);
@@ -624,7 +645,7 @@ export default function AdminTemplatesPage() {
     try {
       const result = await broadcastSyncLayoutsMutation.mutateAsync();
       setSyncResult({ success: true, message: result.message });
-    } catch (error) {
+    } catch {
       setSyncResult({ success: false, message: "Failed to sync layouts to booths" });
     }
   };

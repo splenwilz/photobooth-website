@@ -81,6 +81,7 @@ export default function BoothsPage() {
     const canceled = searchParams.get("canceled");
 
     if (canceled === "true") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- handle URL params on mount
       setCheckoutMessage({ type: "canceled", message: "Checkout was canceled. You can try again anytime." });
       // Clear the URL param
       window.history.replaceState({}, "", "/dashboard/booths");

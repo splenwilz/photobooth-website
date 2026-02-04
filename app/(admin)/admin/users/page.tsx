@@ -68,6 +68,7 @@ export default function AdminUsersPage() {
     setPage(1);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleSort = (field: SortField) => {
     if (sortBy === field) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");

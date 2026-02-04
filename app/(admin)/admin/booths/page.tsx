@@ -7,7 +7,6 @@
  */
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import {
   useAdminBooths,
   exportBoothsCsv,
@@ -190,8 +189,8 @@ export default function AdminBoothsPage() {
       <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3">
         {isLoading ? (
           <>
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="p-3 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+            {["total", "online", "offline", "warning", "revenue", "alerts"].map((id) => (
+              <div key={id} className="p-3 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
                 <Skeleton className="w-12 h-8 mb-1" />
                 <Skeleton className="w-20 h-4" />
               </div>
@@ -316,8 +315,8 @@ export default function AdminBoothsPage() {
       {/* Loading State */}
       {isLoading && (
         <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" : "space-y-3"}>
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+          {["booth-a", "booth-b", "booth-c", "booth-d", "booth-e", "booth-f"].map((id) => (
+            <div key={id} className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
               <div className="flex items-start gap-3 mb-4">
                 <Skeleton className="w-12 h-12 rounded-xl" />
                 <div>
@@ -346,7 +345,7 @@ export default function AdminBoothsPage() {
               booth={booth}
               viewMode={viewMode}
               onEmergencyAccess={() => setEmergencyModalBooth({ id: booth.id, name: booth.name })}
-              onViewDetail={() => window.location.href = `/admin/booths/${booth.id}`}
+              onViewDetail={() => { window.location.href = `/admin/booths/${booth.id}`; }}
             />
           ))}
         </div>
@@ -427,12 +426,10 @@ function BoothCard({
 
   if (viewMode === "list") {
     return (
-      <div
-        className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer"
+      <button
+        type="button"
+        className="w-full text-left p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer"
         onClick={onViewDetail}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => e.key === "Enter" && onViewDetail()}
       >
         <div className="flex items-center gap-4">
           <div className="relative shrink-0">
@@ -460,7 +457,7 @@ function BoothCard({
                   className="text-xs font-medium px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-500 flex items-center gap-1"
                   title={errorDetails || "Hardware error detected"}
                 >
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg aria-hidden="true" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                   </svg>
                   Error
@@ -502,23 +499,21 @@ function BoothCard({
             title="Generate emergency password"
             aria-label="Generate emergency password"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
             </svg>
           </button>
         </div>
-      </div>
+      </button>
     );
   }
 
   // Grid View
   return (
-    <div
-      className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer group"
+    <button
+      type="button"
+      className="w-full text-left p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer group"
       onClick={onViewDetail}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => e.key === "Enter" && onViewDetail()}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
@@ -623,7 +618,7 @@ function BoothCard({
               className="text-xs font-medium px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-500 flex items-center gap-1"
               title={errorDetails || "Hardware error detected"}
             >
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg aria-hidden="true" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
               </svg>
             </span>
@@ -642,12 +637,12 @@ function BoothCard({
             title="Generate emergency password"
             aria-label="Generate emergency password"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
             </svg>
           </button>
         </div>
       </div>
-    </div>
+    </button>
   );
 }

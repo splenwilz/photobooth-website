@@ -35,6 +35,7 @@ export default function TemplatesPage() {
 
   const { openCart, getItemCount } = useCartStore();
   const [mounted, setMounted] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration pattern
   useEffect(() => setMounted(true), []);
   const itemCount = mounted ? getItemCount() : 0;
 
@@ -46,6 +47,7 @@ export default function TemplatesPage() {
 
   // Reset page when filters change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset pagination on filter change
     setPage(1);
   }, [templateType, activeTab, sortBy, debouncedSearch]);
 
