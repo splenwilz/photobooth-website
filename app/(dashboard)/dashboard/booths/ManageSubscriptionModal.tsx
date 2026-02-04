@@ -103,6 +103,7 @@ export function ManageSubscriptionModal({
 
     try {
       await cancelBoothSubscription(boothId, false); // Cancel at period end
+      setIsCanceling(false);
       setShowCancelConfirm(false);
       onClose();
     } catch (err) {
@@ -131,8 +132,9 @@ export function ManageSubscriptionModal({
               type="button"
               onClick={onClose}
               className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+              aria-label="Close dialog"
             >
-              <svg className="w-5 h-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-5 h-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>

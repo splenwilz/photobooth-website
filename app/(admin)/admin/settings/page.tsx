@@ -22,7 +22,9 @@ import {
 // Tab type that includes pricing
 type TabId = SettingCategory | "pricing";
 
-// Tab configuration matching API categories
+// Tab configuration - phased rollout
+// Currently implemented: operational settings + pricing plans
+// Future categories (billing, support, security, templates, notifications) will be added as needed
 const TABS: { id: TabId; label: string }[] = [
   { id: "operational", label: "Operational" },
   { id: "pricing", label: "Pricing Plans" },

@@ -325,9 +325,9 @@ export default function AdminOverviewPage() {
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Revenue by Plan</h2>
-            <a href="/admin/subscriptions" className="text-sm text-[#0891B2] hover:text-[#22D3EE] transition-colors">
+            <Link href="/admin/subscriptions" className="text-sm text-[#0891B2] hover:text-[#22D3EE] transition-colors">
               View Billing →
-            </a>
+            </Link>
           </div>
 
           <div className="rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] p-5">
