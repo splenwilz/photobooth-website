@@ -101,16 +101,30 @@ export default function PricingPage() {
       return [];
     }
 
-    return plansData.plans.map((plan, index) => ({
+    // Derive badge and icon from plan name instead of array index
+    const getPlanIcon = (name: string): string => {
+      const lowerName = name.toLowerCase();
+      if (lowerName.includes("starter") || lowerName.includes("basic") || lowerName.includes("free")) return "🎯";
+      if (lowerName.includes("pro") || lowerName.includes("professional")) return "⚡";
+      if (lowerName.includes("enterprise") || lowerName.includes("business")) return "🏢";
+      return "📦";
+    };
+
+    const isPopularPlan = (name: string): boolean => {
+      const lowerName = name.toLowerCase();
+      return lowerName.includes("pro") || lowerName.includes("professional");
+    };
+
+    return plansData.plans.map((plan) => ({
       id: plan.id.toString(),
       name: plan.name,
       description: plan.description || "",
       priceCents: plan.price_cents,
       priceDisplay: plan.price_display,
-      badge: index === 1 ? "Most Popular" : null, // Highlight second plan
+      badge: isPopularPlan(plan.name) ? "Most Popular" : null,
       features: plan.features.map((f) => ({ text: f, included: true })),
-      highlighted: index === 1,
-      icon: index === 0 ? "🎯" : index === 1 ? "⚡" : "🏢",
+      highlighted: isPopularPlan(plan.name),
+      icon: getPlanIcon(plan.name),
       isPaid: plan.price_cents > 0,
       hasAnnualOption: plan.has_annual_option,
       annualPriceDisplay: plan.annual_price_display,

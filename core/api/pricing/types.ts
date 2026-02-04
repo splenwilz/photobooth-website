@@ -38,10 +38,10 @@ export interface PublicPlansResponse {
 
 /**
  * Request: Create a subscription checkout session for a booth
+ * Note: booth_id is passed in the URL path, not in the request body
  */
 export interface CheckoutRequest {
   price_id: string;
-  booth_id: string;
   success_url: string;
   cancel_url: string;
 }

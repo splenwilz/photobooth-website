@@ -52,7 +52,6 @@ export function SubscribeBoothModal({
       // Use {CHECKOUT_SESSION_ID} placeholder - Stripe replaces this with actual session ID
       const result = await createSubscriptionCheckout(boothId, {
         price_id: priceId,
-        booth_id: boothId,
         success_url: `${window.location.origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}&type=subscription&booth_id=${boothId}`,
         cancel_url: `${window.location.origin}/dashboard/booths?canceled=true`,
       });
