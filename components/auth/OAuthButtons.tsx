@@ -5,9 +5,10 @@ import { oauthInitiateAction, type OAuthProvider } from "@/core/api/auth/oauth/a
 
 interface OAuthButtonsProps {
   disabled?: boolean;
+  redirectTo?: string;
 }
 
-export function OAuthButtons({ disabled = false }: OAuthButtonsProps) {
+export function OAuthButtons({ disabled = false, redirectTo }: OAuthButtonsProps) {
   const [isLoading, setIsLoading] = useState<OAuthProvider | null>(null);
   const [error, setError] = useState<string | null>(null);
 
