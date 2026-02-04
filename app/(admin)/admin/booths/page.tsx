@@ -434,7 +434,7 @@ function BoothCard({
         className="w-full text-left p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:ring-offset-2 dark:focus:ring-offset-[#111111]"
         onClick={onViewDetail}
         onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
+          if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) {
             e.preventDefault();
             onViewDetail();
           }
@@ -525,7 +525,7 @@ function BoothCard({
       className="w-full text-left p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:ring-offset-2 dark:focus:ring-offset-[#111111]"
       onClick={onViewDetail}
       onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
+        if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) {
           e.preventDefault();
           onViewDetail();
         }
