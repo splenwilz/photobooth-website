@@ -9,10 +9,15 @@
  * @see GET /api/v1/booths/overview
  */
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { useBoothOverview } from "@/core/api/booths";
-import type { BoothStatus } from "@/core/api/booths";
+import { queryKeys } from "@/core/api/utils/query-keys";
+import type { BoothStatus, BoothSubscription } from "@/core/api/booths";
 import { AddBoothModal } from "./AddBoothModal";
+import { SubscribeBoothModal } from "./SubscribeBoothModal";
+import { ManageSubscriptionModal } from "./ManageSubscriptionModal";
 
 type FilterStatus = "all" | "online" | "offline" | "warning" | "error";
 
@@ -33,15 +38,83 @@ function getStatusColor(status: BoothStatus): string {
   }
 }
 
+function getSubscriptionBadge(subscription: BoothSubscription | null): { text: string; color: string; bgColor: string } {
+  if (!subscription || subscription.status === 'none' || !subscription.plan_name) {
+    return { text: "No Plan", color: "text-zinc-500", bgColor: "bg-zinc-100 dark:bg-zinc-800" };
+  }
+  switch (subscription.status) {
+    case 'active':
+      return { text: subscription.plan_name, color: "text-green-600 dark:text-green-400", bgColor: "bg-green-100 dark:bg-green-900/30" };
+    case 'trialing':
+      return { text: `${subscription.plan_name} (Trial)`, color: "text-blue-600 dark:text-blue-400", bgColor: "bg-blue-100 dark:bg-blue-900/30" };
+    case 'past_due':
+      return { text: `${subscription.plan_name} (Past Due)`, color: "text-amber-600 dark:text-amber-400", bgColor: "bg-amber-100 dark:bg-amber-900/30" };
+    case 'canceled':
+      return { text: `${subscription.plan_name} (Canceled)`, color: "text-red-600 dark:text-red-400", bgColor: "bg-red-100 dark:bg-red-900/30" };
+    default:
+      return { text: subscription.plan_name, color: "text-zinc-600 dark:text-zinc-400", bgColor: "bg-zinc-100 dark:bg-zinc-800" };
+  }
+}
+
 function Skeleton({ className = "" }: { className?: string }) {
   return <div className={`animate-pulse bg-slate-200 dark:bg-zinc-800 rounded ${className}`} />;
 }
 
 export default function BoothsPage() {
+  const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
+
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [subscribeBoothId, setSubscribeBoothId] = useState<string | null>(null);
+  const [subscribeBoothName, setSubscribeBoothName] = useState<string>("");
+  const [manageBoothId, setManageBoothId] = useState<string | null>(null);
+  const [manageBoothName, setManageBoothName] = useState<string>("");
+  const [manageSubscription, setManageSubscription] = useState<BoothSubscription | null>(null);
+  const [checkoutMessage, setCheckoutMessage] = useState<{ type: "success" | "canceled"; message: string } | null>(null);
+
   const { data, isLoading, error } = useBoothOverview();
+
+  // Handle checkout return (success redirect goes to /checkout/success, this handles canceled)
+  useEffect(() => {
+    const canceled = searchParams.get("canceled");
+
+    if (canceled === "true") {
+      setCheckoutMessage({ type: "canceled", message: "Checkout was canceled. You can try again anytime." });
+      // Clear the URL param
+      window.history.replaceState({}, "", "/dashboard/booths");
+    }
+
+    // Refetch booth data when returning from any checkout flow
+    queryClient.invalidateQueries({ queryKey: queryKeys.booths.all() });
+  }, [searchParams, queryClient]);
+
+  const openSubscribeModal = (boothId: string, boothName: string) => {
+    setSubscribeBoothId(boothId);
+    setSubscribeBoothName(boothName);
+  };
+
+  const closeSubscribeModal = () => {
+    setSubscribeBoothId(null);
+    setSubscribeBoothName("");
+    // Refetch after closing modal (in case subscription was added)
+    queryClient.invalidateQueries({ queryKey: queryKeys.booths.all() });
+  };
+
+  const openManageModal = (boothId: string, boothName: string, subscription: BoothSubscription) => {
+    setManageBoothId(boothId);
+    setManageBoothName(boothName);
+    setManageSubscription(subscription);
+  };
+
+  const closeManageModal = () => {
+    setManageBoothId(null);
+    setManageBoothName("");
+    setManageSubscription(null);
+    queryClient.invalidateQueries({ queryKey: queryKeys.booths.all() });
+  };
+
 
   const summary = data?.summary;
   const booths = data?.booths ?? [];
@@ -155,6 +228,49 @@ export default function BoothsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Checkout Message Banner */}
+      {checkoutMessage && (
+        <div
+          className={`p-4 rounded-xl flex items-center justify-between ${
+            checkoutMessage.type === "canceled"
+              ? "bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800"
+              : "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800"
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            {checkoutMessage.type === "canceled" ? (
+              <svg className="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            )}
+            <p className={`text-sm font-medium ${
+              checkoutMessage.type === "canceled"
+                ? "text-amber-700 dark:text-amber-300"
+                : "text-green-700 dark:text-green-300"
+            }`}>
+              {checkoutMessage.message}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setCheckoutMessage(null)}
+            className={`p-1 rounded-lg transition-colors ${
+              checkoutMessage.type === "canceled"
+                ? "hover:bg-amber-100 dark:hover:bg-amber-800/30 text-amber-500"
+                : "hover:bg-green-100 dark:hover:bg-green-800/30 text-green-500"
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
+
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -277,48 +393,74 @@ export default function BoothsPage() {
         </div>
 
         <div className="space-y-3">
-          {filteredBooths.map((booth) => (
-            <div
-              key={booth.booth_id}
-              className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-zinc-500 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-label="Booth Icon">
-                      <title>Booth Icon</title>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold text-zinc-900 dark:text-white">{booth.booth_name}</p>
-                      <div
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: getStatusColor(booth.booth_status) }}
-                      />
+          {filteredBooths.map((booth) => {
+            const subBadge = getSubscriptionBadge(booth.subscription ?? null);
+            return (
+              <div
+                key={booth.booth_id}
+                className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
+                      <svg className="w-6 h-6 text-zinc-500 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-label="Booth Icon">
+                        <title>Booth Icon</title>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                      </svg>
                     </div>
-                    <p className="text-sm text-zinc-500">{booth.booth_address ?? "No address"}</p>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-zinc-900 dark:text-white">{booth.booth_name}</p>
+                        <div
+                          className="w-2 h-2 rounded-full"
+                          style={{ backgroundColor: getStatusColor(booth.booth_status) }}
+                        />
+                      </div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="text-sm text-zinc-500">{booth.booth_address ?? "No address"}</p>
+                        <span className="text-zinc-300 dark:text-zinc-600">·</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${subBadge.bgColor} ${subBadge.color}`}>
+                          {subBadge.text}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-6">
-                  <div className="text-right hidden sm:block">
-                    <p className="font-semibold text-zinc-900 dark:text-white">{formatCurrency(booth.revenue?.today ?? 0)}</p>
-                    <p className="text-xs text-zinc-500">{booth.transactions?.today_count ?? 0} today</p>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right hidden sm:block">
+                      <p className="font-semibold text-zinc-900 dark:text-white">{formatCurrency(booth.revenue?.today ?? 0)}</p>
+                      <p className="text-xs text-zinc-500">{booth.transactions?.today_count ?? 0} today</p>
+                    </div>
+                    <div className="text-right hidden md:block">
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400">{booth.credits?.balance ?? 0} credits</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const hasActiveSubscription = booth.subscription &&
+                          (booth.subscription.status === 'active' ||
+                           booth.subscription.status === 'trialing' ||
+                           booth.subscription.status === 'past_due');
+
+                        if (hasActiveSubscription && booth.subscription) {
+                          openManageModal(booth.booth_id, booth.booth_name, booth.subscription);
+                        } else {
+                          openSubscribeModal(booth.booth_id, booth.booth_name);
+                        }
+                      }}
+                      className="px-3 py-1.5 text-sm font-medium rounded-lg bg-[#0891B2]/10 text-[#0891B2] hover:bg-[#0891B2]/20 transition-colors"
+                    >
+                      {booth.subscription?.status === 'active' || booth.subscription?.status === 'trialing' || booth.subscription?.status === 'past_due'
+                        ? "Manage Plan"
+                        : "Subscribe"}
+                    </button>
                   </div>
-                  <div className="text-right hidden md:block">
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400">{booth.credits?.balance ?? 0} credits</p>
-                  </div>
-                  <svg className="w-5 h-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-label="Arrow Right">
-                    <title>Arrow Right</title>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                  </svg>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {filteredBooths.length === 0 && (
             <div className="p-12 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-center">
@@ -337,6 +479,23 @@ export default function BoothsPage() {
       <AddBoothModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
+      />
+
+      {/* Subscribe Booth Modal */}
+      <SubscribeBoothModal
+        isOpen={!!subscribeBoothId}
+        boothId={subscribeBoothId}
+        boothName={subscribeBoothName}
+        onClose={closeSubscribeModal}
+      />
+
+      {/* Manage Subscription Modal */}
+      <ManageSubscriptionModal
+        isOpen={!!manageBoothId}
+        boothId={manageBoothId}
+        boothName={manageBoothName}
+        subscription={manageSubscription}
+        onClose={closeManageModal}
       />
     </div>
   );

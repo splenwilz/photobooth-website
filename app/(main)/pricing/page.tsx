@@ -3,160 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useUser } from "@/hooks/use-user";
-import { useSubscriptionAccess } from "@/core/api/payments";
-import type { HardwarePackageId } from "@/core/config/stripe";
-
-// Hardware booth packages
-const hardwarePackages: Array<{
-  id: HardwarePackageId;
-  name: string;
-  description: string;
-  price: number;
-  features: Array<{ text: string; included: boolean }>;
-  cta: string;
-  ctaLink: string | null; // null = uses checkout, string = custom link
-  highlighted: boolean;
-  icon: string;
-  badge: string | null;
-}> = [
-  {
-    id: "essential",
-    name: "Essential",
-    description: "Perfect for getting started",
-    price: 2499,
-    features: [
-      { text: "15\" Touchscreen Monitor", included: true },
-      { text: "Compact Photo Booth Stand", included: true },
-      { text: "USB Webcam (1080p)", included: true },
-      { text: "Basic LED Ring Light", included: true },
-      { text: "Cable Management Kit", included: true },
-      { text: "DSLR Camera Mount", included: false },
-      { text: "Professional Printer", included: false },
-      { text: "Travel Case", included: false },
-    ],
-    cta: "Buy Essential",
-    ctaLink: null, // Uses checkout
-    highlighted: false,
-    icon: "📷",
-    badge: null,
-  },
-  {
-    id: "professional",
-    name: "Professional",
-    description: "Complete event-ready setup",
-    price: 4999,
-    features: [
-      { text: "21.5\" Touchscreen Monitor", included: true },
-      { text: "Premium Aluminum Stand", included: true },
-      { text: "DSLR Camera Mount + Bracket", included: true },
-      { text: "Professional LED Lighting", included: true },
-      { text: "DNP DS620A Photo Printer", included: true },
-      { text: "500 Print Media Sheets", included: true },
-      { text: "Padded Travel Case", included: true },
-      { text: "1-Year Hardware Warranty", included: true },
-    ],
-    cta: "Buy Professional",
-    ctaLink: null, // Uses checkout
-    highlighted: true,
-    icon: "🎯",
-    badge: "Most Popular",
-  },
-  {
-    id: "premium",
-    name: "Premium",
-    description: "Enterprise-grade equipment",
-    price: 7999,
-    features: [
-      { text: "27\" 4K Touchscreen Display", included: true },
-      { text: "Custom Branded Enclosure", included: true },
-      { text: "Canon DSLR Camera Included", included: true },
-      { text: "Studio Lighting System", included: true },
-      { text: "DNP DS820A Photo Printer", included: true },
-      { text: "1000 Print Media Sheets", included: true },
-      { text: "Flight Case + Accessories", included: true },
-      { text: "2-Year Hardware Warranty", included: true },
-    ],
-    cta: "Buy Premium",
-    ctaLink: null, // Uses checkout
-    highlighted: false,
-    icon: "👑",
-    badge: null,
-  },
-];
-
-// Software subscription plans
-const softwarePlans = [
-  {
-    id: "starter",
-    name: "Starter",
-    description: "Perfect for trying out PhotoBoothX",
-    monthlyPrice: 0,
-    yearlyPrice: 0,
-    period: "forever",
-    features: [
-      { text: "1 booth", included: true },
-      { text: "Basic templates (10)", included: true },
-      { text: "Webcam support", included: true },
-      { text: "Community support", included: true },
-      { text: "Watermarked prints", included: true },
-      { text: "DSLR support", included: false },
-      { text: "Mobile app", included: false },
-      { text: "Analytics", included: false },
-    ],
-    cta: "Download Free",
-    ctaLink: "/downloads",
-    highlighted: false,
-    icon: "🎯",
-    isPaid: false,
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    description: "For professional operators",
-    monthlyPrice: 49,
-    yearlyPrice: 39,
-    period: "/month",
-    badge: "Most Popular",
-    features: [
-      { text: "Unlimited booths", included: true },
-      { text: "100+ premium templates", included: true },
-      { text: "Webcam + DSLR support", included: true },
-      { text: "Priority email support", included: true },
-      { text: "No watermarks", included: true },
-      { text: "Mobile app access", included: true },
-      { text: "Payment integrations", included: true },
-      { text: "Analytics dashboard", included: true },
-    ],
-    cta: "Start 14-Day Free Trial",
-    ctaLink: null, // Will use checkout
-    highlighted: true,
-    icon: "⚡",
-    isPaid: true,
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    description: "For large operations",
-    monthlyPrice: null,
-    yearlyPrice: null,
-    period: "",
-    features: [
-      { text: "Everything in Pro", included: true },
-      { text: "Dedicated account manager", included: true },
-      { text: "Custom integrations", included: true },
-      { text: "99.9% SLA guarantee", included: true },
-      { text: "On-site training", included: true },
-      { text: "White-label options", included: true },
-      { text: "Custom development", included: true },
-      { text: "Priority phone support", included: true },
-    ],
-    cta: "Contact Sales",
-    ctaLink: "/contact",
-    highlighted: false,
-    icon: "🏢",
-    isPaid: false,
-  },
-];
+import { usePricingPlans } from "@/core/api/pricing";
 
 const faqs = [
   {
@@ -168,8 +15,8 @@ const faqs = [
     answer: "No! You can use your own equipment. Our software works with most webcams, DSLR cameras, and photo printers. Our hardware packages are a convenient option if you want a complete, tested setup.",
   },
   {
-    question: "Is there a free trial for Pro software?",
-    answer: "Yes! You can try all Pro features free for 14 days. No credit card required. If you love it, upgrade to keep your features.",
+    question: "How do I get started with Pro software?",
+    answer: "Simply choose a plan and subscribe. You can upgrade or downgrade anytime from your dashboard.",
   },
   {
     question: "Can I cancel my software subscription anytime?",
@@ -194,7 +41,6 @@ const faqs = [
 ];
 
 const comparisonFeatures = [
-  { name: "Number of Booths", starter: "1", pro: "Unlimited", enterprise: "Unlimited" },
   { name: "Template Library", starter: "10 basic", pro: "100+ premium", enterprise: "100+ premium + custom" },
   { name: "Camera Support", starter: "Webcam only", pro: "Webcam + DSLR", enterprise: "Webcam + DSLR" },
   { name: "Print Quality", starter: "Watermarked", pro: "Full quality", enterprise: "Full quality" },
@@ -211,29 +57,71 @@ export default function PricingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   // Auth state
-  const { isAuthenticated, isLoading: authLoading } = useUser();
+  const { isAuthenticated } = useUser();
 
-  // Subscription access check
-  const { data: accessData, isLoading: accessLoading } = useSubscriptionAccess({
-    enabled: isAuthenticated,
-  });
-  const hasActiveSubscription = accessData?.has_access ?? false;
+  // Fetch pricing plans from API
+  const { data: plansData, isLoading: plansLoading } = usePricingPlans();
 
-  // Section IDs for anchor navigation
-  const hardwareSectionId = "hardware";
-  const softwareSectionId = "software";
+  // Get trial period from API (0 = no trial)
+  const trialPeriodDays = plansData?.trial_period_days ?? 0;
 
-  // Get button text for Pro plan
-  const getProButtonText = () => {
-    if (authLoading || accessLoading) return "Loading...";
-    if (hasActiveSubscription) return "Manage Subscription";
-    return "Start 14-Day Free Trial";
+  // Get CTA text for paid plans (subscription happens from booth management)
+  const getPaidPlanCtaText = () => {
+    if (isAuthenticated) return "Manage Booths";
+    if (trialPeriodDays > 0) return `${trialPeriodDays}-Day Free Trial`;
+    return "Get Started";
   };
 
-  // Get subscription checkout URL based on billing interval
-  const getSubscriptionCheckoutUrl = () => {
-    return `/api/checkout/subscription?interval=${isAnnual ? "annual" : "monthly"}`;
+  // Get CTA link - authenticated users go to booth management, others to signup
+  const getPaidPlanCtaLink = () => {
+    return isAuthenticated ? "/dashboard/booths" : "/signup";
   };
+
+  // Display plan type
+  type DisplayPlan = {
+    id: string;
+    name: string;
+    description: string;
+    priceCents: number;
+    priceDisplay: string;
+    badge: string | null;
+    features: Array<{ text: string; included: boolean }>;
+    highlighted: boolean;
+    icon: string;
+    isPaid: boolean;
+    // Annual billing
+    hasAnnualOption: boolean;
+    annualPriceDisplay: string | null;
+    annualSavingsDisplay: string | null;
+  };
+
+  // Map API plans to display format
+  const getDisplayPlans = (): DisplayPlan[] => {
+    if (!plansData?.plans || plansData.plans.length === 0) {
+      return [];
+    }
+
+    return plansData.plans.map((plan, index) => ({
+      id: plan.id.toString(),
+      name: plan.name,
+      description: plan.description || "",
+      priceCents: plan.price_cents,
+      priceDisplay: plan.price_display,
+      badge: index === 1 ? "Most Popular" : null, // Highlight second plan
+      features: plan.features.map((f) => ({ text: f, included: true })),
+      highlighted: index === 1,
+      icon: index === 0 ? "🎯" : index === 1 ? "⚡" : "🏢",
+      isPaid: plan.price_cents > 0,
+      hasAnnualOption: plan.has_annual_option,
+      annualPriceDisplay: plan.annual_price_display,
+      annualSavingsDisplay: plan.annual_savings_display,
+    }));
+  };
+
+  const displayPlans = getDisplayPlans();
+
+  // Check if any plan has annual option
+  const hasAnyAnnualOption = displayPlans.some((p) => p.hasAnnualOption);
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
@@ -248,179 +136,20 @@ export default function PricingPage() {
               <title>Checkmark</title>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            Hardware + Software Solutions
+            Flexible Pricing
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-            Everything you need to<br />
-            <span className="text-[#0891B2]">start your photo booth business</span>
+            Simple per-booth pricing<br />
+            <span className="text-[#0891B2]">for every photo booth business</span>
           </h1>
-          <p className="text-xl text-[var(--muted)] max-w-2xl mx-auto mb-10">
-            Get complete booth setups or bring your own equipment.
-            Flexible software plans to match your business.
+          <p className="text-xl text-[var(--muted)] max-w-2xl mx-auto">
+            Subscribe each booth to the plan that fits its needs. Upgrade or downgrade anytime.
           </p>
-
-          {/* Quick nav tabs */}
-          <div className="inline-flex items-center gap-2 p-1.5 rounded-full bg-slate-200 dark:bg-zinc-900 border border-[var(--border)]">
-            <a
-              href={`#${hardwareSectionId}`}
-              className="px-5 py-2 rounded-full text-sm font-medium transition-all bg-white text-black flex items-center gap-2"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Computer" aria-hidden="true">
-                <title>Computer</title>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              Booth Packages
-            </a>
-            <a
-              href={`#${softwareSectionId}`}
-              className="px-5 py-2 rounded-full text-sm font-medium transition-all text-[var(--muted)] hover:text-[var(--foreground)] flex items-center gap-2"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Code" aria-hidden="true">
-                <title>Code</title>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-              </svg>
-              Software Plans
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Hardware Packages Section */}
-      <section id={hardwareSectionId} className="px-6 pb-24">
-        <div className="max-w-5xl mx-auto">
-          {/* Section Header */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#F59E0B]/10 border border-[#F59E0B]/20 text-[#F59E0B] text-sm font-medium mb-4">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Computer" aria-hidden="true">
-                <title>Computer</title>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              One-Time Purchase
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              Complete Booth Packages
-            </h2>
-            <p className="text-[var(--muted)] max-w-2xl mx-auto mb-20">
-              Event-ready photo booth setups with professional equipment.
-              Everything tested and configured — just unbox and start earning.
-          </p>
-          </div>
-
-          {/* Hardware Cards */}
-          <div className="grid lg:grid-cols-3 gap-6">
-            {hardwarePackages.map((pkg) => (
-              <div
-                key={pkg.name}
-                className={`relative rounded-2xl p-8 transition-all ${
-                  pkg.highlighted
-                    ? "bg-gradient-to-b from-[#F59E0B]/20 to-slate-100 dark:to-[#111111] border-2 border-[#F59E0B]/50 scale-105 lg:-mt-4 lg:mb-4 shadow-xl shadow-[#F59E0B]/10"
-                    : "bg-[var(--card)] border border-[var(--border)] hover:border-[var(--border)]"
-                }`}
-              >
-                {/* Badge */}
-                {pkg.badge && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <span className="px-4 py-1.5 rounded-full bg-[#F59E0B] text-white text-sm font-semibold shadow-lg shadow-[#F59E0B]/30">
-                      {pkg.badge}
-                    </span>
-                  </div>
-                )}
-
-                {/* Header */}
-                <div className="mb-6">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-3xl">{pkg.icon}</span>
-                    <h3 className="text-xl font-bold">{pkg.name}</h3>
-                  </div>
-                  <p className="text-sm text-[var(--muted)]">{pkg.description}</p>
-                </div>
-
-                {/* Price */}
-                <div className="mb-8">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-bold">${pkg.price.toLocaleString()}</span>
-                  </div>
-                  <p className="text-sm text-[var(--muted)] mt-1">
-                    One-time purchase + 3 months Pro software free
-                  </p>
-                </div>
-
-                {/* CTA */}
-                {pkg.ctaLink ? (
-                  <Link
-                    href={pkg.ctaLink}
-                    className={`block w-full py-3.5 rounded-xl font-semibold text-center transition-all mb-8 ${
-                      pkg.highlighted
-                        ? "bg-[#F59E0B] text-white hover:bg-[#D97706] shadow-lg shadow-[#F59E0B]/30 hover:shadow-[#F59E0B]/50"
-                        : "bg-slate-200 dark:bg-zinc-800 text-zinc-900 dark:text-white hover:bg-slate-300 dark:hover:bg-zinc-700"
-                    }`}
-                  >
-                    {pkg.cta}
-                  </Link>
-                ) : (
-                  <a
-                    href={`/api/checkout/hardware/${pkg.id}`}
-                    className={`block w-full py-3.5 rounded-xl font-semibold text-center transition-all mb-8 ${
-                      pkg.highlighted
-                        ? "bg-[#F59E0B] text-white hover:bg-[#D97706] shadow-lg shadow-[#F59E0B]/30 hover:shadow-[#F59E0B]/50"
-                        : "bg-slate-200 dark:bg-zinc-800 text-zinc-900 dark:text-white hover:bg-slate-300 dark:hover:bg-zinc-700"
-                    }`}
-                  >
-                    {pkg.cta}
-                  </a>
-                )}
-
-                {/* Features */}
-                <ul className="space-y-3">
-                  {pkg.features.map((feature) => (
-                    <li
-                      key={feature.text}
-                      className={`flex items-center gap-3 text-sm ${
-                        feature.included ? "text-[var(--foreground-secondary)]" : "text-[var(--muted)]"
-                      }`}
-                    >
-                      {feature.included ? (
-                        <svg className="w-5 h-5 text-[#10B981] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Included">
-                          <title>Included</title>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                      ) : (
-                        <svg className="w-5 h-5 text-slate-400 dark:text-zinc-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Not included">
-                          <title>Not included</title>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      )}
-                      {feature.text}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          {/* Additional Info */}
-          <div className="mt-12 grid sm:grid-cols-3 gap-6 text-center">
-            <div className="p-4 rounded-xl bg-[var(--card)] border border-[var(--border)]">
-              <div className="text-2xl mb-2">🚚</div>
-              <h4 className="font-semibold mb-1">Free Shipping</h4>
-              <p className="text-sm text-[var(--muted)]">Continental US orders</p>
-            </div>
-            <div className="p-4 rounded-xl bg-[var(--card)] border border-[var(--border)]">
-              <div className="text-2xl mb-2">🛠️</div>
-              <h4 className="font-semibold mb-1">Pre-Configured</h4>
-              <p className="text-sm text-[var(--muted)]">Tested before shipping</p>
-            </div>
-            <div className="p-4 rounded-xl bg-[var(--card)] border border-[var(--border)]">
-              <div className="text-2xl mb-2">💳</div>
-              <h4 className="font-semibold mb-1">0% Financing</h4>
-              <p className="text-sm text-[var(--muted)]">Available for qualified buyers</p>
-            </div>
-          </div>
         </div>
       </section>
 
       {/* Software Plans Section */}
-      <section id={softwareSectionId} className="px-6 pb-24">
+      <section className="px-6 pb-24">
         <div className="max-w-5xl mx-auto">
           {/* Section Header */}
           <div className="text-center mb-12">
@@ -432,50 +161,95 @@ export default function PricingPage() {
               Subscription Plans
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              PhotoBoothX Software
+              Per-Booth Plans
             </h2>
             <p className="text-[var(--muted)] max-w-2xl mx-auto mb-8">
-              Powerful photo booth software that works with your existing equipment
-              or our hardware packages.
+              Each booth gets its own subscription. Mix and match plans across your fleet
+              to optimize costs and features.
             </p>
 
             {/* Billing Toggle */}
-            <div className="inline-flex items-center gap-4 p-1.5 rounded-full bg-slate-200 dark:bg-zinc-900 border border-[var(--border)]">
-              <button
-                type="button"
-                onClick={() => setIsAnnual(false)}
-                className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
-                  !isAnnual
-                    ? "bg-white text-black"
-                    : "text-[var(--muted)] hover:text-[var(--foreground)]"
-                }`}
-              >
-                Monthly
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsAnnual(true)}
-                className={`px-5 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
-                  isAnnual
-                    ? "bg-white text-black"
-                    : "text-[var(--muted)] hover:text-[var(--foreground)]"
-                }`}
-              >
-                Annual
-                <span className={`text-xs px-2 py-0.5 rounded-full ${
-                  isAnnual
-                    ? "bg-[#10B981] text-white"
-                    : "bg-[#10B981]/20 text-[#10B981]"
-                }`}>
-                  Save 20%
-                </span>
-              </button>
-            </div>
+            {hasAnyAnnualOption && (
+              <div className="inline-flex items-center gap-4 p-1.5 rounded-full bg-slate-200 dark:bg-zinc-900 border border-[var(--border)]">
+                <button
+                  type="button"
+                  onClick={() => setIsAnnual(false)}
+                  className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
+                    !isAnnual
+                      ? "bg-white text-black"
+                      : "text-[var(--muted)] hover:text-[var(--foreground)]"
+                  }`}
+                >
+                  Monthly
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsAnnual(true)}
+                  className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
+                    isAnnual
+                      ? "bg-white text-black"
+                      : "text-[var(--muted)] hover:text-[var(--foreground)]"
+                  }`}
+                >
+                  Annual
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Software Cards */}
+          {plansLoading ? (
+            /* Loading Skeleton */
+            <div className="grid lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className={`relative rounded-2xl p-8 bg-[var(--card)] border border-[var(--border)] ${
+                    i === 2 ? "lg:scale-105 lg:-mt-4 lg:mb-4" : ""
+                  }`}
+                >
+                  {/* Header skeleton */}
+                  <div className="mb-6">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 rounded-lg bg-slate-200 dark:bg-zinc-700 animate-pulse" />
+                      <div className="h-6 w-24 bg-slate-200 dark:bg-zinc-700 rounded animate-pulse" />
+                    </div>
+                    <div className="h-4 w-full bg-slate-200 dark:bg-zinc-700 rounded animate-pulse mt-2" />
+                  </div>
+
+                  {/* Price skeleton */}
+                  <div className="mb-8">
+                    <div className="h-12 w-32 bg-slate-200 dark:bg-zinc-700 rounded animate-pulse" />
+                    <div className="h-4 w-20 bg-slate-200 dark:bg-zinc-700 rounded animate-pulse mt-2" />
+                  </div>
+
+                  {/* Button skeleton */}
+                  <div className="h-12 w-full bg-slate-200 dark:bg-zinc-700 rounded-xl animate-pulse mb-8" />
+
+                  {/* Features skeleton */}
+                  <div className="space-y-3">
+                    {[1, 2, 3, 4, 5].map((j) => (
+                      <div key={j} className="flex items-center gap-3">
+                        <div className="w-5 h-5 rounded-full bg-slate-200 dark:bg-zinc-700 animate-pulse shrink-0" />
+                        <div className="h-4 flex-1 bg-slate-200 dark:bg-zinc-700 rounded animate-pulse" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : displayPlans.length === 0 ? (
+            /* Empty state */
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">📦</div>
+              <h3 className="text-xl font-semibold mb-2">No plans available</h3>
+              <p className="text-[var(--muted)]">
+                Pricing plans are currently being configured. Please check back soon.
+              </p>
+            </div>
+          ) : (
           <div className="grid lg:grid-cols-3 gap-6">
-            {softwarePlans.map((plan) => (
+            {displayPlans.map((plan) => (
               <div
                 key={plan.name}
                 className={`relative rounded-2xl p-8 transition-all ${
@@ -504,23 +278,39 @@ export default function PricingPage() {
 
                 {/* Price */}
                 <div className="mb-8">
-                  {plan.monthlyPrice !== null ? (
+                  {plan.priceCents > 0 ? (
                     <>
                       <div className="flex items-baseline gap-1">
                         <span className="text-5xl font-bold">
-                          ${isAnnual ? plan.yearlyPrice : plan.monthlyPrice}
+                          {isAnnual && plan.hasAnnualOption && plan.annualPriceDisplay
+                            ? plan.annualPriceDisplay.replace("/year", "").replace("/yr", "")
+                            : plan.priceDisplay.replace("/month", "").replace("/mo", "")}
                         </span>
-                        <span className="text-[var(--muted)]">{plan.period}</span>
+                        <span className="text-[var(--muted)]">
+                          {isAnnual && plan.hasAnnualOption ? "/booth/yr" : "/booth/mo"}
+                        </span>
                       </div>
-                      {plan.monthlyPrice > 0 && (
+                      {isAnnual && plan.hasAnnualOption ? (
+                        plan.annualSavingsDisplay ? (
+                          <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                            {plan.annualSavingsDisplay}
+                          </p>
+                        ) : (
+                          <p className="text-sm text-[var(--muted)] mt-1">
+                            per booth, billed annually
+                          </p>
+                        )
+                      ) : (
                         <p className="text-sm text-[var(--muted)] mt-1">
-                          {isAnnual
-                            ? `Billed $${(plan.yearlyPrice ?? 0) * 12}/year`
-                            : "Billed monthly"
-                          }
+                          per booth, billed monthly
                         </p>
                       )}
                     </>
+                  ) : plan.priceCents === 0 && plan.priceDisplay !== "Custom" ? (
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-5xl font-bold">$0</span>
+                      <span className="text-[var(--muted)]">/booth</span>
+                    </div>
                   ) : (
                     <div className="flex items-baseline gap-1">
                       <span className="text-4xl font-bold">Custom</span>
@@ -529,31 +319,16 @@ export default function PricingPage() {
                 </div>
 
                 {/* CTA */}
-                {plan.isPaid ? (
-                  <a
-                    href={getSubscriptionCheckoutUrl()}
-                    className={`block w-full py-3.5 rounded-xl font-semibold text-center transition-all mb-8 ${
-                      authLoading || accessLoading ? "opacity-70 pointer-events-none" : ""
-                    } ${
-                      plan.highlighted
-                        ? "bg-[#0891B2] text-white hover:bg-[#0E7490] shadow-lg shadow-[#0891B2]/30 hover:shadow-[#0891B2]/50"
-                        : "bg-slate-200 dark:bg-zinc-800 text-zinc-900 dark:text-white hover:bg-slate-300 dark:hover:bg-zinc-700"
-                    }`}
-                  >
-                    {getProButtonText()}
-                  </a>
-                ) : (
-                  <Link
-                    href={plan.ctaLink ?? "/downloads"}
-                    className={`block w-full py-3.5 rounded-xl font-semibold text-center transition-all mb-8 ${
-                      plan.highlighted
-                        ? "bg-[#0891B2] text-white hover:bg-[#0E7490] shadow-lg shadow-[#0891B2]/30 hover:shadow-[#0891B2]/50"
-                        : "bg-slate-200 dark:bg-zinc-800 text-zinc-900 dark:text-white hover:bg-slate-300 dark:hover:bg-zinc-700"
-                    }`}
-                  >
-                    {plan.cta}
-                  </Link>
-                )}
+                <Link
+                  href={plan.isPaid ? getPaidPlanCtaLink() : "/downloads"}
+                  className={`block w-full py-3.5 rounded-xl font-semibold text-center transition-all mb-8 ${
+                    plan.highlighted
+                      ? "bg-[#0891B2] text-white hover:bg-[#0E7490] shadow-lg shadow-[#0891B2]/30 hover:shadow-[#0891B2]/50"
+                      : "bg-slate-200 dark:bg-zinc-800 text-zinc-900 dark:text-white hover:bg-slate-300 dark:hover:bg-zinc-700"
+                  }`}
+                >
+                  {plan.isPaid ? getPaidPlanCtaText() : "Download Free"}
+                </Link>
 
                 {/* Features */}
                 <ul className="space-y-3">
@@ -582,6 +357,7 @@ export default function PricingPage() {
               </div>
             ))}
           </div>
+          )}
         </div>
       </section>
 
@@ -801,8 +577,8 @@ export default function PricingPage() {
               </h2>
 
               <p className="text-[var(--muted)] mb-8 leading-relaxed">
-                Download PhotoBoothX and start your 14-day free trial.
-                No credit card required, cancel anytime.
+                Download PhotoBoothX and get started today.
+                Cancel your subscription anytime.
               </p>
 
               {/* CTA Buttons */}
@@ -832,14 +608,14 @@ export default function PricingPage() {
                     <title>Checkmark</title>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
-                  Free trial
+                  Free starter plan
                 </span>
                 <span className="flex items-center gap-1.5">
                   <svg className="w-4 h-4 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Checkmark" aria-hidden="true">
                     <title>Checkmark</title>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
-                  No credit card
+                  Secure payments
                 </span>
                 <span className="flex items-center gap-1.5">
                   <svg className="w-4 h-4 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Checkmark" aria-hidden="true">

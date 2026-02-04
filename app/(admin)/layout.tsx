@@ -1,17 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { useAdminTickets } from "@/core/api/admin/tickets";
+import type { AuthUser } from "@/core/api/auth/types";
 
 /**
  * Admin Dashboard Layout
- * 
+ *
  * Clean, professional layout matching the user dashboard style.
  * Uses the same design patterns for consistency.
  */
+
+// Get user from auth_user cookie (client-side)
+function getUserFromCookie(): AuthUser | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const cookie = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("auth_user="));
+    if (!cookie) return null;
+    return JSON.parse(decodeURIComponent(cookie.split("=")[1]));
+  } catch {
+    return null;
+  }
+}
+
+// Get user initials
+function getInitials(user: AuthUser | null): string {
+  if (!user) return "A";
+  const first = user.first_name?.[0] ?? "";
+  const last = user.last_name?.[0] ?? "";
+  return (first + last).toUpperCase() || "A";
+}
 
 // Navigation items for admin
 const navItems = [
@@ -43,15 +65,6 @@ const navItems = [
     )
   },
   {
-    name: "Tickets",
-    href: "/admin/tickets",
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
-      </svg>
-    )
-  },
-  {
     name: "Booths",
     href: "/admin/booths",
     icon: (
@@ -67,33 +80,6 @@ const navItems = [
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
-      </svg>
-    )
-  },
-  {
-    name: "Templates",
-    href: "/admin/templates",
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-      </svg>
-    )
-  },
-  { 
-    name: "Revenue", 
-    href: "/admin/revenue", 
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    )
-  },
-  { 
-    name: "Logs", 
-    href: "/admin/logs", 
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
       </svg>
     )
   },
@@ -115,10 +101,25 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [user, setUser] = useState<AuthUser | null>(null);
 
-  // Fetch open tickets count for sidebar badge
-  const { data: ticketsData } = useAdminTickets({ status: "open", per_page: 1 });
+  // Load user from cookie on mount
+  useEffect(() => {
+    setUser(getUserFromCookie());
+  }, []);
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.push("/signin");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      router.push("/signin");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex">
@@ -176,11 +177,6 @@ export default function AdminLayout({
                 >
                   {item.icon}
                   <span className="font-medium">{item.name}</span>
-                  {item.name === "Tickets" && ticketsData?.summary?.open_tickets ? (
-                    <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                      {ticketsData.summary.open_tickets}
-                    </span>
-                  ) : null}
                 </Link>
               );
             })}
@@ -189,17 +185,21 @@ export default function AdminLayout({
           {/* Admin User Section */}
           <div className="p-4 border-t border-[var(--border)]">
             <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-100 dark:bg-zinc-800/50">
-              <div className="w-10 h-10 rounded-full bg-linear-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center font-bold text-sm">
-                SA
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center font-bold text-sm text-white">
+                {getInitials(user)}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate text-zinc-900 dark:text-white">Super Admin</p>
-                <p className="text-xs text-zinc-500 truncate">admin@photoboothx.com</p>
+                <p className="font-medium text-sm truncate text-zinc-900 dark:text-white">
+                  {user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Admin" : "Admin"}
+                </p>
+                <p className="text-xs text-zinc-500 truncate">{user?.email ?? ""}</p>
               </div>
               <button
                 type="button"
                 className="p-2 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
                 aria-label="Logout"
+                title="Logout"
+                onClick={handleLogout}
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />

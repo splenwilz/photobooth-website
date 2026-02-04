@@ -5,7 +5,7 @@
  */
 
 import { useQuery } from "@tanstack/react-query";
-import { getAdminBooths } from "./services";
+import { getAdminBooths, getAdminBoothDetail } from "./services";
 import type { AdminBoothsQueryParams } from "./types";
 
 /**
@@ -15,11 +15,15 @@ import type { AdminBoothsQueryParams } from "./types";
  * - all: invalidates everything
  * - lists: invalidates all list queries
  * - list(params): invalidates specific filtered list
+ * - details: invalidates all detail queries
+ * - detail(id): invalidates specific booth detail
  */
 export const adminBoothKeys = {
   all: ["admin-booths"] as const,
   lists: () => [...adminBoothKeys.all, "list"] as const,
   list: (params?: AdminBoothsQueryParams) => [...adminBoothKeys.lists(), params] as const,
+  details: () => [...adminBoothKeys.all, "detail"] as const,
+  detail: (boothId: string) => [...adminBoothKeys.details(), boothId] as const,
 };
 
 /**
@@ -40,5 +44,27 @@ export function useAdminBooths(params: AdminBoothsQueryParams = {}) {
     queryKey: adminBoothKeys.list(params),
     queryFn: () => getAdminBooths(params),
     staleTime: 30 * 1000, // 30 seconds - booth status changes frequently
+  });
+}
+
+/**
+ * Hook to fetch detailed information for a single booth
+ *
+ * @param boothId - The booth UUID
+ * @returns Query result with booth details, loading state, and error
+ *
+ * @example
+ * const { data, isLoading, error } = useAdminBoothDetail("booth-uuid-1");
+ * if (data) {
+ *   console.log(data.revenue.month); // Revenue in cents
+ *   console.log(data.hardware.printer.status);
+ * }
+ */
+export function useAdminBoothDetail(boothId: string) {
+  return useQuery({
+    queryKey: adminBoothKeys.detail(boothId),
+    queryFn: () => getAdminBoothDetail(boothId),
+    staleTime: 30 * 1000, // 30 seconds - booth status changes frequently
+    enabled: !!boothId, // Only fetch when boothId is provided
   });
 }
