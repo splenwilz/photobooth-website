@@ -7,6 +7,7 @@
  */
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   useAdminBooths,
   exportBoothsCsv,
@@ -86,6 +87,7 @@ function isPrinterUnavailable(printerStatus: StatusIconValue): boolean {
 }
 
 export default function AdminBoothsPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -345,7 +347,7 @@ export default function AdminBoothsPage() {
               booth={booth}
               viewMode={viewMode}
               onEmergencyAccess={() => setEmergencyModalBooth({ id: booth.id, name: booth.name })}
-              onViewDetail={() => { window.location.href = `/admin/booths/${booth.id}`; }}
+              onViewDetail={() => router.push(`/admin/booths/${booth.id}`)}
             />
           ))}
         </div>

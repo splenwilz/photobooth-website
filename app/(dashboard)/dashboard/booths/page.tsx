@@ -80,14 +80,13 @@ export default function BoothsPage() {
   useEffect(() => {
     const canceled = searchParams.get("canceled");
 
-    if (canceled === "true") {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- handle URL params on mount
-      setCheckoutMessage({ type: "canceled", message: "Checkout was canceled. You can try again anytime." });
-      // Clear the URL param
-      window.history.replaceState({}, "", "/dashboard/booths");
-    }
+    if (canceled !== "true") return;
 
-    // Refetch booth data when returning from any checkout flow
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- handle URL params on mount
+    setCheckoutMessage({ type: "canceled", message: "Checkout was canceled. You can try again anytime." });
+    // Clear the URL param
+    window.history.replaceState({}, "", "/dashboard/booths");
+    // Refetch booth data when returning from checkout
     queryClient.invalidateQueries({ queryKey: queryKeys.booths.all() });
   }, [searchParams, queryClient]);
 

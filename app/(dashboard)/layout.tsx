@@ -24,7 +24,10 @@ function getUserFromCookie(): AuthUser | null {
       .map((c) => c.trim())
       .find((row) => row.startsWith("auth_user="));
     if (!cookie) return null;
-    return JSON.parse(decodeURIComponent(cookie.split("=")[1]));
+    // Use indexOf to handle values containing "=" characters
+    const eqIndex = cookie.indexOf("=");
+    if (eqIndex === -1) return null;
+    return JSON.parse(decodeURIComponent(cookie.slice(eqIndex + 1)));
   } catch {
     return null;
   }
