@@ -7,7 +7,7 @@
  * the user to manage via Stripe Customer Portal or cancel.
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { BoothSubscription } from "@/core/api/booths";
 import { usePricingPlans } from "@/core/api/pricing";
 import { createPortalSession, cancelBoothSubscription } from "@/core/api/payments";
@@ -55,6 +55,18 @@ export function ManageSubscriptionModal({
   const [isCanceling, setIsCanceling] = useState(false);
   const [isLoadingPortal, setIsLoadingPortal] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Reset local state when modal closes to avoid stale UI on reopen
+  useEffect(() => {
+    if (!isOpen) {
+      /* eslint-disable react-hooks/set-state-in-effect -- intentional reset on close */
+      setShowCancelConfirm(false);
+      setIsCanceling(false);
+      setIsLoadingPortal(false);
+      setError(null);
+      /* eslint-enable react-hooks/set-state-in-effect */
+    }
+  }, [isOpen]);
 
   const { data: plansData } = usePricingPlans();
   const plans = plansData?.plans ?? [];
