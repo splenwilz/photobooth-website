@@ -428,10 +428,17 @@ function BoothCard({
 
   if (viewMode === "list") {
     return (
-      <button
-        type="button"
-        className="w-full text-left p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer"
+      <div
+        role="button"
+        tabIndex={0}
+        className="w-full text-left p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:ring-offset-2 dark:focus:ring-offset-[#111111]"
         onClick={onViewDetail}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onViewDetail();
+          }
+        }}
       >
         <div className="flex items-center gap-4">
           <div className="relative shrink-0">
@@ -487,7 +494,7 @@ function BoothCard({
             </div>
           </div>
 
-          <span className="text-sm font-semibold text-zinc-900 dark:text-white shrink-0 hidden lg:block">${booth.revenue_mtd}</span>
+          <span className="text-sm font-semibold text-zinc-900 dark:text-white shrink-0 hidden lg:block">${booth.revenue_mtd ?? "0.00"}</span>
           <span className="text-xs text-zinc-500 shrink-0 hidden sm:block">{booth.last_heartbeat_ago || "Never"}</span>
 
           {/* Emergency Access Button */}
@@ -506,16 +513,23 @@ function BoothCard({
             </svg>
           </button>
         </div>
-      </button>
+      </div>
     );
   }
 
   // Grid View
   return (
-    <button
-      type="button"
-      className="w-full text-left p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer group"
+    <div
+      role="button"
+      tabIndex={0}
+      className="w-full text-left p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:ring-offset-2 dark:focus:ring-offset-[#111111]"
       onClick={onViewDetail}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onViewDetail();
+        }
+      }}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
@@ -606,7 +620,7 @@ function BoothCard({
       {/* Revenue */}
       <div className="flex items-center justify-between mb-4">
         <span className="text-xs text-zinc-500">Revenue MTD</span>
-        <span className="text-sm font-semibold text-zinc-900 dark:text-white">${booth.revenue_mtd}</span>
+        <span className="text-sm font-semibold text-zinc-900 dark:text-white">${booth.revenue_mtd ?? "0.00"}</span>
       </div>
 
       {/* Footer */}
@@ -645,6 +659,6 @@ function BoothCard({
           </button>
         </div>
       </div>
-    </button>
+    </div>
   );
 }
