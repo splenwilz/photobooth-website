@@ -12,6 +12,7 @@ export interface TopPerformingBooth {
   booth_id: string;
   booth_name: string;
   owner_name: string | null;
+  /** Revenue in cents - divide by 100 for display */
   revenue: number;
   revenue_change: number | null;
 }

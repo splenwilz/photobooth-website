@@ -11,7 +11,7 @@ import Link from "next/link";
 import { useAdminOverview } from "@/core/api/admin/overview";
 
 /**
- * Format currency display (values are already in dollars)
+ * Format currency display (expects dollar amount)
  */
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("en-US", {
@@ -304,9 +304,9 @@ export default function AdminOverviewPage() {
                         <p className="text-sm text-zinc-500 truncate">{booth.owner_name || "Unknown"}</p>
                       </div>
 
-                      {/* Revenue */}
+                      {/* Revenue - value is in cents */}
                       <div className="text-right">
-                        <p className="font-semibold text-zinc-900 dark:text-white">{formatCurrency(booth.revenue)}</p>
+                        <p className="font-semibold text-zinc-900 dark:text-white">{formatCurrency(booth.revenue / 100)}</p>
                         {booth.revenue_change !== null && (
                           <p className={`text-xs ${booth.revenue_change >= 0 ? "text-green-500" : "text-red-500"}`}>
                             {booth.revenue_change >= 0 ? "+" : ""}{booth.revenue_change}%

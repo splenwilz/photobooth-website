@@ -31,11 +31,12 @@ export interface AdminBoothsSummary {
  */
 export interface AdminTopPerformingBooth {
   rank: number;
-  id: string;
-  name: string;
+  booth_id: string;
+  booth_name: string;
   owner_name: string | null;
-  revenue: string;
-  revenue_change_percent: number | null;
+  /** Revenue in cents - divide by 100 for display */
+  revenue: number;
+  revenue_change: number | null;
 }
 
 /**
