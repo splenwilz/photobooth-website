@@ -25,7 +25,7 @@ function Skeleton({ className = "" }: { className?: string }) {
   );
 }
 
-// Format currency (values are already in dollars)
+// Format currency (expects dollar amount, not cents)
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",

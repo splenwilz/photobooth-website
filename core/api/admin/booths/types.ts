@@ -234,7 +234,7 @@ export interface BoothSubscription {
 }
 
 /**
- * Booth revenue breakdown (all values in cents)
+ * Booth revenue breakdown (all values in dollars)
  */
 export interface BoothRevenue {
   today: number;
