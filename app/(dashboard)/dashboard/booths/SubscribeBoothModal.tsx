@@ -99,12 +99,16 @@ export function SubscribeBoothModal({
               </span>
               <button
                 type="button"
+                role="switch"
+                aria-checked={isAnnual}
+                aria-label="Toggle annual billing"
                 onClick={() => setIsAnnual(!isAnnual)}
                 className={`relative w-12 h-6 rounded-full transition-colors ${
                   isAnnual ? "bg-[#0891B2]" : "bg-slate-300 dark:bg-zinc-700"
                 }`}
               >
                 <div
+                  aria-hidden="true"
                   className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
                     isAnnual ? "left-7" : "left-1"
                   }`}
