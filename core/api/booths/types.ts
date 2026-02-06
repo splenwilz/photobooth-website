@@ -291,6 +291,24 @@ export interface BoothRevenue {
 export type BoothStatus = 'online' | 'offline' | 'warning' | 'error';
 
 /**
+ * Subscription info for a booth
+ */
+export interface BoothSubscription {
+  /** Current plan ID (null if no subscription) */
+  plan_id: number | null;
+  /** Plan name for display */
+  plan_name: string | null;
+  /** Stripe price ID (used to determine monthly vs annual) */
+  price_id: string | null;
+  /** Subscription status */
+  status: 'active' | 'trialing' | 'past_due' | 'canceled' | 'none';
+  /** Current period end date */
+  current_period_end: string | null;
+  /** Whether subscription will cancel at period end */
+  cancel_at_period_end: boolean;
+}
+
+/**
  * Individual booth in the overview response
  * Note: Some fields may be null if booth data is incomplete
  */
@@ -303,6 +321,7 @@ export interface BoothOverviewItem {
   operation: BoothOperation | null;
   transactions: BoothTransactions | null;
   revenue: BoothRevenue | null;
+  subscription: BoothSubscription | null;
   last_updated: string;
 }
 

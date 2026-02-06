@@ -20,10 +20,14 @@ function getUserFromCookie(): AuthUser | null {
   if (typeof window === "undefined") return null;
   try {
     const cookie = document.cookie
-      .split("; ")
+      .split(";")
+      .map((c) => c.trim())
       .find((row) => row.startsWith("auth_user="));
     if (!cookie) return null;
-    return JSON.parse(decodeURIComponent(cookie.split("=")[1]));
+    // Use indexOf to handle values containing "=" characters
+    const eqIndex = cookie.indexOf("=");
+    if (eqIndex === -1) return null;
+    return JSON.parse(decodeURIComponent(cookie.slice(eqIndex + 1)));
   } catch {
     return null;
   }
@@ -228,6 +232,7 @@ function DashboardLayoutContent({
 
   // Load user from cookie on mount
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- read cookie on mount
     setUser(getUserFromCookie());
   }, []);
 
@@ -253,11 +258,16 @@ function DashboardLayoutContent({
   // Handle logout
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
-      router.push("/signin");
+      const response = await fetch("/api/auth/logout", { method: "POST" });
+      if (!response.ok) {
+        console.error("Logout request failed:", response.status);
+      }
+      setUser(null);
+      router.replace("/signin");
     } catch (error) {
       console.error("Logout failed:", error);
-      router.push("/signin");
+      setUser(null);
+      router.replace("/signin");
     }
   };
 

@@ -65,6 +65,7 @@ function getApiBaseUrl(): string {
  * - or custom: X-Token-Expired: true
  * @see https://www.rfc-editor.org/rfc/rfc6750#section-3
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function isExpiredByHeader(res: Response): boolean {
   const wwwAuth = res.headers.get('WWW-Authenticate') || ''
   const lower = wwwAuth.toLowerCase()

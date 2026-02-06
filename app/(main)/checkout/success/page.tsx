@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
-import { useCheckoutSession } from "@/core/api/payments";
+import { useCheckoutSession, getBoothSubscription } from "@/core/api/payments";
+import type { BoothSubscriptionItem } from "@/core/api/payments";
 import { useRedeemLicense } from "@/core/api/licenses";
 import type { RedeemLicenseResponse } from "@/core/api/licenses";
+import { usePricingPlans } from "@/core/api/pricing";
 
 type CheckoutType = "subscription" | "hardware" | "templates";
 
@@ -19,6 +21,10 @@ function CheckoutSuccessContent() {
   const [licenseData, setLicenseData] = useState<RedeemLicenseResponse | null>(null);
   const [redeemError, setRedeemError] = useState<string | null>(null);
   const [hasAttemptedRedeem, setHasAttemptedRedeem] = useState(false);
+
+  // Booth subscription data for per-booth subscriptions
+  const [boothSubscription, setBoothSubscription] = useState<BoothSubscriptionItem | null>(null);
+  const [hasAttemptedBoothFetch, setHasAttemptedBoothFetch] = useState(false);
 
   // Offline license state
   const [showOfflineForm, setShowOfflineForm] = useState(false);
@@ -43,6 +49,30 @@ function CheckoutSuccessContent() {
   // License redemption mutation
   const redeemLicense = useRedeemLicense();
 
+  // Fetch pricing plans for subscription feature details
+  const { data: plansData } = usePricingPlans();
+  const plans = plansData?.plans ?? [];
+
+  // Fetch booth subscription details after payment is confirmed
+  useEffect(() => {
+    if (
+      checkoutType === "subscription" &&
+      boothId &&
+      session?.payment_status === "paid" &&
+      !hasAttemptedBoothFetch
+    ) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- guard flag for one-time fetch
+      setHasAttemptedBoothFetch(true);
+      getBoothSubscription(boothId)
+        .then((data) => {
+          setBoothSubscription(data);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch booth subscription:", err);
+        });
+    }
+  }, [checkoutType, boothId, session, hasAttemptedBoothFetch]);
+
   // Redeem license after payment confirmed (for hardware purchases)
   useEffect(() => {
     if (
@@ -52,6 +82,7 @@ function CheckoutSuccessContent() {
       !redeemLicense.isPending &&
       sessionId
     ) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- guard flag for one-time effect
       setHasAttemptedRedeem(true);
       redeemLicense.mutate(
         {
@@ -80,6 +111,7 @@ function CheckoutSuccessContent() {
 
     // Check if user is on mobile
     const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- detect device on mount
     setIsMobileUser(isMobile);
 
     // Only redirect for templates or subscription purchases (not hardware - users need to see license key)
@@ -359,20 +391,41 @@ function CheckoutSuccessContent() {
           ],
           showLicenseKey: false,
         };
-      default:
+      default: {
+        // Get plan details from booth subscription or pricing plans
+        const planName = boothSubscription?.price_id
+          ? plans.find((p) => p.stripe_price_id === boothSubscription.price_id || p.stripe_annual_price_id === boothSubscription.price_id)?.name
+          : null;
+        const planDetails = planName
+          ? plans.find((p) => p.name === planName)
+          : null;
+        const subscriptionStatus = boothSubscription?.status;
+        const isTrialing = subscriptionStatus === "trialing";
+
+        // Build features list from actual plan or use generic message
+        const features: string[] = [];
+        if (isTrialing) {
+          features.push("Free trial started");
+        } else {
+          features.push("Subscription is now active");
+        }
+        if (planDetails?.features && planDetails.features.length > 0) {
+          features.push(...planDetails.features.slice(0, 3));
+        } else {
+          features.push("Full access to all plan features");
+        }
+
         return {
-          title: "Welcome to Pro!",
-          description: "Your subscription is now active. Enjoy unlimited booths, premium templates, and all Pro features.",
-          primaryAction: { href: "/dashboard", label: "Go to Dashboard" },
+          title: planName ? `Welcome to ${planName}!` : "Subscription Active!",
+          description: planName
+            ? `Your ${planName} subscription is now active for this booth.`
+            : "Your booth subscription is now active.",
+          primaryAction: { href: "/dashboard/booths", label: "Go to Booths" },
           secondaryAction: { href: "/downloads", label: "Download Software" },
-          features: [
-            "14-day free trial started",
-            "Unlimited booths",
-            "100+ premium templates",
-            "Priority support",
-          ],
+          features,
           showLicenseKey: false,
         };
+      }
     }
   };
 

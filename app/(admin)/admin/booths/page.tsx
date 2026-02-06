@@ -6,7 +6,8 @@
  * Platform-wide booth monitoring with rich visuals.
  */
 
-import { useState, useEffect, useId } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   useAdminBooths,
   exportBoothsCsv,
@@ -41,28 +42,6 @@ function Skeleton({ className = "" }: { className?: string }) {
   return (
     <div className={`animate-pulse bg-zinc-200 dark:bg-zinc-700 rounded ${className}`} />
   );
-}
-
-// Tooltip component that appears above the element (keyboard-only)
-function Tooltip({ children, text }: { children: React.ReactNode; text: string }) {
-  const tooltipId = useId();
-  return (
-    <span className="relative group outline-none focus:ring-2 focus:ring-[#0891B2] focus:ring-offset-1 rounded" tabIndex={0} aria-describedby={tooltipId}>
-      {children}
-      <span id={tooltipId} className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-zinc-900 dark:bg-zinc-700 rounded-lg whitespace-nowrap opacity-0 invisible group-focus:opacity-100 group-focus:visible transition-all z-50 pointer-events-none" role="tooltip">
-        {text}
-        <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-zinc-900 dark:border-t-zinc-700" />
-      </span>
-    </span>
-  );
-}
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-  }).format(amount);
 }
 
 function getStatusConfig(status: string) {
@@ -108,6 +87,7 @@ function isPrinterUnavailable(printerStatus: StatusIconValue): boolean {
 }
 
 export default function AdminBoothsPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -159,26 +139,25 @@ export default function AdminBoothsPage() {
 
   // Extract data
   const summary = data?.summary;
-  const topBooths = data?.top_performing || [];
   const booths = data?.booths || [];
   const totalPages = data?.total_pages || 1;
   const total = data?.total || 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-hidden">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">All Booths</h1>
             <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-500/20">
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-xs font-medium text-green-400">Live Monitoring</span>
+              <span className="text-xs font-medium text-green-400">Live</span>
             </div>
           </div>
-          <p className="text-zinc-500 dark:text-zinc-400 mt-1">Platform-wide booth monitoring and management</p>
+          <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-sm">Platform-wide booth monitoring and management</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
             onClick={handleRefresh}
@@ -203,17 +182,17 @@ export default function AdminBoothsPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
               </svg>
             )}
-            {isExporting ? "Exporting..." : "Export"}
+            <span className="hidden sm:inline">{isExporting ? "Exporting..." : "Export"}</span>
           </button>
         </div>
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3">
         {isLoading ? (
           <>
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+            {["total", "online", "offline", "warning", "revenue", "alerts"].map((id) => (
+              <div key={id} className="p-3 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
                 <Skeleton className="w-12 h-8 mb-1" />
                 <Skeleton className="w-20 h-4" />
               </div>
@@ -221,95 +200,48 @@ export default function AdminBoothsPage() {
           </>
         ) : (
           <>
-            <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
-              <p className="text-2xl font-bold text-zinc-900 dark:text-white">{summary?.total_booths ?? 0}</p>
-              <p className="text-sm text-zinc-500">Total Booths</p>
+            <div className="p-3 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]" title="Total number of booths registered">
+              <p className="text-xl font-bold text-zinc-900 dark:text-white">{summary?.total_booths ?? 0}</p>
+              <p className="text-xs text-zinc-500">Total Booths</p>
             </div>
-            <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+            <div className="p-3 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]" title="Booths currently online and operational">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-green-500" />
-                <p className="text-2xl font-bold text-zinc-900 dark:text-white">{summary?.online ?? 0}</p>
+                <p className="text-xl font-bold text-zinc-900 dark:text-white">{summary?.online ?? 0}</p>
               </div>
-              <p className="text-sm text-zinc-500">Online</p>
+              <p className="text-xs text-zinc-500">Online</p>
             </div>
-            <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+            <div className="p-3 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]" title="Booths that are currently offline or unreachable">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-red-500" />
-                <p className="text-2xl font-bold text-zinc-900 dark:text-white">{summary?.offline ?? 0}</p>
+                <p className="text-xl font-bold text-zinc-900 dark:text-white">{summary?.offline ?? 0}</p>
               </div>
-              <p className="text-sm text-zinc-500">Offline</p>
+              <p className="text-xs text-zinc-500">Offline</p>
             </div>
-            <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+            <div className="p-3 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]" title="Booths online but with hardware issues">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-yellow-500" />
-                <p className="text-2xl font-bold text-zinc-900 dark:text-white">{summary?.warning ?? 0}</p>
+                <p className="text-xl font-bold text-zinc-900 dark:text-white">{summary?.warning ?? 0}</p>
               </div>
-              <p className="text-sm text-zinc-500">Warning</p>
+              <p className="text-xs text-zinc-500">Warning</p>
             </div>
-            <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
-              <p className="text-2xl font-bold text-zinc-900 dark:text-white">{formatCurrency(summary?.revenue_mtd ?? 0)}</p>
-              <p className="text-sm text-zinc-500">Revenue (MTD)</p>
+            <div className="p-3 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]" title="Total revenue month-to-date">
+              <p className="text-xl font-bold text-zinc-900 dark:text-white">${summary?.revenue_mtd ?? "0.00"}</p>
+              <p className="text-xs text-zinc-500">Revenue MTD</p>
             </div>
-            <div className="p-4 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
-              <p className="text-2xl font-bold text-zinc-900 dark:text-white">{summary?.active_alerts ?? 0}</p>
-              <p className="text-sm text-zinc-500">Active Alerts</p>
+            <div className="p-3 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]" title="Number of active alerts requiring attention">
+              <p className="text-xl font-bold text-zinc-900 dark:text-white">{summary?.active_alerts ?? 0}</p>
+              <p className="text-xs text-zinc-500">Active Alerts</p>
             </div>
           </>
         )}
       </div>
 
-      {/* Top Performers */}
-      <section className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-zinc-900 dark:text-white">Top Performing Booths</h3>
-          <span className="text-xs text-zinc-500">This Month</span>
-        </div>
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-slate-100 dark:bg-zinc-800/50">
-                <Skeleton className="w-6 h-6 rounded-full" />
-                <div className="flex-1">
-                  <Skeleton className="w-24 h-4 mb-1" />
-                  <Skeleton className="w-16 h-3" />
-                </div>
-                <div className="text-right">
-                  <Skeleton className="w-16 h-5 mb-1" />
-                  <Skeleton className="w-10 h-3" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : topBooths.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {topBooths.map((booth) => (
-              <div key={booth.id} className="flex items-center gap-3 p-3 rounded-xl bg-slate-100 dark:bg-zinc-800/50">
-                <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-slate-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300">
-                  {booth.rank}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate text-zinc-900 dark:text-white">{booth.name}</p>
-                  <p className="text-xs text-zinc-500">{booth.owner_name || "Unknown"}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-zinc-900 dark:text-white">{formatCurrency(booth.revenue)}</p>
-                  {booth.revenue_change_percent !== null && (
-                    <span className={`text-xs ${booth.revenue_change_percent >= 0 ? "text-green-500" : "text-red-500"}`}>
-                      {booth.revenue_change_percent >= 0 ? "+" : ""}{booth.revenue_change_percent.toFixed(1)}%
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-zinc-500 text-center py-4">No booth data available</p>
-        )}
-      </section>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1 relative">
+      <div className="flex flex-col gap-3">
+        {/* Search */}
+        <div className="relative">
           <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
@@ -322,27 +254,37 @@ export default function AdminBoothsPage() {
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1 p-1 bg-slate-200/50 dark:bg-zinc-800/50 rounded-xl">
-            {(["all", "online", "offline", "warning"] as FilterStatus[]).map((status) => (
-              <button
-                key={status}
-                type="button"
-                onClick={() => handleFilterChange(status)}
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all capitalize ${
-                  filterStatus === status
-                    ? "bg-[#0891B2] text-white"
-                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
-                }`}
-              >
-                {status !== "all" && <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusConfig(status).color }} />}
-                {status}
-              </button>
-            ))}
+        {/* Filter buttons and view toggle */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap gap-1 p-1 bg-slate-200/50 dark:bg-zinc-800/50 rounded-xl">
+            {(["all", "online", "offline", "warning"] as FilterStatus[]).map((status) => {
+              const tooltips: Record<FilterStatus, string> = {
+                all: "Show all booths",
+                online: "Show only online booths",
+                offline: "Show only offline booths",
+                warning: "Show booths with hardware issues",
+              };
+              return (
+                <button
+                  key={status}
+                  type="button"
+                  onClick={() => handleFilterChange(status)}
+                  title={tooltips[status]}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-all capitalize ${
+                    filterStatus === status
+                      ? "bg-[#0891B2] text-white"
+                      : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+                  }`}
+                >
+                  {status !== "all" && <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusConfig(status).color }} />}
+                  {status}
+                </button>
+              );
+            })}
           </div>
 
           {/* View Toggle */}
-          <div className="flex gap-1 p-1 bg-slate-200/50 dark:bg-zinc-800/50 rounded-xl">
+          <div className="flex gap-1 p-1 bg-slate-200/50 dark:bg-zinc-800/50 rounded-xl ml-auto">
             <button
               type="button"
               onClick={() => setViewMode("grid")}
@@ -375,8 +317,8 @@ export default function AdminBoothsPage() {
       {/* Loading State */}
       {isLoading && (
         <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" : "space-y-3"}>
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
+          {["booth-a", "booth-b", "booth-c", "booth-d", "booth-e", "booth-f"].map((id) => (
+            <div key={id} className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
               <div className="flex items-start gap-3 mb-4">
                 <Skeleton className="w-12 h-12 rounded-xl" />
                 <div>
@@ -405,6 +347,7 @@ export default function AdminBoothsPage() {
               booth={booth}
               viewMode={viewMode}
               onEmergencyAccess={() => setEmergencyModalBooth({ id: booth.id, name: booth.name })}
+              onViewDetail={() => router.push(`/admin/booths/${booth.id}`)}
             />
           ))}
         </div>
@@ -464,10 +407,12 @@ function BoothCard({
   booth,
   viewMode,
   onEmergencyAccess,
+  onViewDetail,
 }: {
   booth: AdminBoothListItem;
   viewMode: ViewMode;
   onEmergencyAccess: () => void;
+  onViewDetail: () => void;
 }) {
   // Connectivity status (online/offline based on heartbeat)
   const connectivityStatus = getConnectivityStatus(booth.status);
@@ -483,7 +428,18 @@ function BoothCard({
 
   if (viewMode === "list") {
     return (
-      <div className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer">
+      <div
+        role="button"
+        tabIndex={0}
+        className="w-full text-left p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:ring-offset-2 dark:focus:ring-offset-[#111111]"
+        onClick={onViewDetail}
+        onKeyDown={(e) => {
+          if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) {
+            e.preventDefault();
+            onViewDetail();
+          }
+        }}
+      >
         <div className="flex items-center gap-4">
           <div className="relative shrink-0">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center">
@@ -506,14 +462,15 @@ function BoothCard({
                 {statusConfig.label}
               </span>
               {hasError && (
-                <Tooltip text={errorDetails || "Hardware error detected"}>
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-500 flex items-center gap-1 cursor-help">
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                    </svg>
-                    Error
-                  </span>
-                </Tooltip>
+                <span
+                  className="text-xs font-medium px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-500 flex items-center gap-1"
+                  title={errorDetails || "Hardware error detected"}
+                >
+                  <svg aria-hidden="true" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                  </svg>
+                  Error
+                </span>
               )}
             </div>
             <p className="text-sm text-zinc-500">{booth.owner_name || "Unknown"} · {booth.address || "No address"}</p>
@@ -537,18 +494,7 @@ function BoothCard({
             </div>
           </div>
 
-          <div className="text-right shrink-0">
-            <p className="font-bold text-zinc-900 dark:text-white">{formatCurrency(booth.revenue_mtd)}</p>
-            {booth.revenue_change_percent !== null && (
-              <div className={`flex items-center justify-end gap-1 ${booth.revenue_change_percent >= 0 ? "text-green-500" : "text-red-500"}`}>
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d={booth.revenue_change_percent >= 0 ? "M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" : "M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"} />
-                </svg>
-                <span className="text-xs font-medium">{Math.abs(booth.revenue_change_percent).toFixed(1)}%</span>
-              </div>
-            )}
-          </div>
-
+          <span className="text-sm font-semibold text-zinc-900 dark:text-white shrink-0 hidden lg:block">${booth.revenue_mtd ?? "0.00"}</span>
           <span className="text-xs text-zinc-500 shrink-0 hidden sm:block">{booth.last_heartbeat_ago || "Never"}</span>
 
           {/* Emergency Access Button */}
@@ -562,7 +508,7 @@ function BoothCard({
             title="Generate emergency password"
             aria-label="Generate emergency password"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
             </svg>
           </button>
@@ -573,7 +519,18 @@ function BoothCard({
 
   // Grid View
   return (
-    <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer group">
+    <div
+      role="button"
+      tabIndex={0}
+      className="w-full text-left p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:ring-offset-2 dark:focus:ring-offset-[#111111]"
+      onClick={onViewDetail}
+      onKeyDown={(e) => {
+        if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) {
+          e.preventDefault();
+          onViewDetail();
+        }
+      }}
+    >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
@@ -597,22 +554,6 @@ function BoothCard({
             <p className="text-xs text-zinc-500">{booth.owner_name || "Unknown"}</p>
           </div>
         </div>
-      </div>
-
-      {/* Revenue & Growth */}
-      <div className="flex items-center justify-between mb-4 p-3 rounded-xl bg-slate-100 dark:bg-zinc-800/50">
-        <div>
-          <p className="text-xs text-zinc-500">Revenue (MTD)</p>
-          <p className="text-lg font-bold text-zinc-900 dark:text-white">{formatCurrency(booth.revenue_mtd)}</p>
-        </div>
-        {booth.revenue_change_percent !== null && (
-          <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${booth.revenue_change_percent >= 0 ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d={booth.revenue_change_percent >= 0 ? "M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" : "M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"} />
-            </svg>
-            <span className="text-xs font-medium">{Math.abs(booth.revenue_change_percent).toFixed(1)}%</span>
-          </div>
-        )}
       </div>
 
       {/* Hardware Status */}
@@ -645,9 +586,7 @@ function BoothCard({
               <div className="flex-1 h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                 <div className="h-full rounded-full bg-zinc-400 dark:bg-zinc-600 w-full opacity-30" />
               </div>
-              <Tooltip text="Printer offline - unable to read supply levels">
-                <span className="text-xs text-zinc-400 dark:text-zinc-500 w-8 cursor-help">N/A</span>
-              </Tooltip>
+              <span className="text-xs text-zinc-400 dark:text-zinc-500 w-8" title="Printer offline - unable to read supply levels">N/A</span>
             </>
           ) : (
             <>
@@ -665,9 +604,7 @@ function BoothCard({
               <div className="flex-1 h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                 <div className="h-full rounded-full bg-zinc-400 dark:bg-zinc-600 w-full opacity-30" />
               </div>
-              <Tooltip text="Printer offline - unable to read supply levels">
-                <span className="text-xs text-zinc-400 dark:text-zinc-500 w-8 cursor-help">N/A</span>
-              </Tooltip>
+              <span className="text-xs text-zinc-400 dark:text-zinc-500 w-8" title="Printer offline - unable to read supply levels">N/A</span>
             </>
           ) : (
             <>
@@ -680,6 +617,12 @@ function BoothCard({
         </div>
       </div>
 
+      {/* Revenue */}
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-xs text-zinc-500">Revenue MTD</span>
+        <span className="text-sm font-semibold text-zinc-900 dark:text-white">${booth.revenue_mtd ?? "0.00"}</span>
+      </div>
+
       {/* Footer */}
       <div className="flex items-center justify-between pt-4 border-t border-[var(--border)]">
         <div className="flex items-center gap-2">
@@ -687,13 +630,14 @@ function BoothCard({
             {statusConfig.label}
           </span>
           {hasError && (
-            <Tooltip text={errorDetails || "Hardware error detected"}>
-              <span className="text-xs font-medium px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-500 flex items-center gap-1 cursor-help">
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                </svg>
-              </span>
-            </Tooltip>
+            <span
+              className="text-xs font-medium px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-500 flex items-center gap-1"
+              title={errorDetails || "Hardware error detected"}
+            >
+              <svg aria-hidden="true" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+              </svg>
+            </span>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -709,7 +653,7 @@ function BoothCard({
             title="Generate emergency password"
             aria-label="Generate emergency password"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
             </svg>
           </button>

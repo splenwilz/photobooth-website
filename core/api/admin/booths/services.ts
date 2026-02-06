@@ -5,7 +5,11 @@
  */
 
 import { apiClient } from "@/core/api/client";
-import type { AdminBoothsQueryParams, AdminBoothsListResponse } from "./types";
+import type {
+  AdminBoothsQueryParams,
+  AdminBoothsListResponse,
+  AdminBoothDetailResponse,
+} from "./types";
 
 const BASE_URL = "/api/v1/admin/booths";
 
@@ -37,6 +41,22 @@ export async function getAdminBooths(
 ): Promise<AdminBoothsListResponse> {
   const queryString = buildQueryString(params);
   return apiClient<AdminBoothsListResponse>(`${BASE_URL}${queryString}`);
+}
+
+/**
+ * Fetch detailed information for a single booth
+ *
+ * @param boothId - The booth UUID
+ * @returns Promise with comprehensive booth details
+ *
+ * @example
+ * const booth = await getAdminBoothDetail("booth-uuid-1");
+ * console.log(booth.revenue.month); // Revenue in cents
+ */
+export async function getAdminBoothDetail(
+  boothId: string
+): Promise<AdminBoothDetailResponse> {
+  return apiClient<AdminBoothDetailResponse>(`${BASE_URL}/${boothId}`);
 }
 
 /**

@@ -116,4 +116,4 @@ export interface AdminAddMessageRequest {
 /**
  * Admin message response (same as TicketMessage)
  */
-export interface AdminAddMessageResponse extends TicketMessage {}
+export type AdminAddMessageResponse = TicketMessage;
