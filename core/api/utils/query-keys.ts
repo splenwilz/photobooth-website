@@ -14,6 +14,7 @@ import type { AdminUsersQueryParams } from "../admin/users/types";
 import type { AlertsParams } from "../alerts/types";
 import type { BoothRevenueParams, RevenueDashboardParams } from "../analytics/types";
 import type { CreditsHistoryParams } from "../credits/types";
+import type { NotificationHistoryParams } from "../notifications/types";
 import type { ReleasesParams } from "../releases/types";
 import type { TicketsQueryParams } from "../tickets/types";
 
@@ -45,6 +46,13 @@ export const queryKeys = {
 	alerts: {
 		all: () => ['alerts'] as const,
 		list: (params?: AlertsParams) => ['alerts', 'list', params] as const,
+	},
+
+	// Notification preferences & history queries
+	notifications: {
+		all: () => ['notifications'] as const,
+		preferences: () => ['notifications', 'preferences'] as const,
+		history: (params?: NotificationHistoryParams) => ['notifications', 'history', params] as const,
 	},
 
 	// Credits queries
