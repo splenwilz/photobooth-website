@@ -179,6 +179,15 @@ function LogoUploadArea({
     wasUploadingRef.current = isUploading;
   }, [isUploading, previewUrl]);
 
+  // Revoke object URL on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -192,6 +201,11 @@ function LogoUploadArea({
     if (file.size > 5 * 1024 * 1024) {
       alert("File must be under 5MB.");
       return;
+    }
+
+    // Revoke old preview URL before creating a new one
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
     }
 
     setPreviewUrl(URL.createObjectURL(file));
