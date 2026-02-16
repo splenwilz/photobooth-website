@@ -7,7 +7,7 @@
  * (custom logo, welcome screen text, visibility toggles).
  */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, useId } from "react";
 import { useSearchParams } from "next/navigation";
 import { useUser } from "@/hooks/use-user";
 import {
@@ -104,21 +104,63 @@ function ConfirmModal({
   onCancel: () => void;
   isPending?: boolean;
 }) {
+  const id = useId();
+  const titleId = `${id}-title`;
+  const messageId = `${id}-message`;
+  const cancelButtonRef = useRef<HTMLButtonElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !isPending) {
+        onCancel();
+      }
+    },
+    [onCancel, isPending],
+  );
+
+  useEffect(() => {
+    if (!isOpen) return;
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
+    cancelButtonRef.current?.focus();
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      previousFocusRef.current?.focus();
+    };
+  }, [isOpen, handleKeyDown]);
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+      <button
+        type="button"
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm cursor-default"
         onClick={onCancel}
+        tabIndex={-1}
+        aria-label="Close dialog"
       />
-      <div className="relative w-full max-w-md mx-4 bg-white dark:bg-[#111111] rounded-2xl shadow-xl border border-[var(--border)] p-6">
-        <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={messageId}
+        className="relative w-full max-w-md mx-4 bg-white dark:bg-[#111111] rounded-2xl shadow-xl border border-[var(--border)] p-6"
+      >
+        <h3
+          id={titleId}
+          className="text-lg font-semibold text-zinc-900 dark:text-white"
+        >
           {title}
         </h3>
-        <p className="text-sm text-zinc-500 mt-2">{message}</p>
+        <p id={messageId} className="text-sm text-zinc-500 mt-2">
+          {message}
+        </p>
         <div className="flex gap-3 mt-6">
           <button
+            type="button"
+            ref={cancelButtonRef}
             onClick={onCancel}
             disabled={isPending}
             className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] text-zinc-700 dark:text-zinc-300 font-medium hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors"
@@ -126,6 +168,7 @@ function ConfirmModal({
             Cancel
           </button>
           <button
+            type="button"
             onClick={onConfirm}
             disabled={isPending}
             className={`flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${
