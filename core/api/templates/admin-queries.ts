@@ -105,30 +105,40 @@ export function useCreateTemplate() {
     mutationFn: async (data: {
       templateFile: File;
       previewFile: File;
-      metadata: Omit<AdminTemplateCreateRequest, "template_s3_key" | "preview_s3_key">;
+      overlayFile?: File;
+      metadata: Omit<AdminTemplateCreateRequest, "template_s3_key" | "preview_s3_key" | "overlay_s3_key">;
     }) => {
       // Step 1: Get presigned URLs
-      const presign = await getPresignedUrls({
+      const presignRequest: { template_filename: string; preview_filename: string; overlay_filename?: string } = {
         template_filename: data.templateFile.name,
         preview_filename: data.previewFile.name,
-      });
+      };
+      if (data.overlayFile) {
+        presignRequest.overlay_filename = data.overlayFile.name;
+      }
+      const presign = await getPresignedUrls(presignRequest);
 
       // Step 2: Upload files to S3 in parallel
-      await Promise.all([
+      const uploads: Promise<void>[] = [
         uploadFileToS3(presign.template_upload_url, data.templateFile),
         uploadFileToS3(presign.preview_upload_url, data.previewFile),
-      ]);
+      ];
+      if (data.overlayFile && presign.overlay_upload_url) {
+        uploads.push(uploadFileToS3(presign.overlay_upload_url, data.overlayFile));
+      }
+      await Promise.all(uploads);
 
       // Step 3: Create template record
-      const createPayload = {
+      const createPayload: AdminTemplateCreateRequest = {
         ...data.metadata,
         template_s3_key: presign.template_s3_key,
         preview_s3_key: presign.preview_s3_key,
         file_size: data.templateFile.size,
       };
-      console.log("[DEBUG] Create template payload:", JSON.stringify(createPayload, null, 2));
+      if (presign.overlay_s3_key) {
+        createPayload.overlay_s3_key = presign.overlay_s3_key;
+      }
       const result = await createTemplate(createPayload);
-      console.log("[DEBUG] Create template response:", JSON.stringify(result, null, 2));
       return result;
     },
     onSuccess: () => {
@@ -139,13 +149,74 @@ export function useCreateTemplate() {
 
 /**
  * Hook to update a template
+ *
+ * Supports optional file replacement: if files are provided, they are uploaded
+ * to S3 via presigned URLs before patching the template record with new S3 keys.
  */
 export function useUpdateTemplate() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: AdminTemplateUpdateRequest }) =>
-      updateTemplate(id, data),
+    mutationFn: async ({
+      id,
+      data,
+      templateFile,
+      previewFile,
+      overlayFile,
+      removeOverlay,
+    }: {
+      id: number;
+      data: AdminTemplateUpdateRequest;
+      templateFile?: File;
+      previewFile?: File;
+      overlayFile?: File;
+      removeOverlay?: boolean;
+    }) => {
+      const updatePayload = { ...data };
+
+      // Handle overlay removal (no upload needed)
+      if (removeOverlay) {
+        updatePayload.overlay_s3_key = null;
+      }
+
+      // If any files need uploading, presign and upload first
+      if (templateFile || previewFile || overlayFile) {
+        const presignRequest: { template_filename: string; preview_filename: string; overlay_filename?: string } = {
+          template_filename: templateFile?.name ?? "unused.png",
+          preview_filename: previewFile?.name ?? "unused.png",
+        };
+        if (overlayFile) {
+          presignRequest.overlay_filename = overlayFile.name;
+        }
+        const presign = await getPresignedUrls(presignRequest);
+
+        // Upload only the changed files to S3 in parallel
+        const uploads: Promise<void>[] = [];
+        if (templateFile) {
+          uploads.push(uploadFileToS3(presign.template_upload_url, templateFile));
+        }
+        if (previewFile) {
+          uploads.push(uploadFileToS3(presign.preview_upload_url, previewFile));
+        }
+        if (overlayFile && presign.overlay_upload_url) {
+          uploads.push(uploadFileToS3(presign.overlay_upload_url, overlayFile));
+        }
+        await Promise.all(uploads);
+
+        // Add S3 keys to the update payload for changed files only
+        if (templateFile) {
+          updatePayload.template_s3_key = presign.template_s3_key;
+        }
+        if (previewFile) {
+          updatePayload.preview_s3_key = presign.preview_s3_key;
+        }
+        if (overlayFile && presign.overlay_s3_key) {
+          updatePayload.overlay_s3_key = presign.overlay_s3_key;
+        }
+      }
+
+      return updateTemplate(id, updatePayload);
+    },
     onSuccess: (updatedTemplate) => {
       // Update the specific template in cache
       queryClient.setQueryData(

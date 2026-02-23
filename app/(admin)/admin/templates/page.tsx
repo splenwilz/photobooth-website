@@ -199,10 +199,14 @@ export default function AdminTemplatesPage() {
   const [tagInput, setTagInput] = useState("");
   const [templateFile, setTemplateFile] = useState<File | null>(null);
   const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [overlayFile, setOverlayFile] = useState<File | null>(null);
+  const [removeOverlay, setRemoveOverlay] = useState(false);
   const [dragActiveTemplate, setDragActiveTemplate] = useState(false);
   const [dragActivePreview, setDragActivePreview] = useState(false);
+  const [dragActiveOverlay, setDragActiveOverlay] = useState(false);
   const templateFileRef = useRef<HTMLInputElement>(null);
   const previewFileRef = useRef<HTMLInputElement>(null);
+  const overlayFileRef = useRef<HTMLInputElement>(null);
   const [templateFormError, setTemplateFormError] = useState<string | null>(null);
 
   // Category state
@@ -341,50 +345,62 @@ export default function AdminTemplatesPage() {
     }
   };
 
-  const handleDrag = (e: React.DragEvent, type: "template" | "preview") => {
+  const handleDrag = (e: React.DragEvent, type: "template" | "preview" | "overlay") => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") {
       if (type === "template") {
         setDragActiveTemplate(true);
-      } else {
+      } else if (type === "preview") {
         setDragActivePreview(true);
+      } else {
+        setDragActiveOverlay(true);
       }
     } else if (e.type === "dragleave") {
       if (type === "template") {
         setDragActiveTemplate(false);
-      } else {
+      } else if (type === "preview") {
         setDragActivePreview(false);
+      } else {
+        setDragActiveOverlay(false);
       }
     }
   };
 
-  const handleDrop = (e: React.DragEvent, type: "template" | "preview") => {
+  const handleDrop = (e: React.DragEvent, type: "template" | "preview" | "overlay") => {
     e.preventDefault();
     e.stopPropagation();
     if (type === "template") {
       setDragActiveTemplate(false);
-    } else {
+    } else if (type === "preview") {
       setDragActivePreview(false);
+    } else {
+      setDragActiveOverlay(false);
     }
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
       if (file.type.startsWith("image/")) {
         if (type === "template") {
           setTemplateFile(file);
-        } else {
+        } else if (type === "preview") {
           setPreviewFile(file);
+        } else {
+          setOverlayFile(file);
+          setRemoveOverlay(false);
         }
       }
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "template" | "preview") => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "template" | "preview" | "overlay") => {
     if (e.target.files && e.target.files[0]) {
       if (type === "template") {
         setTemplateFile(e.target.files[0]);
-      } else {
+      } else if (type === "preview") {
         setPreviewFile(e.target.files[0]);
+      } else {
+        setOverlayFile(e.target.files[0]);
+        setRemoveOverlay(false);
       }
     }
   };
@@ -395,6 +411,8 @@ export default function AdminTemplatesPage() {
     setTagInput("");
     setTemplateFile(null);
     setPreviewFile(null);
+    setOverlayFile(null);
+    setRemoveOverlay(false);
     setTemplateFormError(null);
     setIsTemplateModalOpen(true);
   };
@@ -415,6 +433,8 @@ export default function AdminTemplatesPage() {
     setTagInput("");
     setTemplateFile(null);
     setPreviewFile(null);
+    setOverlayFile(null);
+    setRemoveOverlay(false);
     setTemplateFormError(null);
     setIsTemplateModalOpen(true);
   };
@@ -437,6 +457,10 @@ export default function AdminTemplatesPage() {
             sort_order: templateFormData.sort_order,
             tags: templateFormData.tags,
           },
+          templateFile: templateFile || undefined,
+          previewFile: previewFile || undefined,
+          overlayFile: overlayFile || undefined,
+          removeOverlay,
         });
         setIsTemplateModalOpen(false);
       } catch (error) {
@@ -456,6 +480,7 @@ export default function AdminTemplatesPage() {
         await uploadMutation.mutateAsync({
           templateFile,
           previewFile,
+          overlayFile: overlayFile || undefined,
           metadata: {
             name: templateFormData.name,
             description: templateFormData.description || undefined,
@@ -1550,10 +1575,12 @@ export default function AdminTemplatesPage() {
                   </select>
                 </div>
               </div>
-              {!editingTemplate && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">Template File *</label>
+                    <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
+                      Template File {!editingTemplate && "*"}
+                      {editingTemplate && <span className="text-zinc-400 font-normal"> (Replace)</span>}
+                    </label>
                     <div
                       className={`relative border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
                         dragActiveTemplate
@@ -1594,6 +1621,22 @@ export default function AdminTemplatesPage() {
                             Change
                           </button>
                         </div>
+                      ) : editingTemplate?.download_url ? (
+                        <div className="space-y-2">
+                          <img
+                            src={editingTemplate.download_url}
+                            alt="Current template"
+                            className="w-16 h-24 mx-auto object-contain rounded-lg bg-slate-100 dark:bg-zinc-800"
+                          />
+                          <p className="text-xs text-zinc-500 truncate">{editingTemplate.original_filename}</p>
+                          <button
+                            type="button"
+                            onClick={() => templateFileRef.current?.click()}
+                            className="text-sm text-[#0891B2] hover:underline"
+                          >
+                            Replace
+                          </button>
+                        </div>
                       ) : (
                         <div className="space-y-2">
                           <div className="w-12 h-12 mx-auto rounded-lg bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
@@ -1617,7 +1660,7 @@ export default function AdminTemplatesPage() {
                               onClick={() => templateFileRef.current?.click()}
                               className="text-[#0891B2] hover:underline"
                             >
-                              Upload overlay
+                              Upload template
                             </button>
                           </p>
                         </div>
@@ -1625,7 +1668,10 @@ export default function AdminTemplatesPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">Preview Image *</label>
+                    <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
+                      Preview Image {!editingTemplate && "*"}
+                      {editingTemplate && <span className="text-zinc-400 font-normal"> (Replace)</span>}
+                    </label>
                     <div
                       className={`relative border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
                         dragActivePreview
@@ -1666,6 +1712,22 @@ export default function AdminTemplatesPage() {
                             Change
                           </button>
                         </div>
+                      ) : editingTemplate?.preview_url ? (
+                        <div className="space-y-2">
+                          <img
+                            src={editingTemplate.preview_url}
+                            alt="Current preview"
+                            className="w-16 h-24 mx-auto object-contain rounded-lg bg-slate-100 dark:bg-zinc-800"
+                          />
+                          <p className="text-xs text-zinc-500">Current preview</p>
+                          <button
+                            type="button"
+                            onClick={() => previewFileRef.current?.click()}
+                            className="text-sm text-[#0891B2] hover:underline"
+                          >
+                            Replace
+                          </button>
+                        </div>
                       ) : (
                         <div className="space-y-2">
                           <div className="w-12 h-12 mx-auto rounded-lg bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
@@ -1697,7 +1759,111 @@ export default function AdminTemplatesPage() {
                     </div>
                   </div>
                 </div>
-              )}
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
+                    Overlay File <span className="text-zinc-400 font-normal">(Optional)</span>
+                  </label>
+                  <div
+                    className={`relative border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
+                      dragActiveOverlay
+                        ? "border-[#0891B2] bg-[#0891B2]/10"
+                        : "border-[var(--border)] hover:border-[#0891B2]/50"
+                    }`}
+                    onDragEnter={(e) => handleDrag(e, "overlay")}
+                    onDragLeave={(e) => handleDrag(e, "overlay")}
+                    onDragOver={(e) => handleDrag(e, "overlay")}
+                    onDrop={(e) => handleDrop(e, "overlay")}
+                  >
+                    <input
+                      ref={overlayFileRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileChange(e, "overlay")}
+                      className="hidden"
+                    />
+                    {overlayFile ? (
+                      <div className="flex items-center justify-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-[#10B981]/20 flex items-center justify-center flex-shrink-0">
+                          <svg
+                            className="w-5 h-5 text-[#10B981]"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                          </svg>
+                        </div>
+                        <p className="text-sm text-zinc-900 dark:text-white font-medium truncate">{overlayFile.name}</p>
+                        <button
+                          type="button"
+                          onClick={() => overlayFileRef.current?.click()}
+                          className="text-sm text-[#0891B2] hover:underline flex-shrink-0"
+                        >
+                          Change
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => { setOverlayFile(null); setRemoveOverlay(false); }}
+                          className="text-sm text-red-500 hover:underline flex-shrink-0"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ) : editingTemplate?.overlay_url && !removeOverlay ? (
+                      <div className="flex items-center justify-center gap-3">
+                        <img
+                          src={editingTemplate.overlay_url}
+                          alt="Current overlay"
+                          className="w-10 h-16 object-contain rounded-lg bg-slate-100 dark:bg-zinc-800 flex-shrink-0"
+                        />
+                        <p className="text-sm text-zinc-500">Current overlay</p>
+                        <button
+                          type="button"
+                          onClick={() => overlayFileRef.current?.click()}
+                          className="text-sm text-[#0891B2] hover:underline flex-shrink-0"
+                        >
+                          Replace
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setRemoveOverlay(true)}
+                          className="text-sm text-red-500 hover:underline flex-shrink-0"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                          <svg
+                            className="w-5 h-5 text-zinc-400"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={1.5}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-5.571 3v7.5M11.25 3l-4.821 2.75L12 8.5l5.571-2.75L12 3z"
+                            />
+                          </svg>
+                        </div>
+                        <p className="text-sm text-zinc-500">
+                          <button
+                            type="button"
+                            onClick={() => overlayFileRef.current?.click()}
+                            className="text-[#0891B2] hover:underline"
+                          >
+                            Upload overlay
+                          </button>
+                          {" "}— Decorative elements drawn on top of photos
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">Price ($)</label>

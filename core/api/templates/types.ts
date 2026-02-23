@@ -77,6 +77,7 @@ export interface Template {
   review_count: number;
   download_url: string;
   preview_url: string;
+  overlay_url: string | null;
   color_config: unknown;
   created_by: string;
   created_at: string;

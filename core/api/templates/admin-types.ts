@@ -108,6 +108,7 @@ export interface AdminTemplate {
   tags: string; // comma-separated
   download_url: string;
   preview_url: string;
+  overlay_url: string | null;
   color_config: AdminTemplateColorConfig | null;
   created_by: string;
   created_at: string;
@@ -147,6 +148,7 @@ export interface AdminLayoutsResponse {
 export interface AdminPresignRequest {
   template_filename: string;
   preview_filename: string;
+  overlay_filename?: string;
 }
 
 /**
@@ -157,6 +159,8 @@ export interface AdminPresignResponse {
   template_s3_key: string;
   preview_upload_url: string;
   preview_s3_key: string;
+  overlay_upload_url?: string;
+  overlay_s3_key?: string;
   expires_in: number;
 }
 
@@ -166,6 +170,7 @@ export interface AdminPresignResponse {
 export interface AdminTemplateCreateRequest {
   template_s3_key: string;
   preview_s3_key: string;
+  overlay_s3_key?: string;
   name: string;
   description?: string;
   category_id?: number;
@@ -205,6 +210,9 @@ export interface AdminTemplateUpdateRequest {
   tags?: string;
   width?: number;
   height?: number;
+  template_s3_key?: string;
+  preview_s3_key?: string;
+  overlay_s3_key?: string | null;
 }
 
 /**
