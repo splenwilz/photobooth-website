@@ -23,6 +23,8 @@ import {
   updateLayout,
   deleteLayout,
   addPhotoAreaToLayout,
+  updatePhotoArea,
+  deletePhotoArea,
   broadcastSyncLayouts,
   broadcastSyncCategories,
   broadcastSyncTemplates,
@@ -366,6 +368,48 @@ export function useAddPhotoArea() {
       layoutId: string;
       data: Parameters<typeof addPhotoAreaToLayout>[1];
     }) => addPhotoAreaToLayout(layoutId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminTemplateKeys.layouts });
+    },
+  });
+}
+
+/**
+ * Hook to update a photo area
+ */
+export function useUpdatePhotoArea() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      layoutId,
+      photoAreaId,
+      data,
+    }: {
+      layoutId: string;
+      photoAreaId: number;
+      data: Parameters<typeof updatePhotoArea>[2];
+    }) => updatePhotoArea(layoutId, photoAreaId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminTemplateKeys.layouts });
+    },
+  });
+}
+
+/**
+ * Hook to delete a photo area
+ */
+export function useDeletePhotoArea() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      layoutId,
+      photoAreaId,
+    }: {
+      layoutId: string;
+      photoAreaId: number;
+    }) => deletePhotoArea(layoutId, photoAreaId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminTemplateKeys.layouts });
     },

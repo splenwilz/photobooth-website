@@ -23,6 +23,8 @@ import {
   useUpdateLayout,
   useDeleteLayout,
   useAddPhotoArea,
+  useUpdatePhotoArea,
+  useDeletePhotoArea,
   useBroadcastSyncCategories,
   useBroadcastSyncLayouts,
   useBroadcastSyncTemplates,
@@ -136,7 +138,7 @@ const defaultLayoutFormData: LayoutFormData = {
   description: "",
   width: 603,
   height: 1803,
-  photo_count: 3,
+  photo_count: 0,
   product_category_id: 1,
   is_active: true,
   sort_order: 0,
@@ -223,6 +225,8 @@ export default function AdminTemplatesPage() {
   const [expandedLayoutId, setExpandedLayoutId] = useState<string | null>(null);
   const [addingPhotoAreaTo, setAddingPhotoAreaTo] = useState<string | null>(null);
   const [photoAreaForm, setPhotoAreaForm] = useState<PhotoAreaFormData>(defaultPhotoArea);
+  const [editingPhotoArea, setEditingPhotoArea] = useState<{ layoutId: string; photoAreaId: number } | null>(null);
+  const [deletePhotoAreaConfirm, setDeletePhotoAreaConfirm] = useState<{ layoutId: string; photoAreaId: number } | null>(null);
 
   // Sync result state
   const [syncResult, setSyncResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -261,6 +265,8 @@ export default function AdminTemplatesPage() {
   const updateLayoutMutation = useUpdateLayout();
   const deleteLayoutMutation = useDeleteLayout();
   const addPhotoAreaMutation = useAddPhotoArea();
+  const updatePhotoAreaMutation = useUpdatePhotoArea();
+  const deletePhotoAreaMutation = useDeletePhotoArea();
   const broadcastSyncLayoutsMutation = useBroadcastSyncLayouts();
 
   // Reset page when filters change
@@ -632,7 +638,10 @@ export default function AdminTemplatesPage() {
         const { photo_areas: _photo_areas, ...updateData } = layoutFormData;
         await updateLayoutMutation.mutateAsync({ id: editingLayoutId, data: updateData });
       } else {
-        await createLayoutMutation.mutateAsync(layoutFormData);
+        await createLayoutMutation.mutateAsync({
+          ...layoutFormData,
+          photo_count: layoutFormData.photo_areas.length,
+        });
       }
       setIsLayoutModalOpen(false);
       setLayoutFormData(defaultLayoutFormData);
@@ -658,10 +667,67 @@ export default function AdminTemplatesPage() {
         layoutId: addingPhotoAreaTo,
         data: photoAreaForm,
       });
+      // Update photo_count to match actual photo areas
+      const layout = layouts.find((l) => l.id === addingPhotoAreaTo);
+      if (layout) {
+        const newCount = (layout.photo_areas?.length || 0) + 1;
+        await updateLayoutMutation.mutateAsync({
+          id: addingPhotoAreaTo,
+          data: { photo_count: newCount },
+        });
+      }
       setAddingPhotoAreaTo(null);
       setPhotoAreaForm(defaultPhotoArea);
     } catch (error) {
       console.error("Failed to add photo area:", error);
+    }
+  };
+
+  const openEditPhotoAreaModal = (layoutId: string, area: { id: number; photo_index: number; x: number; y: number; width: number; height: number; rotation: number; border_radius: number; shape_type: string }) => {
+    setEditingPhotoArea({ layoutId, photoAreaId: area.id });
+    setPhotoAreaForm({
+      photo_index: area.photo_index,
+      x: area.x,
+      y: area.y,
+      width: area.width,
+      height: area.height,
+      rotation: area.rotation,
+      border_radius: area.border_radius,
+      shape_type: area.shape_type,
+    });
+  };
+
+  const handleUpdatePhotoArea = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPhotoArea) return;
+    try {
+      await updatePhotoAreaMutation.mutateAsync({
+        layoutId: editingPhotoArea.layoutId,
+        photoAreaId: editingPhotoArea.photoAreaId,
+        data: photoAreaForm,
+      });
+      setEditingPhotoArea(null);
+      setPhotoAreaForm(defaultPhotoArea);
+    } catch (error) {
+      console.error("Failed to update photo area:", error);
+    }
+  };
+
+  const handleDeletePhotoArea = async (layoutId: string, photoAreaId: number) => {
+    try {
+      await deletePhotoAreaMutation.mutateAsync({ layoutId, photoAreaId });
+      // Update photo_count to match actual photo areas
+      const layout = layouts.find((l) => l.id === layoutId);
+      if (layout) {
+        const newCount = Math.max(0, (layout.photo_areas?.length || 1) - 1);
+        await updateLayoutMutation.mutateAsync({
+          id: layoutId,
+          data: { photo_count: newCount },
+        });
+      }
+      setDeletePhotoAreaConfirm(null);
+    } catch (error) {
+      console.error("Failed to delete photo area:", error);
     }
   };
 
@@ -1353,7 +1419,7 @@ export default function AdminTemplatesPage() {
                       </div>
                       <div className="text-sm">
                         <span className="px-2 py-1 rounded-full bg-slate-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
-                          {layout.photo_count} photos
+                          {layout.photo_areas?.length ?? layout.photo_count} photos
                         </span>
                       </div>
                       <span
@@ -1420,9 +1486,31 @@ export default function AdminTemplatesPage() {
                                 <span className="text-sm font-medium text-zinc-900 dark:text-white">
                                   Photo #{area.photo_index}
                                 </span>
-                                <span className="text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-zinc-500">
-                                  {area.shape_type}
-                                </span>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-zinc-500">
+                                    {area.shape_type}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => openEditPhotoAreaModal(layout.id, area)}
+                                    className="p-1 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-[#0891B2]"
+                                    title="Edit photo area"
+                                  >
+                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                    </svg>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setDeletePhotoAreaConfirm({ layoutId: layout.id, photoAreaId: area.id })}
+                                    className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-zinc-400 hover:text-red-600"
+                                    title="Delete photo area"
+                                  >
+                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                    </svg>
+                                  </button>
+                                </div>
                               </div>
                               <div className="text-xs text-zinc-500 space-y-1">
                                 <p>
@@ -2226,15 +2314,10 @@ export default function AdminTemplatesPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Photo Count</label>
-                  <input
-                    type="number"
-                    value={layoutFormData.photo_count}
-                    onChange={(e) => setLayoutFormData({ ...layoutFormData, photo_count: parseInt(e.target.value) || 1 })}
-                    min={1}
-                    max={4}
-                    required
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  />
+                  <div className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-zinc-900 dark:text-white">
+                    {layoutFormData.photo_areas.length || 0}
+                  </div>
+                  <p className="text-xs text-zinc-500 mt-1">Auto-set from photo areas below</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -2273,6 +2356,201 @@ export default function AdminTemplatesPage() {
                   <span className="text-sm text-zinc-700 dark:text-zinc-300">Active</span>
                 </label>
               </div>
+              {/* Inline Photo Areas Editor (create mode only) */}
+              {!editingLayoutId && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                      Photo Areas ({layoutFormData.photo_areas.length})
+                    </label>
+                    {!editingLayoutId && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setLayoutFormData((prev) => ({
+                            ...prev,
+                            photo_areas: [
+                              ...prev.photo_areas,
+                              { ...defaultPhotoArea, photo_index: prev.photo_areas.length + 1 },
+                            ],
+                          }))
+                        }
+                        className="text-xs px-2.5 py-1 rounded-lg bg-[#0891B2] text-white hover:bg-[#0E7490]"
+                      >
+                        + Add Photo Area
+                      </button>
+                    )}
+                  </div>
+                  {layoutFormData.photo_areas.length === 0 && (
+                    <p className="text-xs text-zinc-400 italic py-3 text-center border border-dashed border-slate-200 dark:border-zinc-700 rounded-lg">
+                      No photo areas added yet. Click &quot;+ Add Photo Area&quot; to get started.
+                    </p>
+                  )}
+                  <div className="space-y-3">
+                    {layoutFormData.photo_areas.map((area, idx) => (
+                      <div
+                        key={idx}
+                        className="p-3 rounded-lg border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-900"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                            Photo Area #{area.photo_index}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setLayoutFormData((prev) => ({
+                                ...prev,
+                                photo_areas: prev.photo_areas.filter((_, i) => i !== idx),
+                              }))
+                            }
+                            className="text-xs text-red-500 hover:underline"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        <div className="grid grid-cols-4 gap-2">
+                          <div>
+                            <label className="block text-[10px] text-zinc-500 mb-0.5">Index</label>
+                            <input
+                              type="number"
+                              min={1}
+
+                              value={area.photo_index}
+                              onChange={(e) =>
+                                setLayoutFormData((prev) => ({
+                                  ...prev,
+                                  photo_areas: prev.photo_areas.map((a, i) =>
+                                    i === idx ? { ...a, photo_index: parseInt(e.target.value) || 1 } : a
+                                  ),
+                                }))
+                              }
+                              className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] text-zinc-500 mb-0.5">Shape</label>
+                            <select
+                              value={area.shape_type}
+                              onChange={(e) =>
+                                setLayoutFormData((prev) => ({
+                                  ...prev,
+                                  photo_areas: prev.photo_areas.map((a, i) =>
+                                    i === idx ? { ...a, shape_type: e.target.value } : a
+                                  ),
+                                }))
+                              }
+                              className="w-full px-1 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
+                            >
+                              <option value="rectangle">Rect</option>
+                              <option value="rounded_rectangle">Rounded</option>
+                              <option value="circle">Circle</option>
+                              <option value="heart">Heart</option>
+                              <option value="petal">Petal</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] text-zinc-500 mb-0.5">X</label>
+                            <input
+                              type="number"
+                              value={area.x}
+                              onChange={(e) =>
+                                setLayoutFormData((prev) => ({
+                                  ...prev,
+                                  photo_areas: prev.photo_areas.map((a, i) =>
+                                    i === idx ? { ...a, x: parseInt(e.target.value) || 0 } : a
+                                  ),
+                                }))
+                              }
+                              className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] text-zinc-500 mb-0.5">Y</label>
+                            <input
+                              type="number"
+                              value={area.y}
+                              onChange={(e) =>
+                                setLayoutFormData((prev) => ({
+                                  ...prev,
+                                  photo_areas: prev.photo_areas.map((a, i) =>
+                                    i === idx ? { ...a, y: parseInt(e.target.value) || 0 } : a
+                                  ),
+                                }))
+                              }
+                              className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] text-zinc-500 mb-0.5">Width</label>
+                            <input
+                              type="number"
+                              value={area.width}
+                              onChange={(e) =>
+                                setLayoutFormData((prev) => ({
+                                  ...prev,
+                                  photo_areas: prev.photo_areas.map((a, i) =>
+                                    i === idx ? { ...a, width: parseInt(e.target.value) || 0 } : a
+                                  ),
+                                }))
+                              }
+                              className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] text-zinc-500 mb-0.5">Height</label>
+                            <input
+                              type="number"
+                              value={area.height}
+                              onChange={(e) =>
+                                setLayoutFormData((prev) => ({
+                                  ...prev,
+                                  photo_areas: prev.photo_areas.map((a, i) =>
+                                    i === idx ? { ...a, height: parseInt(e.target.value) || 0 } : a
+                                  ),
+                                }))
+                              }
+                              className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] text-zinc-500 mb-0.5">Rotation</label>
+                            <input
+                              type="number"
+                              value={area.rotation}
+                              onChange={(e) =>
+                                setLayoutFormData((prev) => ({
+                                  ...prev,
+                                  photo_areas: prev.photo_areas.map((a, i) =>
+                                    i === idx ? { ...a, rotation: parseFloat(e.target.value) || 0 } : a
+                                  ),
+                                }))
+                              }
+                              className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] text-zinc-500 mb-0.5">Radius</label>
+                            <input
+                              type="number"
+                              value={area.border_radius}
+                              onChange={(e) =>
+                                setLayoutFormData((prev) => ({
+                                  ...prev,
+                                  photo_areas: prev.photo_areas.map((a, i) =>
+                                    i === idx ? { ...a, border_radius: parseInt(e.target.value) || 0 } : a
+                                  ),
+                                }))
+                              }
+                              className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
@@ -2311,7 +2589,7 @@ export default function AdminTemplatesPage() {
                     value={photoAreaForm.photo_index}
                     onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, photo_index: parseInt(e.target.value) || 1 })}
                     min={1}
-                    max={4}
+
                     required
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
                   />
@@ -2412,6 +2690,158 @@ export default function AdminTemplatesPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Photo Area Modal */}
+      {editingPhotoArea && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60" onClick={() => { setEditingPhotoArea(null); setPhotoAreaForm(defaultPhotoArea); }} />
+          <div className="relative w-full max-w-md bg-white dark:bg-[#111111] rounded-2xl shadow-xl overflow-hidden">
+            <div className="p-6 border-b border-slate-200 dark:border-zinc-800">
+              <h2 className="text-lg font-bold text-zinc-900 dark:text-white">Edit Photo Area</h2>
+            </div>
+            <form onSubmit={handleUpdatePhotoArea} className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Photo Index</label>
+                  <input
+                    type="number"
+                    value={photoAreaForm.photo_index}
+                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, photo_index: parseInt(e.target.value) || 1 })}
+                    min={1}
+
+                    required
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Shape</label>
+                  <select
+                    value={photoAreaForm.shape_type}
+                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, shape_type: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
+                  >
+                    {SHAPE_TYPES.map((shape) => (
+                      <option key={shape} value={shape}>
+                        {shape}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">X Position</label>
+                  <input
+                    type="number"
+                    value={photoAreaForm.x}
+                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, x: parseInt(e.target.value) || 0 })}
+                    required
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Y Position</label>
+                  <input
+                    type="number"
+                    value={photoAreaForm.y}
+                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, y: parseInt(e.target.value) || 0 })}
+                    required
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Width</label>
+                  <input
+                    type="number"
+                    value={photoAreaForm.width}
+                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, width: parseInt(e.target.value) || 0 })}
+                    required
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Height</label>
+                  <input
+                    type="number"
+                    value={photoAreaForm.height}
+                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, height: parseInt(e.target.value) || 0 })}
+                    required
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Rotation (°)</label>
+                  <input
+                    type="number"
+                    value={photoAreaForm.rotation}
+                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, rotation: parseFloat(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Border Radius</label>
+                  <input
+                    type="number"
+                    value={photoAreaForm.border_radius}
+                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, border_radius: parseInt(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => { setEditingPhotoArea(null); setPhotoAreaForm(defaultPhotoArea); }}
+                  className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-slate-50 dark:hover:bg-zinc-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={updatePhotoAreaMutation.isPending}
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-[#0891B2] text-white font-medium hover:bg-[#0E7490] disabled:opacity-50"
+                >
+                  {updatePhotoAreaMutation.isPending ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Photo Area Confirmation Modal */}
+      {deletePhotoAreaConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setDeletePhotoAreaConfirm(null)} />
+          <div className="relative w-full max-w-sm bg-white dark:bg-[#111111] rounded-2xl shadow-xl p-6">
+            <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-2">Delete Photo Area</h3>
+            <p className="text-sm text-zinc-500 mb-6">
+              Are you sure you want to delete this photo area? This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setDeletePhotoAreaConfirm(null)}
+                className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-slate-50 dark:hover:bg-zinc-800"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDeletePhotoArea(deletePhotoAreaConfirm.layoutId, deletePhotoAreaConfirm.photoAreaId)}
+                disabled={deletePhotoAreaMutation.isPending}
+                className="flex-1 px-4 py-2.5 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 disabled:opacity-50"
+              >
+                {deletePhotoAreaMutation.isPending ? "Deleting..." : "Delete"}
+              </button>
+            </div>
           </div>
         </div>
       )}
