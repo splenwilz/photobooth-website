@@ -14,6 +14,7 @@ import type {
   AdminLayoutsResponse,
   AdminPresignRequest,
   AdminPresignResponse,
+  AdminShapeType,
   AdminTemplateCreateRequest,
   AdminTemplateCreateResponse,
   AdminTemplateUpdateRequest,
@@ -359,5 +360,40 @@ export async function addPhotoAreaToLayout(
   return apiClient(`${TEMPLATES_BASE}/layouts/${layoutId}/photo-areas`, {
     method: "POST",
     body: JSON.stringify(data),
+  });
+}
+
+/**
+ * Update a photo area in a layout (admin)
+ */
+export async function updatePhotoArea(
+  layoutId: string,
+  photoAreaId: number,
+  data: Partial<{
+    photo_index: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    rotation: number;
+    border_radius: number;
+    shape_type: AdminShapeType;
+  }>
+): Promise<{ id: number; layout_id: string }> {
+  return apiClient(`${TEMPLATES_BASE}/layouts/${layoutId}/photo-areas/${photoAreaId}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * Delete a photo area from a layout (admin)
+ */
+export async function deletePhotoArea(
+  layoutId: string,
+  photoAreaId: number
+): Promise<void> {
+  return apiClient(`${TEMPLATES_BASE}/layouts/${layoutId}/photo-areas/${photoAreaId}`, {
+    method: "DELETE",
   });
 }

@@ -55,6 +55,7 @@ export default function DashboardTemplatesPage() {
         name: purchase.template.name,
         downloadUrl: result.download_url,
         previewUrl: purchase.template.preview_url,
+        overlayUrl: purchase.template.overlay_url,
         fileType: purchase.template.file_type,
       });
     } catch {
