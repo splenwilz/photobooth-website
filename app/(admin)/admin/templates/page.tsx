@@ -2315,9 +2315,13 @@ export default function AdminTemplatesPage() {
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Photo Count</label>
                   <div className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-zinc-900 dark:text-white">
-                    {layoutFormData.photo_areas.length || 0}
+                    {editingLayoutId
+                      ? layoutFormData.photo_count
+                      : layoutFormData.photo_areas.length}
                   </div>
-                  <p className="text-xs text-zinc-500 mt-1">Auto-set from photo areas below</p>
+                  <p className="text-xs text-zinc-500 mt-1">
+                    {editingLayoutId ? "Managed via photo areas in the expanded view" : "Auto-set from photo areas below"}
+                  </p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">

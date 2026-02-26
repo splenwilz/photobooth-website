@@ -120,13 +120,18 @@ export function useCreateTemplate() {
       }
       const presign = await getPresignedUrls(presignRequest);
 
+      // Validate presign response for overlay
+      if (data.overlayFile && (!presign.overlay_upload_url || !presign.overlay_s3_key)) {
+        throw new Error("Overlay upload failed: server did not return overlay upload credentials. Please try again or contact support.");
+      }
+
       // Step 2: Upload files to S3 in parallel
       const uploads: Promise<void>[] = [
         uploadFileToS3(presign.template_upload_url, data.templateFile),
         uploadFileToS3(presign.preview_upload_url, data.previewFile),
       ];
-      if (data.overlayFile && presign.overlay_upload_url) {
-        uploads.push(uploadFileToS3(presign.overlay_upload_url, data.overlayFile));
+      if (data.overlayFile) {
+        uploads.push(uploadFileToS3(presign.overlay_upload_url!, data.overlayFile));
       }
       await Promise.all(uploads);
 
@@ -137,7 +142,7 @@ export function useCreateTemplate() {
         preview_s3_key: presign.preview_s3_key,
         file_size: data.templateFile.size,
       };
-      if (presign.overlay_s3_key) {
+      if (data.overlayFile) {
         createPayload.overlay_s3_key = presign.overlay_s3_key;
       }
       const result = await createTemplate(createPayload);
@@ -192,6 +197,11 @@ export function useUpdateTemplate() {
         }
         const presign = await getPresignedUrls(presignRequest);
 
+        // Validate presign response for overlay
+        if (overlayFile && (!presign.overlay_upload_url || !presign.overlay_s3_key)) {
+          throw new Error("Overlay upload failed: server did not return overlay upload credentials. Please try again or contact support.");
+        }
+
         // Upload only the changed files to S3 in parallel
         const uploads: Promise<void>[] = [];
         if (templateFile) {
@@ -200,8 +210,8 @@ export function useUpdateTemplate() {
         if (previewFile) {
           uploads.push(uploadFileToS3(presign.preview_upload_url, previewFile));
         }
-        if (overlayFile && presign.overlay_upload_url) {
-          uploads.push(uploadFileToS3(presign.overlay_upload_url, overlayFile));
+        if (overlayFile) {
+          uploads.push(uploadFileToS3(presign.overlay_upload_url!, overlayFile));
         }
         await Promise.all(uploads);
 
@@ -212,7 +222,7 @@ export function useUpdateTemplate() {
         if (previewFile) {
           updatePayload.preview_s3_key = presign.preview_s3_key;
         }
-        if (overlayFile && presign.overlay_s3_key) {
+        if (overlayFile) {
           updatePayload.overlay_s3_key = presign.overlay_s3_key;
         }
       }
