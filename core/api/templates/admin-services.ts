@@ -14,6 +14,7 @@ import type {
   AdminLayoutsResponse,
   AdminPresignRequest,
   AdminPresignResponse,
+  AdminShapeType,
   AdminTemplateCreateRequest,
   AdminTemplateCreateResponse,
   AdminTemplateUpdateRequest,
@@ -376,7 +377,7 @@ export async function updatePhotoArea(
     height: number;
     rotation: number;
     border_radius: number;
-    shape_type: string;
+    shape_type: AdminShapeType;
   }>
 ): Promise<{ id: number; layout_id: string }> {
   return apiClient(`${TEMPLATES_BASE}/layouts/${layoutId}/photo-areas/${photoAreaId}`, {
