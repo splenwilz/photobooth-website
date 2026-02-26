@@ -28,7 +28,9 @@ import {
   useBroadcastSyncCategories,
   useBroadcastSyncLayouts,
   useBroadcastSyncTemplates,
+  adminTemplateKeys,
 } from "@/core/api/templates/admin-queries";
+import { useQueryClient } from "@tanstack/react-query";
 import type {
   AdminTemplate,
   AdminTemplateStatus,
@@ -242,6 +244,8 @@ export default function AdminTemplatesPage() {
     if (filterTemplateType !== "all") params.template_type = filterTemplateType;
     return params;
   }, [page, filterCategory, filterStatus, filterTemplateType]);
+
+  const queryClient = useQueryClient();
 
   // Fetch data
   const { data: templatesData, isLoading: templatesLoading, error: templatesError } = useAdminTemplates(queryParams);
@@ -662,18 +666,19 @@ export default function AdminTemplatesPage() {
   const handleAddPhotoArea = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!addingPhotoAreaTo) return;
+    const layoutId = addingPhotoAreaTo;
     try {
       await addPhotoAreaMutation.mutateAsync({
-        layoutId: addingPhotoAreaTo,
+        layoutId,
         data: photoAreaForm,
       });
-      // Update photo_count to match actual photo areas
-      const layout = layouts.find((l) => l.id === addingPhotoAreaTo);
-      if (layout) {
-        const newCount = (layout.photo_areas?.length || 0) + 1;
+      // Refetch layouts to get fresh photo_areas count, then sync photo_count
+      const fresh = await queryClient.fetchQuery({ queryKey: adminTemplateKeys.layouts });
+      const freshLayout = (fresh as typeof layouts).find((l) => l.id === layoutId);
+      if (freshLayout) {
         await updateLayoutMutation.mutateAsync({
-          id: addingPhotoAreaTo,
-          data: { photo_count: newCount },
+          id: layoutId,
+          data: { photo_count: freshLayout.photo_areas?.length ?? 0 },
         });
       }
       setAddingPhotoAreaTo(null);
@@ -716,13 +721,13 @@ export default function AdminTemplatesPage() {
   const handleDeletePhotoArea = async (layoutId: string, photoAreaId: number) => {
     try {
       await deletePhotoAreaMutation.mutateAsync({ layoutId, photoAreaId });
-      // Update photo_count to match actual photo areas
-      const layout = layouts.find((l) => l.id === layoutId);
-      if (layout) {
-        const newCount = Math.max(0, (layout.photo_areas?.length || 1) - 1);
+      // Refetch layouts to get fresh photo_areas count, then sync photo_count
+      const fresh = await queryClient.fetchQuery({ queryKey: adminTemplateKeys.layouts });
+      const freshLayout = (fresh as typeof layouts).find((l) => l.id === layoutId);
+      if (freshLayout) {
         await updateLayoutMutation.mutateAsync({
           id: layoutId,
-          data: { photo_count: newCount },
+          data: { photo_count: freshLayout.photo_areas?.length ?? 0 },
         });
       }
       setDeletePhotoAreaConfirm(null);
