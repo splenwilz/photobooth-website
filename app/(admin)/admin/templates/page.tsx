@@ -36,6 +36,7 @@ import type {
   AdminTemplateStatus,
   AdminTemplateType,
   AdminTemplatesQueryParams,
+  AdminLayoutsResponse,
 } from "@/core/api/templates/admin-types";
 
 // ============================================================================
@@ -639,7 +640,7 @@ export default function AdminTemplatesPage() {
     e.preventDefault();
     try {
       if (editingLayoutId) {
-        const { photo_areas: _photo_areas, ...updateData } = layoutFormData;
+        const { photo_areas: _photo_areas, photo_count: _photo_count, ...updateData } = layoutFormData;
         await updateLayoutMutation.mutateAsync({ id: editingLayoutId, data: updateData });
       } else {
         await createLayoutMutation.mutateAsync({
@@ -673,8 +674,8 @@ export default function AdminTemplatesPage() {
         data: photoAreaForm,
       });
       // Refetch layouts to get fresh photo_areas count, then sync photo_count
-      const fresh = await queryClient.fetchQuery({ queryKey: adminTemplateKeys.layouts });
-      const freshLayout = (fresh as typeof layouts).find((l) => l.id === layoutId);
+      const fresh = await queryClient.fetchQuery<AdminLayoutsResponse>({ queryKey: adminTemplateKeys.layouts });
+      const freshLayout = fresh.layouts.find((l) => l.id === layoutId);
       if (freshLayout) {
         await updateLayoutMutation.mutateAsync({
           id: layoutId,
@@ -722,8 +723,8 @@ export default function AdminTemplatesPage() {
     try {
       await deletePhotoAreaMutation.mutateAsync({ layoutId, photoAreaId });
       // Refetch layouts to get fresh photo_areas count, then sync photo_count
-      const fresh = await queryClient.fetchQuery({ queryKey: adminTemplateKeys.layouts });
-      const freshLayout = (fresh as typeof layouts).find((l) => l.id === layoutId);
+      const fresh = await queryClient.fetchQuery<AdminLayoutsResponse>({ queryKey: adminTemplateKeys.layouts });
+      const freshLayout = fresh.layouts.find((l) => l.id === layoutId);
       if (freshLayout) {
         await updateLayoutMutation.mutateAsync({
           id: layoutId,
