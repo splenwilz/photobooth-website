@@ -673,17 +673,18 @@ export default function AdminTemplatesPage() {
         layoutId,
         data: photoAreaForm,
       });
-      // Refetch layouts to get fresh photo_areas count, then sync photo_count
-      const fresh = await queryClient.fetchQuery<AdminLayoutsResponse>({ queryKey: adminTemplateKeys.layouts });
-      const freshLayout = fresh.layouts.find((l) => l.id === layoutId);
-      if (freshLayout) {
-        await updateLayoutMutation.mutateAsync({
-          id: layoutId,
-          data: { photo_count: freshLayout.photo_areas?.length ?? 0 },
-        });
-      }
       setAddingPhotoAreaTo(null);
       setPhotoAreaForm(defaultPhotoArea);
+      // Best-effort: sync photo_count in the background
+      queryClient.fetchQuery<AdminLayoutsResponse>({ queryKey: adminTemplateKeys.layouts }).then((fresh) => {
+        const freshLayout = fresh.layouts.find((l) => l.id === layoutId);
+        if (freshLayout) {
+          updateLayoutMutation.mutate({
+            id: layoutId,
+            data: { photo_count: freshLayout.photo_areas?.length ?? 0 },
+          });
+        }
+      }).catch((err) => console.error("Failed to sync photo_count:", err));
     } catch (error) {
       console.error("Failed to add photo area:", error);
     }
@@ -722,16 +723,17 @@ export default function AdminTemplatesPage() {
   const handleDeletePhotoArea = async (layoutId: string, photoAreaId: number) => {
     try {
       await deletePhotoAreaMutation.mutateAsync({ layoutId, photoAreaId });
-      // Refetch layouts to get fresh photo_areas count, then sync photo_count
-      const fresh = await queryClient.fetchQuery<AdminLayoutsResponse>({ queryKey: adminTemplateKeys.layouts });
-      const freshLayout = fresh.layouts.find((l) => l.id === layoutId);
-      if (freshLayout) {
-        await updateLayoutMutation.mutateAsync({
-          id: layoutId,
-          data: { photo_count: freshLayout.photo_areas?.length ?? 0 },
-        });
-      }
       setDeletePhotoAreaConfirm(null);
+      // Best-effort: sync photo_count in the background
+      queryClient.fetchQuery<AdminLayoutsResponse>({ queryKey: adminTemplateKeys.layouts }).then((fresh) => {
+        const freshLayout = fresh.layouts.find((l) => l.id === layoutId);
+        if (freshLayout) {
+          updateLayoutMutation.mutate({
+            id: layoutId,
+            data: { photo_count: freshLayout.photo_areas?.length ?? 0 },
+          });
+        }
+      }).catch((err) => console.error("Failed to sync photo_count:", err));
     } catch (error) {
       console.error("Failed to delete photo area:", error);
     }
