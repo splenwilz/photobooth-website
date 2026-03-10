@@ -330,7 +330,7 @@ function DashboardLayoutContent({
       {/* Sidebar */}
       <aside
         className={`
-        fixed lg:static inset-y-0 left-0 z-50
+        fixed lg:sticky inset-y-0 left-0 z-50 lg:top-0 lg:h-screen
         w-64 bg-white dark:bg-[#111111] border-r border-slate-200 dark:border-zinc-800
         transform transition-transform duration-200 ease-in-out
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
@@ -363,7 +363,7 @@ function DashboardLayoutContent({
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-1">
+          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
             {navItems.map((item) => {
               const isActive =
                 pathname === item.href ||
@@ -400,8 +400,37 @@ function DashboardLayoutContent({
             })}
           </nav>
 
+          {/* Admin Link - only visible to admins */}
+          {user?.role === "admin" && (
+            <div className="px-4 pb-2">
+              <Link
+                href="/admin"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800/50 transition-all"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
+                  />
+                </svg>
+                <span className="font-medium">Admin Panel</span>
+                <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#0891B2]/20 text-[#0891B2]">
+                  ADMIN
+                </span>
+              </Link>
+            </div>
+          )}
+
           {/* User Section */}
-          <div className="p-4 border-t border-slate-200 dark:border-zinc-800">
+          <div className="shrink-0 p-4 border-t border-slate-200 dark:border-zinc-800">
             <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-100 dark:bg-zinc-800/50">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center font-bold text-sm text-white">
                 {getInitials(user)}

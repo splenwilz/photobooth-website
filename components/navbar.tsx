@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
+import type { AuthUser } from "@/core/api/auth/types";
 
 const links = [
   { href: "/features", label: "Features" },
@@ -13,9 +14,31 @@ const links = [
   { href: "/downloads", label: "Downloads" },
 ];
 
+function getUserFromCookie(): AuthUser | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const cookie = document.cookie
+      .split(";")
+      .map((c) => c.trim())
+      .find((row) => row.startsWith("auth_user="));
+    if (!cookie) return null;
+    const eqIndex = cookie.indexOf("=");
+    if (eqIndex === -1) return null;
+    return JSON.parse(decodeURIComponent(cookie.slice(eqIndex + 1)));
+  } catch {
+    return null;
+  }
+}
+
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const pathname = usePathname();
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- read cookie on mount
+    setUser(getUserFromCookie());
+  }, []);
 
   return (
     <header className="w-full bg-[var(--background)]">
@@ -59,6 +82,19 @@ export function Navbar() {
           <div className="flex items-center gap-3">
             {/* Theme Toggle */}
             <ThemeToggle />
+
+            {/* Admin Link - only visible to admins */}
+            {user?.role === "admin" && (
+              <Link
+                href="/admin"
+                className="hidden md:flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800/50 transition-all"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                </svg>
+                Admin
+              </Link>
+            )}
 
             {/* Dashboard Link */}
             <Link
@@ -128,6 +164,18 @@ export function Navbar() {
 
             {/* Mobile CTAs */}
             <div className="mt-4 pt-4 border-t border-slate-200 dark:border-zinc-800 space-y-2">
+              {user?.role === "admin" && (
+                <Link
+                  href="/admin"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 w-full px-4 py-3 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-slate-100 dark:bg-zinc-800/50 rounded-lg hover:bg-slate-200 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                  </svg>
+                  Admin
+                </Link>
+              )}
               <Link
                 href="/dashboard"
                 onClick={() => setMobileMenuOpen(false)}

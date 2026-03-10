@@ -16,6 +16,7 @@ export interface AuthUser {
   last_name: string;
   email_verified: boolean;
   profile_picture_url: string;
+  role?: string;
   created_at: string;
   updated_at: string;
 }
@@ -38,6 +39,7 @@ export interface AuthResponse {
   authentication_method: string;
   impersonator?: Impersonator;
   organization_id?: string;
+  role?: string;
   user: AuthUser;
   sealed_session: string;
 }
