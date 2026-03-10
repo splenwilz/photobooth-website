@@ -49,7 +49,7 @@ export async function setAuthCookies(response: AuthResponse): Promise<void> {
 
   // Set user data (client-accessible for UI purposes)
   // Include role from the top-level response in the user cookie
-  const userData = { ...response.user, role: response.role }
+  const userData = { ...response.user, ...(response.role !== undefined && { role: response.role }) }
   cookieStore.set('auth_user', JSON.stringify(userData), {
     ...COOKIE_OPTIONS,
     httpOnly: false, // Allow client-side access for user display
