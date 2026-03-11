@@ -309,14 +309,14 @@ export function DownloadLogsModal({
 
               {/* Log Types */}
               <fieldset>
+                <legend className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                  Log Types
+                </legend>
                 <div className="flex items-center justify-between mb-2">
-                  <legend className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    Log Types
-                  </legend>
                   <button
                     type="button"
                     onClick={handleSelectAll}
-                    className="text-xs text-[#0891B2] hover:text-[#0E7490] transition-colors"
+                    className="text-xs text-[#0891B2] hover:text-[#0E7490] transition-colors ml-auto"
                   >
                     {selectedLogTypes.length === BOOTH_LOG_TYPES.length ? "Deselect All" : "Select All"}
                   </button>
