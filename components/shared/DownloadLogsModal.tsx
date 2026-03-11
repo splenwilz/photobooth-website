@@ -238,6 +238,7 @@ export function DownloadLogsModal({
             <button
               type="button"
               onClick={handleClose}
+              aria-label="Close download logs modal"
               className="p-2 rounded-lg text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             >
               <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -307,11 +308,11 @@ export function DownloadLogsModal({
               )}
 
               {/* Log Types */}
-              <div>
+              <fieldset>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <legend className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                     Log Types
-                  </label>
+                  </legend>
                   <button
                     type="button"
                     onClick={handleSelectAll}
@@ -340,14 +341,15 @@ export function DownloadLogsModal({
                     </label>
                   ))}
                 </div>
-              </div>
+              </fieldset>
 
               {/* Hours Selection */}
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                <label htmlFor="time-range-select" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   Time Range
                 </label>
                 <select
+                  id="time-range-select"
                   value={hours}
                   onChange={(e) => setHours(Number(e.target.value))}
                   className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent transition-all"
