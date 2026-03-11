@@ -9,10 +9,19 @@ import { cookies } from 'next/headers'
  * POST only — all current long-running operations are POST requests.
  * Timeout: 130 seconds (10s buffer over the backend's 120s max).
  */
+const ALLOWED_PATH_PREFIXES = ['/api/v1/booths/']
+const ALLOWED_PATH_SUFFIXES = ['/download-logs']
+
 export async function POST(req: NextRequest) {
     const path = req.nextUrl.searchParams.get('path')
     if (!path) {
         return NextResponse.json({ error: 'Missing path' }, { status: 400 })
+    }
+
+    const isAllowed = ALLOWED_PATH_PREFIXES.some((prefix) => path.startsWith(prefix))
+        && ALLOWED_PATH_SUFFIXES.some((suffix) => path.endsWith(suffix))
+    if (!isAllowed) {
+        return NextResponse.json({ error: 'Path not allowed on this endpoint' }, { status: 403 })
     }
 
     const apiBaseUrl = process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL

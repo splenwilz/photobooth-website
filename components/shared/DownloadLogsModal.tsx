@@ -41,7 +41,7 @@ function getErrorMessage(error: unknown): string {
       case 409:
         return "This booth is offline and cannot collect logs right now.";
       case 502:
-        return "No matching log files found on this booth.";
+        return error.message || "An error occurred communicating with the booth.";
       case 503:
         return "Log storage is not configured. Contact support.";
       case 504:
@@ -82,13 +82,6 @@ export function DownloadLogsModal({
 
   const isOffline = boothStatus === "offline";
 
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, []);
-
   const clearTimer = () => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -107,6 +100,25 @@ export function DownloadLogsModal({
     clearTimer();
     onClose();
   }, [phase, onClose]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  // Close on Escape key (only when not downloading)
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && phase !== "downloading") {
+        handleClose();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, phase, handleClose]);
 
   const handleToggleLogType = (logType: BoothLogType) => {
     setSelectedLogTypes((prev) =>
@@ -175,7 +187,7 @@ export function DownloadLogsModal({
 
   const handleOpenDownload = () => {
     if (result?.download_url) {
-      window.open(result.download_url, "_blank");
+      window.open(result.download_url, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -190,7 +202,12 @@ export function DownloadLogsModal({
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md mx-4 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="download-logs-title"
+        className="relative w-full max-w-md mx-4 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-zinc-200 dark:border-zinc-800">
           <div className="flex items-center gap-3">
@@ -211,7 +228,7 @@ export function DownloadLogsModal({
               </svg>
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">
+              <h2 id="download-logs-title" className="text-lg font-semibold text-zinc-900 dark:text-white">
                 Download Logs
               </h2>
               <p className="text-sm text-zinc-500">{boothName}</p>
