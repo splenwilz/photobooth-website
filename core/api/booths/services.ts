@@ -1,4 +1,4 @@
-import { apiClient } from "../client";
+import { apiClient, ApiError } from "../client";
 import type {
 	BoothCredentialsResponse,
 	BoothDetailResponse,
@@ -10,6 +10,8 @@ import type {
 	CreateBoothResponse,
 	DashboardOverviewResponse,
 	DeleteBoothResponse,
+	DownloadBoothLogsRequest,
+	DownloadBoothLogsResponse,
 	GenerateCodeResponse,
 	RestartAppResponse,
 	RestartRequest,
@@ -265,4 +267,55 @@ export async function deleteBooth(
 		},
 	);
 	return response;
+}
+
+// ============================================================================
+// DOWNLOAD LOGS SERVICES
+// ============================================================================
+
+/**
+ * Download logs from a booth (long-running operation)
+ *
+ * Uses /api/proxy-long instead of apiClient because the backend may take
+ * up to 120 seconds (booth collects, ZIPs, and uploads logs to S3).
+ *
+ * @param boothId - The booth UUID
+ * @param data - Optional log type and time range filters
+ * @returns Promise with presigned S3 download URL and file size
+ *
+ * @example
+ * const result = await downloadBoothLogs("booth-uuid-1", { log_types: ["errors"], hours: 6 });
+ * window.open(result.download_url, "_blank");
+ */
+export async function downloadBoothLogs(
+	boothId: string,
+	data: DownloadBoothLogsRequest = {},
+): Promise<DownloadBoothLogsResponse> {
+	const path = `/api/v1/booths/${boothId}/download-logs`;
+	const response = await fetch(
+		`/api/proxy-long?path=${encodeURIComponent(path)}`,
+		{
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(data),
+		},
+	);
+
+	if (!response.ok) {
+		const errorText = await response.text();
+		let message: string;
+		try {
+			const errorJson = JSON.parse(errorText);
+			message =
+				errorJson.detail ||
+				errorJson.message ||
+				errorJson.error ||
+				response.statusText;
+		} catch {
+			message = errorText || response.statusText;
+		}
+		throw new ApiError(response.status, message);
+	}
+
+	return response.json();
 }

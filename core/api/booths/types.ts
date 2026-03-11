@@ -637,3 +637,53 @@ export interface DeleteBoothResponse {
   message: string;
 }
 
+// ============================================================================
+// DOWNLOAD LOGS TYPES
+// ============================================================================
+
+/**
+ * Available log types for booth log download
+ */
+export type BoothLogType =
+  | "application"
+  | "application-debug"
+  | "errors"
+  | "hardware"
+  | "transactions"
+  | "performance";
+
+/**
+ * All available log types (for UI rendering)
+ */
+export const BOOTH_LOG_TYPES: { value: BoothLogType; label: string }[] = [
+  { value: "application", label: "Application" },
+  { value: "application-debug", label: "Application Debug" },
+  { value: "errors", label: "Errors" },
+  { value: "hardware", label: "Hardware" },
+  { value: "transactions", label: "Transactions" },
+  { value: "performance", label: "Performance" },
+];
+
+/**
+ * Default log types selected when opening the download modal
+ */
+export const DEFAULT_LOG_TYPES: BoothLogType[] = ["application", "errors"];
+
+/**
+ * Request body for POST /api/v1/booths/{booth_id}/download-logs
+ */
+export interface DownloadBoothLogsRequest {
+  log_types?: BoothLogType[];
+  hours?: number;
+}
+
+/**
+ * Response from POST /api/v1/booths/{booth_id}/download-logs
+ */
+export interface DownloadBoothLogsResponse {
+  download_url: string;
+  file_size: number;
+  booth_id: string;
+  message: string;
+}
+
