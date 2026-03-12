@@ -4,6 +4,7 @@ import {
 	cancelBoothRestart,
 	createBooth,
 	deleteBooth,
+	downloadBoothLogs,
 	generateBoothCode,
 	getBoothCredentials,
 	getBoothDetail,
@@ -23,6 +24,7 @@ import type {
 	BoothPricingResponse,
 	CreateBoothRequest,
 	DashboardOverviewResponse,
+	DownloadBoothLogsRequest,
 	GenerateCodeResponse,
 	RestartRequest,
 	UpdatePricingRequest,
@@ -429,5 +431,32 @@ export function useDeleteBooth() {
 				queryKey: queryKeys.booths.credentials(variables.boothId),
 			});
 		},
+	});
+}
+
+// ============================================================================
+// DOWNLOAD LOGS HOOKS
+// ============================================================================
+
+/**
+ * Hook to download logs from a booth (long-running mutation)
+ *
+ * Triggers the booth to collect, ZIP, and upload logs to S3.
+ * Returns a presigned download URL on success.
+ *
+ * @example
+ * const { mutateAsync: downloadLogs, isPending } = useDownloadBoothLogs();
+ * const result = await downloadLogs({ boothId: "booth-uuid-1", data: { hours: 6 } });
+ * window.open(result.download_url, "_blank");
+ */
+export function useDownloadBoothLogs() {
+	return useMutation({
+		mutationFn: ({
+			boothId,
+			data,
+		}: {
+			boothId: string;
+			data?: DownloadBoothLogsRequest;
+		}) => downloadBoothLogs(boothId, data),
 	});
 }

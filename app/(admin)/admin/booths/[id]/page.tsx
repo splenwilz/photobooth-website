@@ -16,6 +16,7 @@ import {
   type AlertSeverity,
 } from "@/core/api/admin/booths";
 import { EmergencyPasswordModal } from "@/components/admin/EmergencyPasswordModal";
+import { DownloadLogsModal } from "@/components/shared/DownloadLogsModal";
 import { useState } from "react";
 
 // Loading skeleton component
@@ -147,6 +148,7 @@ export default function AdminBoothDetailPage() {
   const router = useRouter();
   const boothId = params.id as string;
   const [emergencyModalOpen, setEmergencyModalOpen] = useState(false);
+  const [downloadLogsModalOpen, setDownloadLogsModalOpen] = useState(false);
 
   const { data: booth, isLoading, error, refetch, isFetching } = useAdminBoothDetail(boothId);
 
@@ -230,6 +232,16 @@ export default function AdminBoothDetailPage() {
             <svg aria-hidden="true" className={`w-5 h-5 ${isFetching ? "animate-spin" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
             </svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => setDownloadLogsModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium rounded-xl hover:bg-blue-500/20 transition-colors"
+          >
+            <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+            Download Logs
           </button>
           <button
             type="button"
@@ -497,6 +509,15 @@ export default function AdminBoothDetailPage() {
         onClose={() => setEmergencyModalOpen(false)}
         boothId={booth.id}
         boothName={booth.name}
+      />
+
+      {/* Download Logs Modal */}
+      <DownloadLogsModal
+        isOpen={downloadLogsModalOpen}
+        onClose={() => setDownloadLogsModalOpen(false)}
+        boothId={booth.id}
+        boothName={booth.name}
+        boothStatus={booth.status.current}
       />
     </div>
   );
