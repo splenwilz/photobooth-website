@@ -53,7 +53,8 @@ export function Navbar() {
               </svg>
             </div>
             <div>
-              <span className="font-bold text-lg text-zinc-900 dark:text-white">BoothIQ</span>
+              <span className="font-bold text-lg text-zinc-900 dark:text-white">Booth</span>
+              <span className="font-bold text-lg text-[#0891B2]">IQ</span>
             </div>
           </Link>
 
