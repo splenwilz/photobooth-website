@@ -189,7 +189,7 @@ export default function ChangelogPage() {
 
           <h1 className="text-4xl sm:text-5xl font-bold mb-4">Changelog</h1>
           <p className="text-xl text-[var(--muted)] max-w-2xl">
-            A complete history of PhotoBoothX releases, including new features, improvements, and bug fixes.
+            A complete history of BoothIQ releases, including new features, improvements, and bug fixes.
           </p>
         </div>
       </section>

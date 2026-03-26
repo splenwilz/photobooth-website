@@ -5,7 +5,7 @@ import { VerifyEmailForm } from "./VerifyEmailForm";
 
 export const metadata: Metadata = {
   title: "Verify Email",
-  description: "Verify your email address to complete your PhotoBoothX account setup.",
+  description: "Verify your email address to complete your BoothIQ account setup.",
 };
 
 function VerifyEmailFormWrapper() {
@@ -43,7 +43,7 @@ export default function VerifyEmailPage() {
                 <circle cx="12" cy="13" r="3" />
               </svg>
             </div>
-            PhotoBoothX
+            BoothIQ
           </Link>
 
           {/* Main Content */}
@@ -100,7 +100,7 @@ export default function VerifyEmailPage() {
                   <circle cx="12" cy="13" r="3" />
                 </svg>
               </div>
-              PhotoBoothX
+              BoothIQ
             </Link>
           </div>
 
@@ -125,7 +125,7 @@ export default function VerifyEmailPage() {
               <Link href="/support" className="hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors">Support</Link>
             </div>
             <p className="text-center text-xs text-zinc-500 mt-4">
-              © 2024 PhotoBoothX. All rights reserved.
+              © 2024 BoothIQ. All rights reserved.
             </p>
           </div>
         </div>

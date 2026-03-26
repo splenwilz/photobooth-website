@@ -1,10 +1,10 @@
-# PhotoBoothX Website
+# BoothIQ Website
 
-The official website and web dashboard for **PhotoBoothX** — professional photo booth software trusted by 10,000+ operators worldwide.
+The official website and web dashboard for **BoothIQ** — professional photo booth software trusted by 10,000+ operators worldwide.
 
 ## About
 
-PhotoBoothX is a complete photo booth solution that includes:
+BoothIQ is a complete photo booth solution that includes:
 
 - **Desktop App**: Capture photos, apply templates, and print instantly (Windows & Mac)
 - **Mobile App**: Monitor and manage booths remotely (iOS & Android)
@@ -71,8 +71,8 @@ Open [http://localhost:3000](http://localhost:3000) to view the site.
 
 ## Related Projects
 
-- **PhotoBoothX Desktop**: Main booth software (Windows)
-- **PhotoBoothX Mobile**: Companion app (iOS/Android)
+- **BoothIQ Desktop**: Main booth software (Windows)
+- **BoothIQ Mobile**: Companion app (iOS/Android)
 
 ## License
 

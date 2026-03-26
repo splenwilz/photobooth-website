@@ -21,7 +21,7 @@ export type ReleaseArchitecture = "x64" | "arm64" | "universal" | "unknown";
 export interface ReleaseAsset {
   /** GitHub asset ID */
   id: number;
-  /** Filename (e.g., "PhotoBoothX-1.2.0-win-x64.exe") */
+  /** Filename (e.g., "BoothIQ-1.2.0-win-x64.exe") */
   name: string;
   /** File size in bytes */
   size: number;

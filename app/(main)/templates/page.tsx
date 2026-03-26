@@ -382,7 +382,7 @@ export default function TemplatesPage() {
             {[
               {
                 q: "What file format do the templates come in?",
-                a: "All templates come in high-resolution PNG format with transparent backgrounds where applicable. They're ready to use with PhotoBoothX software.",
+                a: "All templates come in high-resolution PNG format with transparent backgrounds where applicable. They're ready to use with BoothIQ software.",
               },
               {
                 q: "Can I use these templates commercially?",

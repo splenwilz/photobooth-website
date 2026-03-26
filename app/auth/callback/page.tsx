@@ -117,7 +117,7 @@ export default function OAuthCallbackPage() {
                 <circle cx="12" cy="13" r="3" />
               </svg>
             </div>
-            PhotoBoothX
+            BoothIQ
           </Link>
         </div>
 

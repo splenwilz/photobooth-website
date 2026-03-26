@@ -189,7 +189,7 @@ function CheckoutSuccessContent() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `photoboothx-license-${offlineLicenseData.license_key}.${format}`;
+    a.download = `boothiq-license-${offlineLicenseData.license_key}.${format}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -477,7 +477,7 @@ function CheckoutSuccessContent() {
               </div>
             </div>
             <p className="text-sm text-[var(--muted)]">
-              Enter this key in the PhotoBoothX software to activate online.
+              Enter this key in the BoothIQ software to activate online.
               {licenseData.already_redeemed && (
                 <span className="block mt-1 text-yellow-600 dark:text-yellow-400">
                   This key was already redeemed previously.
@@ -507,7 +507,7 @@ function CheckoutSuccessContent() {
                       Machine ID
                     </label>
                     <p className="text-xs text-[var(--muted)] mb-2">
-                      Open PhotoBoothX, go to Settings → License → Activate, and copy the Machine ID shown there.
+                      Open BoothIQ, go to Settings → License → Activate, and copy the Machine ID shown there.
                     </p>
                     <input
                       type="text"
@@ -560,7 +560,7 @@ function CheckoutSuccessContent() {
                     Offline License Generated
                   </h3>
                   <p className="text-sm text-[var(--muted)]">
-                    Download the license file and import it in PhotoBoothX (Settings → License → Import Offline License).
+                    Download the license file and import it in BoothIQ (Settings → License → Import Offline License).
                   </p>
                   <div className="flex flex-wrap gap-3">
                     <button

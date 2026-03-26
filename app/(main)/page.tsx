@@ -121,7 +121,7 @@ export default function Home() {
                         <circle cx="12" cy="13" r="3" />
                       </svg>
                     </div>
-                    <span className="font-semibold text-sm">PhotoBoothX</span>
+                    <span className="font-semibold text-sm">BoothIQ</span>
                   </div>
                   <div className="space-y-1 flex-1">
                     {["Dashboard", "Templates", "Gallery", "Settings"].map((item, i) => (
@@ -280,7 +280,7 @@ export default function Home() {
                       <div className="aspect-[3/2] bg-zinc-300 rounded" />
                       <div className="aspect-[3/2] bg-zinc-200 rounded" />
                       <div className="h-6 flex items-center justify-center">
-                        <span className="text-[8px] text-zinc-400 font-medium">PHOTOBOOTHX</span>
+                        <span className="text-[8px] text-zinc-400 font-medium">BOOTHIQ</span>
                       </div>
                     </div>
                   </div>
@@ -362,7 +362,7 @@ export default function Home() {
         <div className="relative w-full mb-16 overflow-hidden">
           <img
             src="/app_mockup.jpg"
-            alt="PhotoBoothX Mobile App - Dashboard, Booths List, and Alerts screens"
+            alt="BoothIQ Mobile App - Dashboard, Booths List, and Alerts screens"
             className="w-full h-[350px] md:h-[420px] lg:h-[500px] object-cover object-bottom"
           />
         </div>
@@ -450,7 +450,7 @@ export default function Home() {
                         </svg>
                       </div>
                       <div>
-                        <div className="font-medium">PhotoBoothX-Setup.exe</div>
+                        <div className="font-medium">BoothIQ-Setup.exe</div>
                         <div className="text-sm text-zinc-500">124 MB · Windows 10+</div>
                       </div>
                     </div>
@@ -466,7 +466,7 @@ export default function Home() {
                   </div>
                   <h3 className="text-2xl font-bold mb-3">Connect Your Hardware</h3>
                   <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                    Plug in your camera and printer via USB. PhotoBoothX automatically
+                    Plug in your camera and printer via USB. BoothIQ automatically
                     detects and configures them. Green lights mean good to go.
                   </p>
                 </div>
@@ -545,7 +545,7 @@ export default function Home() {
               <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
             </svg>
             <blockquote className="text-2xl sm:text-3xl font-medium leading-relaxed mb-8 max-w-3xl mx-auto">
-              &ldquo;PhotoBoothX transformed our business. We went from managing chaos to
+              &ldquo;BoothIQ transformed our business. We went from managing chaos to
               running 12 booths effortlessly. The mobile app is a game-changer.&rdquo;
             </blockquote>
             <div className="flex items-center justify-center gap-4">
@@ -682,7 +682,7 @@ export default function Home() {
             <span className="text-[#0891B2]">photo booth business?</span>
           </h2>
           <p className="text-xl text-zinc-600 dark:text-zinc-400 mb-10 max-w-2xl mx-auto">
-            Join 10,000+ operators who trust PhotoBoothX. Start your free trial today.
+            Join 10,000+ operators who trust BoothIQ. Start your free trial today.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
             <Link

@@ -4,7 +4,7 @@ import { ContactForm } from "./ContactForm";
 
 export const metadata: Metadata = {
   title: "Contact Us",
-  description: "Get in touch with PhotoBoothX. Contact our sales team, support, or send us a message.",
+  description: "Get in touch with BoothIQ. Contact our sales team, support, or send us a message.",
 };
 
 const contactOptions = [
@@ -12,30 +12,30 @@ const contactOptions = [
     icon: "💬",
     title: "Sales",
     description: "Talk to our sales team about hardware packages and enterprise plans.",
-    contact: "sales@photoboothx.com",
+    contact: "sales@boothiq.com",
     availability: "Mon-Fri, 9am-6pm EST",
   },
   {
     icon: "🛠️",
     title: "Support",
     description: "Get help with technical issues, billing, or your subscription.",
-    contact: "support@photoboothx.com",
+    contact: "support@boothiq.com",
     availability: "24/7 for Pro users",
   },
   {
     icon: "🤝",
     title: "Partnerships",
-    description: "Interested in reselling or integrating with PhotoBoothX?",
-    contact: "partners@photoboothx.com",
+    description: "Interested in reselling or integrating with BoothIQ?",
+    contact: "partners@boothiq.com",
     availability: "Mon-Fri, 9am-6pm EST",
   },
 ];
 
 const quickLinks = [
   { title: "Documentation", href: "/docs", description: "Browse our guides and tutorials" },
-  { title: "Downloads", href: "/downloads", description: "Get the latest version of PhotoBoothX" },
+  { title: "Downloads", href: "/downloads", description: "Get the latest version of BoothIQ" },
   { title: "Pricing", href: "/pricing", description: "View plans and hardware packages" },
-  { title: "Features", href: "/features", description: "Explore all PhotoBoothX features" },
+  { title: "Features", href: "/features", description: "Explore all BoothIQ features" },
 ];
 
 export default function ContactPage() {
@@ -58,7 +58,7 @@ export default function ContactPage() {
             <span className="text-[#0891B2]">hear from you</span>
           </h1>
           <p className="text-xl text-[var(--muted)] max-w-2xl mx-auto">
-            Have a question about PhotoBoothX? Want to discuss a custom solution?
+            Have a question about BoothIQ? Want to discuss a custom solution?
             Our team is here to help.
           </p>
         </div>
@@ -114,7 +114,7 @@ export default function ContactPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                     <div>
-                      <p className="font-medium">PhotoBoothX HQ</p>
+                      <p className="font-medium">BoothIQ HQ</p>
                       <p className="text-[var(--muted)]">123 Innovation Drive<br />San Francisco, CA 94107</p>
                     </div>
                   </div>
@@ -166,7 +166,7 @@ export default function ContactPage() {
                 <h3 className="text-lg font-semibold mb-4">Follow Us</h3>
                 <div className="flex gap-3">
                   <a
-                    href="https://twitter.com/photoboothx"
+                    href="https://twitter.com/boothiq"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-10 h-10 rounded-xl bg-[var(--card)] border border-[var(--border)] flex items-center justify-center hover:border-[#0891B2]/30 hover:text-[#0891B2] transition-colors"
@@ -176,7 +176,7 @@ export default function ContactPage() {
                     </svg>
                   </a>
                   <a
-                    href="https://instagram.com/photoboothx"
+                    href="https://instagram.com/boothiq"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-10 h-10 rounded-xl bg-[var(--card)] border border-[var(--border)] flex items-center justify-center hover:border-[#0891B2]/30 hover:text-[#0891B2] transition-colors"
@@ -186,7 +186,7 @@ export default function ContactPage() {
                     </svg>
                   </a>
                   <a
-                    href="https://youtube.com/photoboothx"
+                    href="https://youtube.com/boothiq"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-10 h-10 rounded-xl bg-[var(--card)] border border-[var(--border)] flex items-center justify-center hover:border-[#0891B2]/30 hover:text-[#0891B2] transition-colors"
@@ -196,7 +196,7 @@ export default function ContactPage() {
                     </svg>
                   </a>
                   <a
-                    href="https://linkedin.com/company/photoboothx"
+                    href="https://linkedin.com/company/boothiq"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-10 h-10 rounded-xl bg-[var(--card)] border border-[var(--border)] flex items-center justify-center hover:border-[#0891B2]/30 hover:text-[#0891B2] transition-colors"

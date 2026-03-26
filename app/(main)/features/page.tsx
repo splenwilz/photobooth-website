@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Features",
-  description: "Explore PhotoBoothX features: DSLR support, instant printing, templates, mobile app, payments, and analytics.",
+  description: "Explore BoothIQ features: DSLR support, instant printing, templates, mobile app, payments, and analytics.",
 };
 
 /* ============================================
@@ -469,7 +469,7 @@ export default function FeaturesPage() {
               Compatible with industry leaders
             </h2>
             <p className="text-[var(--muted)] max-w-lg mx-auto">
-              PhotoBoothX works with the hardware you already own
+              BoothIQ works with the hardware you already own
             </p>
           </div>
 
@@ -515,7 +515,7 @@ export default function FeaturesPage() {
               Before & After
             </h2>
             <p className="text-lg text-[var(--muted)] max-w-xl mx-auto">
-              See how PhotoBoothX transforms your photo booth operations
+              See how BoothIQ transforms your photo booth operations
             </p>
           </div>
 
@@ -531,7 +531,7 @@ export default function FeaturesPage() {
             </div>
 
             <div className="grid lg:grid-cols-2 gap-6 lg:gap-12">
-              {/* Without PhotoBoothX */}
+              {/* Without BoothIQ */}
               <div className="relative group">
                 {/* Red glow on hover */}
                 <div className="absolute inset-0 bg-red-500/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -545,7 +545,7 @@ export default function FeaturesPage() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-red-400">Without PhotoBoothX</h3>
+                      <h3 className="text-2xl font-bold text-red-400">Without BoothIQ</h3>
                       <p className="text-[var(--muted)]">The old, manual way</p>
                     </div>
                   </div>
@@ -586,7 +586,7 @@ export default function FeaturesPage() {
                 </div>
               </div>
 
-              {/* With PhotoBoothX */}
+              {/* With BoothIQ */}
               <div className="relative group">
                 {/* Green glow on hover */}
                 <div className="absolute inset-0 bg-[#10B981]/10 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -607,7 +607,7 @@ export default function FeaturesPage() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-[#10B981]">With PhotoBoothX</h3>
+                      <h3 className="text-2xl font-bold text-[#10B981]">With BoothIQ</h3>
                       <p className="text-[var(--muted)]">The smart, automated way</p>
                     </div>
                   </div>
@@ -675,7 +675,7 @@ export default function FeaturesPage() {
             Ready to experience all features?
           </h2>
           <p className="text-[var(--muted)] text-lg mb-10 max-w-xl mx-auto">
-            Download PhotoBoothX and start your 14-day free trial. 
+            Download BoothIQ and start your 14-day free trial. 
             No credit card required.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">

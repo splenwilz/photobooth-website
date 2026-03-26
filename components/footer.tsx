@@ -41,7 +41,7 @@ export function Footer() {
                   <circle cx="12" cy="13" r="3" />
                 </svg>
               </div>
-              PhotoBoothX
+              BoothIQ
             </Link>
             <p className="text-sm text-zinc-500">
               Professional photo booth software.
@@ -67,7 +67,7 @@ export function Footer() {
 
         <div className="mt-12 pt-6 border-t border-[#0891B2]/10 text-center">
           <p className="text-sm text-zinc-600">
-            © {new Date().getFullYear()} PhotoBoothX. All rights reserved.
+            © {new Date().getFullYear()} BoothIQ. All rights reserved.
           </p>
         </div>
       </div>
