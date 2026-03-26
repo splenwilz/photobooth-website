@@ -177,7 +177,7 @@ export default function DownloadsPage() {
 
             {/* Static title */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              Download PhotoBoothX
+              Download BoothIQ
             </h1>
 
             {/* Static description */}
@@ -366,7 +366,7 @@ export default function DownloadsPage() {
               </svg>
               Windows Only
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Download PhotoBoothX</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Download BoothIQ</h2>
             <p className="text-[var(--muted)] max-w-lg mx-auto">
               The complete photo booth software for Windows. Run your booth, create templates, and manage everything from one app.
             </p>
@@ -389,7 +389,7 @@ export default function DownloadsPage() {
                       </svg>
                     </div>
 
-                    <h3 className="text-3xl font-bold mb-2">PhotoBoothX for Windows</h3>
+                    <h3 className="text-3xl font-bold mb-2">BoothIQ for Windows</h3>
                     <div className="flex flex-wrap items-center gap-3 mb-4">
                       <span className="px-3 py-1.5 rounded-lg bg-[#0891B2]/20 text-[#22D3EE] text-sm font-medium">
                         v{isLoadingLatest ? <Skeleton className="w-10 h-4" /> : version}

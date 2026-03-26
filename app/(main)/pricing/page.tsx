@@ -591,7 +591,7 @@ export default function PricingPage() {
               </h2>
 
               <p className="text-[var(--muted)] mb-8 leading-relaxed">
-                Download PhotoBoothX and get started today.
+                Download BoothIQ and get started today.
                 Cancel your subscription anytime.
               </p>
 

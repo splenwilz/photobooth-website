@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PhotoBoothX - Professional Photo Booth Software",
+  title: "BoothIQ - Professional Photo Booth Software",
   description: "Photo booth software that just works. Professional photo capture, instant printing, and remote management.",
 };
 

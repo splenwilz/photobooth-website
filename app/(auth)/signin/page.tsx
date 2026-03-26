@@ -5,7 +5,7 @@ import { OAuthButtons } from "@/components/auth/OAuthButtons";
 
 export const metadata: Metadata = {
   title: "Sign In",
-  description: "Sign in to your PhotoBoothX account to manage your booths and subscriptions.",
+  description: "Sign in to your BoothIQ account to manage your booths and subscriptions.",
 };
 
 interface SignInPageProps {
@@ -33,7 +33,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                 <circle cx="12" cy="13" r="3" />
               </svg>
             </div>
-            PhotoBoothX
+            BoothIQ
           </Link>
 
           {/* Main Content */}
@@ -73,7 +73,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
               ))}
             </div>
             <p className="text-[var(--foreground-secondary)] mb-4">
-              &quot;PhotoBoothX transformed our business. Revenue tracking in real-time and instant alerts when paper runs low — game changer.&quot;
+              &quot;BoothIQ transformed our business. Revenue tracking in real-time and instant alerts when paper runs low — game changer.&quot;
             </p>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center font-bold">
@@ -100,7 +100,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                   <circle cx="12" cy="13" r="3" />
                 </svg>
               </div>
-              PhotoBoothX
+              BoothIQ
             </Link>
           </div>
 
@@ -146,7 +146,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
               <Link href="/support" className="hover:text-[var(--foreground-secondary)] transition-colors">Support</Link>
             </div>
             <p className="text-center text-xs text-[var(--muted)] mt-4">
-              © 2024 PhotoBoothX. All rights reserved.
+              © 2024 BoothIQ. All rights reserved.
             </p>
           </div>
         </div>

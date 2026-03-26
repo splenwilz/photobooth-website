@@ -98,7 +98,7 @@ export const useCartStore = create<CartState>()(
       },
     }),
     {
-      name: "photoboothx-cart",
+      name: "boothiq-cart",
       partialize: (state) => ({ items: state.items }), // Only persist items, not UI state
     }
   )

@@ -357,7 +357,7 @@ function DashboardLayoutContent({
                 </svg>
               </div>
               <span className="font-semibold text-lg text-zinc-900 dark:text-white">
-                PhotoBoothX
+                BoothIQ
               </span>
             </Link>
           </div>

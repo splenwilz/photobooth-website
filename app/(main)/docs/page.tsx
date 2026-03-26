@@ -11,7 +11,7 @@ const quickStartSteps = [
   {
     step: 1,
     title: "Download & Install",
-    description: "Get PhotoBoothX on Windows or Mac in minutes",
+    description: "Get BoothIQ on Windows or Mac in minutes",
     time: "2 min",
     href: "/docs/installation",
   },
@@ -135,7 +135,7 @@ const videoTutorials = [
     href: "#",
     views: "24.5k",
     featured: true,
-    description: "Learn how to set up PhotoBoothX from scratch. We cover installation, hardware connection, and your first test print.",
+    description: "Learn how to set up BoothIQ from scratch. We cover installation, hardware connection, and your first test print.",
     category: "Getting Started",
   },
   {
@@ -183,15 +183,15 @@ const videoTutorials = [
 const faqItems = [
   {
     question: "What cameras are supported?",
-    answer: "PhotoBoothX supports USB webcams (Logitech C920, C922, BRIO) and tethered DSLRs from Canon, Nikon, and Sony. For best results, we recommend starting with a Logitech C920 for simple setups.",
+    answer: "BoothIQ supports USB webcams (Logitech C920, C922, BRIO) and tethered DSLRs from Canon, Nikon, and Sony. For best results, we recommend starting with a Logitech C920 for simple setups.",
   },
   {
-    question: "Which printers work with PhotoBoothX?",
+    question: "Which printers work with BoothIQ?",
     answer: "We support dye-sublimation printers including DNP RX1hs, DS620, DS820, HiTi, and Mitsubishi models. The DNP RX1hs is our most popular choice for its speed and print quality.",
   },
   {
     question: "Can I use it without internet?",
-    answer: "Yes! PhotoBoothX works fully offline for capturing, printing, and all core functionality. Internet is only needed for mobile app sync, remote monitoring, and cloud backups.",
+    answer: "Yes! BoothIQ works fully offline for capturing, printing, and all core functionality. Internet is only needed for mobile app sync, remote monitoring, and cloud backups.",
   },
   {
     question: "How do I accept payments?",
@@ -229,10 +229,10 @@ export default function DocsPage() {
               Documentation
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              Learn PhotoBoothX
+              Learn BoothIQ
             </h1>
             <p className="text-xl text-[var(--muted)] max-w-2xl mx-auto">
-              Comprehensive guides, tutorials, and reference documentation to help you get the most out of PhotoBoothX.
+              Comprehensive guides, tutorials, and reference documentation to help you get the most out of BoothIQ.
             </p>
           </div>
 
@@ -525,7 +525,7 @@ export default function DocsPage() {
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">Learn by Watching</h2>
             <p className="text-[var(--muted)] max-w-xl mx-auto">
-              Step-by-step video guides to help you master every feature of PhotoBoothX
+              Step-by-step video guides to help you master every feature of BoothIQ
             </p>
           </div>
 
@@ -679,7 +679,7 @@ export default function DocsPage() {
               Frequently Asked Questions
             </h2>
             <p className="text-[var(--muted)] max-w-lg mx-auto">
-              Quick answers to common questions about PhotoBoothX
+              Quick answers to common questions about BoothIQ
             </p>
           </div>
 
@@ -882,7 +882,7 @@ export default function DocsPage() {
                 </div>
 
                 <a
-                  href="https://discord.gg/photoboothx"
+                  href="https://discord.gg/boothiq"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[#5865F2] text-white font-medium hover:bg-[#4752C4] transition-colors group-hover:shadow-lg group-hover:shadow-[#5865F2]/20"
@@ -916,7 +916,7 @@ export default function DocsPage() {
 
                 <h3 className="text-xl font-bold mb-2 group-hover:text-[#F59E0B] transition-colors">Developer API</h3>
                 <p className="text-[var(--muted)] text-sm mb-6 leading-relaxed">
-                  Build custom integrations, automate workflows, and extend PhotoBoothX with our comprehensive REST API.
+                  Build custom integrations, automate workflows, and extend BoothIQ with our comprehensive REST API.
                 </p>
 
                 {/* Code preview */}

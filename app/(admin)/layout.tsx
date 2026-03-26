@@ -292,7 +292,7 @@ export default function AdminLayout({
 							</div>
 							<div className="flex items-center gap-2">
 								<span className="font-semibold text-lg text-zinc-900 dark:text-white">
-									PhotoBoothX
+									BoothIQ
 								</span>
 								<span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#0891B2]/20 text-[#0891B2]">
 									ADMIN

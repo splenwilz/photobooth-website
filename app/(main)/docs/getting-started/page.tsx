@@ -3,29 +3,29 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Getting Started",
-  description: "Get your PhotoBoothX up and running in under 10 minutes. Step-by-step guide.",
+  description: "Get your BoothIQ up and running in under 10 minutes. Step-by-step guide.",
 };
 
 const steps = [
   {
     number: "01",
     title: "Download and Install",
-    content: `Download PhotoBoothX for your operating system from our downloads page. 
+    content: `Download BoothIQ for your operating system from our downloads page. 
     
-**Windows:** Run the installer and follow the prompts. PhotoBoothX will be installed to your Program Files folder.
+**Windows:** Run the installer and follow the prompts. BoothIQ will be installed to your Program Files folder.
 
-**macOS:** Open the DMG file and drag PhotoBoothX to your Applications folder.
+**macOS:** Open the DMG file and drag BoothIQ to your Applications folder.
 
 The installation typically takes less than 2 minutes.`,
   },
   {
     number: "02",
     title: "Connect Your Camera",
-    content: `PhotoBoothX supports most DSLR cameras from Canon, Nikon, and Sony.
+    content: `BoothIQ supports most DSLR cameras from Canon, Nikon, and Sony.
 
 1. Connect your camera via USB to your computer
 2. Turn on the camera and set it to PC/Tether mode
-3. PhotoBoothX will automatically detect the camera
+3. BoothIQ will automatically detect the camera
 4. You should see a live preview in the app
 
 **Tip:** If using a webcam, it will be detected automatically - no configuration needed.`,
@@ -37,7 +37,7 @@ The installation typically takes less than 2 minutes.`,
 
 1. Install your printer's official drivers
 2. Connect the printer via USB
-3. In PhotoBoothX, go to Settings → Printer
+3. In BoothIQ, go to Settings → Printer
 4. Select your printer from the dropdown
 5. Run a test print to verify
 
@@ -46,7 +46,7 @@ The installation typically takes less than 2 minutes.`,
   {
     number: "04",
     title: "Choose a Template",
-    content: `PhotoBoothX comes with 100+ pre-built templates.
+    content: `BoothIQ comes with 100+ pre-built templates.
 
 1. Go to Templates in the main menu
 2. Browse by category (Strips, 4x6, Square, etc.)
@@ -98,7 +98,7 @@ export default function GettingStartedPage() {
             Getting Started
           </h1>
           <p className="text-[var(--muted)]">
-            Get your PhotoBoothX up and running in under 10 minutes. 
+            Get your BoothIQ up and running in under 10 minutes. 
             This guide will walk you through the essential setup steps.
           </p>
         </div>
@@ -190,7 +190,7 @@ export default function GettingStartedPage() {
         <div className="mt-12 p-6 rounded-xl border border-white/10 bg-white/[0.02] text-center">
           <p className="text-[var(--muted)]">
             Need help? <Link href="/support" className="text-cyan-400 hover:text-cyan-300">Contact support</Link> or{" "}
-            <a href="https://discord.gg/photoboothx" className="text-[#22D3EE] hover:text-[#0891B2]">join our Discord</a>
+            <a href="https://discord.gg/boothiq" className="text-[#22D3EE] hover:text-[#0891B2]">join our Discord</a>
           </p>
         </div>
       </div>
