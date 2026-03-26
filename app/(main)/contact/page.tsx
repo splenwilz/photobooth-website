@@ -169,6 +169,7 @@ export default function ContactPage() {
                     href="https://twitter.com/boothiq"
                     target="_blank"
                     rel="noopener noreferrer"
+                    aria-label="BoothIQ on Twitter"
                     className="w-10 h-10 rounded-xl bg-[var(--card)] border border-[var(--border)] flex items-center justify-center hover:border-[#0891B2]/30 hover:text-[#0891B2] transition-colors"
                   >
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -179,6 +180,7 @@ export default function ContactPage() {
                     href="https://instagram.com/boothiq"
                     target="_blank"
                     rel="noopener noreferrer"
+                    aria-label="BoothIQ on Instagram"
                     className="w-10 h-10 rounded-xl bg-[var(--card)] border border-[var(--border)] flex items-center justify-center hover:border-[#0891B2]/30 hover:text-[#0891B2] transition-colors"
                   >
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -186,9 +188,10 @@ export default function ContactPage() {
                     </svg>
                   </a>
                   <a
-                    href="https://youtube.com/boothiq"
+                    href="https://www.youtube.com/channel/UC2Qyzty59rnmnBSBa8hBUUg"
                     target="_blank"
                     rel="noopener noreferrer"
+                    aria-label="BoothIQ on YouTube"
                     className="w-10 h-10 rounded-xl bg-[var(--card)] border border-[var(--border)] flex items-center justify-center hover:border-[#0891B2]/30 hover:text-[#0891B2] transition-colors"
                   >
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -199,6 +202,7 @@ export default function ContactPage() {
                     href="https://linkedin.com/company/boothiq"
                     target="_blank"
                     rel="noopener noreferrer"
+                    aria-label="BoothIQ on LinkedIn"
                     className="w-10 h-10 rounded-xl bg-[var(--card)] border border-[var(--border)] flex items-center justify-center hover:border-[#0891B2]/30 hover:text-[#0891B2] transition-colors"
                   >
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
