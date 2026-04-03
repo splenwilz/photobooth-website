@@ -19,3 +19,16 @@ export const ResetPasswordRequestSchema = z.object({
 })
 
 export type ResetPasswordRequest = z.infer<typeof ResetPasswordRequestSchema>;
+
+export const ResetPasswordResponseSchema = z.object({
+    id: z.string(),
+    email: z.string(),
+    first_name: z.string(),
+    last_name: z.string(),
+    email_verified: z.boolean(),
+    profile_picture_url: z.string().nullable(),
+    created_at: z.string(),
+    updated_at: z.string(),
+})
+
+export type ResetPasswordResponse = z.infer<typeof ResetPasswordResponseSchema>;

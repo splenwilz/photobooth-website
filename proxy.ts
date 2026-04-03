@@ -18,7 +18,9 @@ export function proxy(request: NextRequest) {
         '/signin',
         '/signup',
         '/confirm-email',
-        '/reset-password'
+        '/reset-password',
+        '/forgot-password',
+        '/verify-email'
     ]
 
     // Protected routes that require authentication

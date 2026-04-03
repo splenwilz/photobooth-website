@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { signinAction, type SigninActionResult } from "@/core/api/auth/signin/actions";
 
-export function SigninForm() {
+export function SigninForm({ resetSuccess }: { resetSuccess?: boolean }) {
   const router = useRouter();
   const [state, formAction, isPending] = useActionState<SigninActionResult | null, FormData>(
     signinAction,
@@ -36,6 +36,13 @@ export function SigninForm() {
 
   return (
     <form action={formAction} className="space-y-5">
+      {/* Password Reset Success — hide after first form submission */}
+      {resetSuccess && !state && (
+        <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 text-sm">
+          Your password has been reset successfully. Sign in with your new password.
+        </div>
+      )}
+
       {/* Error Message */}
       {state && !state.success && (
         <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm">

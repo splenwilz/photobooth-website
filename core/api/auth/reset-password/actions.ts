@@ -1,11 +1,10 @@
 'use server'
 
 import { resetPassword } from "./services"
-import { ResetPasswordRequestSchema, type ResetPasswordRequest } from "./types"
-import type { AuthResponse } from "../types"
+import { ResetPasswordRequestSchema, type ResetPasswordRequest, type ResetPasswordResponse } from "./types"
 
 export type ResetPasswordActionResult =
-    | { success: true; data: AuthResponse }
+    | { success: true; data: ResetPasswordResponse }
     | { success: false; error: string }
     | null
 
