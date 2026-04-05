@@ -11,7 +11,7 @@ import type { AdminTransactionsQueryParams } from "../admin/billing/types";
 import type { AdminBoothsQueryParams } from "../admin/booths/types";
 import type { AdminTicketsQueryParams } from "../admin/tickets/types";
 import type { AdminUsersQueryParams } from "../admin/users/types";
-import type { AlertsParams } from "../alerts/types";
+import type { AlertsParams, BoothAlertsParams } from "../alerts/types";
 import type { BoothRevenueParams, RevenueDashboardParams } from "../analytics/types";
 import type { CreditsHistoryParams } from "../credits/types";
 import type { NotificationHistoryParams } from "../notifications/types";
@@ -46,6 +46,7 @@ export const queryKeys = {
 	alerts: {
 		all: () => ['alerts'] as const,
 		list: (params?: AlertsParams) => ['alerts', 'list', params] as const,
+		booth: (boothId: string, params?: Omit<BoothAlertsParams, 'booth_id'>) => ['alerts', 'booth', boothId, params] as const,
 	},
 
 	// Notification preferences & history queries
