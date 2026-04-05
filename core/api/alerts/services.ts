@@ -1,5 +1,5 @@
 import { apiClient } from "../client";
-import type { AlertsParams, AlertsResponse } from "./types";
+import type { AlertsParams, AlertsResponse, BoothAlertsParams } from "./types";
 
 /**
  * Alerts API Services
@@ -27,8 +27,7 @@ function buildQueryString(params?: Record<string, unknown>): string {
 }
 
 /**
- * Get alerts from API
- * Supports filtering by severity, category, and limit.
+ * Get alerts for all booths
  *
  * @param params - Optional query parameters (severity, category, limit)
  * @returns Promise resolving to alerts response
@@ -48,5 +47,25 @@ export async function getAlerts(
 	return response;
 }
 
+/**
+ * Get alerts for a specific booth
+ *
+ * @param params - Booth ID (path param) and optional query parameters
+ * @returns Promise resolving to alerts response scoped to one booth
+ * @see GET /api/v1/analytics/alerts/{booth_id}
+ */
+export async function getBoothAlerts(
+	params: BoothAlertsParams,
+): Promise<AlertsResponse> {
+	const { booth_id, ...queryParams } = params;
+	const queryString = buildQueryString(queryParams as Record<string, unknown>);
 
+	const response = await apiClient<AlertsResponse>(
+		`/api/v1/analytics/alerts/${booth_id}${queryString}`,
+		{
+			method: "GET",
+		},
+	);
+	return response;
+}
 

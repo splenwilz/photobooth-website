@@ -10,7 +10,9 @@
  */
 
 import { useState, useMemo } from "react";
-import { useAlerts } from "@/core/api/alerts";
+import { useSearchParams } from "next/navigation";
+import { useAlerts, useBoothAlerts } from "@/core/api/alerts";
+import { useBoothList } from "@/core/api/booths";
 import type { AlertSeverity, AlertCategory } from "@/core/api/alerts/types";
 
 type FilterSeverity = "all" | AlertSeverity;
@@ -53,28 +55,39 @@ function Skeleton({ className = "" }: { className?: string }) {
 }
 
 export default function AlertsPage() {
+  const searchParams = useSearchParams();
+  const selectedBoothId = searchParams.get("booth");
+  const isAllBooths = !selectedBoothId;
+
   const [filterSeverity, setFilterSeverity] = useState<FilterSeverity>("all");
   const [filterCategory, setFilterCategory] = useState<FilterCategory>("all");
-  const { data, isLoading, error } = useAlerts({ limit: 100 });
+
+  // Build query params for API-level filtering
+  const queryParams = useMemo(() => ({
+    limit: 100 as number,
+    ...(filterSeverity !== "all" && { severity: filterSeverity }),
+    ...(filterCategory !== "all" && { category: filterCategory }),
+  }), [filterSeverity, filterCategory]);
+
+  // Conditionally fetch all-booths or single-booth alerts
+  const allAlertsQuery = useAlerts(queryParams, { enabled: isAllBooths });
+  const boothAlertsQuery = useBoothAlerts(
+    selectedBoothId,
+    queryParams,
+  );
+
+  const activeQuery = isAllBooths ? allAlertsQuery : boothAlertsQuery;
+  const { data, isLoading, error } = activeQuery;
 
   const alerts = data?.alerts ?? [];
+  const summary = data?.summary ?? { critical: 0, warning: 0, info: 0 };
+  const totalAlerts = summary.critical + summary.warning + summary.info;
 
-  // Filter alerts
-  const filteredAlerts = useMemo(() => {
-    return alerts.filter((alert) => {
-      if (filterSeverity !== "all" && alert.severity !== filterSeverity) return false;
-      if (filterCategory !== "all" && alert.category !== filterCategory) return false;
-      return true;
-    });
-  }, [alerts, filterSeverity, filterCategory]);
-
-  // Count unread by severity
-  const unreadCounts = useMemo(() => ({
-    critical: alerts.filter(a => a.severity === "critical" && !a.isRead).length,
-    warning: alerts.filter(a => a.severity === "warning" && !a.isRead).length,
-    info: alerts.filter(a => a.severity === "info" && !a.isRead).length,
-    total: alerts.filter(a => !a.isRead).length,
-  }), [alerts]);
+  // Get booth name from booth list (cached by layout) for subtitle
+  const { data: boothListData } = useBoothList();
+  const boothName = !isAllBooths
+    ? boothListData?.booths?.find(b => b.id === selectedBoothId)?.name ?? null
+    : null;
 
   const severityFilters: { value: FilterSeverity; label: string; color?: string }[] = [
     { value: "all", label: "All" },
@@ -190,9 +203,11 @@ export default function AlertsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Alerts</h1>
-          <p className="text-zinc-500 dark:text-zinc-400 mt-1">Notifications and system alerts</p>
+          <p className="text-zinc-500 dark:text-zinc-400 mt-1">
+            {boothName ? `Alerts for ${boothName}` : "Notifications and system alerts"}
+          </p>
         </div>
-        {unreadCounts.total > 0 && (
+        {totalAlerts > 0 && (
           <button className="px-4 py-2 text-sm font-medium text-[#0891B2] border border-[#0891B2] rounded-xl hover:bg-[#0891B2]/10 transition-colors">
             Mark All as Read
           </button>
@@ -208,7 +223,7 @@ export default function AlertsPage() {
             </svg>
           </div>
           <div>
-            <p className="text-2xl font-bold text-red-500">{unreadCounts.critical}</p>
+            <p className="text-2xl font-bold text-red-500">{summary.critical}</p>
             <p className="text-sm text-zinc-500">Critical</p>
           </div>
         </div>
@@ -219,7 +234,7 @@ export default function AlertsPage() {
             </svg>
           </div>
           <div>
-            <p className="text-2xl font-bold text-yellow-500">{unreadCounts.warning}</p>
+            <p className="text-2xl font-bold text-yellow-500">{summary.warning}</p>
             <p className="text-sm text-zinc-500">Warnings</p>
           </div>
         </div>
@@ -230,7 +245,7 @@ export default function AlertsPage() {
             </svg>
           </div>
           <div>
-            <p className="text-2xl font-bold text-[#0891B2]">{unreadCounts.info}</p>
+            <p className="text-2xl font-bold text-[#0891B2]">{summary.info}</p>
             <p className="text-sm text-zinc-500">Info</p>
           </div>
         </div>
@@ -284,11 +299,11 @@ export default function AlertsPage() {
       <section>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Notifications</h2>
-          <p className="text-sm text-zinc-500">{filteredAlerts.length} alert{filteredAlerts.length !== 1 ? "s" : ""}</p>
+          <p className="text-sm text-zinc-500">{alerts.length} alert{alerts.length !== 1 ? "s" : ""}</p>
         </div>
 
         <div className="space-y-3">
-          {filteredAlerts.map((alert) => {
+          {alerts.map((alert) => {
             const config = getSeverityConfig(alert.severity);
             return (
               <div
@@ -346,16 +361,16 @@ export default function AlertsPage() {
             );
           })}
 
-          {filteredAlerts.length === 0 && (
+          {alerts.length === 0 && (
             <div className="p-12 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-center">
               <svg className="w-12 h-12 text-zinc-400 dark:text-zinc-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
               </svg>
               <p className="text-zinc-600 dark:text-zinc-400 font-medium">
-                {alerts.length === 0 ? "No alerts" : "No alerts match your filters"}
+                {filterSeverity !== "all" || filterCategory !== "all" ? "No alerts match your filters" : "No alerts"}
               </p>
               <p className="text-sm text-zinc-500 mt-1">
-                {alerts.length === 0 ? "You're all caught up!" : "Try adjusting your filter criteria"}
+                {filterSeverity !== "all" || filterCategory !== "all" ? "Try adjusting your filter criteria" : "You're all caught up!"}
               </p>
             </div>
           )}
