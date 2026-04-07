@@ -17,6 +17,17 @@ export interface CreateBoothRequest {
 }
 
 /**
+ * Partial update for booth fields (name, address).
+ * @see PATCH /api/v1/booths/{booth_id}
+ */
+export interface UpdateBoothSettingsRequest {
+  /** Booth name (1-100 characters) */
+  name?: string;
+  /** Booth address (1-200 characters) */
+  address?: string;
+}
+
+/**
  * Response from booth creation endpoint
  * POST /api/v1/booths
  */

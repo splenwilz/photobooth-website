@@ -16,6 +16,7 @@ import { useBoothOverview } from "@/core/api/booths";
 import { queryKeys } from "@/core/api/utils/query-keys";
 import type { BoothStatus, BoothSubscription } from "@/core/api/booths";
 import { AddBoothModal } from "./AddBoothModal";
+import { EditBoothModal } from "./EditBoothModal";
 import { SubscribeBoothModal } from "./SubscribeBoothModal";
 import { ManageSubscriptionModal } from "./ManageSubscriptionModal";
 
@@ -67,6 +68,11 @@ export default function BoothsPage() {
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingBooth, setEditingBooth] = useState<{
+    id: string;
+    name: string;
+    address: string;
+  } | null>(null);
   const [subscribeBoothId, setSubscribeBoothId] = useState<string | null>(null);
   const [subscribeBoothName, setSubscribeBoothName] = useState<string>("");
   const [manageBoothId, setManageBoothId] = useState<string | null>(null);
@@ -435,27 +441,44 @@ export default function BoothsPage() {
                     <div className="text-right hidden md:block">
                       <p className="text-sm text-zinc-500 dark:text-zinc-400">{booth.credits?.balance ?? 0} credits</p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const hasActiveSubscription = booth.subscription &&
-                          (booth.subscription.status === 'active' ||
-                           booth.subscription.status === 'trialing' ||
-                           booth.subscription.status === 'past_due');
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        aria-label={`Edit ${booth.booth_name}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingBooth({
+                            id: booth.booth_id,
+                            name: booth.booth_name,
+                            address: booth.booth_address ?? "",
+                          });
+                        }}
+                        className="px-3 py-1.5 text-sm font-medium rounded-lg border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const hasActiveSubscription = booth.subscription &&
+                            (booth.subscription.status === 'active' ||
+                             booth.subscription.status === 'trialing' ||
+                             booth.subscription.status === 'past_due');
 
-                        if (hasActiveSubscription && booth.subscription) {
-                          openManageModal(booth.booth_id, booth.booth_name, booth.subscription);
-                        } else {
-                          openSubscribeModal(booth.booth_id, booth.booth_name);
-                        }
-                      }}
-                      className="px-3 py-1.5 text-sm font-medium rounded-lg bg-[#0891B2]/10 text-[#0891B2] hover:bg-[#0891B2]/20 transition-colors"
-                    >
-                      {booth.subscription?.status === 'active' || booth.subscription?.status === 'trialing' || booth.subscription?.status === 'past_due'
-                        ? "Manage Plan"
-                        : "Subscribe"}
-                    </button>
+                          if (hasActiveSubscription && booth.subscription) {
+                            openManageModal(booth.booth_id, booth.booth_name, booth.subscription);
+                          } else {
+                            openSubscribeModal(booth.booth_id, booth.booth_name);
+                          }
+                        }}
+                        className="px-3 py-1.5 text-sm font-medium rounded-lg bg-[#0891B2]/10 text-[#0891B2] hover:bg-[#0891B2]/20 transition-colors"
+                      >
+                        {booth.subscription?.status === 'active' || booth.subscription?.status === 'trialing' || booth.subscription?.status === 'past_due'
+                          ? "Manage Plan"
+                          : "Subscribe"}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -479,6 +502,16 @@ export default function BoothsPage() {
       <AddBoothModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
+      />
+
+      {/* Edit Booth Modal — keyed on booth id so state resets per booth */}
+      <EditBoothModal
+        key={editingBooth?.id ?? "edit-booth-modal"}
+        isOpen={!!editingBooth}
+        boothId={editingBooth?.id ?? null}
+        initialName={editingBooth?.name ?? ""}
+        initialAddress={editingBooth?.address ?? ""}
+        onClose={() => setEditingBooth(null)}
       />
 
       {/* Subscribe Booth Modal */}

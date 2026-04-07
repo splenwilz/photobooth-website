@@ -16,6 +16,7 @@ import type {
 	RestartAppResponse,
 	RestartRequest,
 	RestartSystemResponse,
+	UpdateBoothSettingsRequest,
 	UpdatePricingRequest,
 	UpdatePricingResponse,
 } from "./types";
@@ -40,6 +41,23 @@ export async function createBooth(
 		body: JSON.stringify(data),
 	});
 	return response;
+}
+
+/**
+ * Update booth name and/or address (partial update)
+ * @param boothId - The booth ID to update
+ * @param data - Fields to update (name, address)
+ * @returns Promise resolving when the update completes
+ * @see PATCH /api/v1/booths/{booth_id}
+ */
+export async function updateBoothSettings(
+	boothId: string,
+	data: UpdateBoothSettingsRequest,
+): Promise<unknown> {
+	return apiClient(`/api/v1/booths/${boothId}`, {
+		method: "PATCH",
+		body: JSON.stringify(data),
+	});
 }
 
 /**
