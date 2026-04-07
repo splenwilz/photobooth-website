@@ -111,7 +111,7 @@ export default function OAuthCallbackPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2.5 font-semibold text-xl text-zinc-900 dark:text-white">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#069494] to-[#176161] flex items-center justify-center">
               <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                 <circle cx="12" cy="13" r="3" />

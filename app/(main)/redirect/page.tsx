@@ -34,7 +34,7 @@ function RedirectContent() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
       <div className="text-center">
-        <div className="w-16 h-16 border-4 border-[#0891B2] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <div className="w-16 h-16 border-4 border-[#069494] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
         <p className="text-[var(--muted)]">Redirecting...</p>
       </div>
     </div>
@@ -44,7 +44,7 @@ function RedirectContent() {
 function RedirectLoading() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
-      <div className="w-8 h-8 border-2 border-[#0891B2] border-t-transparent rounded-full animate-spin" />
+      <div className="w-8 h-8 border-2 border-[#069494] border-t-transparent rounded-full animate-spin" />
     </div>
   );
 }

@@ -87,7 +87,7 @@ function MessageBubble({ message, isAdmin }: { message: TicketMessage; isAdmin: 
       <div
         className={`max-w-[85%] ${
           isAdmin
-            ? "bg-[#0891B2] text-white rounded-2xl rounded-bl-md"
+            ? "bg-[#069494] text-white rounded-2xl rounded-bl-md"
             : "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white rounded-2xl rounded-br-md"
         }`}
       >
@@ -175,7 +175,7 @@ export default function TicketDetailPanel({ ticketId, onClose }: TicketDetailPan
               </>
             ) : (
               <>
-                <p className="text-sm font-mono text-[#0891B2]">{ticket?.ticket_number}</p>
+                <p className="text-sm font-mono text-[#069494]">{ticket?.ticket_number}</p>
                 <h2 className="text-lg font-bold text-zinc-900 dark:text-white mt-1">
                   {ticket?.subject}
                 </h2>
@@ -227,7 +227,7 @@ export default function TicketDetailPanel({ ticketId, onClose }: TicketDetailPan
                 <>
                   {/* User Info */}
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center font-bold text-sm text-white">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#069494] to-[#176161] flex items-center justify-center font-bold text-sm text-white">
                       {userInitials}
                     </div>
                     <div>
@@ -354,13 +354,13 @@ export default function TicketDetailPanel({ ticketId, onClose }: TicketDetailPan
                 onChange={(e) => setReplyMessage(e.target.value)}
                 placeholder="Type your reply..."
                 rows={2}
-                className="flex-1 px-4 py-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-transparent focus:border-[#0891B2] focus:outline-none transition-colors text-zinc-900 dark:text-white placeholder-zinc-500 resize-none"
+                className="flex-1 px-4 py-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-transparent focus:border-[#069494] focus:outline-none transition-colors text-zinc-900 dark:text-white placeholder-zinc-500 resize-none"
               />
               <button
                 type="button"
                 onClick={handleSendReply}
                 disabled={!canReply || isSending}
-                className="px-6 py-3 bg-[#0891B2] text-white font-medium rounded-xl hover:bg-[#0E7490] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-6 py-3 bg-[#069494] text-white font-medium rounded-xl hover:bg-[#176161] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {isSending ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

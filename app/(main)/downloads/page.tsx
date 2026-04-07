@@ -162,7 +162,7 @@ export default function DownloadsPage() {
        * Hero Section - Static with dynamic values
        * ============================================ */}
       <section className="relative pt-16 pb-20 px-6 overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#0891B2]/10 blur-[200px] rounded-full" />
+        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#069494]/10 blur-[200px] rounded-full" />
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-[#10B981]/10 blur-[150px] rounded-full" />
 
         <div className="relative max-w-5xl mx-auto">
@@ -269,12 +269,12 @@ export default function DownloadsPage() {
       <section className="py-24 px-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-slate-100 via-slate-50 to-slate-100 dark:from-[#0a0a0a] dark:via-[#111111]/30 dark:to-[#0a0a0a]" />
         <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[#10B981]/5 blur-[150px] rounded-full -translate-y-1/2" />
-        <div className="absolute top-1/2 right-0 w-[400px] h-[400px] bg-[#0891B2]/5 blur-[150px] rounded-full -translate-y-1/2" />
+        <div className="absolute top-1/2 right-0 w-[400px] h-[400px] bg-[#069494]/5 blur-[150px] rounded-full -translate-y-1/2" />
 
         <div className="relative max-w-5xl mx-auto">
           {/* Header - static with dynamic version */}
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#10B981]/20 via-[#0891B2]/10 to-transparent border border-[#10B981]/30 mb-6">
+            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#10B981]/20 via-[#069494]/10 to-transparent border border-[#10B981]/30 mb-6">
               <span className="relative flex h-3 w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10B981] opacity-75" />
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-[#10B981]" />
@@ -316,7 +316,7 @@ export default function DownloadsPage() {
                 </div>
               ) : latestRelease?.body_html ? (
                 <div
-                  className="prose prose-zinc dark:prose-invert max-w-none prose-headings:font-semibold prose-h2:text-xl prose-h3:text-lg prose-a:text-[#0891B2] prose-ul:list-disc prose-li:marker:text-[#10B981]"
+                  className="prose prose-zinc dark:prose-invert max-w-none prose-headings:font-semibold prose-h2:text-xl prose-h3:text-lg prose-a:text-[#069494] prose-ul:list-disc prose-li:marker:text-[#10B981]"
                   // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is from GitHub API (trusted source)
                   dangerouslySetInnerHTML={{ __html: latestRelease.body_html }}
                 />
@@ -341,7 +341,7 @@ export default function DownloadsPage() {
               </div>
               <Link
                 href="/docs/changelog"
-                className="ml-4 px-5 py-2.5 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-colors"
+                className="ml-4 px-5 py-2.5 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors"
               >
                 View History
               </Link>
@@ -355,12 +355,12 @@ export default function DownloadsPage() {
        * ============================================ */}
       <section className="py-24 px-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-slate-100 to-slate-50 dark:from-[#0a0a0a] dark:to-[#111111]/50" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#0891B2]/5 blur-[200px] rounded-full" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#069494]/5 blur-[200px] rounded-full" />
 
         <div className="relative max-w-5xl mx-auto">
           {/* Static header */}
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0891B2]/10 border border-[#0891B2]/20 text-[#22D3EE] text-sm font-medium mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#0EC7C7] text-sm font-medium mb-4">
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801" />
               </svg>
@@ -375,23 +375,23 @@ export default function DownloadsPage() {
           {/* Main Download Card */}
           <div className="max-w-4xl mx-auto">
             <div className="relative rounded-3xl overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#0891B2]/20 via-slate-100 to-slate-100 dark:via-[#111111] dark:to-[#111111]" />
-              <div className="absolute top-0 right-0 w-64 h-64 bg-[#0891B2]/20 blur-3xl rounded-full" />
+              <div className="absolute inset-0 bg-gradient-to-br from-[#069494]/20 via-slate-100 to-slate-100 dark:via-[#111111] dark:to-[#111111]" />
+              <div className="absolute top-0 right-0 w-64 h-64 bg-[#069494]/20 blur-3xl rounded-full" />
               <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#10B981]/10 blur-3xl rounded-full" />
 
-              <div className="relative p-8 md:p-12 border border-[#0891B2]/30 rounded-3xl">
+              <div className="relative p-8 md:p-12 border border-[#069494]/30 rounded-3xl">
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                   {/* Left - Info */}
                   <div>
-                    <div className="w-20 h-20 rounded-2xl bg-[#0891B2]/20 flex items-center justify-center mb-6">
-                      <svg className="w-10 h-10 text-[#0891B2]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <div className="w-20 h-20 rounded-2xl bg-[#069494]/20 flex items-center justify-center mb-6">
+                      <svg className="w-10 h-10 text-[#069494]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801" />
                       </svg>
                     </div>
 
                     <h3 className="text-3xl font-bold mb-2">BoothIQ for Windows</h3>
                     <div className="flex flex-wrap items-center gap-3 mb-4">
-                      <span className="px-3 py-1.5 rounded-lg bg-[#0891B2]/20 text-[#22D3EE] text-sm font-medium">
+                      <span className="px-3 py-1.5 rounded-lg bg-[#069494]/20 text-[#0EC7C7] text-sm font-medium">
                         v{isLoadingLatest ? <Skeleton className="w-10 h-4" /> : version}
                       </span>
                       <span className="text-[var(--muted)]">
@@ -488,7 +488,7 @@ export default function DownloadsPage() {
                         Verified Safe
                       </div>
                       <div className="flex items-center gap-1.5 text-xs text-[var(--muted)]">
-                        <svg className="w-4 h-4 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                        <svg className="w-4 h-4 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
                         Auto Updates
@@ -525,30 +525,30 @@ export default function DownloadsPage() {
               {installSteps.map((step) => (
                 <div key={step.step} className="relative text-center">
                   <div className="relative inline-flex mb-6">
-                    <div className="w-24 h-24 rounded-full bg-[#0891B2]/10 border-2 border-[#0891B2]/30 flex items-center justify-center">
+                    <div className="w-24 h-24 rounded-full bg-[#069494]/10 border-2 border-[#069494]/30 flex items-center justify-center">
                       {step.icon === "download" && (
-                        <svg className="w-10 h-10 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                        <svg className="w-10 h-10 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
                       )}
                       {step.icon === "install" && (
-                        <svg className="w-10 h-10 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                        <svg className="w-10 h-10 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
                         </svg>
                       )}
                       {step.icon === "hardware" && (
-                        <svg className="w-10 h-10 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                        <svg className="w-10 h-10 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                           <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                       )}
                       {step.icon === "rocket" && (
-                        <svg className="w-10 h-10 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                        <svg className="w-10 h-10 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
                         </svg>
                       )}
                     </div>
-                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-[#0891B2] text-white text-sm font-bold flex items-center justify-center">
+                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-[#069494] text-white text-sm font-bold flex items-center justify-center">
                       {step.step}
                     </div>
                   </div>
@@ -605,7 +605,7 @@ export default function DownloadsPage() {
                   <button
                     type="button"
                     onClick={() => setShowAllVersions(!showAllVersions)}
-                    className="text-sm text-[#0891B2] hover:text-[#22D3EE] transition-colors"
+                    className="text-sm text-[#069494] hover:text-[#0EC7C7] transition-colors"
                   >
                     {showAllVersions ? "Show less" : "View all versions"}
                   </button>
@@ -621,7 +621,7 @@ export default function DownloadsPage() {
                     return (
                       <div
                         key={release.id}
-                        className="group flex items-center justify-between p-5 rounded-2xl bg-[var(--background)] border border-[var(--border)] hover:border-[#0891B2]/30 transition-all"
+                        className="group flex items-center justify-between p-5 rounded-2xl bg-[var(--background)] border border-[var(--border)] hover:border-[#069494]/30 transition-all"
                       >
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-xl bg-slate-200 dark:bg-zinc-800 flex items-center justify-center">
@@ -690,7 +690,7 @@ export default function DownloadsPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/docs/getting-started"
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0891B2] text-white font-medium hover:bg-[#0E7490] transition-colors"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#069494] text-white font-medium hover:bg-[#176161] transition-colors"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />

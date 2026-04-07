@@ -83,7 +83,7 @@ function SettingInput({
           onClick={handleToggle}
           disabled={isUpdating}
           className={`relative w-12 h-6 rounded-full transition-colors ${
-            localValue ? "bg-[#0891B2]" : "bg-slate-300 dark:bg-zinc-700"
+            localValue ? "bg-[#069494]" : "bg-slate-300 dark:bg-zinc-700"
           } ${isUpdating ? "opacity-50" : ""}`}
         >
           <div
@@ -111,7 +111,7 @@ function SettingInput({
           max={setting.validation?.max}
           onChange={handleNumberChange}
           disabled={isUpdating}
-          className="w-32 px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#0891B2] disabled:opacity-50"
+          className="w-32 px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494] disabled:opacity-50"
         />
       );
     }
@@ -127,7 +127,7 @@ function SettingInput({
               onUpdate(e.target.value);
             }}
             disabled={isUpdating}
-            className="px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#0891B2] disabled:opacity-50"
+            className="px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494] disabled:opacity-50"
           >
             {setting.validation.enum.map((opt) => (
               <option key={opt} value={opt}>
@@ -145,7 +145,7 @@ function SettingInput({
           onChange={(e) => handleChange(e.target.value)}
           onBlur={handleBlur}
           disabled={isUpdating}
-          className="w-full max-w-md px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#0891B2] disabled:opacity-50"
+          className="w-full max-w-md px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494] disabled:opacity-50"
         />
       );
 
@@ -186,7 +186,7 @@ function SettingRow({
               {displayName}
             </label>
             {!setting.is_default && (
-              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-[#0891B2]/20 text-[#0891B2]">
+              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-[#069494]/20 text-[#069494]">
                 Modified
               </span>
             )}
@@ -498,7 +498,7 @@ function CategorySettings({ category }: { category: SettingCategory }) {
                 type="button"
                 onClick={handleSaveAll}
                 disabled={isSaving}
-                className="px-4 py-2 text-sm font-medium rounded-xl bg-[#0891B2] text-white hover:bg-[#0E7490] disabled:opacity-50 flex items-center gap-2"
+                className="px-4 py-2 text-sm font-medium rounded-xl bg-[#069494] text-white hover:bg-[#176161] disabled:opacity-50 flex items-center gap-2"
               >
                 {isSaving ? (
                   <>
@@ -548,7 +548,7 @@ export default function AdminSettingsPage() {
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${
               activeTab === tab.id
-                ? "bg-[#0891B2] text-white"
+                ? "bg-[#069494] text-white"
                 : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
             }`}
           >

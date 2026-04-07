@@ -112,7 +112,7 @@ export default function SupportPage() {
         <button
           type="button"
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#0891B2] text-white font-medium rounded-xl hover:bg-[#0E7490] transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#069494] text-white font-medium rounded-xl hover:bg-[#176161] transition-colors"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -130,7 +130,7 @@ export default function SupportPage() {
             onClick={() => handleStatusChange(filter.value)}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${
               statusFilter === filter.value
-                ? "bg-[#0891B2] text-white"
+                ? "bg-[#069494] text-white"
                 : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
             }`}
           >
@@ -173,7 +173,7 @@ export default function SupportPage() {
               <button
                 type="button"
                 onClick={() => setShowCreateModal(true)}
-                className="mt-4 px-4 py-2 bg-[#0891B2] text-white font-medium rounded-xl hover:bg-[#0E7490] transition-colors"
+                className="mt-4 px-4 py-2 bg-[#069494] text-white font-medium rounded-xl hover:bg-[#176161] transition-colors"
               >
                 Create Your First Ticket
               </button>
@@ -204,7 +204,7 @@ export default function SupportPage() {
                           className="border-b border-[var(--border)] last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer"
                         >
                           <td className="py-4 px-4">
-                            <span className="font-mono text-sm text-[#0891B2]">{ticket.ticket_number}</span>
+                            <span className="font-mono text-sm text-[#069494]">{ticket.ticket_number}</span>
                           </td>
                           <td className="py-4 px-4">
                             <p className="font-medium text-zinc-900 dark:text-white truncate max-w-xs">

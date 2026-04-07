@@ -88,8 +88,8 @@ function ToggleSwitch({
       aria-label={ariaLabel}
       disabled={disabled}
       onClick={() => onChange(!enabled)}
-      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0891B2] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#0a0a0a] ${
-        enabled ? "bg-[#0891B2]" : "bg-zinc-300 dark:bg-zinc-600"
+      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#069494] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#0a0a0a] ${
+        enabled ? "bg-[#069494]" : "bg-zinc-300 dark:bg-zinc-600"
       } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
     >
       <span
@@ -223,7 +223,7 @@ function PreferencesTab() {
             type="button"
             onClick={handleEnableAll}
             disabled={allEnabled || isBulkUpdating}
-            className="text-sm font-medium text-[#0891B2] hover:text-[#0E7490] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="text-sm font-medium text-[#069494] hover:text-[#176161] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Enable All
           </button>
@@ -248,7 +248,7 @@ function PreferencesTab() {
           <div key={category}>
             {/* Category header */}
             <div className="flex items-center gap-2 mb-3">
-              <div className="text-[#0891B2]">{CATEGORY_ICONS[category]}</div>
+              <div className="text-[#069494]">{CATEGORY_ICONS[category]}</div>
               <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">
                 {CATEGORY_LABELS[category]}
               </h2>
@@ -437,7 +437,7 @@ export default function NotificationsPage() {
             onClick={() => setActiveTab(tab.value)}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
               activeTab === tab.value
-                ? "bg-[#0891B2] text-white"
+                ? "bg-[#069494] text-white"
                 : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
             }`}
           >

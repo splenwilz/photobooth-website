@@ -110,12 +110,12 @@ export default function FeaturesPage() {
        * ============================================ */}
       <section className="relative pt-16 pb-20 px-6 overflow-hidden">
         {/* Background effects */}
-        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#0891B2]/10 blur-[200px] rounded-full" />
+        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#069494]/10 blur-[200px] rounded-full" />
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-[#A855F7]/10 blur-[150px] rounded-full" />
 
         <div className="relative max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0891B2]/10 border border-[#0891B2]/20 text-[#0891B2] dark:text-[#22D3EE] text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#069494] dark:text-[#0EC7C7] text-sm font-medium mb-6">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
               </svg>
@@ -124,7 +124,7 @@ export default function FeaturesPage() {
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
               Everything you need to run
               <br />
-              <span className="text-[#0891B2]">professional photo booths</span>
+              <span className="text-[#069494]">professional photo booths</span>
             </h1>
             <p className="text-xl text-[var(--muted)] max-w-2xl mx-auto">
               From capture to print, payments to analytics. One software, endless possibilities.
@@ -136,20 +136,20 @@ export default function FeaturesPage() {
             {/* Card 1 - Camera Integration */}
             <div className="group relative rounded-3xl overflow-hidden">
               {/* Background gradient */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#0891B2]/10 via-slate-100 to-slate-100 dark:from-[#0891B2]/20 dark:via-[#111111] dark:to-[#111111]" />
-              <div className="absolute top-0 right-0 w-40 h-40 bg-[#0891B2]/10 dark:bg-[#0891B2]/20 blur-3xl rounded-full" />
+              <div className="absolute inset-0 bg-gradient-to-br from-[#069494]/10 via-slate-100 to-slate-100 dark:from-[#069494]/20 dark:via-[#111111] dark:to-[#111111]" />
+              <div className="absolute top-0 right-0 w-40 h-40 bg-[#069494]/10 dark:bg-[#069494]/20 blur-3xl rounded-full" />
 
-              <div className="relative p-8 border border-[#0891B2]/20 rounded-3xl h-full group-hover:border-[#0891B2]/50 transition-colors">
+              <div className="relative p-8 border border-[#069494]/20 rounded-3xl h-full group-hover:border-[#069494]/50 transition-colors">
                 {/* Mini visual */}
                 <div className="mb-6 p-4 rounded-2xl bg-white dark:bg-[var(--background)] border border-slate-200 dark:border-[var(--border)]">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
                     <span className="text-xs text-[var(--muted)]">Logitech C920</span>
-                    <span className="ml-auto text-xs text-[#0891B2]">1080p</span>
+                    <span className="ml-auto text-xs text-[#069494]">1080p</span>
                   </div>
                   <div className="aspect-video rounded-lg bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-[var(--border)] flex items-center justify-center relative overflow-hidden">
-                    <div className="w-12 h-12 border-2 border-[#0891B2] rounded-lg flex items-center justify-center">
-                      <div className="w-3 h-3 bg-[#0891B2] rounded-full animate-pulse" />
+                    <div className="w-12 h-12 border-2 border-[#069494] rounded-lg flex items-center justify-center">
+                      <div className="w-3 h-3 bg-[#069494] rounded-full animate-pulse" />
                     </div>
                     <div className="absolute bottom-2 left-2 right-2 flex justify-between text-[8px] text-[var(--muted)]">
                       <span>ISO 400</span>
@@ -160,11 +160,11 @@ export default function FeaturesPage() {
 
                 {/* Icon & Title */}
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-[#0891B2]/20 flex items-center justify-center text-2xl">
+                  <div className="w-12 h-12 rounded-xl bg-[#069494]/20 flex items-center justify-center text-2xl">
                     📷
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold group-hover:text-[#0891B2] dark:group-hover:text-[#22D3EE] transition-colors">Camera Integration</h3>
+                    <h3 className="text-lg font-bold group-hover:text-[#069494] dark:group-hover:text-[#0EC7C7] transition-colors">Camera Integration</h3>
                     <p className="text-xs text-[var(--muted)]">Webcam + DSLR support</p>
                   </div>
                 </div>
@@ -176,7 +176,7 @@ export default function FeaturesPage() {
                 {/* Tags */}
                 <div className="flex flex-wrap gap-2">
                   {["Live Preview", "Auto-Focus", "Green Screen"].map((tag) => (
-                    <span key={tag} className="px-3 py-1 rounded-full bg-[#0891B2]/10 text-[#0891B2] text-xs font-medium">
+                    <span key={tag} className="px-3 py-1 rounded-full bg-[#069494]/10 text-[#069494] text-xs font-medium">
                       {tag}
                     </span>
                   ))}
@@ -321,13 +321,13 @@ export default function FeaturesPage() {
        * ============================================ */}
       <section className="py-32 px-6 relative overflow-hidden">
         {/* Background elements */}
-        <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-[#0891B2]/5 blur-[200px] rounded-full -translate-y-1/2" />
+        <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-[#069494]/5 blur-[200px] rounded-full -translate-y-1/2" />
         <div className="absolute top-1/2 right-0 w-[400px] h-[400px] bg-[#A855F7]/5 blur-[150px] rounded-full -translate-y-1/2" />
 
         <div className="relative max-w-6xl mx-auto">
           {/* Section Header */}
           <div className="text-center mb-20">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0891B2]/10 border border-[#0891B2]/20 text-[#0891B2] dark:text-[#22D3EE] text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#069494] dark:text-[#0EC7C7] text-sm font-medium mb-6">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
               </svg>
@@ -344,7 +344,7 @@ export default function FeaturesPage() {
           {/* Feature Categories - Stacked Cards */}
           <div className="space-y-8">
             {categories.map((category, categoryIndex) => {
-              const colors = ["#0891B2", "#F59E0B", "#A855F7", "#10B981", "#EC4899", "#3B82F6"];
+              const colors = ["#069494", "#F59E0B", "#A855F7", "#10B981", "#EC4899", "#3B82F6"];
               const color = colors[categoryIndex % colors.length];
               
               return (
@@ -415,7 +415,7 @@ export default function FeaturesPage() {
                               {String(featureIndex + 1).padStart(2, "0")}
                             </div>
                             <div>
-                              <h4 className="font-semibold text-[var(--foreground)] mb-1 group-hover/item:text-[#0891B2] dark:group-hover/item:text-[#22D3EE] transition-colors">
+                              <h4 className="font-semibold text-[var(--foreground)] mb-1 group-hover/item:text-[#069494] dark:group-hover/item:text-[#0EC7C7] transition-colors">
                                 {feature.title}
                               </h4>
                               <p className="text-sm text-[var(--muted)] leading-relaxed">
@@ -445,7 +445,7 @@ export default function FeaturesPage() {
                 className="p-6 rounded-2xl bg-white dark:bg-[var(--card)] border border-slate-200 dark:border-[var(--border)] text-center"
               >
                 <span className="text-2xl mb-2 block">{stat.icon}</span>
-                <div className="text-2xl font-bold text-[#0891B2] mb-1">{stat.value}</div>
+                <div className="text-2xl font-bold text-[#069494] mb-1">{stat.value}</div>
                 <div className="text-sm text-[var(--muted)]">{stat.label}</div>
               </div>
             ))}
@@ -478,7 +478,7 @@ export default function FeaturesPage() {
             {integrations.map((item) => (
               <div
                 key={item.name}
-                className="p-6 rounded-2xl bg-white dark:bg-[var(--background)] border border-slate-200 dark:border-[var(--border)] text-center hover:border-[#0891B2]/30 transition-colors"
+                className="p-6 rounded-2xl bg-white dark:bg-[var(--background)] border border-slate-200 dark:border-[var(--border)] text-center hover:border-[#069494]/30 transition-colors"
               >
                 <div className="text-2xl font-bold text-[var(--foreground)] mb-1">{item.name}</div>
                 <div className="text-xs text-[var(--muted)]">{item.type}</div>
@@ -489,7 +489,7 @@ export default function FeaturesPage() {
           {/* Additional info */}
           <div className="mt-8 text-center">
             <p className="text-sm text-[var(--muted)]">
-              And many more. <Link href="/docs" className="text-[#0891B2] dark:text-[#22D3EE] hover:underline">See full compatibility list →</Link>
+              And many more. <Link href="/docs" className="text-[#069494] dark:text-[#0EC7C7] hover:underline">See full compatibility list →</Link>
             </p>
           </div>
         </div>
@@ -524,7 +524,7 @@ export default function FeaturesPage() {
             {/* Center Arrow/Divider - Desktop */}
             <div className="hidden lg:flex absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
               <div className="w-20 h-20 rounded-full bg-white dark:bg-[var(--background)] border-4 border-slate-200 dark:border-[var(--border)] flex items-center justify-center shadow-lg">
-                <svg className="w-8 h-8 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-8 h-8 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </div>
@@ -591,7 +591,7 @@ export default function FeaturesPage() {
                 {/* Green glow on hover */}
                 <div className="absolute inset-0 bg-[#10B981]/10 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                <div className="relative h-full p-8 md:p-10 rounded-3xl bg-gradient-to-br from-[#10B981]/10 via-white to-[#0891B2]/5 dark:from-[#10B981]/10 dark:via-[#111111] dark:to-[#0891B2]/5 border border-[#10B981]/30 group-hover:border-[#10B981]/50 transition-colors">
+                <div className="relative h-full p-8 md:p-10 rounded-3xl bg-gradient-to-br from-[#10B981]/10 via-white to-[#069494]/5 dark:from-[#10B981]/10 dark:via-[#111111] dark:to-[#069494]/5 border border-[#10B981]/30 group-hover:border-[#10B981]/50 transition-colors">
                   {/* Recommended badge */}
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                     <div className="px-4 py-1.5 rounded-full bg-[#10B981] text-white text-sm font-semibold shadow-lg shadow-[#10B981]/30">
@@ -655,7 +655,7 @@ export default function FeaturesPage() {
             <p className="text-[var(--muted)] mb-6">Ready to make the switch?</p>
             <Link
               href="/downloads"
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-all hover:scale-105 shadow-lg shadow-[#0891B2]/20"
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-all hover:scale-105 shadow-lg shadow-[#069494]/20"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -681,7 +681,7 @@ export default function FeaturesPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
             <Link
               href="/downloads"
-              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-all hover:scale-105 flex items-center justify-center gap-2 shadow-lg shadow-[#0891B2]/20"
+              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-all hover:scale-105 flex items-center justify-center gap-2 shadow-lg shadow-[#069494]/20"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />

@@ -47,7 +47,7 @@ function SettingsItem({
   loading = false,
   onClick,
 }: SettingsItemProps) {
-  const accentColor = destructive ? "#EF4444" : "#0891B2";
+  const accentColor = destructive ? "#EF4444" : "#069494";
 
   return (
     <button
@@ -176,7 +176,7 @@ function ConfirmModal({
             className={`flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${
               confirmDestructive
                 ? "bg-red-500 text-white hover:bg-red-600"
-                : "bg-[#0891B2] text-white hover:bg-[#0E7490]"
+                : "bg-[#069494] text-white hover:bg-[#176161]"
             } disabled:opacity-50`}
           >
             {isPending && (
@@ -472,8 +472,8 @@ export default function SettingsPage() {
         <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <div className="flex items-center gap-4">
             {/* Avatar with initials */}
-            <div className="w-16 h-16 rounded-full bg-[#0891B2]/15 flex items-center justify-center">
-              <span className="text-2xl font-bold text-[#0891B2]">
+            <div className="w-16 h-16 rounded-full bg-[#069494]/15 flex items-center justify-center">
+              <span className="text-2xl font-bold text-[#069494]">
                 {getInitials(user)}
               </span>
             </div>
@@ -490,9 +490,9 @@ export default function SettingsPage() {
 
       {/* All Booths Mode / No Booths Notice */}
       {isAllBoothsMode && (
-        <div className="p-4 rounded-xl bg-[#0891B2]/10 border border-[#0891B2]/30 flex items-start gap-3">
+        <div className="p-4 rounded-xl bg-[#069494]/10 border border-[#069494]/30 flex items-start gap-3">
           <svg
-            className="w-5 h-5 text-[#0891B2] mt-0.5 shrink-0"
+            className="w-5 h-5 text-[#069494] mt-0.5 shrink-0"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -529,9 +529,9 @@ export default function SettingsPage() {
               onClick={() => setShowBoothSelector(!showBoothSelector)}
               className="w-full flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all"
             >
-              <div className="w-10 h-10 rounded-xl bg-[#0891B2]/20 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-[#069494]/20 flex items-center justify-center">
                 <svg
-                  className="w-5 h-5 text-[#0891B2]"
+                  className="w-5 h-5 text-[#069494]"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -592,10 +592,10 @@ export default function SettingsPage() {
                     setShowBoothSelector(false);
                   }}
                   className={`w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors ${
-                    !selectedBoothId ? "bg-[#0891B2]/10" : ""
+                    !selectedBoothId ? "bg-[#069494]/10" : ""
                   }`}
                 >
-                  <div className="w-2 h-2 rounded-full bg-[#0891B2]" />
+                  <div className="w-2 h-2 rounded-full bg-[#069494]" />
                   <div className="flex-1 text-left">
                     <p className="font-medium text-zinc-900 dark:text-white">
                       All Booths
@@ -606,7 +606,7 @@ export default function SettingsPage() {
                   </div>
                   {!selectedBoothId && (
                     <svg
-                      className="w-5 h-5 text-[#0891B2]"
+                      className="w-5 h-5 text-[#069494]"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -631,7 +631,7 @@ export default function SettingsPage() {
                       setShowBoothSelector(false);
                     }}
                     className={`w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors ${
-                      booth.id === selectedBoothId ? "bg-[#0891B2]/10" : ""
+                      booth.id === selectedBoothId ? "bg-[#069494]/10" : ""
                     }`}
                   >
                     <div
@@ -653,7 +653,7 @@ export default function SettingsPage() {
                     </div>
                     {booth.id === selectedBoothId && (
                       <svg
-                        className="w-5 h-5 text-[#0891B2]"
+                        className="w-5 h-5 text-[#069494]"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -686,7 +686,7 @@ export default function SettingsPage() {
               {creditsLoading ? (
                 <p className="text-4xl font-bold text-zinc-400">Loading...</p>
               ) : (
-                <p className="text-5xl font-bold text-[#0891B2]">
+                <p className="text-5xl font-bold text-[#069494]">
                   {creditsData?.credit_balance?.toLocaleString() ?? 0}
                 </p>
               )}
@@ -695,7 +695,7 @@ export default function SettingsPage() {
 
             {/* Credits Actions */}
             <div className="flex gap-3">
-              <button className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#0891B2] text-white font-medium hover:bg-[#0E7490] transition-colors">
+              <button className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#069494] text-white font-medium hover:bg-[#176161] transition-colors">
                 <svg
                   className="w-5 h-5"
                   fill="none"
@@ -711,7 +711,7 @@ export default function SettingsPage() {
                 </svg>
                 Add Credits
               </button>
-              <button className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#0891B2]/15 text-[#0891B2] font-medium hover:bg-[#0891B2]/25 transition-colors">
+              <button className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#069494]/15 text-[#069494] font-medium hover:bg-[#069494]/25 transition-colors">
                 <svg
                   className="w-5 h-5"
                   fill="none"

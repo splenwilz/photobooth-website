@@ -191,7 +191,7 @@ export default function UserDetailPanel({ userId, onClose }: UserDetailPanelProp
             <div className="p-6 space-y-6">
               {/* User Header */}
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center font-bold text-xl text-white shrink-0">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#069494] to-[#176161] flex items-center justify-center font-bold text-xl text-white shrink-0">
                   {getInitials(user.name)}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -311,7 +311,7 @@ export default function UserDetailPanel({ userId, onClose }: UserDetailPanelProp
           <div className="p-4 border-t border-[var(--border)] bg-zinc-50 dark:bg-zinc-900">
             <a
               href={`mailto:${user.email}`}
-              className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl bg-[#0891B2] text-white font-medium hover:bg-[#0E7490] transition-colors"
+              className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl bg-[#069494] text-white font-medium hover:bg-[#176161] transition-colors"
             >
               <svg
                 className="w-4 h-4"

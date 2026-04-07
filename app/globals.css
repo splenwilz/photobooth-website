@@ -9,9 +9,9 @@
 
 :root {
   /* Brand Colors - Deep Teal (same as mobile app) */
-  --brand: #0891B2;
-  --brand-dark: #0E7490;
-  --brand-light: #22D3EE;
+  --brand: #069494;
+  --brand-dark: #176161;
+  --brand-light: #0EC7C7;
 
   /* Light Theme (default) */
   --background: #ffffff;
@@ -58,7 +58,7 @@ html {
 }
 
 ::selection {
-  background: rgba(8, 145, 178, 0.4);
+  background: rgba(6, 148, 148, 0.4);
 }
 
 /* Brand gradient text */
@@ -71,14 +71,14 @@ html {
 
 /* Brand glow effect */
 .brand-glow {
-  box-shadow: 0 0 60px rgba(8, 145, 178, 0.2);
+  box-shadow: 0 0 60px rgba(6, 148, 148, 0.2);
 }
 
 /* Grid background */
 .grid-pattern {
-  background-image: 
-    linear-gradient(rgba(8, 145, 178, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(8, 145, 178, 0.03) 1px, transparent 1px);
+  background-image:
+    linear-gradient(rgba(6, 148, 148, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6, 148, 148, 0.03) 1px, transparent 1px);
   background-size: 60px 60px;
 }
 

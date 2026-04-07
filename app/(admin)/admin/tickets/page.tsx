@@ -212,7 +212,7 @@ export default function AdminTicketsPage() {
               setSearchQuery(e.target.value);
               setPage(1);
             }}
-            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] transition-all"
+            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] transition-all"
           />
         </div>
 
@@ -225,7 +225,7 @@ export default function AdminTicketsPage() {
               onClick={() => handleFilterChange("status", status)}
               className={`px-3 py-2 text-sm font-medium rounded-lg transition-all capitalize whitespace-nowrap ${
                 filterStatus === status
-                  ? "bg-[#0891B2] text-white"
+                  ? "bg-[#069494] text-white"
                   : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
               }`}
             >
@@ -243,7 +243,7 @@ export default function AdminTicketsPage() {
               onClick={() => handleFilterChange("priority", priority)}
               className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all capitalize whitespace-nowrap ${
                 filterPriority === priority
-                  ? "bg-[#0891B2] text-white"
+                  ? "bg-[#069494] text-white"
                   : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
               }`}
             >
@@ -307,7 +307,7 @@ export default function AdminTicketsPage() {
                       handleTicketClick(ticket.id);
                     }
                   }}
-                  className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:ring-offset-2 dark:focus:ring-offset-[#0a0a0a]"
+                  className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#069494] focus:ring-offset-2 dark:focus:ring-offset-[#0a0a0a]"
                 >
                   <div className="flex items-start gap-4">
                     <div className={`w-10 h-10 rounded-xl ${priorityConfig.bg} flex items-center justify-center shrink-0`}>

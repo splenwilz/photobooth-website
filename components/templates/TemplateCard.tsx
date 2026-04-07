@@ -34,7 +34,7 @@ export function TemplateCard({ template, onQuickView }: TemplateCardProps) {
   const imageHeight = isPortrait ? "h-[300px]" : "h-[400px]";
 
   return (
-    <div className="group relative w-full rounded-2xl bg-[var(--card)] border border-[var(--border)] overflow-hidden transition-all hover:border-[#0891B2]/50 hover:shadow-lg hover:shadow-[#0891B2]/5">
+    <div className="group relative w-full rounded-2xl bg-[var(--card)] border border-[var(--border)] overflow-hidden transition-all hover:border-[#069494]/50 hover:shadow-lg hover:shadow-[#069494]/5">
       {/* Image Container */}
       <div className={`relative ${imageHeight} bg-slate-100 dark:bg-zinc-900 overflow-hidden`}>
         <Image
@@ -53,7 +53,7 @@ export function TemplateCard({ template, onQuickView }: TemplateCardProps) {
             </span>
           )}
           {isFree && (
-            <span className="px-2.5 py-1 rounded-full bg-[#0891B2] text-white text-xs font-semibold">
+            <span className="px-2.5 py-1 rounded-full bg-[#069494] text-white text-xs font-semibold">
               Free
             </span>
           )}
@@ -83,7 +83,7 @@ export function TemplateCard({ template, onQuickView }: TemplateCardProps) {
           <button
             type="button"
             onClick={handleAddToCart}
-            className="p-3 rounded-full bg-[#0891B2] text-white hover:bg-[#0E7490] transition-colors"
+            className="p-3 rounded-full bg-[#069494] text-white hover:bg-[#176161] transition-colors"
             aria-label={inCart ? "View cart" : "Add to cart"}
           >
             {inCart ? (
@@ -159,7 +159,7 @@ export function TemplateCard({ template, onQuickView }: TemplateCardProps) {
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               inCart
                 ? "bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20"
-                : "bg-[#0891B2]/10 text-[#0891B2] hover:bg-[#0891B2]/20"
+                : "bg-[#069494]/10 text-[#069494] hover:bg-[#069494]/20"
             }`}
           >
             {inCart ? "In Cart" : "Add"}

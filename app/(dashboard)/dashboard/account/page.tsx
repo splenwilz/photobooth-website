@@ -150,7 +150,7 @@ function AccountPageContent() {
         <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">Profile</h2>
         <div className="p-6 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#069494] to-[#176161] flex items-center justify-center">
               <span className="text-2xl font-bold text-white">
                 {getInitials(user)}
               </span>
@@ -254,7 +254,7 @@ function AccountPageContent() {
                     type="button"
                     onClick={handleManageSubscription}
                     disabled={customerPortal.isPending}
-                    className="px-5 py-2.5 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-colors disabled:opacity-50 flex items-center gap-2"
+                    className="px-5 py-2.5 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors disabled:opacity-50 flex items-center gap-2"
                   >
                     {customerPortal.isPending ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -303,7 +303,7 @@ function AccountPageContent() {
                   type="button"
                   onClick={handleSubscribeToBooth}
                   disabled={boothCheckout.isPending}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-colors disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors disabled:opacity-50"
                 >
                   {boothCheckout.isPending ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -322,10 +322,10 @@ function AccountPageContent() {
       ) : (
         /* No booth selected - Show info notice */
         <section>
-          <div className="p-6 rounded-2xl bg-[#0891B2]/5 border border-[#0891B2]/20">
+          <div className="p-6 rounded-2xl bg-[#069494]/5 border border-[#069494]/20">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-[#0891B2]/10 flex items-center justify-center shrink-0">
-                <svg className="w-5 h-5 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <div className="w-10 h-10 rounded-xl bg-[#069494]/10 flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <title>Information</title>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -350,14 +350,14 @@ function AccountPageContent() {
         <div className="flex flex-wrap gap-3">
           <Link
             href="/docs"
-            className="text-sm text-[#0891B2] hover:underline font-medium"
+            className="text-sm text-[#069494] hover:underline font-medium"
           >
             View Documentation
           </Link>
           <span className="text-zinc-300 dark:text-zinc-700">|</span>
           <Link
             href="/contact"
-            className="text-sm text-[#0891B2] hover:underline font-medium"
+            className="text-sm text-[#069494] hover:underline font-medium"
           >
             Contact Support
           </Link>

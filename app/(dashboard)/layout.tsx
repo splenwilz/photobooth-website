@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -321,21 +322,15 @@ function DashboardLayoutContent({
           {/* Logo */}
           <div className="p-6 border-b border-slate-200 dark:border-zinc-800">
             <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center">
-                <svg
-                  className="w-5 h-5 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                  />
-                  <circle cx="12" cy="13" r="3" />
-                </svg>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#069494] to-[#176161] flex items-center justify-center overflow-hidden">
+                <Image
+                  src="/logo.png"
+                  alt="BoothIQ"
+                  width={28}
+                  height={28}
+                  className="object-contain"
+                  priority
+                />
               </div>
               <span className="font-semibold text-lg text-zinc-900 dark:text-white">
                 BoothIQ
@@ -363,7 +358,7 @@ function DashboardLayoutContent({
                     flex items-center gap-3 px-4 py-3 rounded-xl transition-all
                     ${
                       isActive
-                        ? "bg-[#0891B2]/20 text-[#0891B2]"
+                        ? "bg-[#069494]/20 text-[#069494]"
                         : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800/50"
                     }
                   `}
@@ -403,7 +398,7 @@ function DashboardLayoutContent({
                   />
                 </svg>
                 <span className="font-medium">Admin Panel</span>
-                <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#0891B2]/20 text-[#0891B2]">
+                <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#069494]/20 text-[#069494]">
                   ADMIN
                 </span>
               </Link>
@@ -413,7 +408,7 @@ function DashboardLayoutContent({
           {/* User Section */}
           <div className="shrink-0 p-4 border-t border-slate-200 dark:border-zinc-800">
             <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-100 dark:bg-zinc-800/50">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center font-bold text-sm text-white">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#069494] to-[#176161] flex items-center justify-center font-bold text-sm text-white">
                 {getInitials(user)}
               </div>
               <div className="flex-1 min-w-0">
@@ -481,9 +476,9 @@ function DashboardLayoutContent({
                 onClick={() => setBoothSelectorOpen(!boothSelectorOpen)}
                 className="flex items-center gap-3 px-4 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700/50 hover:border-slate-300 dark:hover:border-zinc-600 transition-colors"
               >
-                <div className="w-8 h-8 rounded-lg bg-[#0891B2]/20 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-[#069494]/20 flex items-center justify-center">
                   <svg
-                    className="w-4 h-4 text-[#0891B2]"
+                    className="w-4 h-4 text-[#069494]"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -535,10 +530,10 @@ function DashboardLayoutContent({
                       setBoothSelectorOpen(false);
                     }}
                     className={`w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors ${
-                      isAllBoothsMode ? "bg-[#0891B2]/10" : ""
+                      isAllBoothsMode ? "bg-[#069494]/10" : ""
                     }`}
                   >
-                    <div className="w-2 h-2 rounded-full bg-[#0891B2]" />
+                    <div className="w-2 h-2 rounded-full bg-[#069494]" />
                     <div className="flex-1 text-left">
                       <p className="font-medium text-zinc-900 dark:text-white">
                         All Booths
@@ -549,7 +544,7 @@ function DashboardLayoutContent({
                     </div>
                     {isAllBoothsMode && (
                       <svg
-                        className="w-5 h-5 text-[#0891B2]"
+                        className="w-5 h-5 text-[#069494]"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -576,7 +571,7 @@ function DashboardLayoutContent({
                         setBoothSelectorOpen(false);
                       }}
                       className={`w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors ${
-                        booth.id === selectedBoothId ? "bg-[#0891B2]/10" : ""
+                        booth.id === selectedBoothId ? "bg-[#069494]/10" : ""
                       }`}
                     >
                       <div
@@ -598,7 +593,7 @@ function DashboardLayoutContent({
                       </div>
                       {booth.id === selectedBoothId && (
                         <svg
-                          className="w-5 h-5 text-[#0891B2]"
+                          className="w-5 h-5 text-[#069494]"
                           fill="currentColor"
                           viewBox="0 0 20 20"
                         >
@@ -681,7 +676,7 @@ function DashboardLayoutContent({
 function DashboardLayoutFallback() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0a0a0a] flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-[#0891B2] border-t-transparent rounded-full animate-spin" />
+      <div className="w-8 h-8 border-2 border-[#069494] border-t-transparent rounded-full animate-spin" />
     </div>
   );
 }

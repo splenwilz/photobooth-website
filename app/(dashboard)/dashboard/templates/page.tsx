@@ -77,7 +77,7 @@ export default function DashboardTemplatesPage() {
         </div>
         <Link
           href="/templates"
-          className="px-4 py-2.5 rounded-xl bg-[#0891B2] text-white text-sm font-semibold hover:bg-[#0E7490] transition-colors"
+          className="px-4 py-2.5 rounded-xl bg-[#069494] text-white text-sm font-semibold hover:bg-[#176161] transition-colors"
         >
           Browse Templates
         </Link>
@@ -132,7 +132,7 @@ export default function DashboardTemplatesPage() {
           <button
           type="button"
             onClick={() => refetch()}
-            className="px-4 py-2.5 rounded-xl bg-[#0891B2] text-white text-sm font-semibold hover:bg-[#0E7490] transition-colors"
+            className="px-4 py-2.5 rounded-xl bg-[#069494] text-white text-sm font-semibold hover:bg-[#176161] transition-colors"
           >
             Try Again
           </button>
@@ -151,7 +151,7 @@ export default function DashboardTemplatesPage() {
           <p className="text-sm text-zinc-500 mb-6">Purchase templates from the marketplace to see them here.</p>
           <Link
             href="/templates"
-            className="inline-flex px-6 py-3 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-colors"
+            className="inline-flex px-6 py-3 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors"
           >
             Browse Templates
           </Link>

@@ -293,7 +293,7 @@ export function EmergencyPasswordModal({
                     <select
                       value={validityMinutes}
                       onChange={(e) => setValidityMinutes(Number(e.target.value))}
-                      className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#069494] focus:border-transparent transition-all"
                     >
                       {VALIDITY_OPTIONS.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -313,7 +313,7 @@ export function EmergencyPasswordModal({
                       onChange={(e) => setReason(e.target.value)}
                       placeholder="e.g., User locked out, forgot password"
                       rows={3}
-                      className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent transition-all resize-none"
+                      className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#069494] focus:border-transparent transition-all resize-none"
                     />
                   </div>
 
@@ -329,7 +329,7 @@ export function EmergencyPasswordModal({
                     type="button"
                     onClick={handleGenerateCloud}
                     disabled={isCloudPending}
-                    className="w-full py-3 px-4 bg-[#0891B2] text-white font-medium rounded-xl hover:bg-[#0E7490] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full py-3 px-4 bg-[#069494] text-white font-medium rounded-xl hover:bg-[#176161] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {isCloudPending ? (
                       <>
@@ -413,7 +413,7 @@ export function EmergencyPasswordModal({
                       onChange={(e) => setLocalReason(e.target.value)}
                       placeholder="e.g., User locked out, generating master password"
                       rows={3}
-                      className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent transition-all resize-none"
+                      className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#069494] focus:border-transparent transition-all resize-none"
                     />
                   </div>
 

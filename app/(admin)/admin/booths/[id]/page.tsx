@@ -177,7 +177,7 @@ export default function AdminBoothDetailPage() {
           <button
             type="button"
             onClick={() => router.push("/admin/booths")}
-            className="mt-4 px-4 py-2 bg-[#0891B2] text-white font-medium rounded-xl hover:bg-[#0E7490] transition-colors"
+            className="mt-4 px-4 py-2 bg-[#069494] text-white font-medium rounded-xl hover:bg-[#176161] transition-colors"
           >
             Back to Booths
           </button>
@@ -547,7 +547,7 @@ function RevenueCard({
   highlight?: boolean;
 }) {
   return (
-    <div className={`p-4 rounded-2xl border border-[var(--border)] ${highlight ? "bg-gradient-to-br from-[#0891B2]/10 to-[#10B981]/10" : "bg-white dark:bg-[#111111]"}`}>
+    <div className={`p-4 rounded-2xl border border-[var(--border)] ${highlight ? "bg-gradient-to-br from-[#069494]/10 to-[#176161]/10" : "bg-white dark:bg-[#111111]"}`}>
       <p className="text-2xl font-bold text-zinc-900 dark:text-white">{formatCurrency(value)}</p>
       <div className="flex items-center gap-2">
         <p className="text-sm text-zinc-500">{label}</p>

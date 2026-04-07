@@ -88,7 +88,7 @@ function MessageBubble({ message, isUser }: { message: TicketMessage; isUser: bo
       <div
         className={`max-w-[80%] ${
           isUser
-            ? "bg-[#0891B2] text-white rounded-2xl rounded-br-md"
+            ? "bg-[#069494] text-white rounded-2xl rounded-br-md"
             : "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white rounded-2xl rounded-bl-md"
         }`}
       >
@@ -344,7 +344,7 @@ export default function TicketDetailPage() {
       <div className="p-6 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm font-mono text-[#0891B2] mb-1">{ticket.ticket_number}</p>
+            <p className="text-sm font-mono text-[#069494] mb-1">{ticket.ticket_number}</p>
             <h1 className="text-xl font-bold text-zinc-900 dark:text-white">{ticket.subject}</h1>
             <div className="flex flex-wrap gap-2 mt-3">
               <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusConfig.bg} ${statusConfig.text}`}>
@@ -402,7 +402,7 @@ export default function TicketDetailPage() {
             onChange={(e) => setReplyMessage(e.target.value)}
             placeholder="Type your message..."
             rows={4}
-            className="w-full px-4 py-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-transparent focus:border-[#0891B2] focus:outline-none transition-colors text-zinc-900 dark:text-white placeholder-zinc-500 resize-none"
+            className="w-full px-4 py-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-transparent focus:border-[#069494] focus:outline-none transition-colors text-zinc-900 dark:text-white placeholder-zinc-500 resize-none"
           />
 
           {/* Pending Files */}
@@ -494,7 +494,7 @@ export default function TicketDetailPage() {
             <button
               type="submit"
               disabled={!canReply || isSending || uploadingFiles}
-              className="px-6 py-2.5 bg-[#0891B2] text-white font-medium rounded-xl hover:bg-[#0E7490] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-6 py-2.5 bg-[#069494] text-white font-medium rounded-xl hover:bg-[#176161] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {(isSending || uploadingFiles) ? (
                 <>

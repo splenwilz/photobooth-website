@@ -92,7 +92,7 @@ export function VerifyEmailForm() {
         </p>
         <button
           onClick={() => router.push('/signup')}
-          className="px-6 py-3 rounded-xl bg-[#10B981] text-white font-semibold hover:bg-[#059669] transition-all"
+          className="px-6 py-3 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-all"
         >
           Back to Sign Up
         </button>
@@ -103,8 +103,8 @@ export function VerifyEmailForm() {
   return (
     <div className="text-center">
       {/* Icon */}
-      <div className="w-16 h-16 rounded-full bg-[#10B981]/20 flex items-center justify-center mx-auto mb-6">
-        <svg className="w-8 h-8 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <div className="w-16 h-16 rounded-full bg-[#069494]/20 flex items-center justify-center mx-auto mb-6">
+        <svg className="w-8 h-8 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
       </div>
@@ -141,7 +141,7 @@ export function VerifyEmailForm() {
               onKeyDown={(e) => handleKeyDown(index, e)}
               onPaste={handlePaste}
               disabled={isPending}
-              className="w-12 h-14 text-center text-xl font-bold rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-all disabled:opacity-50"
+              className="w-12 h-14 text-center text-xl font-bold rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all disabled:opacity-50"
             />
           ))}
         </div>
@@ -149,7 +149,7 @@ export function VerifyEmailForm() {
         <button
           type="submit"
           disabled={isPending || !isCodeComplete}
-          className="w-full py-4 rounded-xl bg-[#10B981] text-white font-semibold hover:bg-[#059669] transition-all shadow-lg shadow-[#10B981]/20 hover:shadow-[#10B981]/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#10B981] flex items-center justify-center gap-2"
+          className="w-full py-4 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-all shadow-lg shadow-[#069494]/20 hover:shadow-[#069494]/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#069494] flex items-center justify-center gap-2"
         >
           {isPending ? (
             <>
@@ -168,7 +168,7 @@ export function VerifyEmailForm() {
       {/* Resend Link */}
       <p className="text-sm text-zinc-500 mt-6">
         Didn&apos;t receive the code?{" "}
-        <button className="text-[#10B981] hover:text-[#22D3EE] font-medium transition-colors">
+        <button className="text-[#069494] hover:text-[#0EC7C7] font-medium transition-colors">
           Resend
         </button>
       </p>

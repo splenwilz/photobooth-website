@@ -46,7 +46,7 @@ function getSeverityColor(severity: "critical" | "warning" | "info"): string {
   switch (severity) {
     case "critical": return "#EF4444";
     case "warning": return "#F59E0B";
-    case "info": return "#0891B2";
+    case "info": return "#069494";
   }
 }
 
@@ -288,7 +288,7 @@ export default function DashboardPage() {
                 onClick={() => setSelectedPeriod(period)}
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
                   selectedPeriod === period
-                    ? "bg-[#0891B2] text-white"
+                    ? "bg-[#069494] text-white"
                     : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
                 }`}
               >
@@ -380,7 +380,7 @@ export default function DashboardPage() {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-[#0891B2]" />
+                    <div className="w-3 h-3 rounded-full bg-[#069494]" />
                     <span className="text-sm text-zinc-600 dark:text-zinc-400">Card</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -389,7 +389,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className="h-2 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-[#0891B2] rounded-full transition-all" style={{ width: `${cardPercent}%` }} />
+                  <div className="h-full bg-[#069494] rounded-full transition-all" style={{ width: `${cardPercent}%` }} />
                 </div>
               </div>
               {/* Manual */}
@@ -476,8 +476,8 @@ export default function DashboardPage() {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-[#0891B2]/20 flex items-center justify-center">
-                      <svg className="w-4 h-4 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <div className="w-8 h-8 rounded-lg bg-[#069494]/20 flex items-center justify-center">
+                      <svg className="w-4 h-4 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                       </svg>
                     </div>
@@ -489,7 +489,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="h-2 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#0891B2] rounded-full transition-all"
+                    className="h-full bg-[#069494] rounded-full transition-all"
                     style={{ width: `${summary?.total_booths ? ((summary.online_count / summary.total_booths) * 100) : 0}%` }}
                   />
                 </div>
@@ -644,8 +644,8 @@ export default function DashboardPage() {
               {/* Camera Status */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#0891B2]/20 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <div className="w-10 h-10 rounded-xl bg-[#069494]/20 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                     </svg>
                   </div>
@@ -713,7 +713,7 @@ export default function DashboardPage() {
               <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Recent Alerts</h2>
               <p className="text-sm text-zinc-500">{alerts.filter(a => !a.is_read).length} unread</p>
             </div>
-            <a href="/dashboard/alerts" className="text-sm text-[#0891B2] hover:text-[#22D3EE] transition-colors">
+            <a href="/dashboard/alerts" className="text-sm text-[#069494] hover:text-[#0EC7C7] transition-colors">
               View All →
             </a>
           </div>

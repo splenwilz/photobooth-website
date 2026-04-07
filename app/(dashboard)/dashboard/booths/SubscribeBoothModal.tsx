@@ -104,7 +104,7 @@ export function SubscribeBoothModal({
                 aria-label="Toggle annual billing"
                 onClick={() => setIsAnnual(!isAnnual)}
                 className={`relative w-12 h-6 rounded-full transition-colors ${
-                  isAnnual ? "bg-[#0891B2]" : "bg-slate-300 dark:bg-zinc-700"
+                  isAnnual ? "bg-[#069494]" : "bg-slate-300 dark:bg-zinc-700"
                 }`}
               >
                 <div
@@ -149,7 +149,7 @@ export function SubscribeBoothModal({
                     onClick={() => setSelectedPlanId(plan.id)}
                     className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
                       isSelected
-                        ? "border-[#0891B2] bg-[#0891B2]/5"
+                        ? "border-[#069494] bg-[#069494]/5"
                         : "border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-600"
                     }`}
                   >
@@ -160,7 +160,7 @@ export function SubscribeBoothModal({
                             {plan.name}
                           </h3>
                           {isSelected && (
-                            <div className="w-5 h-5 rounded-full bg-[#0891B2] flex items-center justify-center">
+                            <div className="w-5 h-5 rounded-full bg-[#069494] flex items-center justify-center">
                               <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                               </svg>
@@ -240,7 +240,7 @@ export function SubscribeBoothModal({
               type="button"
               onClick={handleSubscribe}
               disabled={!selectedPlanId || isLoading}
-              className="px-4 py-2 text-sm font-medium rounded-xl bg-[#0891B2] text-white hover:bg-[#0E7490] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-4 py-2 text-sm font-medium rounded-xl bg-[#069494] text-white hover:bg-[#176161] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isLoading ? (
                 <>

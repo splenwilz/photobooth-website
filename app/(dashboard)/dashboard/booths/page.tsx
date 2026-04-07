@@ -286,7 +286,7 @@ export default function BoothsPage() {
         <button
         type="button"
           onClick={() => setIsAddModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#0891B2] text-white font-medium rounded-xl hover:bg-[#0E7490] transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#069494] text-white font-medium rounded-xl hover:bg-[#176161] transition-colors"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Add Booth">
             <title>Add Booth</title>
@@ -337,7 +337,7 @@ export default function BoothsPage() {
             placeholder="Search booths..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] focus:ring-1 focus:ring-[#0891B2] transition-all"
+            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all"
           />
         </div>
 
@@ -350,7 +350,7 @@ export default function BoothsPage() {
               onClick={() => setFilterStatus(status)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all ${
                 filterStatus === status
-                  ? "bg-[#0891B2] border-[#0891B2] text-white"
+                  ? "bg-[#069494] border-[#069494] text-white"
                   : "border-slate-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700"
               }`}
             >
@@ -364,10 +364,10 @@ export default function BoothsPage() {
       </div>
 
       {/* All Booths Card */}
-      <div className="p-4 rounded-xl bg-white dark:bg-[#111111] border-2 border-[#0891B2] flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-900/50 transition-all">
+      <div className="p-4 rounded-xl bg-white dark:bg-[#111111] border-2 border-[#069494] flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-900/50 transition-all">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-[#0891B2]/20 flex items-center justify-center">
-            <svg className="w-6 h-6 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-label="All Booths">
+          <div className="w-12 h-12 rounded-xl bg-[#069494]/20 flex items-center justify-center">
+            <svg className="w-6 h-6 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-label="All Booths">
               <title>All Booths</title>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 6.878V6a2.25 2.25 0 012.25-2.25h7.5A2.25 2.25 0 0118 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 004.5 9v.878m13.5-3A2.25 2.25 0 0119.5 9v.878m0 0a2.246 2.246 0 00-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0121 12v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6c0-.98.626-1.813 1.5-2.122" />
             </svg>
@@ -378,7 +378,7 @@ export default function BoothsPage() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <div className="w-5 h-5 rounded-full bg-[#0891B2] flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-[#069494] flex items-center justify-center">
             <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-label="Arrow Right">
               <title>Arrow Right</title>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -472,7 +472,7 @@ export default function BoothsPage() {
                             openSubscribeModal(booth.booth_id, booth.booth_name);
                           }
                         }}
-                        className="px-3 py-1.5 text-sm font-medium rounded-lg bg-[#0891B2]/10 text-[#0891B2] hover:bg-[#0891B2]/20 transition-colors"
+                        className="px-3 py-1.5 text-sm font-medium rounded-lg bg-[#069494]/10 text-[#069494] hover:bg-[#069494]/20 transition-colors"
                       >
                         {booth.subscription?.status === 'active' || booth.subscription?.status === 'trialing' || booth.subscription?.status === 'past_due'
                           ? "Manage Plan"
