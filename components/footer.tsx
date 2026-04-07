@@ -39,7 +39,8 @@ export function Footer() {
               <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#069494] to-[#176161] flex items-center justify-center overflow-hidden">
                 <Image
                   src="/logo.png"
-                  alt="BoothIQ"
+                  alt=""
+                  aria-hidden="true"
                   width={20}
                   height={20}
                   className="object-contain"

@@ -222,7 +222,7 @@ export default function DocsPage() {
 
         <div className="relative max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#0EC7C7] text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#176161] dark:text-[#0EC7C7] text-sm font-medium mb-6">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
@@ -311,7 +311,7 @@ export default function DocsPage() {
                   {/* Content */}
                   <div className="text-center md:text-left p-4 rounded-xl bg-[var(--background)] border border-[var(--border)] group-hover:border-[#069494]/30 transition-colors">
                     <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                      <h3 className="font-semibold group-hover:text-[#0EC7C7] transition-colors">{step.title}</h3>
+                      <h3 className="font-semibold group-hover:text-[#176161] dark:group-hover:text-[#0EC7C7] transition-colors">{step.title}</h3>
                       <span className="px-2 py-0.5 rounded-full bg-[#069494]/10 text-[#069494] text-xs">{step.time}</span>
                     </div>
                     <p className="text-sm text-[var(--muted)]">{step.description}</p>
@@ -669,7 +669,7 @@ export default function DocsPage() {
         <div className="relative max-w-5xl mx-auto">
           {/* Header */}
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#0EC7C7] text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#176161] dark:text-[#0EC7C7] text-sm font-medium mb-6">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -811,7 +811,7 @@ export default function DocsPage() {
                   24/7 Available
                 </div>
 
-                <h3 className="text-xl font-bold mb-2 group-hover:text-[#0EC7C7] transition-colors">Need Help?</h3>
+                <h3 className="text-xl font-bold mb-2 group-hover:text-[#176161] dark:group-hover:text-[#0EC7C7] transition-colors">Need Help?</h3>
                 <p className="text-[var(--muted)] text-sm mb-6 leading-relaxed">
                   Our expert support team responds within hours. Get personalized help with setup, troubleshooting, and optimization.
                 </p>
@@ -925,7 +925,7 @@ export default function DocsPage() {
                   <div>
                     <span className="text-[#F59E0B]">GET</span>
                     <span className="text-[var(--muted)]">{` /api/v1/booths/`}</span>
-                    <span className="text-[#0EC7C7]">:id</span>
+                    <span className="text-[#176161] dark:text-[#0EC7C7]">:id</span>
                   </div>
                 </div>
 
@@ -963,7 +963,7 @@ export default function DocsPage() {
                 </svg>
               </div>
               <div>
-                <div className="font-medium text-sm group-hover:text-[#0EC7C7] transition-colors">Changelog</div>
+                <div className="font-medium text-sm group-hover:text-[#176161] dark:group-hover:text-[#0EC7C7] transition-colors">Changelog</div>
                 <div className="text-xs text-[var(--muted)]">See what&apos;s new</div>
               </div>
             </Link>

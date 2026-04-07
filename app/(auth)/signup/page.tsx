@@ -31,7 +31,8 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#069494] to-[#176161] flex items-center justify-center overflow-hidden">
               <Image
                 src="/logo.png"
-                alt="BoothIQ"
+                alt=""
+                aria-hidden="true"
                 width={28}
                 height={28}
                 className="object-contain"
@@ -102,7 +103,8 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#069494] to-[#176161] flex items-center justify-center overflow-hidden">
                 <Image
                   src="/logo.png"
-                  alt="BoothIQ"
+                  alt=""
+                  aria-hidden="true"
                   width={28}
                   height={28}
                   className="object-contain"

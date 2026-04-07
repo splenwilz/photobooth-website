@@ -105,7 +105,7 @@ export default function GettingStartedPage() {
 
         {/* Prerequisites */}
         <div className="p-6 rounded-xl border border-[#069494]/20 bg-[#069494]/5 mb-12">
-          <h2 className="font-semibold text-[#0EC7C7] mb-3">Before you start</h2>
+          <h2 className="font-semibold text-[#176161] dark:text-[#0EC7C7] mb-3">Before you start</h2>
           <ul className="space-y-2 text-sm text-[var(--foreground-secondary)]">
             <li className="flex items-center gap-2">
               <svg className="w-4 h-4 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -190,7 +190,7 @@ export default function GettingStartedPage() {
         <div className="mt-12 p-6 rounded-xl border border-white/10 bg-white/[0.02] text-center">
           <p className="text-[var(--muted)]">
             Need help? <Link href="/support" className="text-cyan-400 hover:text-cyan-300">Contact support</Link> or{" "}
-            <a href="https://discord.gg/boothiq" className="text-[#0EC7C7] hover:text-[#069494]">join our Discord</a>
+            <a href="https://discord.gg/boothiq" className="text-[#176161] dark:text-[#0EC7C7] hover:text-[#069494]">join our Discord</a>
           </p>
         </div>
       </div>

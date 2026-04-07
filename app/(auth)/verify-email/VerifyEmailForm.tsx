@@ -166,9 +166,16 @@ export function VerifyEmailForm() {
       </form>
 
       {/* Resend Link */}
+      {/* TODO: wire up to a resend-verification-code server action when the
+          backend endpoint is available; button is type="button" + disabled for
+          now so it can't accidentally submit anything or appear actionable. */}
       <p className="text-sm text-zinc-500 mt-6">
         Didn&apos;t receive the code?{" "}
-        <button className="text-[#069494] hover:text-[#0EC7C7] font-medium transition-colors">
+        <button
+          type="button"
+          disabled
+          className="text-[#069494] hover:text-[#0EC7C7] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           Resend
         </button>
       </p>
