@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
@@ -46,15 +47,20 @@ export function Navbar() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center shadow-lg shadow-[#0891B2]/25 group-hover:shadow-[#0891B2]/40 transition-all group-hover:scale-105">
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                <circle cx="12" cy="13" r="3" />
-              </svg>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#069494] to-[#176161] flex items-center justify-center shadow-lg shadow-[#069494]/25 group-hover:shadow-[#069494]/40 transition-all group-hover:scale-105 overflow-hidden">
+              <Image
+                src="/logo.png"
+                alt=""
+                aria-hidden="true"
+                width={28}
+                height={28}
+                className="object-contain"
+                priority
+              />
             </div>
             <div>
               <span className="font-bold text-lg text-zinc-900 dark:text-white">Booth</span>
-              <span className="font-bold text-lg text-[#0891B2]">IQ</span>
+              <span className="font-bold text-lg text-[#069494]">IQ</span>
             </div>
           </Link>
 
@@ -68,7 +74,7 @@ export function Navbar() {
                   href={link.href}
                   className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
                     isActive
-                      ? "text-[#0891B2] bg-[#0891B2]/10"
+                      ? "text-[#069494] bg-[#069494]/10"
                       : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800/50"
                   }`}
                 >
@@ -110,7 +116,7 @@ export function Navbar() {
             {/* Get Started CTA */}
             <Link
               href="/signup"
-              className="hidden sm:flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-[#0891B2] text-white hover:bg-[#0E7490] transition-all shadow-md shadow-[#0891B2]/25 hover:shadow-lg hover:shadow-[#0891B2]/30"
+              className="hidden sm:flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-[#069494] text-white hover:bg-[#176161] transition-all shadow-md shadow-[#069494]/25 hover:shadow-lg hover:shadow-[#069494]/30"
             >
               Get Started
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -152,7 +158,7 @@ export function Navbar() {
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                       isActive
-                        ? "text-[#0891B2] bg-[#0891B2]/10"
+                        ? "text-[#069494] bg-[#069494]/10"
                         : "text-zinc-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/50"
                     }`}
                   >
@@ -189,7 +195,7 @@ export function Navbar() {
               <Link
                 href="/signup"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center gap-2 w-full px-4 py-3 text-sm font-semibold bg-[#0891B2] text-white rounded-lg hover:bg-[#0E7490] transition-colors"
+                className="flex items-center justify-center gap-2 w-full px-4 py-3 text-sm font-semibold bg-[#069494] text-white rounded-lg hover:bg-[#176161] transition-colors"
               >
                 Get Started
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

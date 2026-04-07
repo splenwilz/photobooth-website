@@ -43,14 +43,14 @@ export function ForgotPasswordForm() {
           disabled={isPending}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] focus:ring-1 focus:ring-[#0891B2] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         />
       </div>
 
       <button
         type="submit"
         disabled={isPending}
-        className="w-full py-4 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-all shadow-lg shadow-[#0891B2]/20 hover:shadow-[#0891B2]/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#0891B2] flex items-center justify-center gap-2"
+        className="w-full py-4 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-all shadow-lg shadow-[#069494]/20 hover:shadow-[#069494]/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#069494] flex items-center justify-center gap-2"
       >
         {isPending ? (
           <>
@@ -68,7 +68,7 @@ export function ForgotPasswordForm() {
       {/* Back to Sign In */}
       <p className="text-center text-sm text-zinc-500">
         Remember your password?{" "}
-        <Link href="/signin" className="text-[#0891B2] hover:text-[#22D3EE] font-medium transition-colors">
+        <Link href="/signin" className="text-[#069494] hover:text-[#0EC7C7] font-medium transition-colors">
           Sign in
         </Link>
       </p>

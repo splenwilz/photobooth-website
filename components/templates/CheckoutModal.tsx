@@ -127,7 +127,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                 id="booth-select"
                 value={selectedBoothId}
                 onChange={(e) => setSelectedBoothId(e.target.value)}
-                className="w-full h-11 px-3 rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#0891B2]"
+                className="w-full h-11 px-3 rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#069494]"
               >
                 <option value="">Select a booth...</option>
                 {booths.map((booth) => (
@@ -208,7 +208,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
               type="button"
               onClick={handleCheckout}
               disabled={templateCheckout.isPending || subtotal === 0 || !selectedBoothId}
-              className="flex-1 py-3.5 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 py-3.5 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {templateCheckout.isPending ? (
                 <>

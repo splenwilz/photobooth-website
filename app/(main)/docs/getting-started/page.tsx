@@ -104,23 +104,23 @@ export default function GettingStartedPage() {
         </div>
 
         {/* Prerequisites */}
-        <div className="p-6 rounded-xl border border-[#0891B2]/20 bg-[#0891B2]/5 mb-12">
-          <h2 className="font-semibold text-[#22D3EE] mb-3">Before you start</h2>
+        <div className="p-6 rounded-xl border border-[#069494]/20 bg-[#069494]/5 mb-12">
+          <h2 className="font-semibold text-[#176161] dark:text-[#0EC7C7] mb-3">Before you start</h2>
           <ul className="space-y-2 text-sm text-[var(--foreground-secondary)]">
             <li className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-4 h-4 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
               A computer running Windows 10+ or macOS 12+
             </li>
             <li className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-4 h-4 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
               A DSLR camera or webcam (optional for testing)
             </li>
             <li className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-4 h-4 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
               A dye-sub printer (optional - can test without)
@@ -190,7 +190,7 @@ export default function GettingStartedPage() {
         <div className="mt-12 p-6 rounded-xl border border-white/10 bg-white/[0.02] text-center">
           <p className="text-[var(--muted)]">
             Need help? <Link href="/support" className="text-cyan-400 hover:text-cyan-300">Contact support</Link> or{" "}
-            <a href="https://discord.gg/boothiq" className="text-[#22D3EE] hover:text-[#0891B2]">join our Discord</a>
+            <a href="https://discord.gg/boothiq" className="text-[#176161] dark:text-[#0EC7C7] hover:text-[#069494]">join our Discord</a>
           </p>
         </div>
       </div>

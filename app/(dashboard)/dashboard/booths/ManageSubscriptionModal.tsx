@@ -281,7 +281,7 @@ export function ManageSubscriptionModal({
                 type="button"
                 onClick={handleOpenPortal}
                 disabled={isLoadingPortal}
-                className="w-full px-4 py-2.5 text-sm font-medium rounded-xl bg-[#0891B2] text-white hover:bg-[#0E7490] disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full px-4 py-2.5 text-sm font-medium rounded-xl bg-[#069494] text-white hover:bg-[#176161] disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isLoadingPortal ? (
                   <>

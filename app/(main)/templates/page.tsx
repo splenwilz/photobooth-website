@@ -80,7 +80,7 @@ export default function TemplatesPage() {
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       {/* Hero Section */}
       <section className="relative pt-16 pb-12 px-6 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#0891B2]/10 blur-[150px] rounded-full" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#069494]/10 blur-[150px] rounded-full" />
 
         <div className="relative max-w-6xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] text-sm font-medium mb-6">
@@ -91,7 +91,7 @@ export default function TemplatesPage() {
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
             Beautiful print templates<br />
-            <span className="text-[#0891B2]">for every occasion</span>
+            <span className="text-[#069494]">for every occasion</span>
           </h1>
           <p className="text-xl text-[var(--muted)] max-w-2xl mx-auto mb-8">
             Professional photo layouts designed to make your events unforgettable.
@@ -108,7 +108,7 @@ export default function TemplatesPage() {
               }}
               className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all ${
                 templateType === "strip"
-                  ? "bg-[#0891B2] text-white shadow-lg shadow-[#0891B2]/30"
+                  ? "bg-[#069494] text-white shadow-lg shadow-[#069494]/30"
                   : "text-[var(--muted)] hover:text-[var(--foreground)]"
               }`}
             >
@@ -125,7 +125,7 @@ export default function TemplatesPage() {
               }}
               className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all ${
                 templateType === "photo_4x6"
-                  ? "bg-[#0891B2] text-white shadow-lg shadow-[#0891B2]/30"
+                  ? "bg-[#069494] text-white shadow-lg shadow-[#069494]/30"
                   : "text-[var(--muted)] hover:text-[var(--foreground)]"
               }`}
             >
@@ -143,7 +143,7 @@ export default function TemplatesPage() {
               placeholder="Search templates..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-6 py-4 pl-14 rounded-2xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] placeholder-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[#0891B2]/50 focus:border-[#0891B2] text-lg"
+              className="w-full px-6 py-4 pl-14 rounded-2xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] placeholder-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[#069494]/50 focus:border-[#069494] text-lg"
             />
             <svg
               className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--muted)]"
@@ -162,7 +162,7 @@ export default function TemplatesPage() {
       <button
         type="button"
         onClick={openCart}
-        className="fixed bottom-6 right-6 z-40 md:hidden w-14 h-14 rounded-full bg-[#0891B2] text-white shadow-lg shadow-[#0891B2]/30 flex items-center justify-center"
+        className="fixed bottom-6 right-6 z-40 md:hidden w-14 h-14 rounded-full bg-[#069494] text-white shadow-lg shadow-[#069494]/30 flex items-center justify-center"
         aria-label="Open cart"
       >
         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -189,7 +189,7 @@ export default function TemplatesPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${
                     activeTab === tab.id
-                      ? "bg-[#0891B2] text-white"
+                      ? "bg-[#069494] text-white"
                       : "bg-[var(--card)] text-[var(--muted)] hover:text-[var(--foreground)] border border-[var(--border)]"
                   }`}
                 >
@@ -203,7 +203,7 @@ export default function TemplatesPage() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="px-4 py-2 rounded-xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-[#0891B2]/50"
+                className="px-4 py-2 rounded-xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-[#069494]/50"
               >
                 <option value="popular">Most Popular</option>
                 <option value="newest">Newest</option>
@@ -215,14 +215,14 @@ export default function TemplatesPage() {
               <button
                 type="button"
                 onClick={openCart}
-                className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] hover:border-[#0891B2]/50 transition-colors"
+                className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] hover:border-[#069494]/50 transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
                 <span className="font-medium">Cart</span>
                 {itemCount > 0 && (
-                  <span className="px-2 py-0.5 rounded-full bg-[#0891B2] text-white text-xs font-bold">
+                  <span className="px-2 py-0.5 rounded-full bg-[#069494] text-white text-xs font-bold">
                     {itemCount}
                   </span>
                 )}
@@ -304,7 +304,7 @@ export default function TemplatesPage() {
                   setSearchQuery("");
                   setActiveTab("all");
                 }}
-                className="px-6 py-2.5 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-colors"
+                className="px-6 py-2.5 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors"
               >
                 Clear Filters
               </button>
@@ -318,7 +318,7 @@ export default function TemplatesPage() {
                 type="button"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="px-4 py-2 rounded-xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#0891B2]/50 transition-colors"
+                className="px-4 py-2 rounded-xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#069494]/50 transition-colors"
               >
                 Previous
               </button>
@@ -329,7 +329,7 @@ export default function TemplatesPage() {
                 type="button"
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="px-4 py-2 rounded-xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#0891B2]/50 transition-colors"
+                className="px-4 py-2 rounded-xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#069494]/50 transition-colors"
               >
                 Next
               </button>
@@ -341,7 +341,7 @@ export default function TemplatesPage() {
       {/* CTA Section */}
       <section className="px-6 pb-24">
         <div className="max-w-4xl mx-auto">
-          <div className="relative p-10 md:p-14 rounded-3xl bg-gradient-to-br from-[#0891B2] to-[#0E7490] overflow-hidden">
+          <div className="relative p-10 md:p-14 rounded-3xl bg-gradient-to-br from-[#069494] to-[#176161] overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl" />
 
@@ -356,7 +356,7 @@ export default function TemplatesPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
                   href="/contact"
-                  className="px-8 py-3.5 rounded-xl bg-white text-[#0891B2] font-semibold hover:bg-white/90 transition-colors"
+                  className="px-8 py-3.5 rounded-xl bg-white text-[#069494] font-semibold hover:bg-white/90 transition-colors"
                 >
                   Request Custom Template
                 </Link>

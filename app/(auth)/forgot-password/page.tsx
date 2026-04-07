@@ -13,15 +13,15 @@ export default function ForgotPasswordPage() {
       {/* Left Panel - Decorative */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0891B2]/20 via-slate-100 to-[#10B981]/10 dark:via-[#111111]" />
-        <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-[#0891B2]/20 blur-[150px] rounded-full" />
-        <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-[#10B981]/20 blur-[100px] rounded-full" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#069494]/20 via-slate-100 to-[#176161]/10 dark:via-[#111111]" />
+        <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-[#069494]/20 blur-[150px] rounded-full" />
+        <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-[#069494]/20 blur-[100px] rounded-full" />
 
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
           {/* Logo */}
           <Link href="/" className="inline-flex items-center gap-2.5 font-semibold text-xl w-fit text-zinc-900 dark:text-white">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#069494] to-[#176161] flex items-center justify-center">
               <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                 <circle cx="12" cy="13" r="3" />
@@ -34,7 +34,7 @@ export default function ForgotPasswordPage() {
           <div>
             <h2 className="text-4xl font-bold mb-4 leading-tight text-zinc-900 dark:text-white">
               Forgot your password?<br />
-              <span className="text-[#0891B2]">No worries.</span>
+              <span className="text-[#069494]">No worries.</span>
             </h2>
             <p className="text-zinc-600 dark:text-zinc-400 text-lg mb-8 max-w-md">
               Enter your email and we&apos;ll send you a verification code to reset your password.
@@ -43,8 +43,8 @@ export default function ForgotPasswordPage() {
             {/* Info Items */}
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-[#0891B2]/20 flex items-center justify-center shrink-0">
-                  <svg className="w-4 h-4 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <div className="w-8 h-8 rounded-lg bg-[#069494]/20 flex items-center justify-center shrink-0">
+                  <svg className="w-4 h-4 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </div>
@@ -54,8 +54,8 @@ export default function ForgotPasswordPage() {
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-[#10B981]/20 flex items-center justify-center shrink-0">
-                  <svg className="w-4 h-4 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <div className="w-8 h-8 rounded-lg bg-[#069494]/20 flex items-center justify-center shrink-0">
+                  <svg className="w-4 h-4 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
           {/* Mobile Logo */}
           <div className="text-center mb-8 lg:hidden">
             <Link href="/" className="inline-flex items-center gap-2.5 font-semibold text-xl text-zinc-900 dark:text-white">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#069494] to-[#176161] flex items-center justify-center">
                 <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                   <circle cx="12" cy="13" r="3" />

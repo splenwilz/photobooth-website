@@ -24,13 +24,13 @@ export default function Home() {
         <div className="absolute inset-0 grid-pattern opacity-50 dark:opacity-100" />
 
         {/* Multiple glow effects */}
-        <div className="absolute top-20 left-1/4 w-[500px] h-[500px] bg-[#0891B2]/10 dark:bg-[#0891B2]/20 blur-[150px] rounded-full" />
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-[#0E7490]/10 dark:bg-[#0E7490]/15 blur-[120px] rounded-full" />
+        <div className="absolute top-20 left-1/4 w-[500px] h-[500px] bg-[#069494]/10 dark:bg-[#069494]/20 blur-[150px] rounded-full" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-[#176161]/10 dark:bg-[#176161]/15 blur-[120px] rounded-full" />
 
         <div className="relative max-w-5xl mx-auto">
           <div className="text-center max-w-3xl mx-auto">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#0891B2]/30 bg-[#0891B2]/10 text-sm text-[#0891B2] dark:text-[#22D3EE] mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#069494]/30 bg-[#069494]/10 text-sm text-[#069494] dark:text-[#0EC7C7] mb-8">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10B981] opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#10B981]"></span>
@@ -42,7 +42,7 @@ export default function Home() {
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 leading-[1.1]">
               The photo booth software
               <br />
-              <span className="text-[#0891B2]">professionals trust</span>
+              <span className="text-[#069494]">professionals trust</span>
           </h1>
 
             {/* Subtitle */}
@@ -55,7 +55,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
               <Link
                 href="/downloads"
-                className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-all hover:scale-105 flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-all hover:scale-105 flex items-center justify-center gap-2"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -64,7 +64,7 @@ export default function Home() {
               </Link>
               <Link
                 href="/docs"
-                className="w-full sm:w-auto px-8 py-4 rounded-xl border border-[#0891B2]/30 text-zinc-700 dark:text-zinc-300 font-semibold hover:bg-[#0891B2]/10 transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-4 rounded-xl border border-[#069494]/30 text-zinc-700 dark:text-zinc-300 font-semibold hover:bg-[#069494]/10 transition-all flex items-center justify-center gap-2"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
@@ -83,7 +83,7 @@ export default function Home() {
           {/* App Preview */}
           <div className="mt-16 relative">
             {/* Floating elements */}
-            <div className="absolute -left-4 top-1/4 p-4 rounded-xl bg-slate-100 dark:bg-[#111111] border border-slate-200 dark:border-[#0891B2]/20 shadow-xl hidden lg:block">
+            <div className="absolute -left-4 top-1/4 p-4 rounded-xl bg-slate-100 dark:bg-[#111111] border border-slate-200 dark:border-[#069494]/20 shadow-xl hidden lg:block">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-[#10B981]/20 flex items-center justify-center">
                   <svg className="w-5 h-5 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
@@ -97,9 +97,9 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="absolute -right-4 top-1/3 p-4 rounded-xl bg-slate-100 dark:bg-[#111111] border border-slate-200 dark:border-[#0891B2]/20 shadow-xl hidden lg:block">
+            <div className="absolute -right-4 top-1/3 p-4 rounded-xl bg-slate-100 dark:bg-[#111111] border border-slate-200 dark:border-[#069494]/20 shadow-xl hidden lg:block">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-[#0891B2]/20 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-[#069494]/20 flex items-center justify-center">
                   <span className="text-lg">📊</span>
                 </div>
                 <div>
@@ -110,12 +110,12 @@ export default function Home() {
             </div>
 
             {/* Main preview */}
-            <div className="aspect-video max-w-4xl mx-auto rounded-2xl border border-slate-200 dark:border-[#0891B2]/20 bg-slate-50 dark:bg-[#111111] brand-glow overflow-hidden">
+            <div className="aspect-video max-w-4xl mx-auto rounded-2xl border border-slate-200 dark:border-[#069494]/20 bg-slate-50 dark:bg-[#111111] brand-glow overflow-hidden">
               <div className="h-full flex">
                 {/* Sidebar */}
-                <div className="w-56 border-r border-slate-200 dark:border-[#0891B2]/10 p-4 hidden md:flex flex-col">
+                <div className="w-56 border-r border-slate-200 dark:border-[#069494]/10 p-4 hidden md:flex flex-col">
                   <div className="flex items-center gap-2 mb-6">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0891B2] to-[#0E7490] flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#069494] to-[#176161] flex items-center justify-center">
                       <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                         <circle cx="12" cy="13" r="3" />
@@ -127,13 +127,13 @@ export default function Home() {
                     {["Dashboard", "Templates", "Gallery", "Settings"].map((item, i) => (
                       <div
                         key={item}
-                        className={`px-3 py-2.5 rounded-lg text-sm flex items-center gap-2 ${i === 0 ? "bg-[#0891B2]/20 text-[#0891B2] dark:text-[#22D3EE]" : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"}`}
+                        className={`px-3 py-2.5 rounded-lg text-sm flex items-center gap-2 ${i === 0 ? "bg-[#069494]/20 text-[#069494] dark:text-[#0EC7C7]" : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"}`}
                       >
                         {["📊", "🎨", "🖼️", "⚙️"][i]} {item}
                       </div>
                     ))}
                   </div>
-                  <div className="pt-4 border-t border-slate-200 dark:border-[#0891B2]/10">
+                  <div className="pt-4 border-t border-slate-200 dark:border-[#069494]/10">
                     <div className="flex items-center gap-2 text-xs text-zinc-500">
                       <span className="w-2 h-2 rounded-full bg-[#10B981]" />
                       Booth Online
@@ -153,7 +153,7 @@ export default function Home() {
                     </div>
                   </div>
                   {/* Camera view */}
-                  <div className="aspect-[4/3] rounded-xl border border-slate-200 dark:border-[#0891B2]/10 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-[#0a0a0a] dark:to-[#111111] flex items-center justify-center relative overflow-hidden">
+                  <div className="aspect-[4/3] rounded-xl border border-slate-200 dark:border-[#069494]/10 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-[#0a0a0a] dark:to-[#111111] flex items-center justify-center relative overflow-hidden">
                     {/* Viewfinder grid */}
                     <div className="absolute inset-4 border border-zinc-300/50 dark:border-white/10 rounded-lg">
                       <div className="absolute top-1/3 left-0 right-0 border-t border-zinc-300/30 dark:border-white/5" />
@@ -162,11 +162,11 @@ export default function Home() {
                       <div className="absolute left-2/3 top-0 bottom-0 border-l border-zinc-300/30 dark:border-white/5" />
                     </div>
                     {/* Center focus */}
-                    <div className="w-20 h-20 border-2 border-[#0891B2] rounded-lg flex items-center justify-center">
-                      <div className="w-2 h-2 bg-[#0891B2] rounded-full" />
+                    <div className="w-20 h-20 border-2 border-[#069494] rounded-lg flex items-center justify-center">
+                      <div className="w-2 h-2 bg-[#069494] rounded-full" />
                     </div>
                     {/* Capture button hint */}
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-[#0891B2] text-white text-sm font-medium">
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-[#069494] text-white text-sm font-medium">
                       Tap to Capture
                     </div>
                   </div>
@@ -184,7 +184,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           {/* Section Header */}
           <div className="text-center mb-24">
-            <p className="text-[#0891B2] font-medium tracking-widest text-sm mb-4">FEATURES</p>
+            <p className="text-[#069494] font-medium tracking-widest text-sm mb-4">FEATURES</p>
             <h2 className="text-4xl sm:text-5xl font-bold mb-6">
               Everything you need,<br />nothing you don&apos;t
             </h2>
@@ -196,8 +196,8 @@ export default function Home() {
           {/* Feature 1 - Camera Control */}
           <div className="grid lg:grid-cols-2 gap-16 items-center mb-32">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0891B2]/10 border border-[#0891B2]/20 text-[#0891B2] dark:text-[#22D3EE] text-xs font-medium mb-6">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#0891B2]" />
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#069494] dark:text-[#0EC7C7] text-xs font-medium mb-6">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#069494]" />
                 Camera Integration
               </div>
               <h3 className="text-3xl font-bold mb-4">
@@ -215,8 +215,8 @@ export default function Home() {
                   "Auto color correction and filters"
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-3 text-zinc-700 dark:text-zinc-300">
-                    <div className="w-5 h-5 rounded-full bg-[#0891B2]/20 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-3 h-3 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden="true">
+                    <div className="w-5 h-5 rounded-full bg-[#069494]/20 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-3 h-3 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
@@ -227,8 +227,8 @@ export default function Home() {
             </div>
             {/* Visual */}
             <div className="relative">
-              <div className="absolute inset-0 bg-[#0891B2]/10 dark:bg-[#0891B2]/20 blur-[100px] rounded-full" />
-              <div className="relative aspect-square rounded-3xl bg-slate-100 dark:bg-[#111111] border border-slate-200 dark:border-[#0891B2]/20 p-8 overflow-hidden">
+              <div className="absolute inset-0 bg-[#069494]/10 dark:bg-[#069494]/20 blur-[100px] rounded-full" />
+              <div className="relative aspect-square rounded-3xl bg-slate-100 dark:bg-[#111111] border border-slate-200 dark:border-[#069494]/20 p-8 overflow-hidden">
                 {/* Camera UI mockup */}
                 <div className="w-full h-full rounded-2xl bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-zinc-800 flex flex-col">
                   {/* Top bar */}
@@ -237,25 +237,25 @@ export default function Home() {
                       <div className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
                       <span className="text-xs text-zinc-500">Logitech C920</span>
                     </div>
-                    <span className="text-xs text-[#0891B2]">1080p</span>
+                    <span className="text-xs text-[#069494]">1080p</span>
                   </div>
                   {/* Viewfinder */}
                   <div className="flex-1 p-4">
-                    <div className="w-full h-full rounded-xl border-2 border-dashed border-[#0891B2]/30 flex items-center justify-center relative">
+                    <div className="w-full h-full rounded-xl border-2 border-dashed border-[#069494]/30 flex items-center justify-center relative">
                       <div className="absolute inset-4 grid grid-cols-3 grid-rows-3">
                         {["g1", "g2", "g3", "g4", "g5", "g6", "g7", "g8", "g9"].map((id) => (
                           <div key={id} className="border border-zinc-300/50 dark:border-white/5" />
                         ))}
                       </div>
-                      <div className="w-16 h-16 border-2 border-[#0891B2] rounded-lg flex items-center justify-center z-10">
-                        <div className="w-3 h-3 bg-[#0891B2] rounded-full animate-pulse" />
+                      <div className="w-16 h-16 border-2 border-[#069494] rounded-lg flex items-center justify-center z-10">
+                        <div className="w-3 h-3 bg-[#069494] rounded-full animate-pulse" />
                       </div>
                     </div>
                   </div>
                   {/* Bottom controls */}
                   <div className="flex items-center justify-center gap-4 px-4 py-4 border-t border-slate-200 dark:border-zinc-800">
                     <div className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-zinc-800 text-xs text-zinc-600 dark:text-zinc-400">ISO 400</div>
-                    <div className="w-14 h-14 rounded-full bg-[#0891B2] flex items-center justify-center">
+                    <div className="w-14 h-14 rounded-full bg-[#069494] flex items-center justify-center">
                       <div className="w-12 h-12 rounded-full border-4 border-white/80" />
                     </div>
                     <div className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-zinc-800 text-xs text-zinc-600 dark:text-zinc-400">f/2.8</div>
@@ -336,7 +336,7 @@ export default function Home() {
       <section className="pt-32 bg-gradient-to-b from-slate-50 via-slate-50 to-slate-100/50 dark:from-[#0a0a0a] dark:via-[#0a0a0a] dark:to-[#111111]/50 relative overflow-hidden">
         {/* Background glows */}
         <div className="absolute top-1/4 left-0 w-[600px] h-[600px] bg-[#A855F7]/5 dark:bg-[#A855F7]/10 blur-[200px] rounded-full" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#0891B2]/5 dark:bg-[#0891B2]/10 blur-[150px] rounded-full" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#069494]/5 dark:bg-[#069494]/10 blur-[150px] rounded-full" />
 
         <div className="max-w-6xl mx-auto relative px-6">
           {/* Header */}
@@ -414,7 +414,7 @@ export default function Home() {
       <section className="py-32 px-6 bg-slate-100/50 dark:bg-[#111111]/30 border-y border-slate-200/50 dark:border-zinc-800/50">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-20">
-            <p className="text-[#0891B2] font-medium tracking-widest text-sm mb-4">HOW IT WORKS</p>
+            <p className="text-[#069494] font-medium tracking-widest text-sm mb-4">HOW IT WORKS</p>
             <h2 className="text-4xl sm:text-5xl font-bold mb-6">
               From download to first photo<br />in under 10 minutes
             </h2>
@@ -423,14 +423,14 @@ export default function Home() {
           {/* Timeline */}
           <div className="relative">
             {/* Vertical line */}
-            <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-[#0891B2] via-[#0891B2]/50 to-transparent" />
+            <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-[#069494] via-[#069494]/50 to-transparent" />
 
             {/* Steps */}
             <div className="space-y-16">
               {/* Step 1 */}
               <div className="relative grid md:grid-cols-2 gap-8 md:gap-16">
                 <div className="md:text-right md:pr-16 pl-20 md:pl-0">
-                  <div className="inline-block px-3 py-1 rounded-full bg-[#0891B2] text-white text-sm font-bold mb-4">
+                  <div className="inline-block px-3 py-1 rounded-full bg-[#069494] text-white text-sm font-bold mb-4">
                     Step 1
                   </div>
                   <h3 className="text-2xl font-bold mb-3">Download & Install</h3>
@@ -440,12 +440,12 @@ export default function Home() {
                   </p>
                 </div>
                 {/* Node */}
-                <div className="absolute left-6 md:left-1/2 top-0 w-5 h-5 -translate-x-1/2 rounded-full bg-[#0891B2] ring-4 ring-[#0891B2]/20" />
+                <div className="absolute left-6 md:left-1/2 top-0 w-5 h-5 -translate-x-1/2 rounded-full bg-[#069494] ring-4 ring-[#069494]/20" />
                 <div className="md:pl-16 pl-20">
                   <div className="p-6 rounded-2xl bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-zinc-800">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-[#0891B2]/10 flex items-center justify-center">
-                        <svg className="w-6 h-6 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                      <div className="w-12 h-12 rounded-xl bg-[#069494]/10 flex items-center justify-center">
+                        <svg className="w-6 h-6 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
                       </div>
@@ -461,7 +461,7 @@ export default function Home() {
               {/* Step 2 */}
               <div className="relative grid md:grid-cols-2 gap-8 md:gap-16">
                 <div className="md:order-2 md:pl-16 pl-20">
-                  <div className="inline-block px-3 py-1 rounded-full bg-[#0891B2] text-white text-sm font-bold mb-4">
+                  <div className="inline-block px-3 py-1 rounded-full bg-[#069494] text-white text-sm font-bold mb-4">
                     Step 2
                   </div>
                   <h3 className="text-2xl font-bold mb-3">Connect Your Hardware</h3>
@@ -471,7 +471,7 @@ export default function Home() {
                   </p>
                 </div>
                 {/* Node */}
-                <div className="absolute left-6 md:left-1/2 top-0 w-5 h-5 -translate-x-1/2 rounded-full bg-[#0891B2] ring-4 ring-[#0891B2]/20" />
+                <div className="absolute left-6 md:left-1/2 top-0 w-5 h-5 -translate-x-1/2 rounded-full bg-[#069494] ring-4 ring-[#069494]/20" />
                 <div className="md:order-1 md:pr-16 md:text-right pl-20 md:pl-0">
                   <div className="p-6 rounded-2xl bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-zinc-800 md:inline-block">
                     <div className="flex items-center gap-3 mb-3">
@@ -489,7 +489,7 @@ export default function Home() {
               {/* Step 3 */}
               <div className="relative grid md:grid-cols-2 gap-8 md:gap-16">
                 <div className="md:text-right md:pr-16 pl-20 md:pl-0">
-                  <div className="inline-block px-3 py-1 rounded-full bg-[#0891B2] text-white text-sm font-bold mb-4">
+                  <div className="inline-block px-3 py-1 rounded-full bg-[#069494] text-white text-sm font-bold mb-4">
                     Step 3
                   </div>
                   <h3 className="text-2xl font-bold mb-3">Start Capturing</h3>
@@ -501,7 +501,7 @@ export default function Home() {
                 {/* Node */}
                 <div className="absolute left-6 md:left-1/2 top-0 w-5 h-5 -translate-x-1/2 rounded-full bg-[#10B981] ring-4 ring-[#10B981]/20" />
                 <div className="md:pl-16 pl-20">
-                  <div className="p-6 rounded-2xl bg-gradient-to-r from-[#10B981]/10 to-[#0891B2]/10 border border-[#10B981]/20">
+                  <div className="p-6 rounded-2xl bg-gradient-to-r from-[#10B981]/10 to-[#069494]/10 border border-[#10B981]/20">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-xl bg-[#10B981]/20 flex items-center justify-center">
                         <svg className="w-6 h-6 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
@@ -526,14 +526,14 @@ export default function Home() {
        * ============================================ */}
       <section className="py-24 px-6 relative overflow-hidden">
         {/* Background glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#0891B2]/5 dark:bg-[#0891B2]/10 blur-[150px] rounded-full" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#069494]/5 dark:bg-[#069494]/10 blur-[150px] rounded-full" />
 
         <div className="relative max-w-4xl mx-auto">
           {/* Stats row */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20">
             {stats.map((stat) => (
-              <div key={stat.label} className="text-center p-6 rounded-2xl bg-slate-100 dark:bg-[#111111] border border-slate-200 dark:border-[#0891B2]/10">
-                <div className="text-3xl font-bold text-[#0891B2] mb-1">{stat.value}</div>
+              <div key={stat.label} className="text-center p-6 rounded-2xl bg-slate-100 dark:bg-[#111111] border border-slate-200 dark:border-[#069494]/10">
+                <div className="text-3xl font-bold text-[#069494] mb-1">{stat.value}</div>
                 <div className="text-sm text-zinc-600 dark:text-zinc-500">{stat.label}</div>
               </div>
             ))}
@@ -541,7 +541,7 @@ export default function Home() {
 
           {/* Featured testimonial */}
           <div className="text-center">
-            <svg className="w-12 h-12 mx-auto text-[#0891B2]/30 dark:text-[#0891B2]/20 mb-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <svg className="w-12 h-12 mx-auto text-[#069494]/30 dark:text-[#069494]/20 mb-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
             </svg>
             <blockquote className="text-2xl sm:text-3xl font-medium leading-relaxed mb-8 max-w-3xl mx-auto">
@@ -549,7 +549,7 @@ export default function Home() {
               running 12 booths effortlessly. The mobile app is a game-changer.&rdquo;
             </blockquote>
             <div className="flex items-center justify-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#0891B2] to-[#0E7490] flex items-center justify-center text-white font-bold text-lg">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#069494] to-[#176161] flex items-center justify-center text-white font-bold text-lg">
                 JM
               </div>
               <div className="text-left">
@@ -567,7 +567,7 @@ export default function Home() {
       <section className="py-32 px-6 bg-slate-50 dark:bg-transparent">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-20">
-            <p className="text-[#0891B2] font-medium tracking-widest text-sm mb-4">USE CASES</p>
+            <p className="text-[#069494] font-medium tracking-widest text-sm mb-4">USE CASES</p>
             <h2 className="text-4xl sm:text-5xl font-bold mb-6">
               Built for every occasion
             </h2>
@@ -579,9 +579,9 @@ export default function Home() {
           {/* Featured + Grid Layout */}
           <div className="grid lg:grid-cols-2 gap-6">
             {/* Featured Card - Weddings */}
-            <div className="group relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#0891B2]/10 via-slate-100 to-white dark:from-[#0891B2]/20 dark:via-[#111111] dark:to-[#0a0a0a] border border-[#0891B2]/20 p-10 lg:row-span-2 flex flex-col justify-end min-h-[400px]">
+            <div className="group relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#069494]/10 via-slate-100 to-white dark:from-[#069494]/20 dark:via-[#111111] dark:to-[#0a0a0a] border border-[#069494]/20 p-10 lg:row-span-2 flex flex-col justify-end min-h-[400px]">
               {/* Background decoration */}
-              <div className="absolute top-0 right-0 w-80 h-80 bg-[#0891B2]/5 dark:bg-[#0891B2]/10 blur-[100px] rounded-full" />
+              <div className="absolute top-0 right-0 w-80 h-80 bg-[#069494]/5 dark:bg-[#069494]/10 blur-[100px] rounded-full" />
               <div className="absolute top-8 right-8 text-8xl opacity-20 dark:opacity-30 group-hover:opacity-40 dark:group-hover:opacity-50 transition-opacity">
                 💒
               </div>
@@ -590,7 +590,7 @@ export default function Home() {
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900/10 dark:bg-white/10 text-zinc-700 dark:text-white/70 text-xs font-medium mb-4">
                   Most Popular
                 </div>
-                <h3 className="text-3xl font-bold mb-4 group-hover:text-[#0891B2] dark:group-hover:text-[#22D3EE] transition-colors">
+                <h3 className="text-3xl font-bold mb-4 group-hover:text-[#069494] dark:group-hover:text-[#0EC7C7] transition-colors">
                   Weddings & Receptions
                 </h3>
                 <p className="text-zinc-600 dark:text-zinc-400 text-lg leading-relaxed mb-6 max-w-md">
@@ -610,13 +610,13 @@ export default function Home() {
             {/* Right column - 3 cards */}
             <div className="grid gap-6">
               {/* Corporate */}
-              <div className="group relative rounded-2xl overflow-hidden bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 p-8 hover:border-[#0891B2]/30 transition-all">
+              <div className="group relative rounded-2xl overflow-hidden bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 p-8 hover:border-[#069494]/30 transition-all">
                 <div className="flex items-start gap-6">
                   <div className="w-16 h-16 rounded-2xl bg-[#3B82F6]/10 flex items-center justify-center flex-shrink-0 text-3xl">
                     🏢
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold mb-2 group-hover:text-[#0891B2] dark:group-hover:text-[#22D3EE] transition-colors">
+                    <h3 className="text-xl font-bold mb-2 group-hover:text-[#069494] dark:group-hover:text-[#0EC7C7] transition-colors">
                       Corporate Events
                     </h3>
                     <p className="text-zinc-600 dark:text-zinc-500 leading-relaxed">
@@ -628,13 +628,13 @@ export default function Home() {
               </div>
 
               {/* Retail */}
-              <div className="group relative rounded-2xl overflow-hidden bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 p-8 hover:border-[#0891B2]/30 transition-all">
+              <div className="group relative rounded-2xl overflow-hidden bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 p-8 hover:border-[#069494]/30 transition-all">
                 <div className="flex items-start gap-6">
                   <div className="w-16 h-16 rounded-2xl bg-[#10B981]/10 flex items-center justify-center flex-shrink-0 text-3xl">
                     🛍️
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold mb-2 group-hover:text-[#0891B2] dark:group-hover:text-[#22D3EE] transition-colors">
+                    <h3 className="text-xl font-bold mb-2 group-hover:text-[#069494] dark:group-hover:text-[#0EC7C7] transition-colors">
                       Retail & Malls
                     </h3>
                     <p className="text-zinc-600 dark:text-zinc-500 leading-relaxed">
@@ -646,13 +646,13 @@ export default function Home() {
               </div>
 
               {/* Parties */}
-              <div className="group relative rounded-2xl overflow-hidden bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 p-8 hover:border-[#0891B2]/30 transition-all">
+              <div className="group relative rounded-2xl overflow-hidden bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 p-8 hover:border-[#069494]/30 transition-all">
                 <div className="flex items-start gap-6">
                   <div className="w-16 h-16 rounded-2xl bg-[#F59E0B]/10 flex items-center justify-center flex-shrink-0 text-3xl">
                     🎉
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold mb-2 group-hover:text-[#0891B2] dark:group-hover:text-[#22D3EE] transition-colors">
+                    <h3 className="text-xl font-bold mb-2 group-hover:text-[#069494] dark:group-hover:text-[#0EC7C7] transition-colors">
                       Parties & Celebrations
                     </h3>
                     <p className="text-zinc-600 dark:text-zinc-500 leading-relaxed">
@@ -673,13 +673,13 @@ export default function Home() {
       <section className="py-32 px-6 relative overflow-hidden">
         {/* Background effects */}
         <div className="absolute inset-0 grid-pattern opacity-20 dark:opacity-30" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#0891B2]/10 dark:bg-[#0891B2]/20 blur-[150px] rounded-full" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#069494]/10 dark:bg-[#069494]/20 blur-[150px] rounded-full" />
 
         <div className="relative max-w-3xl mx-auto text-center">
           <h2 className="text-4xl sm:text-5xl font-bold mb-6 leading-tight">
             Ready to transform your
             <br />
-            <span className="text-[#0891B2]">photo booth business?</span>
+            <span className="text-[#069494]">photo booth business?</span>
           </h2>
           <p className="text-xl text-zinc-600 dark:text-zinc-400 mb-10 max-w-2xl mx-auto">
             Join 10,000+ operators who trust BoothIQ. Start your free trial today.
@@ -687,7 +687,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
             <Link
               href="/downloads"
-              className="w-full sm:w-auto px-10 py-5 rounded-xl bg-[#0891B2] text-white font-semibold text-lg hover:bg-[#0E7490] transition-all hover:scale-105 flex items-center justify-center gap-3"
+              className="w-full sm:w-auto px-10 py-5 rounded-xl bg-[#069494] text-white font-semibold text-lg hover:bg-[#176161] transition-all hover:scale-105 flex items-center justify-center gap-3"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -696,7 +696,7 @@ export default function Home() {
             </Link>
             <Link
               href="/pricing"
-              className="w-full sm:w-auto px-10 py-5 rounded-xl border-2 border-[#0891B2]/40 font-semibold text-lg hover:bg-[#0891B2]/10 transition-all"
+              className="w-full sm:w-auto px-10 py-5 rounded-xl border-2 border-[#069494]/40 font-semibold text-lg hover:bg-[#069494]/10 transition-all"
             >
               View Pricing
             </Link>

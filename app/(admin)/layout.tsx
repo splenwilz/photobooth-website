@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -274,27 +275,22 @@ export default function AdminLayout({
 					{/* Logo */}
 					<div className="p-6 border-b border-(--border)">
 						<Link href="/admin" className="flex items-center gap-2.5">
-							<div className="w-10 h-10 rounded-xl bg-linear-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center">
-								<svg
-									className="w-5 h-5 text-white"
-									fill="none"
-									viewBox="0 0 24 24"
-									stroke="currentColor"
-									strokeWidth={2.5}
+							<div className="w-10 h-10 rounded-xl bg-linear-to-br from-[#069494] to-[#176161] flex items-center justify-center overflow-hidden">
+								<Image
+									src="/logo.png"
+									alt=""
 									aria-hidden="true"
-								>
-									<path
-										strokeLinecap="round"
-										strokeLinejoin="round"
-										d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
-									/>
-								</svg>
+									width={28}
+									height={28}
+									className="object-contain"
+									priority
+								/>
 							</div>
 							<div className="flex items-center gap-2">
 								<span className="font-semibold text-lg text-zinc-900 dark:text-white">
 									BoothIQ
 								</span>
-								<span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#0891B2]/20 text-[#0891B2]">
+								<span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#069494]/20 text-[#069494]">
 									ADMIN
 								</span>
 							</div>
@@ -316,7 +312,7 @@ export default function AdminLayout({
                     flex items-center gap-3 px-4 py-3 rounded-xl transition-all
                     ${
 											isActive
-												? "bg-[#0891B2]/20 text-[#0891B2]"
+												? "bg-[#069494]/20 text-[#069494]"
 												: "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800/50"
 										}
                   `}
@@ -332,7 +328,7 @@ export default function AdminLayout({
 					{/* Admin User Section */}
 					<div className="p-4 border-t border-(--border)">
 						<div className="flex items-center gap-3 p-3 rounded-xl bg-slate-100 dark:bg-zinc-800/50">
-							<div className="w-10 h-10 rounded-full bg-linear-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center font-bold text-sm text-white">
+							<div className="w-10 h-10 rounded-full bg-linear-to-br from-[#069494] to-[#176161] flex items-center justify-center font-bold text-sm text-white">
 								{getInitials(user)}
 							</div>
 							<div className="flex-1 min-w-0">

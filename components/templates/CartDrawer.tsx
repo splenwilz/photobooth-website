@@ -52,8 +52,8 @@ export function CartDrawer() {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-[var(--border)]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#0891B2]/10 flex items-center justify-center">
-              <svg className="w-5 h-5 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div className="w-10 h-10 rounded-xl bg-[#069494]/10 flex items-center justify-center">
+              <svg className="w-5 h-5 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
             </div>
@@ -88,7 +88,7 @@ export function CartDrawer() {
               <button
                 type="button"
                 onClick={closeCart}
-                className="px-6 py-2.5 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-colors"
+                className="px-6 py-2.5 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors"
               >
                 Browse Templates
               </button>
@@ -167,7 +167,7 @@ export function CartDrawer() {
             <button
               type="button"
               onClick={() => setShowCheckout(true)}
-              className="w-full py-3.5 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-colors flex items-center justify-center gap-2"
+              className="w-full py-3.5 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors flex items-center justify-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />

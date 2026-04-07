@@ -307,7 +307,7 @@ export default function AnalyticsPage() {
             <button
               onClick={() => setChartPeriod("week")}
               className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
-                chartPeriod === "week" ? "bg-[#0891B2] text-white" : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+                chartPeriod === "week" ? "bg-[#069494] text-white" : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
               }`}
             >
               Week
@@ -315,7 +315,7 @@ export default function AnalyticsPage() {
             <button
               onClick={() => setChartPeriod("month")}
               className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
-                chartPeriod === "month" ? "bg-[#0891B2] text-white" : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+                chartPeriod === "month" ? "bg-[#069494] text-white" : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
               }`}
             >
               Month
@@ -360,7 +360,7 @@ export default function AnalyticsPage() {
                           <div
                             className={`w-full max-w-8 rounded-t transition-all cursor-pointer ${
                               item.amount > 0
-                                ? "bg-[#0891B2] hover:bg-[#22D3EE]"
+                                ? "bg-[#069494] hover:bg-[#0EC7C7]"
                                 : "bg-zinc-200 dark:bg-zinc-700"
                             }`}
                             style={{
@@ -413,7 +413,7 @@ export default function AnalyticsPage() {
                       className="h-full rounded-full transition-all"
                       style={{
                         width: `${item.percentage}%`,
-                        backgroundColor: `rgba(8, 145, 178, ${1 - i * 0.2})`,
+                        backgroundColor: `rgba(6, 148, 148, ${1 - i * 0.2})`,
                       }}
                     />
                   </div>
@@ -438,7 +438,7 @@ export default function AnalyticsPage() {
               byPayment.map((item) => {
                 const isCard = item.name.toLowerCase() === "card";
                 const isCash = item.name.toLowerCase() === "cash";
-                const color = isCard ? "#0891B2" : isCash ? "#10B981" : "#F59E0B";
+                const color = isCard ? "#069494" : isCash ? "#10B981" : "#F59E0B";
                 return (
                   <div key={item.name}>
                     <div className="flex items-center justify-between mb-2">
@@ -488,7 +488,7 @@ export default function AnalyticsPage() {
             <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Recent Transactions</h2>
             <p className="text-sm text-zinc-500">Latest sales activity</p>
           </div>
-          <button className="text-sm text-[#0891B2] hover:text-[#22D3EE] transition-colors">
+          <button className="text-sm text-[#069494] hover:text-[#0EC7C7] transition-colors">
             View All
           </button>
         </div>
@@ -518,10 +518,10 @@ export default function AnalyticsPage() {
                         <p className="text-xs text-zinc-500">{txn.template}</p>
                       </div>
                       <span className="text-sm text-zinc-500 dark:text-zinc-400">{txn.booth_name}</span>
-                      <span className="font-semibold text-[#0891B2]">{formatCurrency(txn.amount)}</span>
+                      <span className="font-semibold text-[#069494]">{formatCurrency(txn.amount)}</span>
                       <span
                         className="text-xs font-medium px-2 py-1 rounded-full w-fit"
-                        style={{ backgroundColor: `${txn.payment_method === "card" ? "#0891B2" : "#10B981"}20`, color: txn.payment_method === "card" ? "#0891B2" : "#10B981" }}
+                        style={{ backgroundColor: `${txn.payment_method === "card" ? "#069494" : "#10B981"}20`, color: txn.payment_method === "card" ? "#069494" : "#10B981" }}
                       >
                         {formatPaymentMethod(txn.payment_method)}
                       </span>
@@ -541,12 +541,12 @@ export default function AnalyticsPage() {
                           <p className="font-medium text-zinc-900 dark:text-white">{formatProductName(txn.product)}</p>
                           <p className="text-xs text-zinc-500">{txn.booth_name}</p>
                         </div>
-                        <p className="font-semibold text-[#0891B2]">{formatCurrency(txn.amount)}</p>
+                        <p className="font-semibold text-[#069494]">{formatCurrency(txn.amount)}</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <span
                           className="text-xs font-medium px-2 py-1 rounded-full"
-                          style={{ backgroundColor: `${txn.payment_method === "card" ? "#0891B2" : "#10B981"}20`, color: txn.payment_method === "card" ? "#0891B2" : "#10B981" }}
+                          style={{ backgroundColor: `${txn.payment_method === "card" ? "#069494" : "#10B981"}20`, color: txn.payment_method === "card" ? "#069494" : "#10B981" }}
                         >
                           {formatPaymentMethod(txn.payment_method)}
                         </span>

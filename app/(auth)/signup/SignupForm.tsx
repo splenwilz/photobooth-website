@@ -72,7 +72,7 @@ export function SignupForm() {
             minLength={2}
             maxLength={50}
             disabled={isPending}
-            className="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
         <div>
@@ -88,7 +88,7 @@ export function SignupForm() {
             minLength={2}
             maxLength={50}
             disabled={isPending}
-            className="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
       </div>
@@ -104,7 +104,7 @@ export function SignupForm() {
           placeholder="john@company.com"
           required
           disabled={isPending}
-          className="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         />
       </div>
 
@@ -122,7 +122,7 @@ export function SignupForm() {
             minLength={8}
             maxLength={50}
             disabled={isPending}
-            className="w-full px-4 py-3.5 pr-12 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full px-4 py-3.5 pr-12 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           />
           <button
             type="button"
@@ -160,7 +160,7 @@ export function SignupForm() {
             minLength={8}
             maxLength={50}
             disabled={isPending}
-            className="w-full px-4 py-3.5 pr-12 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full px-4 py-3.5 pr-12 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           />
           <button
             type="button"
@@ -188,20 +188,20 @@ export function SignupForm() {
           id="terms"
           checked={agreedToTerms}
           onChange={(e) => setAgreedToTerms(e.target.checked)}
-          className="w-4 h-4 mt-0.5 rounded bg-white dark:bg-[#111111] border-slate-200 dark:border-zinc-800 text-[#10B981] focus:ring-[#10B981] focus:ring-offset-0"
+          className="w-4 h-4 mt-0.5 rounded bg-white dark:bg-[#111111] border-slate-200 dark:border-zinc-800 text-[#069494] focus:ring-[#069494] focus:ring-offset-0"
         />
         <label htmlFor="terms" className="text-sm text-zinc-600 dark:text-zinc-400">
           I agree to the{" "}
-          <Link href="/terms" className="text-[#10B981] hover:text-[#22D3EE]">Terms of Service</Link>
+          <Link href="/terms" className="text-[#069494] hover:text-[#0EC7C7]">Terms of Service</Link>
           {" "}and{" "}
-          <Link href="/privacy" className="text-[#10B981] hover:text-[#22D3EE]">Privacy Policy</Link>
+          <Link href="/privacy" className="text-[#069494] hover:text-[#0EC7C7]">Privacy Policy</Link>
         </label>
       </div>
 
       <button
         type="submit"
         disabled={isPending || !agreedToTerms}
-        className="w-full py-4 rounded-xl bg-[#10B981] text-white font-semibold hover:bg-[#059669] transition-all shadow-lg shadow-[#10B981]/20 hover:shadow-[#10B981]/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#10B981] flex items-center justify-center gap-2"
+        className="w-full py-4 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-all shadow-lg shadow-[#069494]/20 hover:shadow-[#069494]/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#069494] flex items-center justify-center gap-2"
       >
         {isPending ? (
           <>

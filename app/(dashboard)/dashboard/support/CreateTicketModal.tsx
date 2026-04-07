@@ -86,7 +86,7 @@ export default function CreateTicketModal({ onClose, onSuccess }: CreateTicketMo
               minLength={5}
               maxLength={200}
               required
-              className="w-full px-4 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-transparent focus:border-[#0891B2] focus:outline-none transition-colors text-zinc-900 dark:text-white placeholder-zinc-500"
+              className="w-full px-4 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-transparent focus:border-[#069494] focus:outline-none transition-colors text-zinc-900 dark:text-white placeholder-zinc-500"
             />
             <p className="text-xs text-zinc-500 mt-1">{subject.length}/200 characters (min 5)</p>
           </div>
@@ -103,7 +103,7 @@ export default function CreateTicketModal({ onClose, onSuccess }: CreateTicketMo
               minLength={10}
               rows={5}
               required
-              className="w-full px-4 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-transparent focus:border-[#0891B2] focus:outline-none transition-colors text-zinc-900 dark:text-white placeholder-zinc-500 resize-none"
+              className="w-full px-4 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-transparent focus:border-[#069494] focus:outline-none transition-colors text-zinc-900 dark:text-white placeholder-zinc-500 resize-none"
             />
             <p className="text-xs text-zinc-500 mt-1">{message.length} characters (min 10)</p>
           </div>
@@ -118,7 +118,7 @@ export default function CreateTicketModal({ onClose, onSuccess }: CreateTicketMo
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as TicketPriority)}
-                className="w-full px-4 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-transparent focus:border-[#0891B2] focus:outline-none transition-colors text-zinc-900 dark:text-white"
+                className="w-full px-4 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-transparent focus:border-[#069494] focus:outline-none transition-colors text-zinc-900 dark:text-white"
               >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
@@ -135,7 +135,7 @@ export default function CreateTicketModal({ onClose, onSuccess }: CreateTicketMo
               <select
                 value={boothId}
                 onChange={(e) => setBoothId(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-transparent focus:border-[#0891B2] focus:outline-none transition-colors text-zinc-900 dark:text-white"
+                className="w-full px-4 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-transparent focus:border-[#069494] focus:outline-none transition-colors text-zinc-900 dark:text-white"
               >
                 <option value="">None (General)</option>
                 {booths.map((booth) => (
@@ -168,7 +168,7 @@ export default function CreateTicketModal({ onClose, onSuccess }: CreateTicketMo
             <button
               type="submit"
               disabled={!isValid || isPending}
-              className="flex-1 px-4 py-2.5 rounded-xl bg-[#0891B2] text-white font-medium hover:bg-[#0E7490] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2.5 rounded-xl bg-[#069494] text-white font-medium hover:bg-[#176161] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isPending ? (
                 <>

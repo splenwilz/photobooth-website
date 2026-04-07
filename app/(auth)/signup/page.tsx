@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { SignupForm } from "./SignupForm";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
 
@@ -19,19 +20,24 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
       {/* Left Panel - Decorative */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0891B2]/20 via-slate-100 to-[#10B981]/10 dark:via-[#111111]" />
-        <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-[#0891B2]/20 blur-[150px] rounded-full" />
-        <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-[#10B981]/20 blur-[100px] rounded-full" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#069494]/20 via-slate-100 to-[#176161]/10 dark:via-[#111111]" />
+        <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-[#069494]/20 blur-[150px] rounded-full" />
+        <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-[#069494]/20 blur-[100px] rounded-full" />
         
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
           {/* Logo */}
           <Link href="/" className="inline-flex items-center gap-2.5 font-semibold text-xl w-fit">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                <circle cx="12" cy="13" r="3" />
-              </svg>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#069494] to-[#176161] flex items-center justify-center overflow-hidden">
+              <Image
+                src="/logo.png"
+                alt=""
+                aria-hidden="true"
+                width={28}
+                height={28}
+                className="object-contain"
+                priority
+              />
             </div>
             BoothIQ
           </Link>
@@ -40,7 +46,7 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
           <div>
             <h2 className="text-4xl font-bold mb-4 leading-tight text-zinc-900 dark:text-white">
               Manage your booths<br />
-              <span className="text-[#0891B2]">from anywhere.</span>
+              <span className="text-[#069494]">from anywhere.</span>
             </h2>
             <p className="text-zinc-600 dark:text-zinc-400 text-lg mb-8 max-w-md">
               Real-time analytics, instant alerts, and complete control over your photo booth business.
@@ -49,11 +55,11 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
             {/* Stats */}
             <div className="flex gap-8">
               <div>
-                <div className="text-3xl font-bold text-[#10B981]">5,000+</div>
+                <div className="text-3xl font-bold text-[#069494]">5,000+</div>
                 <div className="text-sm text-zinc-600 dark:text-zinc-500">Active booths</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-[#0891B2]">$2.4M</div>
+                <div className="text-3xl font-bold text-[#069494]">$2.4M</div>
                 <div className="text-sm text-zinc-600 dark:text-zinc-500">Processed monthly</div>
               </div>
               <div>
@@ -76,7 +82,7 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
               &quot;BoothIQ transformed our business. Revenue tracking in real-time and instant alerts when paper runs low — game changer.&quot;
             </p>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center font-bold text-white">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#069494] to-[#176161] flex items-center justify-center font-bold text-white">
                 MJ
               </div>
               <div>
@@ -94,11 +100,15 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
           {/* Mobile Logo */}
           <div className="text-center mb-8 lg:hidden">
             <Link href="/" className="inline-flex items-center gap-2.5 font-semibold text-xl">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                  <circle cx="12" cy="13" r="3" />
-                </svg>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#069494] to-[#176161] flex items-center justify-center overflow-hidden">
+                <Image
+                  src="/logo.png"
+                  alt=""
+                  aria-hidden="true"
+                  width={28}
+                  height={28}
+                  className="object-contain"
+                />
               </div>
               BoothIQ
             </Link>
@@ -131,7 +141,7 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
           {/* Sign In Link */}
           <p className="text-center text-sm text-[var(--muted)] mt-8">
             Already have an account?{" "}
-            <Link href="/signin" className="text-[#10B981] hover:text-[#22D3EE] font-medium transition-colors">
+            <Link href="/signin" className="text-[#069494] hover:text-[#0EC7C7] font-medium transition-colors">
               Sign in
             </Link>
           </p>

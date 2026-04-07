@@ -72,7 +72,7 @@ export function ContactForm() {
               message: "",
             });
           }}
-          className="text-[#0891B2] hover:text-[#22D3EE] font-medium transition-colors"
+          className="text-[#069494] hover:text-[#0EC7C7] font-medium transition-colors"
         >
           Send another message
         </button>
@@ -93,7 +93,7 @@ export function ContactForm() {
           required
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent transition-all"
+          className="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#069494] focus:border-transparent transition-all"
           placeholder="John Doe"
         />
       </div>
@@ -109,7 +109,7 @@ export function ContactForm() {
           required
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent transition-all"
+          className="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#069494] focus:border-transparent transition-all"
           placeholder="john@example.com"
         />
       </div>
@@ -124,7 +124,7 @@ export function ContactForm() {
           id="company"
           value={formData.company}
           onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-          className="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent transition-all"
+          className="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#069494] focus:border-transparent transition-all"
           placeholder="Your company (optional)"
         />
       </div>
@@ -139,7 +139,7 @@ export function ContactForm() {
           required
           value={formData.inquiryType}
           onChange={(e) => setFormData({ ...formData, inquiryType: e.target.value as InquiryType })}
-          className="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent transition-all"
+          className="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#069494] focus:border-transparent transition-all"
         >
           <option value="sales">Sales inquiry</option>
           <option value="support">Technical support</option>
@@ -159,7 +159,7 @@ export function ContactForm() {
           rows={5}
           value={formData.message}
           onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-          className="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent transition-all resize-none"
+          className="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#069494] focus:border-transparent transition-all resize-none"
           placeholder="Tell us more about your inquiry..."
         />
       </div>
@@ -175,7 +175,7 @@ export function ContactForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full py-3.5 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="w-full py-3.5 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         {isSubmitting ? (
           <>
@@ -198,7 +198,7 @@ export function ContactForm() {
       {/* Privacy Note */}
       <p className="text-xs text-[var(--muted)] text-center">
         By submitting this form, you agree to our{" "}
-        <a href="/privacy" className="text-[#0891B2] hover:text-[#22D3EE] transition-colors">
+        <a href="/privacy" className="text-[#069494] hover:text-[#0EC7C7] transition-colors">
           Privacy Policy
         </a>
         .

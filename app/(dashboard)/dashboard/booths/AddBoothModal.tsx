@@ -150,7 +150,7 @@ function FormStep({
             required
             minLength={1}
             maxLength={100}
-            className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] focus:ring-1 focus:ring-[#0891B2] transition-all"
+            className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all"
           />
         </div>
 
@@ -168,7 +168,7 @@ function FormStep({
             required
             minLength={1}
             maxLength={200}
-            className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] focus:ring-1 focus:ring-[#0891B2] transition-all"
+            className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all"
           />
         </div>
 
@@ -184,7 +184,7 @@ function FormStep({
           <button
             type="submit"
             disabled={isPending || !name.trim() || !address.trim()}
-            className="flex-1 px-4 py-3 rounded-xl bg-[#0891B2] text-white font-medium hover:bg-[#0E7490] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-3 rounded-xl bg-[#069494] text-white font-medium hover:bg-[#176161] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
           >
             {isPending ? (
               <>
@@ -337,7 +337,7 @@ function SuccessStep({ booth, onClose }: SuccessStepProps) {
         {/* Done Button */}
         <button
           onClick={onClose}
-          className="w-full px-4 py-3 rounded-xl bg-[#0891B2] text-white font-medium hover:bg-[#0E7490] transition-colors"
+          className="w-full px-4 py-3 rounded-xl bg-[#069494] text-white font-medium hover:bg-[#176161] transition-colors"
         >
           Done
         </button>

@@ -36,7 +36,7 @@ function getSeverityConfig(severity: AlertSeverity) {
   switch (severity) {
     case "critical": return { color: "#EF4444", label: "Critical" };
     case "warning": return { color: "#F59E0B", label: "Warning" };
-    case "info": return { color: "#0891B2", label: "Info" };
+    case "info": return { color: "#069494", label: "Info" };
   }
 }
 
@@ -93,7 +93,7 @@ export default function AlertsPage() {
     { value: "all", label: "All" },
     { value: "critical", label: "Critical", color: "#EF4444" },
     { value: "warning", label: "Warning", color: "#F59E0B" },
-    { value: "info", label: "Info", color: "#0891B2" },
+    { value: "info", label: "Info", color: "#069494" },
   ];
 
   const categoryFilters: { value: FilterCategory; label: string }[] = [
@@ -208,7 +208,7 @@ export default function AlertsPage() {
           </p>
         </div>
         {totalAlerts > 0 && (
-          <button className="px-4 py-2 text-sm font-medium text-[#0891B2] border border-[#0891B2] rounded-xl hover:bg-[#0891B2]/10 transition-colors">
+          <button className="px-4 py-2 text-sm font-medium text-[#069494] border border-[#069494] rounded-xl hover:bg-[#069494]/10 transition-colors">
             Mark All as Read
           </button>
         )}
@@ -239,13 +239,13 @@ export default function AlertsPage() {
           </div>
         </div>
         <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-[#0891B2]/20 flex items-center justify-center">
-            <svg className="w-6 h-6 text-[#0891B2]" fill="currentColor" viewBox="0 0 20 20">
+          <div className="w-12 h-12 rounded-xl bg-[#069494]/20 flex items-center justify-center">
+            <svg className="w-6 h-6 text-[#069494]" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
             </svg>
           </div>
           <div>
-            <p className="text-2xl font-bold text-[#0891B2]">{summary.info}</p>
+            <p className="text-2xl font-bold text-[#069494]">{summary.info}</p>
             <p className="text-sm text-zinc-500">Info</p>
           </div>
         </div>
@@ -263,7 +263,7 @@ export default function AlertsPage() {
                 onClick={() => setFilterSeverity(filter.value)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full border font-medium text-sm transition-all ${
                   filterSeverity === filter.value
-                    ? "bg-[#0891B2] border-[#0891B2] text-white"
+                    ? "bg-[#069494] border-[#069494] text-white"
                     : "border-slate-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700"
                 }`}
               >
@@ -284,7 +284,7 @@ export default function AlertsPage() {
                 onClick={() => setFilterCategory(filter.value)}
                 className={`px-4 py-2 rounded-full border font-medium text-sm transition-all ${
                   filterCategory === filter.value
-                    ? "bg-[#0891B2] border-[#0891B2] text-white"
+                    ? "bg-[#069494] border-[#069494] text-white"
                     : "border-slate-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700"
                 }`}
               >
@@ -350,7 +350,7 @@ export default function AlertsPage() {
                     <div className="mt-3">
                       <span
                         className="text-xs font-medium px-2.5 py-1 rounded-full"
-                        style={{ backgroundColor: "#0891B220", color: "#0891B2" }}
+                        style={{ backgroundColor: "#06949420", color: "#069494" }}
                       >
                         {formatCategory(alert.category)}
                       </span>

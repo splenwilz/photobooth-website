@@ -201,7 +201,7 @@ function CheckoutSuccessContent() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#0891B2] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-16 h-16 border-4 border-[#069494] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-[var(--muted)]">Verifying payment...</p>
         </div>
       </div>
@@ -224,7 +224,7 @@ function CheckoutSuccessContent() {
           </p>
           <Link
             href="/pricing"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors"
           >
             Back to Pricing
           </Link>
@@ -288,13 +288,13 @@ function CheckoutSuccessContent() {
           </p>
 
           {!showAppButton && (
-            <div className="w-8 h-8 border-2 border-[#0891B2] border-t-transparent rounded-full animate-spin mx-auto mb-6" />
+            <div className="w-8 h-8 border-2 border-[#069494] border-t-transparent rounded-full animate-spin mx-auto mb-6" />
           )}
 
           {showAppButton && (
             <a
               href={deepLink}
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-all hover:scale-[1.02] shadow-lg shadow-[#0891B2]/20"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-all hover:scale-[1.02] shadow-lg shadow-[#069494]/20"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -305,7 +305,7 @@ function CheckoutSuccessContent() {
 
           <p className="text-sm text-[var(--muted)] mt-8">
             Don&apos;t have the app?{" "}
-            <Link href="/downloads" className="text-[#0891B2] hover:underline">
+            <Link href="/downloads" className="text-[#069494] hover:underline">
               Download it here
             </Link>
           </p>
@@ -319,7 +319,7 @@ function CheckoutSuccessContent() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#0891B2] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-16 h-16 border-4 border-[#069494] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-[var(--muted)]">Generating your license key...</p>
         </div>
       </div>
@@ -346,7 +346,7 @@ function CheckoutSuccessContent() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/dashboard"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors"
             >
               Go to Dashboard
             </Link>
@@ -450,16 +450,16 @@ function CheckoutSuccessContent() {
 
         {/* License Key Card */}
         {content.showLicenseKey && licenseData && (
-          <div className="bg-gradient-to-r from-[#0891B2]/10 to-[#10B981]/10 rounded-2xl border border-[#0891B2]/20 p-6 mb-8">
+          <div className="bg-gradient-to-r from-[#069494]/10 to-[#176161]/10 rounded-2xl border border-[#069494]/20 p-6 mb-8">
             <h2 className="font-semibold mb-4 flex items-center gap-2">
-              <svg className="w-5 h-5 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-5 h-5 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
               </svg>
               Your License Key (Online Activation)
             </h2>
             <div className="bg-[var(--background)] rounded-xl p-4 mb-4">
               <div className="flex items-center justify-between gap-4">
-                <code className="text-lg sm:text-xl font-mono font-bold tracking-wider text-[#0891B2]">
+                <code className="text-lg sm:text-xl font-mono font-bold tracking-wider text-[#069494]">
                   {licenseData.license_key}
                 </code>
                 <button
@@ -486,12 +486,12 @@ function CheckoutSuccessContent() {
             </p>
 
             {/* Offline Activation Section */}
-            <div className="mt-6 pt-6 border-t border-[#0891B2]/20">
+            <div className="mt-6 pt-6 border-t border-[#069494]/20">
               {!showOfflineForm && !offlineLicenseData && (
                 <button
                   type="button"
                   onClick={() => setShowOfflineForm(true)}
-                  className="text-sm text-[#0891B2] hover:underline flex items-center gap-2"
+                  className="text-sm text-[#069494] hover:underline flex items-center gap-2"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414" />
@@ -514,7 +514,7 @@ function CheckoutSuccessContent() {
                       value={fingerprint}
                       onChange={(e) => setFingerprint(e.target.value)}
                       placeholder="e.g., EF1DE6E3F598515EFDF6B32E2034F443..."
-                      className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--background)] font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent"
+                      className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--background)] font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[#069494] focus:border-transparent"
                     />
                   </div>
                   {offlineError && (
@@ -525,7 +525,7 @@ function CheckoutSuccessContent() {
                       type="button"
                       onClick={handleGenerateOfflineLicense}
                       disabled={!fingerprint.trim() || isGeneratingOffline}
-                      className="px-4 py-2 rounded-lg bg-[#0891B2] text-white text-sm font-semibold hover:bg-[#0E7490] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                      className="px-4 py-2 rounded-lg bg-[#069494] text-white text-sm font-semibold hover:bg-[#176161] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
                       {isGeneratingOffline ? (
                         <>
@@ -576,7 +576,7 @@ function CheckoutSuccessContent() {
                     <button
                       type="button"
                       onClick={() => handleDownloadOfflineLicense("json")}
-                      className="px-4 py-2 rounded-lg bg-[#0891B2] text-white text-sm font-semibold hover:bg-[#0E7490] transition-colors flex items-center gap-2"
+                      className="px-4 py-2 rounded-lg bg-[#069494] text-white text-sm font-semibold hover:bg-[#176161] transition-colors flex items-center gap-2"
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -607,7 +607,7 @@ function CheckoutSuccessContent() {
         {/* Order Details Card */}
         <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6 mb-8">
           <h2 className="font-semibold mb-4 flex items-center gap-2">
-            <svg className="w-5 h-5 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-5 h-5 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             What&apos;s Next
@@ -653,7 +653,7 @@ function CheckoutSuccessContent() {
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
             href={content.primaryAction.href}
-            className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-all hover:scale-[1.02] shadow-lg shadow-[#0891B2]/20"
+            className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-all hover:scale-[1.02] shadow-lg shadow-[#069494]/20"
           >
             {content.primaryAction.label}
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -670,7 +670,7 @@ function CheckoutSuccessContent() {
 
         {/* Support Link */}
         <p className="text-center text-sm text-[var(--muted)] mt-8">
-          Need help? <Link href="/contact" className="text-[#0891B2] hover:underline">Contact our support team</Link>
+          Need help? <Link href="/contact" className="text-[#069494] hover:underline">Contact our support team</Link>
         </p>
       </div>
     </div>
@@ -681,7 +681,7 @@ function CheckoutSuccessContent() {
 function CheckoutSuccessLoading() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
-      <div className="w-8 h-8 border-2 border-[#0891B2] border-t-transparent rounded-full animate-spin" />
+      <div className="w-8 h-8 border-2 border-[#069494] border-t-transparent rounded-full animate-spin" />
     </div>
   );
 }

@@ -108,7 +108,7 @@ export function BaseSecretConfig() {
           <button
             type="button"
             onClick={() => setIsEditing(true)}
-            className="px-3 py-1.5 text-sm font-medium text-[#0891B2] hover:text-[#0E7490] transition-colors"
+            className="px-3 py-1.5 text-sm font-medium text-[#069494] hover:text-[#176161] transition-colors"
           >
             {status?.is_configured ? "Update" : "Configure"}
           </button>
@@ -126,7 +126,7 @@ export function BaseSecretConfig() {
               value={newSecret}
               onChange={(e) => setNewSecret(e.target.value)}
               placeholder="Enter a secure base secret..."
-              className="w-full px-4 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent transition-all font-mono text-sm"
+              className="w-full px-4 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#069494] focus:border-transparent transition-all font-mono text-sm"
             />
             <p className="mt-1 text-xs text-zinc-500">
               {newSecret.length}/32 characters minimum
@@ -142,7 +142,7 @@ export function BaseSecretConfig() {
               value={confirmSecret}
               onChange={(e) => setConfirmSecret(e.target.value)}
               placeholder="Confirm the base secret..."
-              className="w-full px-4 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent transition-all font-mono text-sm"
+              className="w-full px-4 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#069494] focus:border-transparent transition-all font-mono text-sm"
             />
           </div>
 
@@ -164,7 +164,7 @@ export function BaseSecretConfig() {
               type="button"
               onClick={handleSave}
               disabled={isPending || newSecret.length < 32}
-              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-[#0891B2] rounded-xl hover:bg-[#0E7490] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-[#069494] rounded-xl hover:bg-[#176161] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isPending ? (
                 <>

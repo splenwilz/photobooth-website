@@ -142,7 +142,7 @@ export default function PricingPage() {
       {/* Hero Section */}
       <section className="relative pt-16 pb-16 px-6 overflow-hidden">
         {/* Background glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#0891B2]/10 blur-[150px] rounded-full" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#069494]/10 blur-[150px] rounded-full" />
 
         <div className="relative max-w-5xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] text-sm font-medium mb-6">
@@ -154,7 +154,7 @@ export default function PricingPage() {
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
             Simple per-booth pricing<br />
-            <span className="text-[#0891B2]">for every photo booth business</span>
+            <span className="text-[#069494]">for every photo booth business</span>
           </h1>
           <p className="text-xl text-[var(--muted)] max-w-2xl mx-auto">
             Subscribe each booth to the plan that fits its needs. Upgrade or downgrade anytime.
@@ -167,7 +167,7 @@ export default function PricingPage() {
         <div className="max-w-5xl mx-auto">
           {/* Section Header */}
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0891B2]/10 border border-[#0891B2]/20 text-[#0891B2] text-sm font-medium mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#069494] text-sm font-medium mb-4">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Code" aria-hidden="true">
                 <title>Code</title>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
@@ -268,14 +268,14 @@ export default function PricingPage() {
                 key={plan.name}
                 className={`relative rounded-2xl p-8 transition-all ${
                   plan.highlighted
-                    ? "bg-gradient-to-b from-[#0891B2]/20 to-slate-100 dark:to-[#111111] border-2 border-[#0891B2]/50 scale-105 lg:-mt-4 lg:mb-4 shadow-xl shadow-[#0891B2]/10"
+                    ? "bg-gradient-to-b from-[#069494]/20 to-slate-100 dark:to-[#111111] border-2 border-[#069494]/50 scale-105 lg:-mt-4 lg:mb-4 shadow-xl shadow-[#069494]/10"
                     : "bg-[var(--card)] border border-[var(--border)] hover:border-[var(--border)]"
                 }`}
               >
                 {/* Badge */}
                 {plan.badge && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <span className="px-4 py-1.5 rounded-full bg-[#0891B2] text-[var(--foreground)] text-sm font-semibold shadow-lg shadow-[#0891B2]/30">
+                    <span className="px-4 py-1.5 rounded-full bg-[#069494] text-[var(--foreground)] text-sm font-semibold shadow-lg shadow-[#069494]/30">
                       {plan.badge}
                     </span>
                   </div>
@@ -337,7 +337,7 @@ export default function PricingPage() {
                   href={plan.isPaid ? getPaidPlanCtaLink() : "/downloads"}
                   className={`block w-full py-3.5 rounded-xl font-semibold text-center transition-all mb-8 ${
                     plan.highlighted
-                      ? "bg-[#0891B2] text-white hover:bg-[#0E7490] shadow-lg shadow-[#0891B2]/30 hover:shadow-[#0891B2]/50"
+                      ? "bg-[#069494] text-white hover:bg-[#176161] shadow-lg shadow-[#069494]/30 hover:shadow-[#069494]/50"
                       : "bg-slate-200 dark:bg-zinc-800 text-zinc-900 dark:text-white hover:bg-slate-300 dark:hover:bg-zinc-700"
                   }`}
                 >
@@ -411,7 +411,7 @@ export default function PricingPage() {
                 <tr className="border-b border-[var(--border)]">
                   <th className="text-left py-4 px-6 font-semibold text-zinc-900 dark:text-white">Feature</th>
                   <th className="text-center py-4 px-4 font-semibold text-zinc-600 dark:text-white">Starter</th>
-                  <th className="text-center py-4 px-4 font-semibold bg-[#0891B2]/10 dark:bg-[#0891B2]/20 border-x border-[#0891B2]/20 dark:border-[#0891B2]/40 text-zinc-600 dark:text-white">Pro</th>
+                  <th className="text-center py-4 px-4 font-semibold bg-[#069494]/10 dark:bg-[#069494]/20 border-x border-[#069494]/20 dark:border-[#069494]/40 text-zinc-600 dark:text-white">Pro</th>
                   <th className="text-center py-4 px-4 font-semibold text-zinc-600 dark:text-white">Enterprise</th>
                 </tr>
               </thead>
@@ -423,7 +423,7 @@ export default function PricingPage() {
                   >
                     <td className="py-4 px-6 text-sm font-semibold text-zinc-800 dark:text-white">{feature.name}</td>
                     <td className="py-4 px-4 text-sm text-center text-zinc-600 dark:text-white">{feature.starter}</td>
-                    <td className="py-4 px-4 text-sm text-center bg-[#0891B2]/10 dark:bg-[#0891B2]/20 border-x border-[#0891B2]/20 dark:border-[#0891B2]/40 font-semibold text-zinc-600 dark:text-white">{feature.pro}</td>
+                    <td className="py-4 px-4 text-sm text-center bg-[#069494]/10 dark:bg-[#069494]/20 border-x border-[#069494]/20 dark:border-[#069494]/40 font-semibold text-zinc-600 dark:text-white">{feature.pro}</td>
                     <td className="py-4 px-4 text-sm text-center text-zinc-600 dark:text-white">{feature.enterprise}</td>
                   </tr>
                 ))}
@@ -438,7 +438,7 @@ export default function PricingPage() {
         <div className="max-w-3xl mx-auto">
           <div className="relative p-10 rounded-2xl bg-[var(--card)] border border-[var(--border)]">
             {/* Quote mark */}
-            <svg className="absolute top-6 left-8 w-10 h-10 text-[#0891B2]/30" fill="currentColor" viewBox="0 0 24 24" aria-label="Quote mark" aria-hidden="true">
+            <svg className="absolute top-6 left-8 w-10 h-10 text-[#069494]/30" fill="currentColor" viewBox="0 0 24 24" aria-label="Quote mark" aria-hidden="true">
               <title>Quote mark</title>
               <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
             </svg>
@@ -471,12 +471,12 @@ export default function PricingPage() {
       {/* FAQs - Two Column Layout */}
       <section className="px-6 pb-24 relative overflow-hidden">
         {/* Background decoration */}
-        <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[#0891B2]/5 blur-[150px] rounded-full -translate-y-1/2" />
+        <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[#069494]/5 blur-[150px] rounded-full -translate-y-1/2" />
 
         <div className="relative max-w-5xl mx-auto">
           {/* Header */}
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0891B2]/10 border border-[#0891B2]/20 text-[#22D3EE] text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#0EC7C7] text-sm font-medium mb-6">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Question mark" aria-hidden="true">
                 <title>Question mark</title>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -498,8 +498,8 @@ export default function PricingPage() {
                 key={faq.question}
                 className={`group rounded-2xl border overflow-hidden transition-all ${
                   openFaq === index
-                    ? "bg-[#0891B2]/10 dark:bg-[#0891B2]/20 border-[#0891B2]/30"
-                    : "bg-[var(--card)] border-[var(--border)] hover:border-[#0891B2]/30"
+                    ? "bg-[#069494]/10 dark:bg-[#069494]/20 border-[#069494]/30"
+                    : "bg-[var(--card)] border-[var(--border)] hover:border-[#069494]/30"
                 }`}
               >
                 <button
@@ -510,25 +510,25 @@ export default function PricingPage() {
                   {/* Number badge */}
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 transition-colors ${
                     openFaq === index
-                      ? "bg-[#0891B2] text-white"
-                      : "bg-slate-200 dark:bg-zinc-600 text-zinc-600 dark:text-white group-hover:bg-[#0891B2]/20 group-hover:text-[#0891B2]"
+                      ? "bg-[#069494] text-white"
+                      : "bg-slate-200 dark:bg-zinc-600 text-zinc-600 dark:text-white group-hover:bg-[#069494]/20 group-hover:text-[#069494]"
                   }`}>
                     {String(index + 1).padStart(2, "0")}
                   </div>
                   <div className="flex-1">
                     <span className={`font-semibold block transition-colors ${
-                      openFaq === index ? "text-[#0891B2] dark:text-[#22D3EE]" : "text-zinc-800 dark:text-white group-hover:text-[#0891B2] dark:group-hover:text-[#22D3EE]"
+                      openFaq === index ? "text-[#069494] dark:text-[#0EC7C7]" : "text-zinc-800 dark:text-white group-hover:text-[#069494] dark:group-hover:text-[#0EC7C7]"
                     }`}>
                       {faq.question}
                     </span>
                   </div>
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${
                     openFaq === index
-                      ? "bg-[#0891B2]/20 rotate-180"
+                      ? "bg-[#069494]/20 rotate-180"
                       : "bg-slate-200 dark:bg-zinc-700 group-hover:bg-slate-300 dark:group-hover:bg-zinc-600"
                   }`}>
                     <svg
-                      className={`w-4 h-4 transition-colors ${openFaq === index ? "text-[#0891B2]" : "text-zinc-500 dark:text-zinc-400"}`}
+                      className={`w-4 h-4 transition-colors ${openFaq === index ? "text-[#069494]" : "text-zinc-500 dark:text-zinc-400"}`}
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -554,8 +554,8 @@ export default function PricingPage() {
           {/* Still have questions */}
           <div className="mt-12 text-center">
             <div className="inline-flex items-center gap-4 p-4 rounded-2xl bg-[var(--card)] border border-[var(--border)]">
-              <div className="w-12 h-12 rounded-xl bg-[#0891B2]/10 flex items-center justify-center">
-                <svg className="w-6 h-6 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Chat" aria-hidden="true">
+              <div className="w-12 h-12 rounded-xl bg-[#069494]/10 flex items-center justify-center">
+                <svg className="w-6 h-6 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Chat" aria-hidden="true">
                   <title>Chat</title>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
@@ -566,7 +566,7 @@ export default function PricingPage() {
               </div>
               <Link
                 href="/contact"
-                className="ml-4 px-5 py-2.5 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-colors"
+                className="ml-4 px-5 py-2.5 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors"
               >
                 Contact Us
               </Link>
@@ -599,7 +599,7 @@ export default function PricingPage() {
               <div className="flex flex-col sm:flex-row gap-3 mb-8">
                 <Link
                   href="/downloads"
-                  className="px-6 py-3.5 rounded-xl bg-[#0891B2] text-[var(--foreground)] font-semibold hover:bg-[#0E7490] transition-all hover:scale-[1.02] flex items-center justify-center gap-2 shadow-lg shadow-[#0891B2]/20"
+                  className="px-6 py-3.5 rounded-xl bg-[#069494] text-[var(--foreground)] font-semibold hover:bg-[#176161] transition-all hover:scale-[1.02] flex items-center justify-center gap-2 shadow-lg shadow-[#069494]/20"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Download" aria-hidden="true">
                     <title>Download</title>
@@ -642,7 +642,7 @@ export default function PricingPage() {
             </div>
 
             {/* Right side - Visual */}
-            <div className="relative bg-gradient-to-br from-[#0891B2] to-[#0E7490] p-10 md:p-14 hidden lg:flex items-center justify-center">
+            <div className="relative bg-gradient-to-br from-[#069494] to-[#176161] p-10 md:p-14 hidden lg:flex items-center justify-center">
               {/* Decorative circles */}
               <div className="absolute top-6 right-6 w-20 h-20 rounded-full border border-white/10" />
               <div className="absolute bottom-6 left-6 w-32 h-32 rounded-full border border-white/10" />

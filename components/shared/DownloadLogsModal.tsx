@@ -316,7 +316,7 @@ export function DownloadLogsModal({
                   <button
                     type="button"
                     onClick={handleSelectAll}
-                    className="text-xs text-[#0891B2] hover:text-[#0E7490] transition-colors ml-auto"
+                    className="text-xs text-[#069494] hover:text-[#176161] transition-colors ml-auto"
                   >
                     {selectedLogTypes.length === BOOTH_LOG_TYPES.length ? "Deselect All" : "Select All"}
                   </button>
@@ -327,7 +327,7 @@ export function DownloadLogsModal({
                       key={logType.value}
                       className={`flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer transition-all ${
                         selectedLogTypes.includes(logType.value)
-                          ? "border-[#0891B2] bg-[#0891B2]/5 dark:bg-[#0891B2]/10"
+                          ? "border-[#069494] bg-[#069494]/5 dark:bg-[#069494]/10"
                           : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600"
                       }`}
                     >
@@ -335,7 +335,7 @@ export function DownloadLogsModal({
                         type="checkbox"
                         checked={selectedLogTypes.includes(logType.value)}
                         onChange={() => handleToggleLogType(logType.value)}
-                        className="w-4 h-4 rounded border-zinc-300 text-[#0891B2] focus:ring-[#0891B2]"
+                        className="w-4 h-4 rounded border-zinc-300 text-[#069494] focus:ring-[#069494]"
                       />
                       <span className="text-sm text-zinc-700 dark:text-zinc-300">{logType.label}</span>
                     </label>
@@ -352,7 +352,7 @@ export function DownloadLogsModal({
                   id="time-range-select"
                   value={hours}
                   onChange={(e) => setHours(Number(e.target.value))}
-                  className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#069494] focus:border-transparent transition-all"
                 >
                   {HOURS_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -374,7 +374,7 @@ export function DownloadLogsModal({
                 type="button"
                 onClick={handleDownload}
                 disabled={isOffline || selectedLogTypes.length === 0}
-                className="w-full py-3 px-4 bg-[#0891B2] text-white font-medium rounded-xl hover:bg-[#0E7490] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-3 px-4 bg-[#069494] text-white font-medium rounded-xl hover:bg-[#176161] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 <svg
                   aria-hidden="true"
@@ -401,7 +401,7 @@ export function DownloadLogsModal({
                 {/* Spinner */}
                 <div className="w-16 h-16 mb-4 relative">
                   <div className="absolute inset-0 border-4 border-blue-200 dark:border-blue-900 rounded-full" />
-                  <div className="absolute inset-0 border-4 border-transparent border-t-[#0891B2] rounded-full animate-spin" />
+                  <div className="absolute inset-0 border-4 border-transparent border-t-[#069494] rounded-full animate-spin" />
                 </div>
                 <p className="text-lg font-medium text-zinc-900 dark:text-white">
                   Collecting logs... {elapsedSeconds}s
@@ -477,7 +477,7 @@ export function DownloadLogsModal({
               <button
                 type="button"
                 onClick={handleOpenDownload}
-                className="w-full py-3 px-4 bg-[#0891B2] text-white font-medium rounded-xl hover:bg-[#0E7490] transition-colors flex items-center justify-center gap-2"
+                className="w-full py-3 px-4 bg-[#069494] text-white font-medium rounded-xl hover:bg-[#176161] transition-colors flex items-center justify-center gap-2"
               >
                 <svg
                   aria-hidden="true"

@@ -56,7 +56,7 @@ function getInitials(name: string): string {
 
 function getPlanColor(tier: string): string {
   const lowerTier = tier.toLowerCase();
-  if (lowerTier.includes("enterprise")) return "bg-[#0891B2]";
+  if (lowerTier.includes("enterprise")) return "bg-[#069494]";
   if (lowerTier.includes("pro")) return "bg-blue-500";
   return "bg-zinc-400";
 }
@@ -115,7 +115,7 @@ export default function AdminBillingPage() {
             onClick={() => setActiveTab(tab.id as TabType)}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-all flex items-center gap-2 ${
               activeTab === tab.id
-                ? "bg-[#0891B2] text-white"
+                ? "bg-[#069494] text-white"
                 : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
             }`}
           >
@@ -342,7 +342,7 @@ export default function AdminBillingPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab("transactions")}
-                className="text-sm text-[#0891B2] hover:underline"
+                className="text-sm text-[#069494] hover:underline"
               >
                 View all
               </button>
@@ -369,7 +369,7 @@ export default function AdminBillingPage() {
                   return (
                     <div key={tx.id} className="flex items-center justify-between py-2">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center font-bold text-xs text-white">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#069494] to-[#176161] flex items-center justify-center font-bold text-xs text-white">
                           {getInitials(tx.customer_name)}
                         </div>
                         <div>
@@ -410,7 +410,7 @@ export default function AdminBillingPage() {
                 }}
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-all capitalize ${
                   transactionsStatus === status
-                    ? "bg-[#0891B2] text-white"
+                    ? "bg-[#069494] text-white"
                     : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
                 }`}
               >
@@ -459,7 +459,7 @@ export default function AdminBillingPage() {
                         <tr key={tx.id} className="border-b border-[var(--border)] last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
                           <td className="py-4 px-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center font-bold text-xs text-white">
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#069494] to-[#176161] flex items-center justify-center font-bold text-xs text-white">
                                 {getInitials(tx.customer_name)}
                               </div>
                               <div>
@@ -595,7 +595,7 @@ export default function AdminBillingPage() {
                           href={`https://dashboard.stripe.com/invoices/${issue.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-3 py-1.5 text-sm font-medium rounded-lg bg-[#0891B2] text-white hover:bg-[#0E7490] transition-colors"
+                          className="px-3 py-1.5 text-sm font-medium rounded-lg bg-[#069494] text-white hover:bg-[#176161] transition-colors"
                         >
                           View in Stripe
                         </a>

@@ -152,7 +152,7 @@ export default function AdminUsersPage() {
             placeholder="Search users..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] transition-all"
+            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] transition-all"
           />
         </div>
 
@@ -164,7 +164,7 @@ export default function AdminUsersPage() {
               onClick={() => handleStatusFilter(status)}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-all capitalize ${
                 filterStatus === status
-                  ? "bg-[#0891B2] text-white"
+                  ? "bg-[#069494] text-white"
                   : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
               }`}
             >
@@ -183,7 +183,7 @@ export default function AdminUsersPage() {
               setSortOrder(order);
               setPage(1);
             }}
-            className="appearance-none px-4 py-3 pr-10 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#0891B2] transition-all cursor-pointer"
+            className="appearance-none px-4 py-3 pr-10 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494] transition-all cursor-pointer"
           >
             <option value="created_at-desc">Newest First</option>
             <option value="created_at-asc">Oldest First</option>
@@ -251,7 +251,7 @@ export default function AdminUsersPage() {
               className="p-4 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer"
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#0891B2] to-[#10B981] flex items-center justify-center font-bold text-sm text-white shrink-0">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#069494] to-[#176161] flex items-center justify-center font-bold text-sm text-white shrink-0">
                   {getInitials(user.name)}
                 </div>
                 <div className="flex-1 min-w-0">

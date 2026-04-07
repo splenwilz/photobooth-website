@@ -189,7 +189,7 @@ export function EditBoothModal({
               minLength={1}
               maxLength={100}
               disabled={isPending}
-              className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] focus:ring-1 focus:ring-[#0891B2] transition-all disabled:opacity-50"
+              className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all disabled:opacity-50"
             />
           </div>
 
@@ -209,7 +209,7 @@ export function EditBoothModal({
               placeholder="e.g., 123 Main Street, City, State"
               maxLength={200}
               disabled={isPending}
-              className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] focus:ring-1 focus:ring-[#0891B2] transition-all disabled:opacity-50"
+              className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all disabled:opacity-50"
             />
           </div>
 
@@ -226,7 +226,7 @@ export function EditBoothModal({
             <button
               type="submit"
               disabled={!canSave}
-              className="flex-1 px-4 py-3 rounded-xl bg-[#0891B2] text-white font-medium hover:bg-[#0E7490] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-3 rounded-xl bg-[#069494] text-white font-medium hover:bg-[#176161] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
             >
               {isPending ? (
                 <>

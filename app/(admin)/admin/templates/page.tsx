@@ -775,7 +775,7 @@ export default function AdminTemplatesPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-2 border-[#0891B2] border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-[#069494] border-t-transparent rounded-full animate-spin" />
           <p className="text-zinc-500">Loading templates...</p>
         </div>
       </div>
@@ -850,7 +850,7 @@ export default function AdminTemplatesPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 ${
                 activeTab === tab.id
-                  ? "border-[#0891B2] text-[#0891B2]"
+                  ? "border-[#069494] text-[#069494]"
                   : "border-transparent text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-600"
               }`}
             >
@@ -858,7 +858,7 @@ export default function AdminTemplatesPage() {
               <span
                 className={`px-2 py-0.5 rounded-full text-xs ${
                   activeTab === tab.id
-                    ? "bg-[#0891B2]/20 text-[#0891B2]"
+                    ? "bg-[#069494]/20 text-[#069494]"
                     : "bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400"
                 }`}
               >
@@ -909,7 +909,7 @@ export default function AdminTemplatesPage() {
             <button
               type="button"
               onClick={openAddTemplateModal}
-              className="flex items-center gap-2 px-4 py-2.5 bg-[#0891B2] text-white font-medium rounded-xl hover:bg-[#0E7490] transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#069494] text-white font-medium rounded-xl hover:bg-[#176161] transition-colors"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -930,7 +930,7 @@ export default function AdminTemplatesPage() {
             </div>
             <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
               <p className="text-sm text-zinc-500">Draft</p>
-              <p className="text-2xl font-bold mt-1 text-[#0891B2]">{stats.draft}</p>
+              <p className="text-2xl font-bold mt-1 text-[#069494]">{stats.draft}</p>
             </div>
             <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
               <p className="text-sm text-zinc-500">Free</p>
@@ -960,7 +960,7 @@ export default function AdminTemplatesPage() {
                 placeholder="Search templates..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] transition-all"
+                className="w-full pl-12 pr-4 py-3 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] transition-all"
               />
             </div>
 
@@ -968,7 +968,7 @@ export default function AdminTemplatesPage() {
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value === "all" ? "all" : Number(e.target.value))}
-              className="px-4 py-3 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#0891B2]"
+              className="px-4 py-3 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
             >
               <option value="all">All Categories</option>
               {categoriesData?.categories.map((cat) => (
@@ -987,7 +987,7 @@ export default function AdminTemplatesPage() {
                   onClick={() => setFilterTemplateType(opt.value)}
                   className={`px-3 py-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${
                     filterTemplateType === opt.value
-                      ? "bg-[#0891B2] text-white"
+                      ? "bg-[#069494] text-white"
                       : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
                   }`}
                 >
@@ -1005,7 +1005,7 @@ export default function AdminTemplatesPage() {
                   onClick={() => setFilterStatus(status.value)}
                   className={`px-3 py-2 text-sm font-medium rounded-lg transition-all ${
                     filterStatus === status.value
-                      ? "bg-[#0891B2] text-white"
+                      ? "bg-[#069494] text-white"
                       : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
                   }`}
                 >
@@ -1059,7 +1059,7 @@ export default function AdminTemplatesPage() {
                       </span>
                       {/* Free Badge */}
                       {parseFloat(template.price) === 0 && (
-                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[#0891B2]/20 text-[#0891B2]">
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[#069494]/20 text-[#069494]">
                           Free
                         </span>
                       )}
@@ -1087,7 +1087,7 @@ export default function AdminTemplatesPage() {
                     <button
                       type="button"
                       onClick={() => openEditTemplateModal(template)}
-                      className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-[#0891B2] transition-colors"
+                      className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-[#069494] transition-colors"
                       aria-label="Edit template"
                     >
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -1191,7 +1191,7 @@ export default function AdminTemplatesPage() {
             </div>
             <button
               onClick={openCreateCategoryModal}
-              className="flex items-center gap-2 px-4 py-2.5 bg-[#0891B2] text-white font-medium rounded-xl hover:bg-[#0E7490] transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#069494] text-white font-medium rounded-xl hover:bg-[#176161] transition-colors"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -1371,7 +1371,7 @@ export default function AdminTemplatesPage() {
             </div>
             <button
               onClick={openCreateLayoutModal}
-              className="flex items-center gap-2 px-4 py-2.5 bg-[#0891B2] text-white font-medium rounded-xl hover:bg-[#0E7490] transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#069494] text-white font-medium rounded-xl hover:bg-[#176161] transition-colors"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -1479,7 +1479,7 @@ export default function AdminTemplatesPage() {
                             setAddingPhotoAreaTo(layout.id);
                             setPhotoAreaForm({ ...defaultPhotoArea, photo_index: (layout.photo_areas?.length || 0) + 1 });
                           }}
-                          className="text-sm text-[#0891B2] hover:underline font-medium"
+                          className="text-sm text-[#069494] hover:underline font-medium"
                         >
                           + Add Photo Area
                         </button>
@@ -1502,7 +1502,7 @@ export default function AdminTemplatesPage() {
                                   <button
                                     type="button"
                                     onClick={() => openEditPhotoAreaModal(layout.id, area)}
-                                    className="p-1 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-[#0891B2]"
+                                    className="p-1 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-[#069494]"
                                     title="Edit photo area"
                                     aria-label={`Edit photo area ${area.photo_index}`}
                                   >
@@ -1597,7 +1597,7 @@ export default function AdminTemplatesPage() {
                   type="text"
                   value={templateFormData.name}
                   onChange={(e) => setTemplateFormData((prev) => ({ ...prev, name: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#0891B2]"
+                  className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
                   placeholder="Enter template name"
                 />
               </div>
@@ -1607,7 +1607,7 @@ export default function AdminTemplatesPage() {
                   value={templateFormData.description ?? ""}
                   onChange={(e) => setTemplateFormData((prev) => ({ ...prev, description: e.target.value }))}
                   rows={3}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#0891B2] resize-none"
+                  className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494] resize-none"
                   placeholder="Describe the template..."
                 />
               </div>
@@ -1617,7 +1617,7 @@ export default function AdminTemplatesPage() {
                   <select
                     value={templateFormData.template_type}
                     onChange={(e) => handleTemplateTypeChange(e.target.value as AdminTemplateType)}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#0891B2]"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
                   >
                     <option value="strip">Strip</option>
                     <option value="photo_4x6">4x6 Photo</option>
@@ -1630,7 +1630,7 @@ export default function AdminTemplatesPage() {
                     onChange={(e) =>
                       setTemplateFormData((prev) => ({ ...prev, status: e.target.value as AdminTemplateStatus }))
                     }
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#0891B2]"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
                   >
                     <option value="draft">Draft</option>
                     <option value="active">Active</option>
@@ -1646,7 +1646,7 @@ export default function AdminTemplatesPage() {
                     onChange={(e) =>
                       setTemplateFormData((prev) => ({ ...prev, category_id: e.target.value ? Number(e.target.value) : null }))
                     }
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#0891B2]"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
                     disabled={categoriesLoading}
                   >
                     <option value="">Select category...</option>
@@ -1662,7 +1662,7 @@ export default function AdminTemplatesPage() {
                   <select
                     value={templateFormData.layout_id ?? ""}
                     onChange={(e) => setTemplateFormData((prev) => ({ ...prev, layout_id: e.target.value || null }))}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#0891B2]"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
                     disabled={layoutsLoading}
                   >
                     <option value="">Select layout...</option>
@@ -1683,8 +1683,8 @@ export default function AdminTemplatesPage() {
                     <div
                       className={`relative border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
                         dragActiveTemplate
-                          ? "border-[#0891B2] bg-[#0891B2]/10"
-                          : "border-[var(--border)] hover:border-[#0891B2]/50"
+                          ? "border-[#069494] bg-[#069494]/10"
+                          : "border-[var(--border)] hover:border-[#069494]/50"
                       }`}
                       onDragEnter={(e) => handleDrag(e, "template")}
                       onDragLeave={(e) => handleDrag(e, "template")}
@@ -1715,7 +1715,7 @@ export default function AdminTemplatesPage() {
                           <button
                             type="button"
                             onClick={() => templateFileRef.current?.click()}
-                            className="text-sm text-[#0891B2] hover:underline"
+                            className="text-sm text-[#069494] hover:underline"
                           >
                             Change
                           </button>
@@ -1731,7 +1731,7 @@ export default function AdminTemplatesPage() {
                           <button
                             type="button"
                             onClick={() => templateFileRef.current?.click()}
-                            className="text-sm text-[#0891B2] hover:underline"
+                            className="text-sm text-[#069494] hover:underline"
                           >
                             Replace
                           </button>
@@ -1757,7 +1757,7 @@ export default function AdminTemplatesPage() {
                             <button
                               type="button"
                               onClick={() => templateFileRef.current?.click()}
-                              className="text-[#0891B2] hover:underline"
+                              className="text-[#069494] hover:underline"
                             >
                               Upload template
                             </button>
@@ -1774,8 +1774,8 @@ export default function AdminTemplatesPage() {
                     <div
                       className={`relative border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
                         dragActivePreview
-                          ? "border-[#0891B2] bg-[#0891B2]/10"
-                          : "border-[var(--border)] hover:border-[#0891B2]/50"
+                          ? "border-[#069494] bg-[#069494]/10"
+                          : "border-[var(--border)] hover:border-[#069494]/50"
                       }`}
                       onDragEnter={(e) => handleDrag(e, "preview")}
                       onDragLeave={(e) => handleDrag(e, "preview")}
@@ -1806,7 +1806,7 @@ export default function AdminTemplatesPage() {
                           <button
                             type="button"
                             onClick={() => previewFileRef.current?.click()}
-                            className="text-sm text-[#0891B2] hover:underline"
+                            className="text-sm text-[#069494] hover:underline"
                           >
                             Change
                           </button>
@@ -1822,7 +1822,7 @@ export default function AdminTemplatesPage() {
                           <button
                             type="button"
                             onClick={() => previewFileRef.current?.click()}
-                            className="text-sm text-[#0891B2] hover:underline"
+                            className="text-sm text-[#069494] hover:underline"
                           >
                             Replace
                           </button>
@@ -1848,7 +1848,7 @@ export default function AdminTemplatesPage() {
                             <button
                               type="button"
                               onClick={() => previewFileRef.current?.click()}
-                              className="text-[#0891B2] hover:underline"
+                              className="text-[#069494] hover:underline"
                             >
                               Upload thumbnail
                             </button>
@@ -1865,8 +1865,8 @@ export default function AdminTemplatesPage() {
                   <div
                     className={`relative border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
                       dragActiveOverlay
-                        ? "border-[#0891B2] bg-[#0891B2]/10"
-                        : "border-[var(--border)] hover:border-[#0891B2]/50"
+                        ? "border-[#069494] bg-[#069494]/10"
+                        : "border-[var(--border)] hover:border-[#069494]/50"
                     }`}
                     onDragEnter={(e) => handleDrag(e, "overlay")}
                     onDragLeave={(e) => handleDrag(e, "overlay")}
@@ -1897,7 +1897,7 @@ export default function AdminTemplatesPage() {
                         <button
                           type="button"
                           onClick={() => overlayFileRef.current?.click()}
-                          className="text-sm text-[#0891B2] hover:underline flex-shrink-0"
+                          className="text-sm text-[#069494] hover:underline flex-shrink-0"
                         >
                           Change
                         </button>
@@ -1920,7 +1920,7 @@ export default function AdminTemplatesPage() {
                         <button
                           type="button"
                           onClick={() => overlayFileRef.current?.click()}
-                          className="text-sm text-[#0891B2] hover:underline flex-shrink-0"
+                          className="text-sm text-[#069494] hover:underline flex-shrink-0"
                         >
                           Replace
                         </button>
@@ -1953,7 +1953,7 @@ export default function AdminTemplatesPage() {
                           <button
                             type="button"
                             onClick={() => overlayFileRef.current?.click()}
-                            className="text-[#0891B2] hover:underline"
+                            className="text-[#069494] hover:underline"
                           >
                             Upload overlay
                           </button>
@@ -1970,7 +1970,7 @@ export default function AdminTemplatesPage() {
                     type="text"
                     value={templateFormData.price}
                     onChange={(e) => setTemplateFormData((prev) => ({ ...prev, price: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#0891B2]"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
                     placeholder="0.00"
                   />
                   <p className="text-xs text-zinc-500 mt-1">Set to 0.00 for free templates</p>
@@ -1982,7 +1982,7 @@ export default function AdminTemplatesPage() {
                     min="0"
                     value={templateFormData.sort_order}
                     onChange={(e) => setTemplateFormData((prev) => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#0891B2]"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
                     placeholder="0"
                   />
                   <p className="text-xs text-zinc-500 mt-1">Lower numbers appear first</p>
@@ -2014,7 +2014,7 @@ export default function AdminTemplatesPage() {
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyDown={handleTagKeyDown}
-                    className="flex-1 px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#0891B2]"
+                    className="flex-1 px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
                     placeholder="Add tag and press Enter"
                   />
                   <button
@@ -2039,7 +2039,7 @@ export default function AdminTemplatesPage() {
                 type="button"
                 onClick={handleSaveTemplate}
                 disabled={uploadMutation.isPending || updateTemplateMutation.isPending}
-                className="px-6 py-2.5 rounded-xl bg-[#0891B2] text-white font-medium hover:bg-[#0E7490] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-6 py-2.5 rounded-xl bg-[#069494] text-white font-medium hover:bg-[#176161] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {(uploadMutation.isPending || updateTemplateMutation.isPending) && (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -2159,7 +2159,7 @@ export default function AdminTemplatesPage() {
                     type="checkbox"
                     checked={categoryFormData.is_active}
                     onChange={(e) => setCategoryFormData({ ...categoryFormData, is_active: e.target.checked })}
-                    className="w-4 h-4 rounded border-slate-300 text-[#0891B2] focus:ring-[#0891B2]"
+                    className="w-4 h-4 rounded border-slate-300 text-[#069494] focus:ring-[#069494]"
                   />
                   <span className="text-sm text-zinc-700 dark:text-zinc-300">Active</span>
                 </label>
@@ -2168,7 +2168,7 @@ export default function AdminTemplatesPage() {
                     type="checkbox"
                     checked={categoryFormData.is_premium}
                     onChange={(e) => setCategoryFormData({ ...categoryFormData, is_premium: e.target.checked })}
-                    className="w-4 h-4 rounded border-slate-300 text-[#0891B2] focus:ring-[#0891B2]"
+                    className="w-4 h-4 rounded border-slate-300 text-[#069494] focus:ring-[#069494]"
                   />
                   <span className="text-sm text-zinc-700 dark:text-zinc-300">Premium</span>
                 </label>
@@ -2177,7 +2177,7 @@ export default function AdminTemplatesPage() {
                     type="checkbox"
                     checked={categoryFormData.is_seasonal_category}
                     onChange={(e) => setCategoryFormData({ ...categoryFormData, is_seasonal_category: e.target.checked })}
-                    className="w-4 h-4 rounded border-slate-300 text-[#0891B2] focus:ring-[#0891B2]"
+                    className="w-4 h-4 rounded border-slate-300 text-[#069494] focus:ring-[#069494]"
                   />
                   <span className="text-sm text-zinc-700 dark:text-zinc-300">Seasonal</span>
                 </label>
@@ -2221,7 +2221,7 @@ export default function AdminTemplatesPage() {
                 <button
                   type="submit"
                   disabled={createCategoryMutation.isPending || updateCategoryMutation.isPending}
-                  className="flex-1 px-4 py-2.5 rounded-lg bg-[#0891B2] text-white font-medium hover:bg-[#0E7490] disabled:opacity-50"
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-[#069494] text-white font-medium hover:bg-[#176161] disabled:opacity-50"
                 >
                   {createCategoryMutation.isPending || updateCategoryMutation.isPending ? "Saving..." : "Save"}
                 </button>
@@ -2366,7 +2366,7 @@ export default function AdminTemplatesPage() {
                     type="checkbox"
                     checked={layoutFormData.is_active}
                     onChange={(e) => setLayoutFormData({ ...layoutFormData, is_active: e.target.checked })}
-                    className="w-4 h-4 rounded border-slate-300 text-[#0891B2] focus:ring-[#0891B2]"
+                    className="w-4 h-4 rounded border-slate-300 text-[#069494] focus:ring-[#069494]"
                   />
                   <span className="text-sm text-zinc-700 dark:text-zinc-300">Active</span>
                 </label>
@@ -2390,7 +2390,7 @@ export default function AdminTemplatesPage() {
                             ],
                           }))
                         }
-                        className="text-xs px-2.5 py-1 rounded-lg bg-[#0891B2] text-white hover:bg-[#0E7490]"
+                        className="text-xs px-2.5 py-1 rounded-lg bg-[#069494] text-white hover:bg-[#176161]"
                       >
                         + Add Photo Area
                       </button>
@@ -2577,7 +2577,7 @@ export default function AdminTemplatesPage() {
                 <button
                   type="submit"
                   disabled={createLayoutMutation.isPending || updateLayoutMutation.isPending}
-                  className="flex-1 px-4 py-2.5 rounded-lg bg-[#0891B2] text-white font-medium hover:bg-[#0E7490] disabled:opacity-50"
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-[#069494] text-white font-medium hover:bg-[#176161] disabled:opacity-50"
                 >
                   {createLayoutMutation.isPending || updateLayoutMutation.isPending ? "Saving..." : "Save"}
                 </button>
@@ -2699,7 +2699,7 @@ export default function AdminTemplatesPage() {
                 <button
                   type="submit"
                   disabled={addPhotoAreaMutation.isPending}
-                  className="flex-1 px-4 py-2.5 rounded-lg bg-[#0891B2] text-white font-medium hover:bg-[#0E7490] disabled:opacity-50"
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-[#069494] text-white font-medium hover:bg-[#176161] disabled:opacity-50"
                 >
                   {addPhotoAreaMutation.isPending ? "Adding..." : "Add"}
                 </button>
@@ -2821,7 +2821,7 @@ export default function AdminTemplatesPage() {
                 <button
                   type="submit"
                   disabled={updatePhotoAreaMutation.isPending}
-                  className="flex-1 px-4 py-2.5 rounded-lg bg-[#0891B2] text-white font-medium hover:bg-[#0E7490] disabled:opacity-50"
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-[#069494] text-white font-medium hover:bg-[#176161] disabled:opacity-50"
                 >
                   {updatePhotoAreaMutation.isPending ? "Saving..." : "Save Changes"}
                 </button>

@@ -276,7 +276,7 @@ export function QuickViewModal({ template, isOpen, onClose }: QuickViewModalProp
                   </span>
                 )}
                 {isFree && (
-                  <span className="px-3 py-1 rounded-full bg-[#0891B2] text-white text-sm font-semibold">
+                  <span className="px-3 py-1 rounded-full bg-[#069494] text-white text-sm font-semibold">
                     Free
                   </span>
                 )}
@@ -378,7 +378,7 @@ export function QuickViewModal({ template, isOpen, onClose }: QuickViewModalProp
               className={`w-full py-4 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 ${
                 inCart
                   ? "bg-[#10B981] text-white hover:bg-[#059669]"
-                  : "bg-[#0891B2] text-white hover:bg-[#0E7490]"
+                  : "bg-[#069494] text-white hover:bg-[#176161]"
               }`}
             >
               {inCart ? (
@@ -453,10 +453,10 @@ export function QuickViewModal({ template, isOpen, onClose }: QuickViewModalProp
                         <form
                           key={review.id}
                           onSubmit={handleUpdateReview}
-                          className="p-4 rounded-xl bg-[var(--card)] border-2 border-[#0891B2]/30 space-y-3"
+                          className="p-4 rounded-xl bg-[var(--card)] border-2 border-[#069494]/30 space-y-3"
                         >
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium text-[#0891B2]">Editing your review</span>
+                            <span className="text-xs font-medium text-[#069494]">Editing your review</span>
                             <button
                               type="button"
                               onClick={cancelEditing}
@@ -477,14 +477,14 @@ export function QuickViewModal({ template, isOpen, onClose }: QuickViewModalProp
                             value={editTitle}
                             onChange={(e) => setEditTitle(e.target.value)}
                             placeholder="Title (optional)"
-                            className="w-full px-3 py-2 rounded-lg bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)] placeholder-[var(--muted)] text-sm focus:outline-none focus:ring-2 focus:ring-[#0891B2]/50"
+                            className="w-full px-3 py-2 rounded-lg bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)] placeholder-[var(--muted)] text-sm focus:outline-none focus:ring-2 focus:ring-[#069494]/50"
                           />
                           <textarea
                             value={editComment}
                             onChange={(e) => setEditComment(e.target.value)}
                             placeholder="Comment (optional)"
                             rows={2}
-                            className="w-full px-3 py-2 rounded-lg bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)] placeholder-[var(--muted)] text-sm focus:outline-none focus:ring-2 focus:ring-[#0891B2]/50 resize-none"
+                            className="w-full px-3 py-2 rounded-lg bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)] placeholder-[var(--muted)] text-sm focus:outline-none focus:ring-2 focus:ring-[#069494]/50 resize-none"
                           />
                           {editError && (
                             <p className="text-xs text-[#EF4444]">{editError}</p>
@@ -492,7 +492,7 @@ export function QuickViewModal({ template, isOpen, onClose }: QuickViewModalProp
                           <button
                             type="submit"
                             disabled={updateReviewMutation.isPending}
-                            className="w-full py-2 rounded-lg bg-[#0891B2] text-white text-sm font-semibold hover:bg-[#0E7490] transition-colors disabled:opacity-50"
+                            className="w-full py-2 rounded-lg bg-[#069494] text-white text-sm font-semibold hover:bg-[#176161] transition-colors disabled:opacity-50"
                           >
                             {updateReviewMutation.isPending ? "Saving..." : "Save Changes"}
                           </button>
@@ -549,7 +549,7 @@ export function QuickViewModal({ template, isOpen, onClose }: QuickViewModalProp
                                 <button
                                   type="button"
                                   onClick={() => startEditing(review)}
-                                  className="text-xs text-[#0891B2] hover:underline"
+                                  className="text-xs text-[#069494] hover:underline"
                                 >
                                   Edit
                                 </button>
@@ -578,7 +578,7 @@ export function QuickViewModal({ template, isOpen, onClose }: QuickViewModalProp
                           </p>
                         )}
                         {isOwn && (
-                          <span className="inline-block mt-1 text-xs text-[#0891B2]">Your review</span>
+                          <span className="inline-block mt-1 text-xs text-[#069494]">Your review</span>
                         )}
                       </div>
                     );
@@ -634,7 +634,7 @@ export function QuickViewModal({ template, isOpen, onClose }: QuickViewModalProp
                         value={reviewTitle}
                         onChange={(e) => setReviewTitle(e.target.value)}
                         placeholder="Summarize your experience"
-                        className="w-full px-4 py-2.5 rounded-xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] placeholder-[var(--muted)] text-sm focus:outline-none focus:ring-2 focus:ring-[#0891B2]/50 focus:border-[#0891B2]"
+                        className="w-full px-4 py-2.5 rounded-xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] placeholder-[var(--muted)] text-sm focus:outline-none focus:ring-2 focus:ring-[#069494]/50 focus:border-[#069494]"
                       />
                     </div>
 
@@ -649,7 +649,7 @@ export function QuickViewModal({ template, isOpen, onClose }: QuickViewModalProp
                         onChange={(e) => setReviewComment(e.target.value)}
                         placeholder="Tell others about your experience..."
                         rows={3}
-                        className="w-full px-4 py-2.5 rounded-xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] placeholder-[var(--muted)] text-sm focus:outline-none focus:ring-2 focus:ring-[#0891B2]/50 focus:border-[#0891B2] resize-none"
+                        className="w-full px-4 py-2.5 rounded-xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] placeholder-[var(--muted)] text-sm focus:outline-none focus:ring-2 focus:ring-[#069494]/50 focus:border-[#069494] resize-none"
                       />
                     </div>
 

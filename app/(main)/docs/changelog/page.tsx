@@ -74,7 +74,7 @@ export default function ChangelogPage() {
       <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
         {/* Header Skeleton */}
         <section className="relative pt-16 pb-12 px-6 overflow-hidden">
-          <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[#0891B2]/10 blur-[200px] rounded-full" />
+          <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[#069494]/10 blur-[200px] rounded-full" />
 
           <div className="relative max-w-4xl mx-auto">
             <div className="h-5 w-32 bg-[var(--card)] rounded animate-pulse mb-8" />
@@ -89,7 +89,7 @@ export default function ChangelogPage() {
           <div className="max-w-4xl mx-auto">
             <div className="relative">
               {/* Timeline line */}
-              <div className="absolute left-[19px] top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#0891B2] via-[#0891B2]/50 to-transparent" />
+              <div className="absolute left-[19px] top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#069494] via-[#069494]/50 to-transparent" />
 
               <div className="space-y-12">
                 {[1, 2, 3, 4].map((i) => (
@@ -152,7 +152,7 @@ export default function ChangelogPage() {
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="px-6 py-3 rounded-xl bg-[#0891B2] text-white font-medium hover:bg-[#0E7490] transition-colors"
+            className="px-6 py-3 rounded-xl bg-[#069494] text-white font-medium hover:bg-[#176161] transition-colors"
           >
             Try Again
           </button>
@@ -167,7 +167,7 @@ export default function ChangelogPage() {
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       {/* Header */}
       <section className="relative pt-16 pb-12 px-6 overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[#0891B2]/10 blur-[200px] rounded-full" />
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[#069494]/10 blur-[200px] rounded-full" />
 
         <div className="relative max-w-4xl mx-auto">
           <Link
@@ -180,7 +180,7 @@ export default function ChangelogPage() {
             Back to Downloads
           </Link>
 
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0891B2]/10 border border-[#0891B2]/20 text-[#22D3EE] text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#176161] dark:text-[#0EC7C7] text-sm font-medium mb-6">
             <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -199,7 +199,7 @@ export default function ChangelogPage() {
         <div className="max-w-4xl mx-auto">
           <div className="relative">
             {/* Timeline line */}
-            <div className="absolute left-[19px] top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#0891B2] via-[#0891B2]/50 to-transparent" />
+            <div className="absolute left-[19px] top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#069494] via-[#069494]/50 to-transparent" />
 
             <div className="space-y-12">
               {releases.map((release, index) => {
@@ -217,7 +217,7 @@ export default function ChangelogPage() {
                     <div className={`absolute left-0 w-10 h-10 rounded-full flex items-center justify-center ${
                       isLatest
                         ? "bg-[#10B981] text-white"
-                        : "bg-[var(--card)] border-2 border-[#0891B2]/30 text-[#0891B2]"
+                        : "bg-[var(--card)] border-2 border-[#069494]/30 text-[#069494]"
                     }`}>
                       {isLatest ? (
                         <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -280,7 +280,7 @@ export default function ChangelogPage() {
                         {release.body_html ? (
                           // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is from GitHub API (trusted source)
                           <div
-                            className="prose prose-zinc dark:prose-invert max-w-none prose-sm prose-headings:font-semibold prose-h2:text-lg prose-h3:text-base prose-a:text-[#0891B2] prose-ul:list-disc prose-li:marker:text-[#10B981]"
+                            className="prose prose-zinc dark:prose-invert max-w-none prose-sm prose-headings:font-semibold prose-h2:text-lg prose-h3:text-base prose-a:text-[#069494] prose-ul:list-disc prose-li:marker:text-[#10B981]"
                             // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is from GitHub API (trusted source)
                             dangerouslySetInnerHTML={{ __html: release.body_html }}
                           />
@@ -300,7 +300,7 @@ export default function ChangelogPage() {
                         <div className="px-6 pb-6">
                           <a
                             href={downloadUrl}
-                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0891B2] text-white font-medium hover:bg-[#0E7490] transition-colors"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#069494] text-white font-medium hover:bg-[#176161] transition-colors"
                           >
                             <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />

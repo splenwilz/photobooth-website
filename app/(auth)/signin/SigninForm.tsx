@@ -66,7 +66,7 @@ export function SigninForm({ resetSuccess }: { resetSuccess?: boolean }) {
           placeholder="you@company.com"
           required
           disabled={isPending}
-          className="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] focus:ring-1 focus:ring-[#0891B2] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         />
       </div>
 
@@ -75,7 +75,7 @@ export function SigninForm({ resetSuccess }: { resetSuccess?: boolean }) {
           <label htmlFor="password" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
             Password
           </label>
-          <Link href="/forgot-password" className="text-sm text-[#0891B2] hover:text-[#22D3EE] transition-colors">
+          <Link href="/forgot-password" className="text-sm text-[#069494] hover:text-[#0EC7C7] transition-colors">
             Forgot password?
           </Link>
         </div>
@@ -88,7 +88,7 @@ export function SigninForm({ resetSuccess }: { resetSuccess?: boolean }) {
             required
             minLength={8}
             disabled={isPending}
-            className="w-full px-4 py-3.5 pr-12 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#0891B2] focus:ring-1 focus:ring-[#0891B2] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full px-4 py-3.5 pr-12 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           />
           <button
             type="button"
@@ -115,7 +115,7 @@ export function SigninForm({ resetSuccess }: { resetSuccess?: boolean }) {
           type="checkbox"
           id="remember"
           name="remember"
-          className="w-4 h-4 rounded bg-white dark:bg-[#111111] border-slate-200 dark:border-zinc-800 text-[#0891B2] focus:ring-[#0891B2] focus:ring-offset-0"
+          className="w-4 h-4 rounded bg-white dark:bg-[#111111] border-slate-200 dark:border-zinc-800 text-[#069494] focus:ring-[#069494] focus:ring-offset-0"
         />
         <label htmlFor="remember" className="text-sm text-zinc-500">
           Remember me for 30 days
@@ -125,7 +125,7 @@ export function SigninForm({ resetSuccess }: { resetSuccess?: boolean }) {
       <button
         type="submit"
         disabled={isPending}
-        className="w-full py-4 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-all shadow-lg shadow-[#0891B2]/20 hover:shadow-[#0891B2]/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#0891B2] flex items-center justify-center gap-2"
+        className="w-full py-4 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-all shadow-lg shadow-[#069494]/20 hover:shadow-[#069494]/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#069494] flex items-center justify-center gap-2"
       >
         {isPending ? (
           <>

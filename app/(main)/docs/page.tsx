@@ -56,7 +56,7 @@ const sections = [
     title: "Camera & Capture",
     description: "Configure cameras and capture settings",
     icon: "📷",
-    color: "#0891B2",
+    color: "#069494",
     links: [
       { href: "/docs/camera-setup", label: "Camera Configuration", badge: "Popular" },
       { href: "/docs/supported-cameras", label: "Supported Cameras" },
@@ -217,12 +217,12 @@ export default function DocsPage() {
        * ============================================ */}
       <section className="relative pt-16 pb-20 px-6 overflow-hidden">
         {/* Background effects */}
-        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#0891B2]/10 blur-[200px] rounded-full" />
+        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#069494]/10 blur-[200px] rounded-full" />
         <div className="absolute bottom-0 right-1/3 w-[400px] h-[400px] bg-[#A855F7]/10 blur-[150px] rounded-full" />
 
         <div className="relative max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0891B2]/10 border border-[#0891B2]/20 text-[#22D3EE] text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#176161] dark:text-[#0EC7C7] text-sm font-medium mb-6">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
@@ -239,7 +239,7 @@ export default function DocsPage() {
           {/* Search Bar */}
           <div className="max-w-2xl mx-auto mb-16">
             <div className="relative group">
-              <div className="absolute inset-0 bg-[#0891B2]/20 blur-xl rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 bg-[#069494]/20 blur-xl rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative">
                 <svg className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -247,7 +247,7 @@ export default function DocsPage() {
                 <input
                   type="text"
                   placeholder="Search documentation... (e.g., printer setup, camera config)"
-                  className="w-full pl-14 pr-20 py-4 rounded-2xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] placeholder-zinc-500 focus:outline-none focus:border-[#0891B2]/50 focus:ring-2 focus:ring-[#0891B2]/20 transition-all text-lg"
+                  className="w-full pl-14 pr-20 py-4 rounded-2xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] placeholder-zinc-500 focus:outline-none focus:border-[#069494]/50 focus:ring-2 focus:ring-[#069494]/20 transition-all text-lg"
                 />
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
                   <span className="text-xs text-[var(--muted)] border border-[var(--border)] px-2 py-1 rounded-md font-mono">
@@ -299,7 +299,7 @@ export default function DocsPage() {
                 >
                   {/* Step number */}
                   <div className="relative flex justify-center md:justify-start mb-4">
-                    <div className="w-16 h-16 rounded-2xl bg-[#0891B2]/10 border border-[#0891B2]/30 flex items-center justify-center text-2xl font-bold text-[#0891B2] group-hover:bg-[#0891B2] group-hover:text-white transition-all z-10">
+                    <div className="w-16 h-16 rounded-2xl bg-[#069494]/10 border border-[#069494]/30 flex items-center justify-center text-2xl font-bold text-[#069494] group-hover:bg-[#069494] group-hover:text-white transition-all z-10">
                       {step.step}
                     </div>
                     {/* Connector line - mobile */}
@@ -309,10 +309,10 @@ export default function DocsPage() {
                   </div>
 
                   {/* Content */}
-                  <div className="text-center md:text-left p-4 rounded-xl bg-[var(--background)] border border-[var(--border)] group-hover:border-[#0891B2]/30 transition-colors">
+                  <div className="text-center md:text-left p-4 rounded-xl bg-[var(--background)] border border-[var(--border)] group-hover:border-[#069494]/30 transition-colors">
                     <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                      <h3 className="font-semibold group-hover:text-[#22D3EE] transition-colors">{step.title}</h3>
-                      <span className="px-2 py-0.5 rounded-full bg-[#0891B2]/10 text-[#0891B2] text-xs">{step.time}</span>
+                      <h3 className="font-semibold group-hover:text-[#176161] dark:group-hover:text-[#0EC7C7] transition-colors">{step.title}</h3>
+                      <span className="px-2 py-0.5 rounded-full bg-[#069494]/10 text-[#069494] text-xs">{step.time}</span>
                     </div>
                     <p className="text-sm text-[var(--muted)]">{step.description}</p>
                   </div>
@@ -328,7 +328,7 @@ export default function DocsPage() {
        * ============================================ */}
       <section className="py-24 px-6 relative overflow-hidden">
         {/* Background effects */}
-        <div className="absolute top-1/4 left-0 w-[500px] h-[500px] bg-[#0891B2]/5 blur-[200px] rounded-full" />
+        <div className="absolute top-1/4 left-0 w-[500px] h-[500px] bg-[#069494]/5 blur-[200px] rounded-full" />
         <div className="absolute bottom-1/4 right-0 w-[400px] h-[400px] bg-[#A855F7]/5 blur-[150px] rounded-full" />
 
         <div className="relative max-w-6xl mx-auto">
@@ -498,7 +498,7 @@ export default function DocsPage() {
             ].map((stat) => (
               <div key={stat.label} className="text-center p-4 rounded-2xl bg-[var(--card)] border border-[var(--border)]">
                 <span className="text-lg block mb-1">{stat.icon}</span>
-                <div className="text-lg font-bold text-[#0891B2]">{stat.value}</div>
+                <div className="text-lg font-bold text-[#069494]">{stat.value}</div>
                 <div className="text-xs text-[var(--muted)]">{stat.label}</div>
               </div>
             ))}
@@ -663,13 +663,13 @@ export default function DocsPage() {
        * ============================================ */}
       <section className="py-24 px-6 relative overflow-hidden">
         {/* Background decoration */}
-        <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[#0891B2]/5 blur-[150px] rounded-full -translate-y-1/2" />
+        <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[#069494]/5 blur-[150px] rounded-full -translate-y-1/2" />
         <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-[#F59E0B]/5 blur-[120px] rounded-full" />
         
         <div className="relative max-w-5xl mx-auto">
           {/* Header */}
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0891B2]/10 border border-[#0891B2]/20 text-[#22D3EE] text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#176161] dark:text-[#0EC7C7] text-sm font-medium mb-6">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -690,7 +690,7 @@ export default function DocsPage() {
                 key={faq.question}
                 className={`group rounded-2xl border overflow-hidden transition-all ${
                   openFaq === index 
-                    ? "bg-[#0891B2]/5 border-[#0891B2]/30" 
+                    ? "bg-[#069494]/5 border-[#069494]/30" 
                     : "bg-[var(--card)] border-[var(--border)] hover:border-[var(--border)]"
                 }`}
               >
@@ -702,21 +702,21 @@ export default function DocsPage() {
                   {/* Number badge */}
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 transition-colors ${
                     openFaq === index
-                      ? "bg-[#0891B2] text-white"
-                      : "bg-slate-200 dark:bg-zinc-800 text-[var(--muted)] group-hover:bg-[#0891B2]/20 group-hover:text-[#0891B2]"
+                      ? "bg-[#069494] text-white"
+                      : "bg-slate-200 dark:bg-zinc-800 text-[var(--muted)] group-hover:bg-[#069494]/20 group-hover:text-[#069494]"
                   }`}>
                     {String(index + 1).padStart(2, "0")}
                   </div>
                   <div className="flex-1">
                     <span className={`font-semibold block transition-colors ${
-                      openFaq === index ? "text-[#0891B2] dark:text-[#22D3EE]" : "text-zinc-900 dark:text-white group-hover:text-[#0891B2] dark:group-hover:text-[#22D3EE]"
+                      openFaq === index ? "text-[#069494] dark:text-[#0EC7C7]" : "text-zinc-900 dark:text-white group-hover:text-[#069494] dark:group-hover:text-[#0EC7C7]"
                     }`}>
                       {faq.question}
                     </span>
                   </div>
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${
                     openFaq === index
-                      ? "bg-[#0891B2]/20 rotate-180"
+                      ? "bg-[#069494]/20 rotate-180"
                       : "bg-slate-200 dark:bg-zinc-800 group-hover:bg-slate-300 dark:group-hover:bg-zinc-700"
                   }`}>
                     <svg 
@@ -744,8 +744,8 @@ export default function DocsPage() {
           {/* Still have questions */}
           <div className="mt-12 text-center">
             <div className="inline-flex flex-col sm:flex-row items-center gap-4 p-4 sm:p-6 rounded-2xl bg-[var(--card)] border border-[var(--border)]">
-              <div className="w-12 h-12 rounded-xl bg-[#0891B2]/10 flex items-center justify-center">
-                <svg className="w-6 h-6 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <div className="w-12 h-12 rounded-xl bg-[#069494]/10 flex items-center justify-center">
+                <svg className="w-6 h-6 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
               </div>
@@ -755,7 +755,7 @@ export default function DocsPage() {
               </div>
               <Link
                 href="/support"
-                className="sm:ml-4 px-5 py-2.5 rounded-xl bg-[#0891B2] text-white font-semibold hover:bg-[#0E7490] transition-colors"
+                className="sm:ml-4 px-5 py-2.5 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors"
               >
                 Contact Support
               </Link>
@@ -770,7 +770,7 @@ export default function DocsPage() {
       <section className="py-24 px-6 relative overflow-hidden">
         {/* Background */}
         <div className="absolute inset-0 bg-gradient-to-b from-slate-100 via-slate-50 to-slate-100 dark:from-[#0a0a0a] dark:via-[#111111]/30 dark:to-[#0a0a0a]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#0891B2]/5 blur-[200px] rounded-full" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#069494]/5 blur-[200px] rounded-full" />
 
         <div className="relative max-w-6xl mx-auto">
           {/* Header */}
@@ -794,13 +794,13 @@ export default function DocsPage() {
             {/* Support Card */}
             <div className="group relative rounded-3xl overflow-hidden">
               {/* Background gradient */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#0891B2]/20 via-slate-100 to-slate-100 dark:via-[#111111] dark:to-[#111111]" />
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#0891B2]/30 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 bg-gradient-to-br from-[#069494]/20 via-slate-100 to-slate-100 dark:via-[#111111] dark:to-[#111111]" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#069494]/30 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
               
-              <div className="relative h-full p-8 border border-[#0891B2]/20 rounded-3xl group-hover:border-[#0891B2]/40 transition-colors">
+              <div className="relative h-full p-8 border border-[#069494]/20 rounded-3xl group-hover:border-[#069494]/40 transition-colors">
                 {/* Icon */}
-                <div className="w-16 h-16 rounded-2xl bg-[#0891B2]/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <svg className="w-8 h-8 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <div className="w-16 h-16 rounded-2xl bg-[#069494]/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <svg className="w-8 h-8 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
                 </div>
@@ -811,7 +811,7 @@ export default function DocsPage() {
                   24/7 Available
                 </div>
 
-                <h3 className="text-xl font-bold mb-2 group-hover:text-[#22D3EE] transition-colors">Need Help?</h3>
+                <h3 className="text-xl font-bold mb-2 group-hover:text-[#176161] dark:group-hover:text-[#0EC7C7] transition-colors">Need Help?</h3>
                 <p className="text-[var(--muted)] text-sm mb-6 leading-relaxed">
                   Our expert support team responds within hours. Get personalized help with setup, troubleshooting, and optimization.
                 </p>
@@ -819,22 +819,22 @@ export default function DocsPage() {
                 {/* Stats */}
                 <div className="flex gap-4 mb-6 pb-6 border-b border-[var(--border)]">
                   <div>
-                    <div className="text-lg font-bold text-[#0891B2]">&lt;2h</div>
+                    <div className="text-lg font-bold text-[#069494]">&lt;2h</div>
                     <div className="text-xs text-[var(--muted)]">Response</div>
                   </div>
                   <div>
-                    <div className="text-lg font-bold text-[#0891B2]">98%</div>
+                    <div className="text-lg font-bold text-[#069494]">98%</div>
                     <div className="text-xs text-[var(--muted)]">Resolved</div>
                   </div>
                   <div>
-                    <div className="text-lg font-bold text-[#0891B2]">4.9★</div>
+                    <div className="text-lg font-bold text-[#069494]">4.9★</div>
                     <div className="text-xs text-[var(--muted)]">Rating</div>
                   </div>
                 </div>
 
                 <Link
                   href="/support"
-                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[#0891B2] text-white font-medium hover:bg-[#0E7490] transition-colors group-hover:shadow-lg group-hover:shadow-[#0891B2]/20"
+                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[#069494] text-white font-medium hover:bg-[#176161] transition-colors group-hover:shadow-lg group-hover:shadow-[#069494]/20"
                 >
                   Contact Support
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -925,7 +925,7 @@ export default function DocsPage() {
                   <div>
                     <span className="text-[#F59E0B]">GET</span>
                     <span className="text-[var(--muted)]">{` /api/v1/booths/`}</span>
-                    <span className="text-[#22D3EE]">:id</span>
+                    <span className="text-[#176161] dark:text-[#0EC7C7]">:id</span>
                   </div>
                 </div>
 
@@ -957,13 +957,13 @@ export default function DocsPage() {
               href="/docs/changelog"
               className="group flex items-center gap-4 p-4 rounded-2xl bg-[var(--card)] border border-[var(--border)] hover:border-[var(--border)] transition-colors"
             >
-              <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-[#0891B2]/20 transition-colors">
-                <svg className="w-5 h-5 text-[var(--muted)] group-hover:text-[#0891B2] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-[#069494]/20 transition-colors">
+                <svg className="w-5 h-5 text-[var(--muted)] group-hover:text-[#069494] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                 </svg>
               </div>
               <div>
-                <div className="font-medium text-sm group-hover:text-[#22D3EE] transition-colors">Changelog</div>
+                <div className="font-medium text-sm group-hover:text-[#176161] dark:group-hover:text-[#0EC7C7] transition-colors">Changelog</div>
                 <div className="text-xs text-[var(--muted)]">See what&apos;s new</div>
               </div>
             </Link>
