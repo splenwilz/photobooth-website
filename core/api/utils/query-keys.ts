@@ -131,13 +131,6 @@ export const queryKeys = {
 		all: () => ['settings'] as const,
 	},
 
-	// Business settings queries (user dashboard)
-	businessSettings: {
-		all: () => ['businessSettings'] as const,
-		userProfile: (userId: string) => ['businessSettings', 'userProfile', userId] as const,
-		boothSettings: (boothId: string) => ['businessSettings', 'booth', boothId] as const,
-	},
-
 	// Payment queries
 	payments: {
 		all: () => ['payments'] as const,

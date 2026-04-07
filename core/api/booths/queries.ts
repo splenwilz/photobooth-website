@@ -15,6 +15,7 @@ import {
 	restartBoothApp,
 	restartBoothSystem,
 	updateBoothPricing,
+	updateBoothSettings,
 } from "./services";
 import type {
 	BoothCredentialsResponse,
@@ -27,8 +28,13 @@ import type {
 	DownloadBoothLogsRequest,
 	GenerateCodeResponse,
 	RestartRequest,
+	UpdateBoothSettingsRequest,
 	UpdatePricingRequest,
 } from "./types";
+
+interface UpdateBoothSettingsContext {
+	previousOverview: BoothOverviewResponse | undefined;
+}
 
 /**
  * Booth React Query Hooks
@@ -246,6 +252,80 @@ export function useUpdatePricing() {
 				queryKey: queryKeys.booths.pricing(variables.boothId),
 			});
 			// Invalidate booth detail to refresh pricing info
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.booths.detail(variables.boothId),
+			});
+		},
+	});
+}
+
+/**
+ * Hook to update booth name and/or address (partial update)
+ *
+ * Optimistically patches the booth overview cache so the row updates instantly,
+ * then invalidates the overview and detail caches on settle to reconcile with
+ * the server. Rolls back on error.
+ *
+ * Usage:
+ * ```tsx
+ * const { mutate: updateBoothSettings, isPending, error } = useUpdateBoothSettings();
+ *
+ * updateBoothSettings({ boothId: 'booth-123', name: 'New Name', address: '123 St' }, {
+ *   onSuccess: () => alert('Saved'),
+ * });
+ * ```
+ *
+ * @returns React Query mutation for booth name/address updates
+ * @see PATCH /api/v1/booths/{booth_id}
+ */
+export function useUpdateBoothSettings() {
+	const queryClient = useQueryClient();
+
+	return useMutation<
+		unknown,
+		Error,
+		{ boothId: string } & UpdateBoothSettingsRequest,
+		UpdateBoothSettingsContext
+	>({
+		mutationFn: ({ boothId, ...data }) => updateBoothSettings(boothId, data),
+
+		onMutate: async ({ boothId, name, address }) => {
+			// Cancel in-flight overview refetches so they don't clobber our patch
+			await queryClient.cancelQueries({ queryKey: queryKeys.booths.all(), exact: true });
+
+			const previousOverview = queryClient.getQueryData<BoothOverviewResponse>(
+				queryKeys.booths.all(),
+			);
+
+			if (previousOverview) {
+				queryClient.setQueryData<BoothOverviewResponse>(queryKeys.booths.all(), {
+					...previousOverview,
+					booths: previousOverview.booths.map((b) =>
+						b.booth_id === boothId
+							? {
+									...b,
+									...(name !== undefined ? { booth_name: name } : {}),
+									...(address !== undefined ? { booth_address: address } : {}),
+								}
+							: b,
+					),
+				});
+			}
+
+			return { previousOverview };
+		},
+
+		onError: (_err, _vars, context) => {
+			// Roll back to the snapshot we took in onMutate
+			if (context?.previousOverview) {
+				queryClient.setQueryData(queryKeys.booths.all(), context.previousOverview);
+			}
+		},
+
+		onSettled: (_data, _error, variables) => {
+			// Reconcile with server (success OR error after rollback)
+			queryClient.invalidateQueries({ queryKey: queryKeys.booths.all(), exact: true });
+			queryClient.invalidateQueries({ queryKey: queryKeys.booths.list() });
 			queryClient.invalidateQueries({
 				queryKey: queryKeys.booths.detail(variables.boothId),
 			});
