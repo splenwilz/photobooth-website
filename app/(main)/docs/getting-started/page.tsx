@@ -1,200 +1,116 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { DocsLayout } from "@/components/docs/DocsLayout";
+import { getPrevNext } from "../_data/sidebar";
 
 export const metadata: Metadata = {
-  title: "Getting Started",
-  description: "Get your BoothIQ up and running in under 10 minutes. Step-by-step guide.",
+  title: "Getting Started — BoothIQ Docs",
+  description:
+    "Everything you need to unbox a BoothIQ kiosk, sign in to the admin dashboard, and print your first photo.",
 };
 
-const steps = [
-  {
-    number: "01",
-    title: "Download and Install",
-    content: `Download BoothIQ for your operating system from our downloads page. 
-    
-**Windows:** Run the installer and follow the prompts. BoothIQ will be installed to your Program Files folder.
+const HREF = "/docs/getting-started";
 
-**macOS:** Open the DMG file and drag BoothIQ to your Applications folder.
+const TOC = [
+  { id: "articles-in-this-section", label: "Articles in this section" },
+  { id: "who-this-section-is-for", label: "Who this section is for" },
+  { id: "what-youll-need-before-you-start", label: "What you'll need before you start" },
+] as const;
 
-The installation typically takes less than 2 minutes.`,
-  },
-  {
-    number: "02",
-    title: "Connect Your Camera",
-    content: `BoothIQ supports most DSLR cameras from Canon, Nikon, and Sony.
+export default function GettingStartedIndexPage() {
+  const { prev, next } = getPrevNext(HREF);
 
-1. Connect your camera via USB to your computer
-2. Turn on the camera and set it to PC/Tether mode
-3. BoothIQ will automatically detect the camera
-4. You should see a live preview in the app
-
-**Tip:** If using a webcam, it will be detected automatically - no configuration needed.`,
-  },
-  {
-    number: "03",
-    title: "Set Up Your Printer",
-    content: `For instant prints, connect a dye-sublimation printer.
-
-1. Install your printer's official drivers
-2. Connect the printer via USB
-3. In BoothIQ, go to Settings → Printer
-4. Select your printer from the dropdown
-5. Run a test print to verify
-
-**Supported printers:** DNP DS-RX1, DNP DS620, HiTi P525L, Mitsubishi CP-D70DW, and more.`,
-  },
-  {
-    number: "04",
-    title: "Choose a Template",
-    content: `BoothIQ comes with 100+ pre-built templates.
-
-1. Go to Templates in the main menu
-2. Browse by category (Strips, 4x6, Square, etc.)
-3. Click a template to preview it
-4. Click "Use Template" to activate it
-
-**Customization:** Click "Edit" on any template to add your own logos, text, and graphics.`,
-  },
-  {
-    number: "05",
-    title: "Configure Payments (Optional)",
-    content: `If you're running a paid booth, set up payments.
-
-1. Go to Settings → Payments
-2. Choose your payment method (Coin, Card, or Both)
-3. Set prices for each product type
-4. Run a test transaction
-
-**Free Play Mode:** For private events, enable Free Play in Settings to disable payments.`,
-  },
-  {
-    number: "06",
-    title: "Start Your Booth",
-    content: `You're ready to go!
-
-1. Click "Start Booth" on the main screen
-2. The attract screen will display, waiting for guests
-3. Guests tap the screen to start their session
-4. Photos are captured, displayed, and printed automatically
-
-**Pro Tip:** Download our mobile app to monitor your booth remotely during events.`,
-  },
-];
-
-export default function GettingStartedPage() {
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] pt-16 pb-24 px-6">
-      <div className="max-w-3xl mx-auto">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-[var(--muted)] mb-8">
-          <Link href="/docs" className="hover:text-[var(--foreground)]">Docs</Link>
-          <span>/</span>
-          <span className="text-[var(--foreground)]">Getting Started</span>
-        </div>
+    <DocsLayout toc={[...TOC]} prev={prev} next={next}>
+      <h1>Getting Started</h1>
 
-        {/* Header */}
-        <div className="mb-12">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-4">
-            Getting Started
-          </h1>
-          <p className="text-[var(--muted)]">
-            Get your BoothIQ up and running in under 10 minutes. 
-            This guide will walk you through the essential setup steps.
-          </p>
-        </div>
+      <p>
+        This is the place to start if you&apos;ve never used BoothIQ before.
+        By the end of this section your kiosk will be powered on, an admin
+        account will be set up, and you&apos;ll have printed your first
+        test photo.
+      </p>
 
-        {/* Prerequisites */}
-        <div className="p-6 rounded-xl border border-[#069494]/20 bg-[#069494]/5 mb-12">
-          <h2 className="font-semibold text-[#176161] dark:text-[#0EC7C7] mb-3">Before you start</h2>
-          <ul className="space-y-2 text-sm text-[var(--foreground-secondary)]">
-            <li className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-              A computer running Windows 10+ or macOS 12+
-            </li>
-            <li className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-              A DSLR camera or webcam (optional for testing)
-            </li>
-            <li className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-              A dye-sub printer (optional - can test without)
-            </li>
-          </ul>
-        </div>
+      <p>
+        A BoothIQ kiosk arrives <strong>pre-built and pre-installed</strong>.
+        You don&apos;t install software, you don&apos;t touch Windows, and
+        you don&apos;t wire any hardware inside the booth. Everything happens
+        through the BoothIQ app on the kiosk&apos;s own touchscreen.
+      </p>
 
-        {/* Steps */}
-        <div className="space-y-12">
-          {steps.map((step) => (
-            <div key={step.number} className="relative">
-              <div className="flex items-start gap-6">
-                <div className="shrink-0 w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-lg font-bold text-[var(--muted)]">
-                  {step.number}
-                </div>
-                <div className="flex-1 pt-2">
-                  <h2 className="text-xl font-semibold mb-4">{step.title}</h2>
-                  <div className="prose prose-invert prose-sm max-w-none">
-                    {step.content.split('\n\n').map((paragraph, i) => (
-                      <p key={i} className="text-[var(--muted)] whitespace-pre-line mb-4">
-                        {paragraph}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+      <h2 id="articles-in-this-section">Articles in this section</h2>
 
-        {/* Next Steps */}
-        <div className="mt-16 pt-12 border-t border-white/5">
-          <h2 className="text-xl font-semibold mb-6">Next Steps</h2>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <Link
-              href="/docs/camera-setup"
-              className="p-4 rounded-xl border border-white/10 bg-white/[0.02] hover:border-white/20 transition-colors"
-            >
-              <h3 className="font-medium mb-1">Camera Configuration →</h3>
-              <p className="text-sm text-[var(--muted)]">Fine-tune your camera settings</p>
-            </Link>
-            <Link
-              href="/docs/templates"
-              className="p-4 rounded-xl border border-white/10 bg-white/[0.02] hover:border-white/20 transition-colors"
-            >
-              <h3 className="font-medium mb-1">Using Templates →</h3>
-              <p className="text-sm text-[var(--muted)]">Create custom photo layouts</p>
-            </Link>
-            <Link
-              href="/docs/mobile-app"
-              className="p-4 rounded-xl border border-white/10 bg-white/[0.02] hover:border-white/20 transition-colors"
-            >
-              <h3 className="font-medium mb-1">Mobile App Guide →</h3>
-              <p className="text-sm text-[var(--muted)]">Monitor booths remotely</p>
-            </Link>
-            <Link
-              href="/docs/payment-setup"
-              className="p-4 rounded-xl border border-white/10 bg-white/[0.02] hover:border-white/20 transition-colors"
-            >
-              <h3 className="font-medium mb-1">Payment Setup →</h3>
-              <p className="text-sm text-[var(--muted)]">Configure coins and cards</p>
-            </Link>
-          </div>
-        </div>
+      <ol>
+        <li>
+          <Link href="/docs/getting-started/what-is-boothiq">
+            What is BoothIQ?
+          </Link>{" "}
+          — A plain-English overview of the product.
+        </li>
+        <li>
+          <Link href="/docs/getting-started/how-it-works">How it works</Link>{" "}
+          — A high-level walkthrough of the customer experience.
+        </li>
+        <li>
+          <Link href="/docs/getting-started/system-requirements">
+            Site and venue requirements
+          </Link>{" "}
+          — What your venue needs to provide for the kiosk.
+        </li>
+        <li>
+          <Link href="/docs/getting-started/what-is-in-the-box">
+            What&apos;s in the box
+          </Link>{" "}
+          — Components shipped with a BoothIQ kiosk.
+        </li>
+        <li>
+          <Link href="/docs/getting-started/first-time-setup">
+            First-time setup
+          </Link>{" "}
+          — Position the kiosk, plug it in, and reach the welcome screen.
+        </li>
+        <li>
+          <Link href="/docs/getting-started/first-login-and-password">
+            First login and password
+          </Link>{" "}
+          — Sign in to admin with the default account, change your password,
+          and set up a recovery PIN.
+        </li>
+        <li>
+          <Link href="/docs/getting-started/your-first-print">
+            Your first print
+          </Link>{" "}
+          — End-to-end smoke test from the welcome screen to a finished photo.
+        </li>
+      </ol>
 
-        {/* Help */}
-        <div className="mt-12 p-6 rounded-xl border border-white/10 bg-white/[0.02] text-center">
-          <p className="text-[var(--muted)]">
-            Need help? <Link href="/support" className="text-cyan-400 hover:text-cyan-300">Contact support</Link> or{" "}
-            <a href="https://discord.gg/boothiq" className="text-[#176161] dark:text-[#0EC7C7] hover:text-[#069494]">join our Discord</a>
-          </p>
-        </div>
-      </div>
-    </div>
+      <h2 id="who-this-section-is-for">Who this section is for</h2>
+
+      <p>
+        Venue operators who just received a kiosk and installers who are
+        placing one in a venue for the first time. You don&apos;t need any
+        computer experience — if you can plug in a power cable and tap a
+        touchscreen, you can finish this section.
+      </p>
+
+      <h2 id="what-youll-need-before-you-start">
+        What you&apos;ll need before you start
+      </h2>
+
+      <ul>
+        <li>The BoothIQ kiosk itself (delivered, still in its packaging is fine)</li>
+        <li>A wall outlet within reach of the spot you&apos;ve chosen</li>
+        <li>(Optional) A network connection — Wi-Fi credentials or an Ethernet drop</li>
+        <li>A few minutes to read each article</li>
+      </ul>
+
+      <p>
+        When you&apos;re ready, head to{" "}
+        <Link href="/docs/getting-started/what-is-boothiq">
+          What is BoothIQ?
+        </Link>{" "}
+        to start.
+      </p>
+    </DocsLayout>
   );
 }
-

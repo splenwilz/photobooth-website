@@ -88,13 +88,6 @@ function formatDownloadCount(count: number): string {
  * Static Data
  * ============================================ */
 
-const installSteps = [
-  { step: 1, title: "Download", description: "Download the Windows installer (.exe)", icon: "download" },
-  { step: 2, title: "Install", description: "Run the installer and follow the setup wizard", icon: "install" },
-  { step: 3, title: "Connect Hardware", description: "Plug in your camera (Logitech C920) and printer (DNP RX1hs)", icon: "hardware" },
-  { step: 4, title: "Start Earning", description: "Configure your booth settings and go live", icon: "rocket" },
-];
-
 const systemReqs = {
   minimum: {
     os: "Windows 10 (64-bit)",
@@ -111,13 +104,6 @@ const systemReqs = {
     usb: "USB 3.0 port",
   },
 };
-
-const downloadFeatures = [
-  "Full photo booth software",
-  "Template editor included",
-  "All printer drivers",
-  "Automatic updates",
-];
 
 /* ============================================
  * Main Component
@@ -149,7 +135,6 @@ export default function DownloadsPage() {
   // Computed display values
   const version = latestRelease?.tag_name.replace(/^v/, "");
   const releaseDate = latestRelease ? formatReleaseDate(latestRelease.published_at) : null;
-  const shortDate = latestRelease ? formatShortDate(latestRelease.published_at) : null;
   const downloadUrl = windowsAsset ? getAssetDownloadUrl(windowsAsset.id) : "#";
   const fileSize = windowsAsset ? formatFileSize(windowsAsset.size) : null;
   const downloadsDisplay = latestRelease
@@ -159,33 +144,44 @@ export default function DownloadsPage() {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       {/* ============================================
-       * Hero Section - Static with dynamic values
+       * Hero Section
+       *
+       * Audience: existing operators who already have BoothIQ pre-installed
+       * on a BoothWorks booth and need an update or re-install. Also
+       * usable by BYO-hardware operators setting up on their own Windows
+       * machine. The page is NOT a "buy our software" funnel.
+       *
+       * Top padding clears the sticky navbar (~96-100px tall) on every
+       * breakpoint — same fix as the pricing/features hero.
        * ============================================ */}
-      <section className="relative pt-16 pb-20 px-6 overflow-hidden">
+      <section className="relative pt-28 sm:pt-32 lg:pt-36 pb-20 px-6 overflow-hidden">
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#069494]/10 blur-[200px] rounded-full" />
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-[#10B981]/10 blur-[150px] rounded-full" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-[#069494]/8 blur-[150px] rounded-full" />
 
         <div className="relative max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            {/* Version badge - dynamic */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] text-sm font-medium mb-6">
+          <div className="text-center">
+            {/* Version badge — dynamic version from API */}
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#069494] dark:text-[#0EC7C7] text-sm font-medium mb-6">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
-              Version {isLoadingLatest ? <Skeleton className="w-12 h-4" /> : version}
+              Latest version {isLoadingLatest ? <Skeleton className="w-12 h-4" /> : version}
             </div>
 
-            {/* Static title */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
               Download BoothIQ
             </h1>
 
-            {/* Static description */}
-            <p className="text-xl text-[var(--muted)] max-w-2xl mx-auto mb-8">
-              Get the desktop software for your photo booth and the mobile app to manage it from anywhere.
+            {/* Honest subhead — names the actual audience instead of the
+                generic "buy our software" pitch. Most operators already
+                have this installed; this page is for updates/reinstalls. */}
+            <p className="text-xl text-[var(--muted)] max-w-2xl mx-auto mb-10">
+              The Windows app that runs on your booth. Most BoothIQ booths
+              ship with it pre-installed by BoothWorks — this page is for
+              updates, re-installs, and bring-your-own-hardware setups.
             </p>
 
-            {/* Download button - dynamic values */}
+            {/* Download button — dynamic values */}
             <div className="flex flex-col items-center gap-4">
               {latestError ? (
                 <div className="text-center p-6 rounded-2xl bg-red-500/10 border border-red-500/20">
@@ -222,43 +218,16 @@ export default function DownloadsPage() {
                 </a>
               )}
 
-              <div className="flex items-center gap-4 text-sm text-[var(--muted)]">
-                <span className="flex items-center gap-1.5">
-                  <svg className="w-4 h-4 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
-                  Verified safe
-                </span>
-                <span>·</span>
-                <span>Windows 10/11</span>
+              {/* Honest meta line: only the things we can actually back.
+                  Drops "Verified safe" (stock claim) and the trial line. */}
+              <div className="flex items-center gap-3 text-sm text-[var(--muted)]">
+                <span>Windows 10 or later (64-bit)</span>
                 <span>·</span>
                 <span>
                   {isLoadingLatest ? <Skeleton className="w-16 h-4" /> : `${downloadsDisplay} downloads`}
                 </span>
               </div>
             </div>
-
-            <p className="text-sm text-[var(--muted)] mt-4">
-              Free 14-day trial · No credit card required
-            </p>
-          </div>
-
-          {/* Stats - mostly static */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
-            {[
-              { icon: "⬇️", value: isLoadingLatest ? null : downloadsDisplay, label: "Downloads" },
-              { icon: "⭐", value: "4.9", label: "Avg. Rating" },
-              { icon: "🌍", value: "50+", label: "Countries" },
-              { icon: "🔄", value: "Weekly", label: "Updates" },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center p-4 rounded-xl bg-[var(--card)]/50 border border-[var(--border)]/50">
-                <span className="text-2xl block mb-1">{stat.icon}</span>
-                <div className="text-xl font-bold text-[var(--foreground)]">
-                  {stat.value ?? <Skeleton className="w-12 h-6 mx-auto" />}
-                </div>
-                <div className="text-xs text-[var(--muted)]">{stat.label}</div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
@@ -274,12 +243,12 @@ export default function DownloadsPage() {
         <div className="relative max-w-5xl mx-auto">
           {/* Header - static with dynamic version */}
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#10B981]/20 via-[#069494]/10 to-transparent border border-[#10B981]/30 mb-6">
+            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#069494]/20 via-[#069494]/10 to-transparent border border-[#069494]/30 mb-6">
               <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10B981] opacity-75" />
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-[#10B981]" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#069494] opacity-75" />
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-[#069494]" />
               </span>
-              <span className="text-[#10B981] font-semibold">New Release</span>
+              <span className="text-[#069494] dark:text-[#0EC7C7] font-semibold">New Release</span>
               <span className="h-4 w-px bg-slate-300 dark:bg-zinc-700" />
               <span className="text-[var(--foreground)] font-mono font-bold">
                 v{isLoadingLatest ? <Skeleton className="w-10 h-4" /> : version}
@@ -316,7 +285,7 @@ export default function DownloadsPage() {
                 </div>
               ) : latestRelease?.body_html ? (
                 <div
-                  className="prose prose-zinc dark:prose-invert max-w-none prose-headings:font-semibold prose-h2:text-xl prose-h3:text-lg prose-a:text-[#069494] prose-ul:list-disc prose-li:marker:text-[#10B981]"
+                  className="prose prose-zinc dark:prose-invert max-w-none prose-headings:font-semibold prose-h2:text-xl prose-h3:text-lg prose-h4:text-base prose-a:text-[#069494] dark:prose-a:text-[#0EC7C7] prose-ul:list-disc prose-li:marker:text-[#069494]"
                   // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is from GitHub API (trusted source)
                   dangerouslySetInnerHTML={{ __html: latestRelease.body_html }}
                 />
@@ -351,211 +320,68 @@ export default function DownloadsPage() {
       </section>
 
       {/* ============================================
-       * Desktop Download Section - mostly static
+       * System Requirements
+       *
+       * Just the Min vs Recommended specs. The original section here
+       * was a duplicate of the hero (second header, second download
+       * button, fake "4.9 Rating" trust badge, stock "Verified Safe"
+       * tag). All of that was deleted because the hero already has
+       * the download — only the requirements were genuinely useful.
        * ============================================ */}
       <section className="py-24 px-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-slate-100 to-slate-50 dark:from-[#0a0a0a] dark:to-[#111111]/50" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#069494]/5 blur-[200px] rounded-full" />
 
-        <div className="relative max-w-5xl mx-auto">
-          {/* Static header */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#0EC7C7] text-sm font-medium mb-4">
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801" />
+        <div className="relative max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#069494] dark:text-[#0EC7C7] text-sm font-medium mb-6">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25zm.75-12h9v9h-9v-9z" />
               </svg>
-              Windows Only
+              System Requirements
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Download BoothIQ</h2>
-            <p className="text-[var(--muted)] max-w-lg mx-auto">
-              The complete photo booth software for Windows. Run your booth, create templates, and manage everything from one app.
+            <h2 className="text-4xl sm:text-5xl font-bold mb-6">
+              What you&apos;ll need
+            </h2>
+            <p className="text-lg text-[var(--muted)] max-w-2xl mx-auto">
+              BoothIQ runs on Windows. Here&apos;s what your booth&apos;s
+              machine needs.
             </p>
           </div>
 
-          {/* Main Download Card */}
-          <div className="max-w-4xl mx-auto">
-            <div className="relative rounded-3xl overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#069494]/20 via-slate-100 to-slate-100 dark:via-[#111111] dark:to-[#111111]" />
-              <div className="absolute top-0 right-0 w-64 h-64 bg-[#069494]/20 blur-3xl rounded-full" />
-              <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#10B981]/10 blur-3xl rounded-full" />
-
-              <div className="relative p-8 md:p-12 border border-[#069494]/30 rounded-3xl">
-                <div className="grid md:grid-cols-2 gap-8 items-center">
-                  {/* Left - Info */}
-                  <div>
-                    <div className="w-20 h-20 rounded-2xl bg-[#069494]/20 flex items-center justify-center mb-6">
-                      <svg className="w-10 h-10 text-[#069494]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801" />
-                      </svg>
-                    </div>
-
-                    <h3 className="text-3xl font-bold mb-2">BoothIQ for Windows</h3>
-                    <div className="flex flex-wrap items-center gap-3 mb-4">
-                      <span className="px-3 py-1.5 rounded-lg bg-[#069494]/20 text-[#0EC7C7] text-sm font-medium">
-                        v{isLoadingLatest ? <Skeleton className="w-10 h-4" /> : version}
-                      </span>
-                      <span className="text-[var(--muted)]">
-                        {isLoadingLatest ? <Skeleton className="w-16 h-4" /> : fileSize ?? "N/A"}
-                      </span>
-                      <span className="text-[var(--muted)]">·</span>
-                      <span className="text-[var(--muted)]">
-                        Released {isLoadingLatest ? <Skeleton className="w-20 h-4" /> : shortDate}
-                      </span>
-                    </div>
-
-                    <p className="text-[var(--muted)] mb-6">Windows 10 or later (64-bit)</p>
-
-                    {/* Static features list */}
-                    <div className="space-y-2 mb-8">
-                      {downloadFeatures.map((feature) => (
-                        <div key={feature} className="flex items-center gap-2 text-sm">
-                          <svg className="w-4 h-4 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                          <span className="text-[var(--foreground-secondary)]">{feature}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Download button */}
-                    <a
-                      href={isLoadingLatest ? "#" : downloadUrl}
-                      className={`group inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-white text-black font-semibold transition-all shadow-lg shadow-white/10 ${
-                        isLoadingLatest ? "opacity-70 cursor-wait" : "hover:bg-zinc-100 hover:scale-105"
-                      }`}
-                      onClick={(e) => isLoadingLatest && e.preventDefault()}
-                    >
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
-                      {isLoadingLatest ? "Loading..." : "Download Now"}
-                    </a>
-
-                    {windowsAsset && (
-                      <p className="text-xs text-[var(--muted)] mt-4">{windowsAsset.name}</p>
-                    )}
-                  </div>
-
-                  {/* Right - Static System Requirements */}
-                  <div className="space-y-4">
-                    <div className="p-5 rounded-2xl bg-[var(--background)]/80 border border-[var(--border)]">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-zinc-800 flex items-center justify-center">
-                          <svg className="w-4 h-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                        <h4 className="font-semibold text-[var(--muted)]">Minimum Requirements</h4>
-                      </div>
-                      <ul className="space-y-2 text-sm text-[var(--muted)]">
-                        {Object.values(systemReqs.minimum).map((req) => (
-                          <li key={req} className="flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
-                            {req}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="p-5 rounded-2xl bg-gradient-to-br from-[#10B981]/10 to-slate-100 dark:to-[#0a0a0a]/80 border border-[#10B981]/20">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-8 h-8 rounded-lg bg-[#10B981]/20 flex items-center justify-center">
-                          <svg className="w-4 h-4 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                          </svg>
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-[#10B981]">Recommended</h4>
-                          <span className="text-xs text-[var(--muted)]">Best experience</span>
-                        </div>
-                      </div>
-                      <ul className="space-y-2 text-sm text-[var(--foreground-secondary)]">
-                        {Object.values(systemReqs.recommended).map((req) => (
-                          <li key={req} className="flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
-                            {req}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* Static trust badges */}
-                    <div className="flex items-center justify-center gap-4 pt-2">
-                      <div className="flex items-center gap-1.5 text-xs text-[var(--muted)]">
-                        <svg className="w-4 h-4 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                        Verified Safe
-                      </div>
-                      <div className="flex items-center gap-1.5 text-xs text-[var(--muted)]">
-                        <svg className="w-4 h-4 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        Auto Updates
-                      </div>
-                      <div className="flex items-center gap-1.5 text-xs text-[var(--muted)]">
-                        <svg className="w-4 h-4 text-[#F59E0B]" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                        4.9 Rating
-                      </div>
-                    </div>
-                  </div>
-                </div>
+          {/* Two-column requirements grid */}
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Minimum */}
+            <div className="p-6 md:p-7 rounded-2xl bg-[var(--card)] border border-[var(--border)]">
+              <div className="mb-5">
+                <h3 className="font-semibold text-lg text-[var(--foreground)]">Minimum</h3>
+                <p className="text-sm text-[var(--muted)]">It&apos;ll run.</p>
               </div>
+              <ul className="space-y-2.5 text-sm text-[var(--muted)]">
+                {Object.values(systemReqs.minimum).map((req) => (
+                  <li key={req} className="flex items-center gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 dark:bg-zinc-600" />
+                    {req}
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* ============================================
-       * Installation Steps - Fully Static
-       * ============================================ */}
-      <section className="py-24 px-6 bg-[var(--card)]/30 border-y border-[var(--border)]/50">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Up and running in minutes</h2>
-            <p className="text-[var(--muted)]">Simple installation process</p>
-          </div>
-
-          <div className="relative">
-            <div className="hidden md:block absolute top-12 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-slate-300 dark:via-zinc-700 to-transparent" />
-
-            <div className="grid md:grid-cols-4 gap-8">
-              {installSteps.map((step) => (
-                <div key={step.step} className="relative text-center">
-                  <div className="relative inline-flex mb-6">
-                    <div className="w-24 h-24 rounded-full bg-[#069494]/10 border-2 border-[#069494]/30 flex items-center justify-center">
-                      {step.icon === "download" && (
-                        <svg className="w-10 h-10 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                      )}
-                      {step.icon === "install" && (
-                        <svg className="w-10 h-10 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-                        </svg>
-                      )}
-                      {step.icon === "hardware" && (
-                        <svg className="w-10 h-10 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                      )}
-                      {step.icon === "rocket" && (
-                        <svg className="w-10 h-10 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
-                        </svg>
-                      )}
-                    </div>
-                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-[#069494] text-white text-sm font-bold flex items-center justify-center">
-                      {step.step}
-                    </div>
-                  </div>
-                  <h3 className="font-semibold text-lg mb-2">{step.title}</h3>
-                  <p className="text-sm text-[var(--muted)]">{step.description}</p>
-                </div>
-              ))}
+            {/* Recommended */}
+            <div className="p-6 md:p-7 rounded-2xl bg-gradient-to-br from-[#069494]/10 to-transparent border border-[#069494]/30">
+              <div className="mb-5">
+                <h3 className="font-semibold text-lg text-[var(--foreground)]">Recommended</h3>
+                <p className="text-sm text-[var(--muted)]">Smooth experience.</p>
+              </div>
+              <ul className="space-y-2.5 text-sm text-[var(--foreground-secondary)]">
+                {Object.values(systemReqs.recommended).map((req) => (
+                  <li key={req} className="flex items-center gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#069494]" />
+                    {req}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>

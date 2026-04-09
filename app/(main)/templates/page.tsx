@@ -78,13 +78,14 @@ export default function TemplatesPage() {
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      {/* Hero Section */}
-      <section className="relative pt-16 pb-12 px-6 overflow-hidden">
+      {/* Hero Section — top padding clears the sticky navbar (~96-100px)
+          on every breakpoint, same fix as the pricing/downloads heroes. */}
+      <section className="relative pt-28 sm:pt-32 lg:pt-36 pb-12 px-6 overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#069494]/10 blur-[150px] rounded-full" />
 
         <div className="relative max-w-6xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] text-sm font-medium mb-6">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#069494] dark:text-[#0EC7C7] text-sm font-medium mb-6">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
             </svg>
             Premium Templates
@@ -372,37 +373,46 @@ export default function TemplatesPage() {
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="px-6 pb-24">
+      {/* ============================================
+       * FAQ Section — matches the FAQ pattern on features/pricing/
+       * downloads (header pill, simple stacked cards). Dropped the
+       * "30-day money-back guarantee" question because that policy
+       * doesn&apos;t exist; same lie we removed from the pricing page.
+       * ============================================ */}
+      <section className="py-24 px-6">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-2xl font-bold text-center text-[var(--foreground)] mb-8">
-            Frequently Asked Questions
-          </h2>
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#069494] dark:text-[#0EC7C7] text-sm font-medium mb-6">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+              </svg>
+              Common questions
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[var(--foreground)]">
+              Things people ask
+            </h2>
+          </div>
           <div className="space-y-4">
             {[
               {
                 q: "What file format do the templates come in?",
-                a: "All templates come in high-resolution PNG format with transparent backgrounds where applicable. They're ready to use with BoothIQ software.",
+                a: "All templates come in high-resolution PNG with transparent backgrounds where applicable. They're ready to use with BoothIQ.",
               },
               {
                 q: "Can I use these templates commercially?",
-                a: "Yes! All purchased templates include a commercial license. You can use them for unlimited events and clients.",
+                a: "Yes — all purchased templates include a commercial license. Use them across unlimited events and clients.",
               },
               {
                 q: "Do I get updates to templates I've purchased?",
-                a: "Yes, any updates or improvements to templates you've purchased are available to you at no extra cost.",
-              },
-              {
-                q: "Can I get a refund if I'm not satisfied?",
-                a: "We offer a 30-day money-back guarantee on all template purchases. If you're not happy, contact us for a full refund.",
+                a: "Yes. If we update or improve a template you already own, the new version is available to you at no extra cost.",
               },
             ].map((faq) => (
               <div
                 key={faq.q}
-                className="p-6 rounded-xl bg-[var(--card)] border border-[var(--border)]"
+                className="p-6 rounded-xl bg-[var(--card)] border border-[var(--border)] hover:border-[#069494]/30 transition-colors"
               >
                 <h3 className="font-semibold text-[var(--foreground)] mb-2">{faq.q}</h3>
-                <p className="text-sm text-[var(--muted)]">{faq.a}</p>
+                <p className="text-sm text-[var(--muted)] leading-relaxed">{faq.a}</p>
               </div>
             ))}
           </div>
