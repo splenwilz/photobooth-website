@@ -5,33 +5,41 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useCheckoutSession, getBoothSubscription } from "@/core/api/payments";
 import type { BoothSubscriptionItem } from "@/core/api/payments";
-import { useRedeemLicense } from "@/core/api/licenses";
-import type { RedeemLicenseResponse } from "@/core/api/licenses";
 import { usePricingPlans } from "@/core/api/pricing";
 
-type CheckoutType = "subscription" | "hardware" | "templates";
+/**
+ * Checkout success page.
+ *
+ * Two checkout types are supported:
+ *   1. "subscription" — operator subscribed a booth to a Pro plan (the
+ *      common path; comes from SubscribeBoothModal in /dashboard/booths)
+ *   2. "templates" — operator bought one or more templates from the
+ *      template marketplace
+ *
+ * Hardware sales used to be a third type but were removed at the
+ * client's request — booths are now sold exclusively on the BoothWorks
+ * website. The license-redemption + offline-activation flow that lived
+ * here was tied to that hardware path and is now gone too.
+ */
+
+type CheckoutType = "subscription" | "templates";
 
 function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const checkoutType = (searchParams.get("type") as CheckoutType) ?? "subscription";
-  const hardwarePackage = searchParams.get("package");
   const boothId = searchParams.get("booth_id");
+  // The subscribe modal passes these in the success URL so we don't have
+  // to depend on a post-payment API lookup matching by stripe_price_id
+  // (which has been unreliable).
+  const boothNameParam = searchParams.get("booth_name");
+  const planNameParam = searchParams.get("plan_name");
+  const billingParam = searchParams.get("billing"); // "monthly" | "annual"
 
-  const [licenseData, setLicenseData] = useState<RedeemLicenseResponse | null>(null);
-  const [redeemError, setRedeemError] = useState<string | null>(null);
-  const [hasAttemptedRedeem, setHasAttemptedRedeem] = useState(false);
-
-  // Booth subscription data for per-booth subscriptions
+  // Booth subscription data — fallback source for plan info if the URL
+  // params are missing (e.g., on an old bookmarked success URL).
   const [boothSubscription, setBoothSubscription] = useState<BoothSubscriptionItem | null>(null);
   const [hasAttemptedBoothFetch, setHasAttemptedBoothFetch] = useState(false);
-
-  // Offline license state
-  const [showOfflineForm, setShowOfflineForm] = useState(false);
-  const [fingerprint, setFingerprint] = useState("");
-  const [offlineLicenseData, setOfflineLicenseData] = useState<RedeemLicenseResponse | null>(null);
-  const [offlineError, setOfflineError] = useState<string | null>(null);
-  const [isGeneratingOffline, setIsGeneratingOffline] = useState(false);
 
   // Mobile app redirect state
   const [isMobileUser, setIsMobileUser] = useState(false);
@@ -45,9 +53,6 @@ function CheckoutSuccessContent() {
     isLoading: sessionLoading,
     isError: sessionError,
   } = useCheckoutSession(sessionId);
-
-  // License redemption mutation
-  const redeemLicense = useRedeemLicense();
 
   // Fetch pricing plans for subscription feature details
   const { data: plansData } = usePricingPlans();
@@ -73,62 +78,27 @@ function CheckoutSuccessContent() {
     }
   }, [checkoutType, boothId, session, hasAttemptedBoothFetch]);
 
-  // Redeem license after payment confirmed (for hardware purchases)
-  useEffect(() => {
-    if (
-      checkoutType === "hardware" &&
-      session?.payment_status === "paid" &&
-      !hasAttemptedRedeem &&
-      !redeemLicense.isPending &&
-      sessionId
-    ) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- guard flag for one-time effect
-      setHasAttemptedRedeem(true);
-      redeemLicense.mutate(
-        {
-          checkout_session_id: sessionId,
-        },
-        {
-          onSuccess: (data) => {
-            if (data.success) {
-              setLicenseData(data);
-            } else {
-              setRedeemError(data.message ?? "Failed to redeem license");
-            }
-          },
-          onError: (error) => {
-            setRedeemError(error.message);
-          },
-        }
-      );
-    }
-  }, [checkoutType, session, sessionId, hasAttemptedRedeem, redeemLicense]);
-
   // Mobile detection and app redirect for templates/subscription purchases
   useEffect(() => {
-    // Only run on client
     if (typeof window === "undefined") return;
 
-    // Check if user is on mobile
     const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- detect device on mount
     setIsMobileUser(isMobile);
 
-    // Only redirect for templates or subscription purchases (not hardware - users need to see license key)
     // Guard against duplicate redirect attempts (e.g., from React Query refetch)
     if (
       isMobile &&
       session?.payment_status === "paid" &&
       sessionId &&
-      (checkoutType === "templates" || checkoutType === "subscription") &&
       !hasAttemptedRedirect.current
     ) {
       hasAttemptedRedirect.current = true;
       setIsRedirecting(true);
 
       // Construct the appropriate deep link with URL-encoded parameters
-      let deepLink: string;
       const encodedSessionId = encodeURIComponent(sessionId);
+      let deepLink: string;
       if (checkoutType === "templates") {
         deepLink = `boothiq://template-purchase-success?session_id=${encodedSessionId}`;
       } else {
@@ -151,51 +121,6 @@ function CheckoutSuccessContent() {
     }
   }, [session, sessionId, checkoutType, boothId]);
 
-  // Handle offline license generation
-  const handleGenerateOfflineLicense = () => {
-    if (!sessionId || !fingerprint.trim()) return;
-
-    setIsGeneratingOffline(true);
-    setOfflineError(null);
-
-    redeemLicense.mutate(
-      {
-        checkout_session_id: sessionId,
-        fingerprint: fingerprint.trim(),
-      },
-      {
-        onSuccess: (data) => {
-          setIsGeneratingOffline(false);
-          if (data.success && data.license_json) {
-            setOfflineLicenseData(data);
-          } else {
-            setOfflineError(data.message ?? "Failed to generate offline license");
-          }
-        },
-        onError: (error) => {
-          setIsGeneratingOffline(false);
-          setOfflineError(error.message);
-        },
-      }
-    );
-  };
-
-  // Download offline license as file
-  const handleDownloadOfflineLicense = (format: "json" | "lic") => {
-    if (!offlineLicenseData?.license_json) return;
-
-    const mimeType = format === "json" ? "application/json" : "application/octet-stream";
-    const blob = new Blob([offlineLicenseData.license_json], { type: mimeType });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `boothiq-license-${offlineLicenseData.license_key}.${format}`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
   // Loading state
   if (sessionLoading) {
     return (
@@ -214,7 +139,7 @@ function CheckoutSuccessContent() {
       <div className="min-h-screen flex items-center justify-center bg-[var(--background)] px-6">
         <div className="max-w-md w-full text-center">
           <div className="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-6">
-            <svg className="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
@@ -239,7 +164,7 @@ function CheckoutSuccessContent() {
       <div className="min-h-screen flex items-center justify-center bg-[var(--background)] px-6">
         <div className="max-w-md w-full text-center">
           <div className="w-20 h-20 rounded-full bg-yellow-500/10 flex items-center justify-center mx-auto mb-6">
-            <svg className="w-10 h-10 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-10 h-10 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
@@ -250,7 +175,7 @@ function CheckoutSuccessContent() {
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-200 dark:bg-zinc-800 text-zinc-900 dark:text-white font-semibold hover:bg-slate-300 dark:hover:bg-zinc-700 transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] font-semibold hover:bg-[#069494]/5 hover:border-[#069494]/30 transition-colors"
           >
             Refresh Status
           </button>
@@ -259,13 +184,9 @@ function CheckoutSuccessContent() {
     );
   }
 
-  // Mobile app redirect view for templates/subscription purchases
-  if (
-    isMobileUser &&
-    isRedirecting &&
-    session?.payment_status === "paid" &&
-    (checkoutType === "templates" || checkoutType === "subscription")
-  ) {
+  // Mobile app redirect view — both subscription and templates checkout
+  // types fall through here on mobile devices.
+  if (isMobileUser && isRedirecting && session?.payment_status === "paid") {
     const encodedSessionId = encodeURIComponent(sessionId || "");
     const deepLink =
       checkoutType === "templates"
@@ -275,8 +196,8 @@ function CheckoutSuccessContent() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--background)] px-6">
         <div className="max-w-md w-full text-center">
-          <div className="w-20 h-20 rounded-full bg-[#10B981]/10 flex items-center justify-center mx-auto mb-6">
-            <svg className="w-10 h-10 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <div className="w-20 h-20 rounded-full bg-[#069494]/10 flex items-center justify-center mx-auto mb-6">
+            <svg className="w-10 h-10 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
@@ -296,149 +217,102 @@ function CheckoutSuccessContent() {
               href={deepLink}
               className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-all hover:scale-[1.02] shadow-lg shadow-[#069494]/20"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
               </svg>
               Open BoothIQ App
             </a>
           )}
-
-          <p className="text-sm text-[var(--muted)] mt-8">
-            Don&apos;t have the app?{" "}
-            <Link href="/downloads" className="text-[#069494] hover:underline">
-              Download it here
-            </Link>
-          </p>
         </div>
       </div>
     );
   }
 
-  // Hardware license redemption in progress
-  if (checkoutType === "hardware" && redeemLicense.isPending) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#069494] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-[var(--muted)]">Generating your license key...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // License redemption error
-  if (redeemError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--background)] px-6">
-        <div className="max-w-md w-full text-center">
-          <div className="w-20 h-20 rounded-full bg-yellow-500/10 flex items-center justify-center mx-auto mb-6">
-            <svg className="w-10 h-10 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold mb-2">Payment Successful!</h1>
-          <p className="text-[var(--muted)] mb-4">
-            Your payment is confirmed, but we had trouble generating your license key.
-          </p>
-          <p className="text-sm text-yellow-600 dark:text-yellow-400 mb-8">
-            Please contact support to manually receive your license key.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors"
-            >
-              Go to Dashboard
-            </Link>
-            <Link
-              href="/contact"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-[var(--border)] font-semibold hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
-            >
-              Contact Support
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Get success content based on checkout type
+  // Build the success content based on checkout type
   const getSuccessContent = () => {
-    switch (checkoutType) {
-      case "hardware":
-        return {
-          title: "Order Confirmed!",
-          description: `Your ${hardwarePackage ? hardwarePackage.charAt(0).toUpperCase() + hardwarePackage.slice(1) : ""} booth package is on its way.${licenseData ? " Your license key is ready!" : ""}`,
-          primaryAction: { href: "/dashboard", label: "Go to Dashboard" },
-          secondaryAction: { href: "/downloads", label: "Download Software" },
-          features: [
-            "Hardware ships within 3-5 business days",
-            licenseData ? `${licenseData.key_type} license activated (${licenseData.expires_days} days)` : "License key being generated...",
-            "Setup guide sent to your email",
-          ],
-          showLicenseKey: true,
-        };
-      case "templates":
-        return {
-          title: "Purchase Complete!",
-          description: "Your templates have been added to your library. Start using them right away!",
-          primaryAction: { href: "/dashboard/templates", label: "Download Templates" },
-          secondaryAction: { href: "/templates", label: "Browse More Templates" },
-          features: [
-            "Templates available immediately",
-            "Download anytime from your dashboard",
-            "Use across all your booths",
-          ],
-          showLicenseKey: false,
-        };
-      default: {
-        // Get plan details from booth subscription or pricing plans
-        const planName = boothSubscription?.price_id
-          ? plans.find((p) => p.stripe_price_id === boothSubscription.price_id || p.stripe_annual_price_id === boothSubscription.price_id)?.name
-          : null;
-        const planDetails = planName
-          ? plans.find((p) => p.name === planName)
-          : null;
-        const subscriptionStatus = boothSubscription?.status;
-        const isTrialing = subscriptionStatus === "trialing";
-
-        // Build features list from actual plan or use generic message
-        const features: string[] = [];
-        if (isTrialing) {
-          features.push("Free trial started");
-        } else {
-          features.push("Subscription is now active");
-        }
-        if (planDetails?.features && planDetails.features.length > 0) {
-          features.push(...planDetails.features.slice(0, 3));
-        } else {
-          features.push("Full access to all plan features");
-        }
-
-        return {
-          title: planName ? `Welcome to ${planName}!` : "Subscription Active!",
-          description: planName
-            ? `Your ${planName} subscription is now active for this booth.`
-            : "Your booth subscription is now active.",
-          primaryAction: { href: "/dashboard/booths", label: "Go to Booths" },
-          secondaryAction: { href: "/downloads", label: "Download Software" },
-          features,
-          showLicenseKey: false,
-        };
-      }
+    if (checkoutType === "templates") {
+      return {
+        title: "Purchase Complete!",
+        description: "Your templates have been added to your library. Open them in BoothIQ to start using them.",
+        primaryAction: { href: "/dashboard/templates", label: "Download Templates" },
+        secondaryAction: { href: "/templates", label: "Browse More Templates" },
+        // NOTE: Templates are booth-scoped — see release notes for v0.1.0:
+        // "Booth-scoped template purchases — prevents sharing across booths".
+        // Don't tell users they can use templates across all their booths.
+        features: [
+          "Templates available immediately in your dashboard",
+          "Tied to the booth you purchased them for",
+          "Re-download anytime — purchase never expires",
+        ],
+      };
     }
+
+    // Subscription (default)
+    //
+    // Prefer the URL-passed plan name over the booth-subscription API
+    // lookup. The lookup matched by stripe_price_id and was failing
+    // silently — falling back to a generic "Subscription Active" title
+    // even when the user had clearly just paid for a specific plan. The
+    // subscribe modal now sends plan_name + booth_name in the success
+    // URL so we always know what to display.
+    const planName =
+      planNameParam ||
+      (boothSubscription?.price_id
+        ? plans.find(
+            (p) =>
+              p.stripe_price_id === boothSubscription.price_id ||
+              p.stripe_annual_price_id === boothSubscription.price_id
+          )?.name ?? null
+        : null);
+
+    const boothName = boothNameParam;
+    const billingInterval = billingParam === "annual" ? "annually" : "monthly";
+
+    // Real "what's next" guidance — actual things the operator can do
+    // now that the subscription is live, not restatements of the title.
+    const features: string[] = [
+      boothName
+        ? `Live revenue from ${boothName} is now visible in your dashboard`
+        : "Live revenue is now visible in your dashboard",
+      `Renews ${billingInterval} — cancel or change plan anytime`,
+      "Manage this subscription from the booth detail page",
+    ];
+
+    // Personalised description — names the booth and plan when known.
+    let description: string;
+    if (planName && boothName) {
+      description = `Your ${planName} plan is now active for ${boothName}.`;
+    } else if (planName) {
+      description = `Your ${planName} plan is now active for this booth.`;
+    } else if (boothName) {
+      description = `${boothName} is now subscribed.`;
+    } else {
+      description = "Your booth subscription is now active.";
+    }
+
+    return {
+      title: planName ? `${planName} plan active!` : "Subscription Active!",
+      description,
+      primaryAction: { href: "/dashboard/booths", label: "Go to Booths" },
+      // The downloads page is for updates / re-installs. A brand-new
+      // subscriber doesn't need to download anything — the booth ships
+      // pre-installed by BoothWorks. Send them to the dashboard overview
+      // instead.
+      secondaryAction: { href: "/dashboard", label: "Open Dashboard" },
+      features,
+    };
   };
 
   const content = getSuccessContent();
 
   // Success state
   return (
-    <div className="min-h-screen bg-[var(--background)] pt-16 pb-16 px-6">
+    <div className="min-h-screen bg-[var(--background)] pt-28 sm:pt-32 lg:pt-36 pb-16 px-6">
       <div className="max-w-2xl mx-auto">
         {/* Success Icon */}
         <div className="text-center mb-8">
-          <div className="w-24 h-24 rounded-full bg-[#10B981]/10 flex items-center justify-center mx-auto mb-6">
-            <svg className="w-12 h-12 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <div className="w-24 h-24 rounded-full bg-[#069494]/10 flex items-center justify-center mx-auto mb-6">
+            <svg className="w-12 h-12 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
@@ -448,166 +322,10 @@ function CheckoutSuccessContent() {
           </p>
         </div>
 
-        {/* License Key Card */}
-        {content.showLicenseKey && licenseData && (
-          <div className="bg-gradient-to-r from-[#069494]/10 to-[#176161]/10 rounded-2xl border border-[#069494]/20 p-6 mb-8">
-            <h2 className="font-semibold mb-4 flex items-center gap-2">
-              <svg className="w-5 h-5 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-              </svg>
-              Your License Key (Online Activation)
-            </h2>
-            <div className="bg-[var(--background)] rounded-xl p-4 mb-4">
-              <div className="flex items-center justify-between gap-4">
-                <code className="text-lg sm:text-xl font-mono font-bold tracking-wider text-[#069494]">
-                  {licenseData.license_key}
-                </code>
-                <button
-                  type="button"
-                  onClick={() => {
-                    navigator.clipboard.writeText(licenseData.license_key);
-                  }}
-                  className="shrink-0 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
-                  title="Copy to clipboard"
-                >
-                  <svg className="w-5 h-5 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <p className="text-sm text-[var(--muted)]">
-              Enter this key in the BoothIQ software to activate online.
-              {licenseData.already_redeemed && (
-                <span className="block mt-1 text-yellow-600 dark:text-yellow-400">
-                  This key was already redeemed previously.
-                </span>
-              )}
-            </p>
-
-            {/* Offline Activation Section */}
-            <div className="mt-6 pt-6 border-t border-[#069494]/20">
-              {!showOfflineForm && !offlineLicenseData && (
-                <button
-                  type="button"
-                  onClick={() => setShowOfflineForm(true)}
-                  className="text-sm text-[#069494] hover:underline flex items-center gap-2"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414" />
-                  </svg>
-                  Need offline activation?
-                </button>
-              )}
-
-              {showOfflineForm && !offlineLicenseData && (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Machine ID
-                    </label>
-                    <p className="text-xs text-[var(--muted)] mb-2">
-                      Open BoothIQ, go to Settings → License → Activate, and copy the Machine ID shown there.
-                    </p>
-                    <input
-                      type="text"
-                      value={fingerprint}
-                      onChange={(e) => setFingerprint(e.target.value)}
-                      placeholder="e.g., EF1DE6E3F598515EFDF6B32E2034F443..."
-                      className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--background)] font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[#069494] focus:border-transparent"
-                    />
-                  </div>
-                  {offlineError && (
-                    <p className="text-sm text-red-500">{offlineError}</p>
-                  )}
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={handleGenerateOfflineLicense}
-                      disabled={!fingerprint.trim() || isGeneratingOffline}
-                      className="px-4 py-2 rounded-lg bg-[#069494] text-white text-sm font-semibold hover:bg-[#176161] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                    >
-                      {isGeneratingOffline ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          Generating...
-                        </>
-                      ) : (
-                        "Generate Offline License"
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowOfflineForm(false);
-                        setFingerprint("");
-                        setOfflineError(null);
-                      }}
-                      className="px-4 py-2 rounded-lg border border-[var(--border)] text-sm font-semibold hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {offlineLicenseData && offlineLicenseData.license_json && (
-                <div className="space-y-4">
-                  <h3 className="font-semibold flex items-center gap-2 text-[#10B981]">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    Offline License Generated
-                  </h3>
-                  <p className="text-sm text-[var(--muted)]">
-                    Download the license file and import it in BoothIQ (Settings → License → Import Offline License).
-                  </p>
-                  <div className="flex flex-wrap gap-3">
-                    <button
-                      type="button"
-                      onClick={() => handleDownloadOfflineLicense("lic")}
-                      className="px-4 py-2 rounded-lg bg-[#10B981] text-white text-sm font-semibold hover:bg-[#059669] transition-colors flex items-center gap-2"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
-                      Download .lic
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDownloadOfflineLicense("json")}
-                      className="px-4 py-2 rounded-lg bg-[#069494] text-white text-sm font-semibold hover:bg-[#176161] transition-colors flex items-center gap-2"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
-                      Download .json
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (offlineLicenseData.license_json) {
-                          navigator.clipboard.writeText(offlineLicenseData.license_json);
-                        }
-                      }}
-                      className="px-4 py-2 rounded-lg border border-[var(--border)] text-sm font-semibold hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors flex items-center gap-2"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                      </svg>
-                      Copy to Clipboard
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Order Details Card */}
+        {/* What's Next Card */}
         <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6 mb-8">
           <h2 className="font-semibold mb-4 flex items-center gap-2">
-            <svg className="w-5 h-5 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-5 h-5 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             What&apos;s Next
@@ -615,10 +333,10 @@ function CheckoutSuccessContent() {
           <ul className="space-y-3">
             {content.features.map((feature) => (
               <li key={feature} className="flex items-start gap-3 text-sm">
-                <svg className="w-5 h-5 text-[#10B981] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-5 h-5 text-[#069494] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
-                <span>{feature}</span>
+                <span className="text-[var(--foreground-secondary)]">{feature}</span>
               </li>
             ))}
           </ul>
@@ -626,7 +344,7 @@ function CheckoutSuccessContent() {
 
         {/* Receipt Info */}
         {session && (
-          <div className="bg-slate-50 dark:bg-zinc-900 rounded-2xl p-6 mb-8">
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 mb-8">
             <h3 className="text-sm font-medium text-[var(--muted)] mb-3">Payment Details</h3>
             <div className="space-y-2 text-sm">
               {session.customer_email && (
@@ -638,7 +356,9 @@ function CheckoutSuccessContent() {
               <div className="flex justify-between">
                 <span className="text-[var(--muted)]">Amount</span>
                 <span className="font-medium">
-                  ${(session.amount_total / 100).toFixed(2)} {session.currency.toUpperCase()}
+                  {session.amount_total != null && session.currency
+                    ? `$${(session.amount_total / 100).toFixed(2)} ${session.currency.toUpperCase()}`
+                    : "—"}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -656,13 +376,13 @@ function CheckoutSuccessContent() {
             className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-all hover:scale-[1.02] shadow-lg shadow-[#069494]/20"
           >
             {content.primaryAction.label}
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
           </Link>
           <Link
             href={content.secondaryAction.href}
-            className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl border border-[var(--border)] font-semibold hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl border border-[var(--border)] font-semibold hover:bg-[#069494]/5 hover:border-[#069494]/30 transition-colors"
           >
             {content.secondaryAction.label}
           </Link>

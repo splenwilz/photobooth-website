@@ -33,6 +33,12 @@ export async function getPublicPricingPlans(): Promise<PublicPlansResponse> {
  *
  * Initiates Stripe Checkout for per-booth subscription.
  *
+ * Note: the backend requires `booth_id` in BOTH the URL path
+ * and the request body. The path is used for routing/auth,
+ * and the body field is what the Pydantic schema validates
+ * against. This wrapper accepts a single `boothId` argument
+ * and injects it into the body so callers don't have to.
+ *
  * @param boothId - Booth ID to subscribe
  * @param data - Checkout request with price ID and URLs
  * @returns Checkout session with redirect URL
@@ -53,7 +59,10 @@ export async function createSubscriptionCheckout(
     `/api/v1/booths/${boothId}/subscription/checkout`,
     {
       method: "POST",
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        booth_id: boothId,
+        ...data,
+      }),
     }
   );
 }

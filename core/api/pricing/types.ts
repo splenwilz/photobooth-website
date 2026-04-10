@@ -38,7 +38,11 @@ export interface PublicPlansResponse {
 
 /**
  * Request: Create a subscription checkout session for a booth
- * Note: booth_id is passed in the URL path, not in the request body
+ *
+ * Note: the backend requires `booth_id` in BOTH the URL path and
+ * the request body. The `createSubscriptionCheckout` service wrapper
+ * injects `booth_id` into the body automatically — callers only
+ * pass these three fields directly.
  */
 export interface CheckoutRequest {
   price_id: string;

@@ -42,55 +42,49 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
             BoothIQ
           </Link>
 
-          {/* Main Content */}
+          {/* Main Content — honest headline + tagline + a checkmark
+              feature list. The original had fake numbers (5,000+ booths,
+              $2.4M monthly, 99.9% SLA) and a fabricated Michael Johnson
+              testimonial. Both were deleted. */}
           <div>
             <h2 className="text-4xl font-bold mb-4 leading-tight text-zinc-900 dark:text-white">
               Manage your booths<br />
               <span className="text-[#069494]">from anywhere.</span>
             </h2>
-            <p className="text-[var(--muted)] text-lg mb-8 max-w-md">
-              Real-time analytics, instant alerts, and complete control over your photo booth business.
+            <p className="text-[var(--muted)] text-lg mb-10 max-w-md">
+              Live revenue, remote configuration, and full booth visibility —
+              on every device you sign in from.
             </p>
 
-            {/* Stats */}
-            <div className="flex gap-8">
-              <div>
-                <div className="text-3xl font-bold text-[#069494]">5,000+</div>
-                <div className="text-sm text-[var(--muted)]">Active booths</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-[#069494]">$2.4M</div>
-                <div className="text-sm text-[var(--muted)]">Processed monthly</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-[#A855F7]">99.9%</div>
-                <div className="text-sm text-[var(--muted)]">Uptime</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Testimonial */}
-          <div className="p-6 rounded-2xl bg-white/80 dark:bg-[var(--card)]/80 border border-slate-200/50 dark:border-[var(--border)]/50 backdrop-blur-sm">
-            <div className="flex items-center gap-1 mb-3">
-              {[...Array(5)].map((_, i) => (
-                <svg aria-label="Star" aria-hidden="true" key={i} className="w-4 h-4 text-[#F59E0B]" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
+            {/* Feature checklist — every item is verifiable from the rest
+                of the site (matches the features-page tabbed showcase). */}
+            <ul className="space-y-4 max-w-md">
+              {[
+                "Live revenue tracking from any device",
+                "iOS, Android, and web — all in sync",
+                "Per-booth pricing — pay only for what you run",
+                "Offline-first — the booth keeps running without internet",
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-3 text-zinc-700 dark:text-zinc-300">
+                  <svg
+                    className="w-5 h-5 text-[#069494] shrink-0 mt-0.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                    aria-hidden="true"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>{item}</span>
+                </li>
               ))}
-            </div>
-            <p className="text-[var(--foreground-secondary)] mb-4">
-              &quot;BoothIQ transformed our business. Revenue tracking in real-time and instant alerts when paper runs low — game changer.&quot;
-            </p>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#069494] to-[#176161] flex items-center justify-center font-bold">
-                MJ
-              </div>
-              <div>
-                <div className="font-medium">Michael Johnson</div>
-                <div className="text-sm text-[var(--muted)]">SnapShot Events, 12 booths</div>
-              </div>
-            </div>
+            </ul>
           </div>
+
+          {/* Bottom spacer — keeps the justify-between layout balanced
+              after the fake testimonial card was removed. */}
+          <div />
         </div>
       </div>
 
@@ -156,7 +150,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
               <Link href="/support" className="hover:text-[var(--foreground-secondary)] transition-colors">Support</Link>
             </div>
             <p className="text-center text-xs text-[var(--muted)] mt-4">
-              © 2024 BoothIQ. All rights reserved.
+              © {new Date().getFullYear()} BoothIQ. All rights reserved.
             </p>
           </div>
         </div>

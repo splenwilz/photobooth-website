@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* @tailwindcss/typography — required for `prose` classes used in
+   places like the downloads page release notes (rendered from
+   GitHub markdown). Tailwind v4 doesn't auto-load plugins from
+   package.json — they must be enabled explicitly here. */
+@plugin "@tailwindcss/typography";
+
 @variant dark (&:is(.dark *));
 
 /* ============================================
@@ -102,3 +108,182 @@ html {
 .delay-2 { animation-delay: 0.2s; opacity: 0; }
 .delay-3 { animation-delay: 0.3s; opacity: 0; }
 .delay-4 { animation-delay: 0.4s; opacity: 0; }
+
+/* ============================================
+ * Prose styles for rendered HTML content
+ *
+ * Used for HTML coming from external sources (e.g. release notes
+ * from the GitHub API rendered via dangerouslySetInnerHTML on the
+ * /downloads page). The @tailwindcss/typography plugin should
+ * provide these via `prose` classes, but the plugin doesn't
+ * always load reliably under Tailwind v4 — these explicit styles
+ * are a fallback that always works.
+ *
+ * Scoped to `.prose` so they only affect intentional containers.
+ * Colors use BoothIQ theme variables so dark/light mode just work.
+ * ============================================ */
+
+.prose {
+  color: var(--foreground);
+  font-size: 1.0625rem; /* 17px — comfortable docs body size */
+  line-height: 1.7;
+}
+
+.prose > :first-child {
+  margin-top: 0;
+}
+.prose > :last-child {
+  margin-bottom: 0;
+}
+
+.prose h1 {
+  font-size: 2.25rem; /* 36px */
+  font-weight: 800;
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+  line-height: 1.15;
+  color: var(--foreground);
+  letter-spacing: -0.02em;
+}
+
+.prose h2 {
+  font-size: 1.625rem; /* 26px */
+  font-weight: 700;
+  margin-top: 2.25em;
+  margin-bottom: 0.85em;
+  line-height: 1.3;
+  color: var(--foreground);
+  letter-spacing: -0.01em;
+}
+
+.prose h3 {
+  font-size: 1.25rem; /* 20px */
+  font-weight: 600;
+  margin-top: 1.75em;
+  margin-bottom: 0.6em;
+  line-height: 1.4;
+  color: var(--foreground);
+}
+
+.prose h4 {
+  font-size: 1.0625rem; /* 17px — same as body */
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  line-height: 1.5;
+  color: var(--foreground);
+}
+
+.prose p {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  color: var(--foreground-muted);
+}
+
+.prose ul {
+  list-style-type: disc;
+  padding-left: 1.625em;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.prose ol {
+  list-style-type: decimal;
+  padding-left: 1.625em;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.prose li {
+  margin-top: 0.4em;
+  margin-bottom: 0.4em;
+  color: var(--foreground-muted);
+  padding-left: 0.25em;
+}
+
+.prose li::marker {
+  color: var(--brand);
+}
+
+.prose li > ul,
+.prose li > ol {
+  margin-top: 0.4em;
+  margin-bottom: 0.4em;
+}
+
+.prose a {
+  color: var(--brand);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  font-weight: 500;
+}
+.prose a:hover {
+  color: var(--brand-light);
+}
+.dark .prose a {
+  color: var(--brand-light);
+}
+.dark .prose a:hover {
+  color: var(--brand);
+}
+
+.prose strong {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.prose em {
+  font-style: italic;
+}
+
+.prose code {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.9em;
+  background: rgba(6, 148, 148, 0.08);
+  color: var(--brand);
+  padding: 0.15em 0.4em;
+  border-radius: 0.25em;
+  font-weight: 500;
+}
+
+.dark .prose code {
+  background: rgba(6, 148, 148, 0.15);
+  color: var(--brand-light);
+}
+
+.prose pre {
+  background: var(--background-card);
+  color: var(--foreground);
+  padding: 1em 1.25em;
+  border-radius: 0.5em;
+  overflow-x: auto;
+  font-size: 0.875em;
+  line-height: 1.6;
+  margin-top: 1.25em;
+  margin-bottom: 1.25em;
+}
+
+.prose pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  border-radius: 0;
+  font-size: 1em;
+}
+
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin-top: 2em;
+  margin-bottom: 2em;
+}
+
+.prose blockquote {
+  border-left: 3px solid var(--brand);
+  padding-left: 1em;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  color: var(--foreground-muted);
+  font-style: italic;
+}

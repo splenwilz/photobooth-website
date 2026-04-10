@@ -5,56 +5,8 @@ import { useState } from "react";
 import { useUser } from "@/hooks/use-user";
 import { usePricingPlans } from "@/core/api/pricing";
 
-const faqs = [
-  {
-    question: "What's included in the hardware packages?",
-    answer: "Each hardware package includes everything you need to start your photo booth business — monitor, stand, lighting, and depending on the tier, professional printers and cameras. All equipment is tested and configured before shipping.",
-  },
-  {
-    question: "Do I need to buy hardware from you?",
-    answer: "No! You can use your own equipment. Our software works with most webcams, DSLR cameras, and photo printers. Our hardware packages are a convenient option if you want a complete, tested setup.",
-  },
-  {
-    question: "How do I get started with Pro software?",
-    answer: "Simply choose a plan and subscribe. You can upgrade or downgrade anytime from your dashboard.",
-  },
-  {
-    question: "Can I cancel my software subscription anytime?",
-    answer: "Absolutely. Cancel anytime from your dashboard with no questions asked. Your booths will continue working on the Starter plan.",
-  },
-  {
-    question: "Do hardware packages include the software?",
-    answer: "Hardware packages include 3 months of Pro software subscription free. After that, you can continue with Pro or switch to our free Starter plan.",
-  },
-  {
-    question: "What warranty comes with the hardware?",
-    answer: "Essential packages include 6-month warranty, Professional includes 1-year warranty, and Premium includes 2-year warranty. Extended warranties are available for purchase.",
-  },
-  {
-    question: "Do you offer financing for hardware?",
-    answer: "Yes! We partner with financing providers to offer 0% APR financing for qualified buyers. Contact our sales team to learn more about payment plans.",
-  },
-  {
-    question: "Is there a discount for annual software billing?",
-    answer: "Yes! Pay annually and save 20% — that's $39/month instead of $49/month. Plus, you get priority support.",
-  },
-];
-
-const comparisonFeatures = [
-  { name: "Template Library", starter: "10 basic", pro: "100+ premium", enterprise: "100+ premium + custom" },
-  { name: "Camera Support", starter: "Webcam only", pro: "Webcam + DSLR", enterprise: "Webcam + DSLR" },
-  { name: "Print Quality", starter: "Watermarked", pro: "Full quality", enterprise: "Full quality" },
-  { name: "Mobile App", starter: "—", pro: "✓", enterprise: "✓" },
-  { name: "Analytics", starter: "—", pro: "✓", enterprise: "✓ Advanced" },
-  { name: "Payment Processing", starter: "—", pro: "2.9% + $0.30", enterprise: "Custom rates" },
-  { name: "Support", starter: "Community", pro: "Priority email", enterprise: "Dedicated manager" },
-  { name: "API Access", starter: "—", pro: "—", enterprise: "✓" },
-  { name: "SLA", starter: "—", pro: "—", enterprise: "99.9%" },
-];
-
 export default function PricingPage() {
   const [isAnnual, setIsAnnual] = useState(true);
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   // Auth state
   const { isAuthenticated } = useUser();
@@ -62,20 +14,12 @@ export default function PricingPage() {
   // Fetch pricing plans from API
   const { data: plansData, isLoading: plansLoading } = usePricingPlans();
 
-  // Get trial period from API (0 = no trial)
-  const trialPeriodDays = plansData?.trial_period_days ?? 0;
-
-  // Get CTA text for paid plans (subscription happens from booth management)
-  const getPaidPlanCtaText = () => {
-    if (isAuthenticated) return "Manage Booths";
-    if (trialPeriodDays > 0) return `${trialPeriodDays}-Day Free Trial`;
-    return "Get Started";
-  };
-
-  // Get CTA link - authenticated users go to booth management, others to signup
-  const getPaidPlanCtaLink = () => {
-    return isAuthenticated ? "/dashboard/booths" : "/signup";
-  };
+  // Single CTA path for every plan: signed-in operators jump straight to
+  // booth management (where they pick a plan for a specific booth);
+  // everyone else signs up first. There is no free trial, no download —
+  // every plan goes through the same funnel.
+  const ctaText = isAuthenticated ? "Manage Booths" : "Get Started";
+  const ctaLink = isAuthenticated ? "/dashboard/booths" : "/signup";
 
   // Display plan type
   type DisplayPlan = {
@@ -87,8 +31,7 @@ export default function PricingPage() {
     badge: string | null;
     features: Array<{ text: string; included: boolean }>;
     highlighted: boolean;
-    icon: string;
-    isPaid: boolean;
+    iconPath: string;
     // Annual billing
     hasAnnualOption: boolean;
     annualPriceDisplay: string | null;
@@ -101,13 +44,25 @@ export default function PricingPage() {
       return [];
     }
 
-    // Derive badge and icon from plan name instead of array index
-    const getPlanIcon = (name: string): string => {
+    // Derive badge and icon from plan name instead of array index. Icons
+    // are Heroicon SVG paths (rocket / bolt / building / box) — no emoji,
+    // matching the rest of the redesigned site.
+    const getPlanIconPath = (name: string): string => {
       const lowerName = name.toLowerCase();
-      if (lowerName.includes("starter") || lowerName.includes("basic") || lowerName.includes("free")) return "🎯";
-      if (lowerName.includes("pro") || lowerName.includes("professional")) return "⚡";
-      if (lowerName.includes("enterprise") || lowerName.includes("business")) return "🏢";
-      return "📦";
+      // Rocket — Starter / Basic / Free
+      if (lowerName.includes("starter") || lowerName.includes("basic") || lowerName.includes("free")) {
+        return "M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z";
+      }
+      // Bolt — Pro / Professional
+      if (lowerName.includes("pro") || lowerName.includes("professional")) {
+        return "M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z";
+      }
+      // Building — Enterprise / Business
+      if (lowerName.includes("enterprise") || lowerName.includes("business")) {
+        return "M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z";
+      }
+      // Box — fallback
+      return "M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9";
     };
 
     const isPopularPlan = (name: string): boolean => {
@@ -124,8 +79,7 @@ export default function PricingPage() {
       badge: isPopularPlan(plan.name) ? "Most Popular" : null,
       features: plan.features.map((f) => ({ text: f, included: true })),
       highlighted: isPopularPlan(plan.name),
-      icon: getPlanIcon(plan.name),
-      isPaid: plan.price_cents > 0,
+      iconPath: getPlanIconPath(plan.name),
       hasAnnualOption: plan.has_annual_option,
       annualPriceDisplay: plan.annual_price_display,
       annualSavingsDisplay: plan.annual_savings_display,
@@ -140,15 +94,15 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       {/* Hero Section */}
-      <section className="relative pt-16 pb-16 px-6 overflow-hidden">
+      <section className="relative pt-28 sm:pt-32 lg:pt-36 pb-20 px-6 overflow-hidden">
         {/* Background glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#069494]/10 blur-[150px] rounded-full" />
 
         <div className="relative max-w-5xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] text-sm font-medium mb-6">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Checkmark" aria-hidden="true">
-              <title>Checkmark</title>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#069494] dark:text-[#0EC7C7] text-sm font-medium mb-6">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
             </svg>
             Flexible Pricing
           </div>
@@ -165,8 +119,10 @@ export default function PricingPage() {
       {/* Software Plans Section */}
       <section className="px-6 pb-24">
         <div className="max-w-5xl mx-auto">
-          {/* Section Header */}
-          <div className="text-center mb-12">
+          {/* Section Header — mb-20 (not mb-12) because the highlighted
+              card below is lifted with lg:-mt-4 and its "Most Popular"
+              badge is positioned -top-4, eating ~32px out of the gap. */}
+          <div className="text-center mb-20">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#069494] text-sm font-medium mb-4">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Code" aria-hidden="true">
                 <title>Code</title>
@@ -284,7 +240,18 @@ export default function PricingPage() {
                 {/* Header */}
                 <div className="mb-6">
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="text-3xl">{plan.icon}</span>
+                    <div className="w-11 h-11 rounded-xl bg-[#069494]/10 border border-[#069494]/20 flex items-center justify-center shrink-0">
+                      <svg
+                        className="w-5 h-5 text-[#069494] dark:text-[#0EC7C7]"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        aria-hidden="true"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d={plan.iconPath} />
+                      </svg>
+                    </div>
                     <h3 className="text-xl font-bold">{plan.name}</h3>
                   </div>
                   <p className="text-sm text-[var(--muted)]">{plan.description}</p>
@@ -332,16 +299,17 @@ export default function PricingPage() {
                   )}
                 </div>
 
-                {/* CTA */}
+                {/* CTA — single funnel for every plan: signed-in operators
+                    go to booth management, others sign up first. */}
                 <Link
-                  href={plan.isPaid ? getPaidPlanCtaLink() : "/downloads"}
+                  href={ctaLink}
                   className={`block w-full py-3.5 rounded-xl font-semibold text-center transition-all mb-8 ${
                     plan.highlighted
                       ? "bg-[#069494] text-white hover:bg-[#176161] shadow-lg shadow-[#069494]/30 hover:shadow-[#069494]/50"
                       : "bg-slate-200 dark:bg-zinc-800 text-zinc-900 dark:text-white hover:bg-slate-300 dark:hover:bg-zinc-700"
                   }`}
                 >
-                  {plan.isPaid ? getPaidPlanCtaText() : "Download Free"}
+                  {ctaText}
                 </Link>
 
                 {/* Features */}
@@ -375,198 +343,86 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* Trust Badges */}
-      <section className="px-6 pb-24">
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            {[
-              { icon: "🔒", title: "Secure Payments", desc: "256-bit SSL encryption" },
-              { icon: "💸", title: "Money-Back", desc: "30-day guarantee" },
-              { icon: "🚀", title: "Instant Access", desc: "Start in minutes" },
-              { icon: "💬", title: "24/7 Support", desc: "Always here to help" },
-            ].map((badge) => (
-              <div key={badge.title} className="p-6 rounded-xl bg-[var(--card)] border border-[var(--border)]">
-                <div className="text-3xl mb-3">{badge.icon}</div>
-                <h3 className="font-semibold mb-1">{badge.title}</h3>
-                <p className="text-sm text-[var(--muted)]">{badge.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Feature Comparison Table */}
-      <section className="px-6 pb-24">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-4">
-            Compare software plans
-          </h2>
-          <p className="text-[var(--muted)] text-center mb-12">
-            Find the perfect plan for your business
-          </p>
-
-          <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--card)]">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-[var(--border)]">
-                  <th className="text-left py-4 px-6 font-semibold text-zinc-900 dark:text-white">Feature</th>
-                  <th className="text-center py-4 px-4 font-semibold text-zinc-600 dark:text-white">Starter</th>
-                  <th className="text-center py-4 px-4 font-semibold bg-[#069494]/10 dark:bg-[#069494]/20 border-x border-[#069494]/20 dark:border-[#069494]/40 text-zinc-600 dark:text-white">Pro</th>
-                  <th className="text-center py-4 px-4 font-semibold text-zinc-600 dark:text-white">Enterprise</th>
-                </tr>
-              </thead>
-              <tbody>
-                {comparisonFeatures.map((feature) => (
-                  <tr
-                    key={feature.name}
-                    className="border-b border-[var(--border)]/50 last:border-b-0"
-                  >
-                    <td className="py-4 px-6 text-sm font-semibold text-zinc-800 dark:text-white">{feature.name}</td>
-                    <td className="py-4 px-4 text-sm text-center text-zinc-600 dark:text-white">{feature.starter}</td>
-                    <td className="py-4 px-4 text-sm text-center bg-[#069494]/10 dark:bg-[#069494]/20 border-x border-[#069494]/20 dark:border-[#069494]/40 font-semibold text-zinc-600 dark:text-white">{feature.pro}</td>
-                    <td className="py-4 px-4 text-sm text-center text-zinc-600 dark:text-white">{feature.enterprise}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonial */}
-      <section className="px-6 pb-24">
-        <div className="max-w-3xl mx-auto">
-          <div className="relative p-10 rounded-2xl bg-[var(--card)] border border-[var(--border)]">
-            {/* Quote mark */}
-            <svg className="absolute top-6 left-8 w-10 h-10 text-[#069494]/30" fill="currentColor" viewBox="0 0 24 24" aria-label="Quote mark" aria-hidden="true">
-              <title>Quote mark</title>
-              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-            </svg>
-
-            <blockquote className="text-xl text-[var(--foreground)] leading-relaxed mb-6 relative z-10">
-              &ldquo;Switching to Pro was a no-brainer. The ROI was immediate — we made back the annual
-              subscription in just one weekend event. The mobile app alone is worth the price.&rdquo;
-            </blockquote>
-
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#F59E0B] to-[#D97706] flex items-center justify-center text-white font-bold">
-                SK
-              </div>
-              <div>
-                <div className="font-semibold text-[var(--foreground)]">Sarah Kim</div>
-                <div className="text-sm text-[var(--muted)]">Owner, SnapBox Events · 8 booths</div>
-              </div>
-              <div className="ml-auto flex gap-0.5" role="img" aria-label="5 star rating">
-                {["star-1", "star-2", "star-3", "star-4", "star-5"].map((id) => (
-                  <svg key={id} className="w-5 h-5 text-[#F59E0B]" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQs - Two Column Layout */}
-      <section className="px-6 pb-24 relative overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[#069494]/5 blur-[150px] rounded-full -translate-y-1/2" />
+      {/* ============================================
+       * FAQs — static 2-column grid, all answers visible. No accordion;
+       * matches the FAQ pattern on the features page so the site reads
+       * as one cohesive design. Every answer is something we can stand
+       * behind without inventing details.
+       * ============================================ */}
+      <section className="py-24 lg:py-32 px-6 relative overflow-hidden">
+        <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[#069494]/5 blur-[150px] rounded-full -translate-y-1/2 pointer-events-none" />
 
         <div className="relative max-w-5xl mx-auto">
           {/* Header */}
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#0EC7C7] text-sm font-medium mb-6">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Question mark" aria-hidden="true">
-                <title>Question mark</title>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#069494] dark:text-[#0EC7C7] text-sm font-medium mb-6">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
               </svg>
-              Got Questions?
+              Common questions
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              Frequently asked questions
+            <h2 className="text-4xl sm:text-5xl font-bold mb-6">
+              Things people ask
             </h2>
-            <p className="text-[var(--muted)] max-w-lg mx-auto">
-              Everything you need to know about our pricing
-            </p>
           </div>
 
-          {/* FAQ Grid - Two columns on desktop */}
-          <div className="grid md:grid-cols-2 gap-4">
-            {faqs.map((faq, index) => (
+          {/* Q&A grid */}
+          <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+            {[
+              {
+                q: "How does per-booth pricing work?",
+                a: "Each booth on your account has its own subscription. Add one booth, pick its plan; add another, pick its plan. Cancel one and the others keep running on whatever plans they were on.",
+              },
+              {
+                q: "Is there a free trial?",
+                a: "No free trial — but creating an account is free. You only start paying once you link a physical booth and pick its plan.",
+              },
+              {
+                q: "What hardware do I need?",
+                a: "BoothIQ booths are sold and assembled by BoothWorks. The hardware (camera, printer, touchscreen, payment) ships pre-configured to run BoothIQ out of the box.",
+              },
+              {
+                q: "Can I change a booth's plan later?",
+                a: "Yes. Upgrade or downgrade any booth's plan from your dashboard at any time. Annual plans switch at the end of the current billing period.",
+              },
+              {
+                q: "Does the booth need internet?",
+                a: "No. BoothIQ is offline-first — the booth runs 100% locally on its Windows app and keeps taking sessions, prints, and payments without a network. Cloud sync is a luxury layer that activates when there's internet.",
+              },
+              {
+                q: "How do I cancel a booth's subscription?",
+                a: "From your dashboard, on the booth itself. Cancelling one booth's plan only affects that booth — your other booths keep running on their own subscriptions.",
+              },
+              {
+                q: "How are payments handled?",
+                a: "Stripe handles checkout securely. You can pay monthly or annually where available, and switch billing intervals from your dashboard.",
+              },
+            ].map(({ q, a }) => (
               <div
-                key={faq.question}
-                className={`group rounded-2xl border overflow-hidden transition-all ${
-                  openFaq === index
-                    ? "bg-[#069494]/10 dark:bg-[#069494]/20 border-[#069494]/30"
-                    : "bg-[var(--card)] border-[var(--border)] hover:border-[#069494]/30"
-                }`}
+                key={q}
+                className="p-6 md:p-7 rounded-2xl bg-[var(--card)] border border-[var(--border)] hover:border-[#069494]/30 transition-colors"
               >
-                <button
-                  type="button"
-                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                  className="w-full flex items-start gap-4 p-6 text-left"
-                >
-                  {/* Number badge */}
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 transition-colors ${
-                    openFaq === index
-                      ? "bg-[#069494] text-white"
-                      : "bg-slate-200 dark:bg-zinc-600 text-zinc-600 dark:text-white group-hover:bg-[#069494]/20 group-hover:text-[#069494]"
-                  }`}>
-                    {String(index + 1).padStart(2, "0")}
-                  </div>
-                  <div className="flex-1">
-                    <span className={`font-semibold block transition-colors ${
-                      openFaq === index ? "text-[#069494] dark:text-[#0EC7C7]" : "text-zinc-800 dark:text-white group-hover:text-[#069494] dark:group-hover:text-[#0EC7C7]"
-                    }`}>
-                      {faq.question}
-                    </span>
-                  </div>
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${
-                    openFaq === index
-                      ? "bg-[#069494]/20 rotate-180"
-                      : "bg-slate-200 dark:bg-zinc-700 group-hover:bg-slate-300 dark:group-hover:bg-zinc-600"
-                  }`}>
-                    <svg
-                      className={`w-4 h-4 transition-colors ${openFaq === index ? "text-[#069494]" : "text-zinc-500 dark:text-zinc-400"}`}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      aria-label={openFaq === index ? "Collapse" : "Expand"}
-                    >
-                      <title>{openFaq === index ? "Collapse" : "Expand"}</title>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </button>
-                <div className={`overflow-hidden transition-all duration-300 ${
-                  openFaq === index ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
-                }`}>
-                  <div className="px-6 pb-6 pl-[4.5rem] text-zinc-600 dark:text-white leading-relaxed">
-                    {faq.answer}
-                  </div>
-                </div>
+                <h3 className="font-semibold text-base text-[var(--foreground)] mb-2">{q}</h3>
+                <p className="text-sm text-[var(--muted)] leading-relaxed">{a}</p>
               </div>
             ))}
           </div>
 
           {/* Still have questions */}
           <div className="mt-12 text-center">
-            <div className="inline-flex items-center gap-4 p-4 rounded-2xl bg-[var(--card)] border border-[var(--border)]">
-              <div className="w-12 h-12 rounded-xl bg-[#069494]/10 flex items-center justify-center">
-                <svg className="w-6 h-6 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Chat" aria-hidden="true">
-                  <title>Chat</title>
+            <div className="inline-flex flex-col sm:flex-row items-center gap-4 p-4 rounded-2xl bg-[var(--card)] border border-[var(--border)]">
+              <div className="w-12 h-12 rounded-xl bg-[#069494]/10 flex items-center justify-center shrink-0">
+                <svg className="w-6 h-6 text-[#069494]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
               </div>
-              <div className="text-left">
+              <div className="text-center sm:text-left">
                 <p className="font-medium text-[var(--foreground)]">Still have questions?</p>
-                <p className="text-sm text-[var(--muted)]">Our team is here to help</p>
+                <p className="text-sm text-[var(--muted)]">We&apos;re happy to help.</p>
               </div>
               <Link
                 href="/contact"
-                className="ml-4 px-5 py-2.5 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors"
+                className="sm:ml-4 px-5 py-2.5 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors"
               >
                 Contact Us
               </Link>
@@ -575,113 +431,44 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* Final CTA - Split Layout */}
-      <section className="px-6 pb-32">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-0 rounded-3xl overflow-hidden border border-[var(--border)]">
-            {/* Left side - Content */}
-            <div className="bg-[var(--card)] p-10 md:p-14 flex flex-col justify-center">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] text-xs font-medium w-fit mb-6">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
-                Start in under 5 minutes
-              </div>
+      {/* ============================================
+       * Final CTA — same pattern as the landing page and features page
+       * final CTA (teal glow + grid pattern background, centered text,
+       * Sign Up Free + secondary button) so the site reads as one
+       * cohesive design.
+       * ============================================ */}
+      <section className="py-32 px-6 relative overflow-hidden">
+        {/* Background effects */}
+        <div className="absolute inset-0 grid-pattern opacity-20 dark:opacity-30" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#069494]/10 dark:bg-[#069494]/20 blur-[150px] rounded-full" />
 
-              <h2 className="text-3xl sm:text-4xl font-bold mb-4 leading-tight">
-                Ready to get started?
-              </h2>
-
-              <p className="text-[var(--muted)] mb-8 leading-relaxed">
-                Download BoothIQ and get started today.
-                Cancel your subscription anytime.
-              </p>
-
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 mb-8">
-                <Link
-                  href="/downloads"
-                  className="px-6 py-3.5 rounded-xl bg-[#069494] text-[var(--foreground)] font-semibold hover:bg-[#176161] transition-all hover:scale-[1.02] flex items-center justify-center gap-2 shadow-lg shadow-[#069494]/20"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Download" aria-hidden="true">
-                    <title>Download</title>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  Download Free
-                </Link>
-                <Link
-                  href="/contact"
-                  className="px-6 py-3.5 rounded-xl border border-[var(--border)] text-[var(--foreground)] font-semibold hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all flex items-center justify-center gap-2"
-                >
-                  Contact Sales
-                </Link>
-              </div>
-
-              {/* Trust indicators */}
-              <div className="flex flex-wrap gap-4 text-sm text-[var(--muted)]">
-                <span className="flex items-center gap-1.5">
-                  <svg className="w-4 h-4 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Checkmark" aria-hidden="true">
-                    <title>Checkmark</title>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  Free starter plan
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <svg className="w-4 h-4 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Checkmark" aria-hidden="true">
-                    <title>Checkmark</title>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  Secure payments
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <svg className="w-4 h-4 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Checkmark" aria-hidden="true">
-                    <title>Checkmark</title>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  Cancel anytime
-                </span>
-              </div>
-            </div>
-
-            {/* Right side - Visual */}
-            <div className="relative bg-gradient-to-br from-[#069494] to-[#176161] p-10 md:p-14 hidden lg:flex items-center justify-center">
-              {/* Decorative circles */}
-              <div className="absolute top-6 right-6 w-20 h-20 rounded-full border border-white/10" />
-              <div className="absolute bottom-6 left-6 w-32 h-32 rounded-full border border-white/10" />
-              <div className="absolute top-1/2 left-1/4 w-16 h-16 rounded-full bg-white/5" />
-
-              {/* Stats card */}
-              <div className="relative bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 w-full max-w-xs">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-label="Chart" aria-hidden="true">
-                      <title>Chart</title>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-white/60 text-xs">Your potential</div>
-                    <div className="text-white font-semibold">Monthly Revenue</div>
-                  </div>
-                </div>
-
-                <div className="text-4xl font-bold text-white mb-2">$8,500</div>
-                <div className="flex items-center gap-2 text-sm text-white/70 mb-6">
-                  <span className="px-2 py-0.5 rounded bg-[#10B981]/20 text-[#10B981] text-xs font-medium">+340%</span>
-                  vs. manual operations
-                </div>
-
-                {/* Mini stats */}
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
-                  <div>
-                    <div className="text-2xl font-bold text-white">2,400</div>
-                    <div className="text-xs text-white/50">Photos/month</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-white">98%</div>
-                    <div className="text-xs text-white/50">Uptime</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+        <div className="relative max-w-3xl mx-auto text-center">
+          <h2 className="text-4xl sm:text-5xl font-bold mb-6 leading-tight">
+            One plan
+            <br />
+            <span className="text-[#069494]">per booth.</span>
+          </h2>
+          <p className="text-xl text-zinc-600 dark:text-zinc-400 mb-10 max-w-2xl mx-auto">
+            Create your account for free. Link your first booth, pick its
+            plan, and you&apos;re live. Add more booths whenever — each on
+            its own plan.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              href="/signup"
+              className="w-full sm:w-auto px-10 py-5 rounded-xl bg-[#069494] text-white font-semibold text-lg hover:bg-[#176161] transition-all hover:scale-105 flex items-center justify-center gap-3"
+            >
+              Sign Up Free
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </Link>
+            <Link
+              href="/features"
+              className="w-full sm:w-auto px-10 py-5 rounded-xl border-2 border-[#069494]/40 font-semibold text-lg hover:bg-[#069494]/10 transition-all"
+            >
+              View Features
+            </Link>
           </div>
         </div>
       </section>
