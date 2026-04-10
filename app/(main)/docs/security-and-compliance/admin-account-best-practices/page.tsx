@@ -187,7 +187,7 @@ export default function AdminAccountBestPracticesPage() {
         <li><strong>Re-set the recovery PIN</strong> when you change the password</li>
       </ul>
 
-      <p>If you have multiple booths, you can use the <strong>same password across booths</strong> if it&apos;s secured in a shared password manager. But consider the trade-off. If one booth&apos;s password leaks, all your booths are exposed.</p>
+      <p>If you have multiple booths, use a <strong>unique password for each booth</strong> and store them all in a shared-vault password manager (e.g. a team vault in 1Password or Bitwarden). This way, a leaked password on one booth doesn&apos;t compromise your entire fleet.</p>
 
       <h2 id="failed-logins">Watch for failed login attempts</h2>
 

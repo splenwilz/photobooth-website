@@ -101,7 +101,7 @@ export default function LockedOutOfAdminPage() {
 
       <h2 id="step-4">Step 4: Use a Master Password (single-use emergency access)</h2>
 
-      <p>BoothIQ has a <strong>master password</strong> system for emergency access. A master password is an <strong>8-digit single-use code</strong> that BoothIQ can validate against a per-kiosk secret. The booth will not give you a master password. You have to obtain one from a trusted source.</p>
+      <p>BoothIQ has a <strong>master password</strong> system for emergency access. A master password is a <strong>single-use emergency code</strong> (format: <code>EMR-*</code>) that BoothIQ can validate against a per-kiosk secret. The booth will not give you a master password. You have to obtain one from a trusted source.</p>
 
       <p>There are two ways to get one:</p>
 

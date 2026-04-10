@@ -46,7 +46,7 @@ export default function OutOfOrderScreenPage() {
 
       <h2 id="diagnosis">Quick diagnosis</h2>
 
-      <p>The out-of-order screen is triggered by the <strong>hardware watchdog</strong>. A setting in <strong>Settings → Hardware Error Screen → Enable hardware watchdog</strong>. The watchdog watches the <strong>camera, printer, and PCB</strong> status pills and shows the out-of-order screen if any of them goes offline.</p>
+      <p>The out-of-order screen is triggered by the <strong>hardware watchdog</strong>, which is controlled by the toggle in <strong>Settings → Hardware Error Screen → Enable hardware watchdog</strong>. The watchdog watches the <strong>camera, printer, and PCB</strong> status pills and shows the out-of-order screen if any of them goes offline.</p>
 
       <p>So the out-of-order screen appearing means <strong>at least one piece of hardware is offline right now</strong>. Find which one and fix it.</p>
 

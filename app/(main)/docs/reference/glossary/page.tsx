@@ -49,7 +49,7 @@ export default function GlossaryPage() {
         <li><strong>License.</strong> Per-kiosk activation tied to the booth&apos;s hardware. Issued via the cloud</li>
         <li><strong>License banner.</strong> A strip at the top of the admin dashboard that appears when the license is in trial, grace, or expiring state</li>
         <li><strong>Master account.</strong> An admin user with full access to every tab and setting</li>
-        <li><strong>Master password.</strong> A single-use 8-digit emergency code for accessing a locked-out kiosk. Issued by support</li>
+        <li><strong>Master password.</strong> A single-use emergency code (format: <code>EMR-*</code>) for accessing a locked-out kiosk. Issued by support</li>
         <li><strong>Multi-copy discount.</strong> A percentage off the extra-copy price when buying more than one (set in Products tab)</li>
         <li><strong>Operation mode.</strong> Coin Operated or Free Play (set in Settings tab)</li>
         <li><strong>Orphaned template.</strong> A template whose category was deleted or never assigned</li>

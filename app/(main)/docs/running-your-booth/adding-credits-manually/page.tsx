@@ -180,13 +180,21 @@ export default function AddingCreditsManuallyPage() {
       <h2 id="reconciling">Reconciling at end of day</h2>
 
       <p>
-        At the end of a day, your end-of-day cash should match the{" "}
-        <strong>Sales tab</strong> revenue minus any{" "}
-        <strong>Admin credits</strong> you added during the day. The
-        math:
+        At the end of a day, your end-of-day cash should match the
+        cash-only revenue from the <strong>Sales tab</strong> (filter
+        by cash payment method if your booth also accepts cards)
+        minus any <strong>Admin credits</strong> you added during the
+        day. The math:
       </p>
 
-      <pre><code>{`expected_cash_in_box = sales_tab_revenue - manual_admin_credits_added`}</code></pre>
+      <pre><code>{`expected_cash_in_box = cash_revenue - manual_admin_credits_added`}</code></pre>
+
+      <p>
+        If your booth only takes cash (no card reader), cash revenue
+        equals total revenue and this is straightforward. If your
+        booth accepts both cash and cards, use the payment method
+        breakdown in the Sales tab to isolate the cash portion.
+      </p>
 
       <p>If your cash count doesn&apos;t match, look in the Credits tab history for unexpected manual additions, deductions, or resets you may have forgotten about.</p>
 

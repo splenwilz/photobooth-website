@@ -211,11 +211,7 @@ export default function DocsLandingPage() {
                 disabled
                 className="w-full pl-14 pr-20 py-4 rounded-2xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] placeholder-[var(--muted)] focus:outline-none focus:border-[#069494]/50 focus:ring-2 focus:ring-[#069494]/20 transition-all text-base disabled:cursor-not-allowed"
               />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-                <span className="text-xs text-[var(--muted)] border border-[var(--border)] px-1.5 py-0.5 rounded-md font-mono">
-                  ⌘K
-                </span>
-              </div>
+              {/* Keyboard shortcut hint hidden until search is implemented */}
             </div>
           </div>
         </div>

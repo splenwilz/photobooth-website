@@ -47,7 +47,7 @@ export default function MasterPasswordSystemPage() {
 
       <h2 id="what-it-is">What it is</h2>
 
-      <p>A <strong>master password</strong> is an <strong>8-digit single-use code</strong> that BoothIQ accepts in addition to your normal password. It&apos;s designed for one specific situation: <strong>you&apos;re locked out of the kiosk and you can&apos;t recover with the normal password or recovery PIN</strong>.</p>
+      <p>A <strong>master password</strong> is a <strong>single-use emergency code</strong> (format: <code>EMR-*</code>) that BoothIQ accepts in addition to your normal password. It&apos;s designed for one specific situation: <strong>you&apos;re locked out of the kiosk and you can&apos;t recover with the normal password or recovery PIN</strong>.</p>
 
       <p>You can&apos;t generate a master password yourself on the kiosk. You have to obtain one from a <strong>trusted source</strong>. Typically:</p>
 
@@ -85,7 +85,7 @@ export default function MasterPasswordSystemPage() {
 
       <h3>Option B: HMAC-derived master password (advanced)</h3>
 
-      <p>This is a deeper mechanism documented in the developer docs (<code>docs/MASTER_PASSWORD.md</code>). It uses a per-kiosk secret combined with a one-time code to derive a valid 8-digit password.</p>
+      <p>This is a deeper mechanism documented in the developer docs (<code>docs/MASTER_PASSWORD.md</code>). It uses a per-kiosk secret combined with a one-time code to derive a valid emergency password.</p>
 
       <p>This path is <strong>for support technicians</strong>, not for routine operator use. If support tells you to use it, follow their exact instructions.</p>
 
@@ -94,7 +94,7 @@ export default function MasterPasswordSystemPage() {
       <ol>
         <li>Go to the admin login screen on the kiosk (5-tap on the credits indicator).</li>
         <li>Enter your <strong>username</strong> (e.g. <code>admin</code>).</li>
-        <li>Enter the <strong>master password</strong> in the password field. Type the <code>EMR-*</code> code or the 8-digit number exactly as support gave it to you.</li>
+        <li>Enter the <strong>master password</strong> in the password field. Type the <code>EMR-*</code> code exactly as support gave it to you.</li>
         <li>Tap <strong>Sign In</strong>.</li>
         <li>The booth validates the code and signs you in.</li>
       </ol>

@@ -356,7 +356,9 @@ function CheckoutSuccessContent() {
               <div className="flex justify-between">
                 <span className="text-[var(--muted)]">Amount</span>
                 <span className="font-medium">
-                  ${(session.amount_total / 100).toFixed(2)} {session.currency.toUpperCase()}
+                  {session.amount_total != null && session.currency
+                    ? `$${(session.amount_total / 100).toFixed(2)} ${session.currency.toUpperCase()}`
+                    : "—"}
                 </span>
               </div>
               <div className="flex justify-between">
