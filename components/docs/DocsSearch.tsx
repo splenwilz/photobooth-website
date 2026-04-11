@@ -49,6 +49,7 @@ export default function DocsSearch() {
       })
     : [];
 
+  const visibleResults = filtered.slice(0, 20);
   const showDropdown = open && query.trim().length > 0;
 
   // ⌘K / Ctrl+K to focus
@@ -98,16 +99,16 @@ export default function DocsSearch() {
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setActiveIndex((prev) =>
-        prev < filtered.length - 1 ? prev + 1 : 0
+        prev < visibleResults.length - 1 ? prev + 1 : 0
       );
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setActiveIndex((prev) =>
-        prev > 0 ? prev - 1 : filtered.length - 1
+        prev > 0 ? prev - 1 : visibleResults.length - 1
       );
     } else if (e.key === "Enter" && activeIndex >= 0) {
       e.preventDefault();
-      navigate(filtered[activeIndex].href);
+      navigate(visibleResults[activeIndex].href);
     }
   }
 
@@ -165,7 +166,7 @@ export default function DocsSearch() {
               No results for &quot;{query}&quot;
             </div>
           ) : (
-            filtered.slice(0, 20).map((result, i) => (
+            visibleResults.map((result, i) => (
               <button
                 key={result.href}
                 role="option"
