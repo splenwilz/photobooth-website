@@ -63,6 +63,7 @@ export default function DocsSearch() {
       if (e.key === "Escape") {
         inputRef.current?.blur();
         setOpen(false);
+        setActiveIndex(-1);
       }
     }
     document.addEventListener("keydown", handleKeyDown);
@@ -77,6 +78,7 @@ export default function DocsSearch() {
         !containerRef.current.contains(e.target as Node)
       ) {
         setOpen(false);
+        setActiveIndex(-1);
       }
     }
     document.addEventListener("mousedown", handleClick);
@@ -143,7 +145,7 @@ export default function DocsSearch() {
             setOpen(true);
             setActiveIndex(-1);
           }}
-          onFocus={() => setOpen(true)}
+          onFocus={() => { setOpen(true); setActiveIndex(-1); }}
           onKeyDown={handleKeyDown}
           className="w-full pl-14 pr-20 py-4 rounded-2xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] placeholder-[var(--muted)] focus:outline-none focus:border-[#069494]/50 focus:ring-2 focus:ring-[#069494]/20 transition-all text-base"
           aria-label="Search documentation"
