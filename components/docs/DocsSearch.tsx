@@ -41,7 +41,7 @@ export default function DocsSearch() {
 
   const filtered = query.trim()
     ? allResults.filter((r) => {
-        const q = query.toLowerCase();
+        const q = query.trim().toLowerCase();
         return (
           r.title.toLowerCase().includes(q) ||
           r.section.toLowerCase().includes(q)
@@ -94,7 +94,7 @@ export default function DocsSearch() {
   );
 
   function handleKeyDown(e: React.KeyboardEvent) {
-    if (!showDropdown) return;
+    if (!showDropdown || visibleResults.length === 0) return;
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -106,7 +106,11 @@ export default function DocsSearch() {
       setActiveIndex((prev) =>
         prev > 0 ? prev - 1 : visibleResults.length - 1
       );
-    } else if (e.key === "Enter" && activeIndex >= 0) {
+    } else if (
+      e.key === "Enter" &&
+      activeIndex >= 0 &&
+      activeIndex < visibleResults.length
+    ) {
       e.preventDefault();
       navigate(visibleResults[activeIndex].href);
     }
