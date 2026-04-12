@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { sidebarSections } from "@/app/(main)/docs/_data/sidebar";
 
@@ -40,6 +40,11 @@ export default function DocsSearch() {
   const containerRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  const isMac = useMemo(() => {
+    if (typeof navigator === "undefined") return true;
+    return /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
+  }, []);
 
   const filtered = query.trim()
     ? allResults.filter((r) => {
@@ -173,7 +178,7 @@ export default function DocsSearch() {
         />
         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
           <kbd className="text-xs text-[var(--muted)] border border-[var(--border)] px-1.5 py-0.5 rounded-md font-mono">
-            ⌘K
+            {isMac ? "⌘K" : "Ctrl+K"}
           </kbd>
         </div>
       </div>
@@ -195,6 +200,7 @@ export default function DocsSearch() {
                 key={result.href}
                 id={`${RESULT_ID_PREFIX}${i}`}
                 role="option"
+                tabIndex={-1}
                 aria-selected={i === activeIndex}
                 onClick={() => navigate(result.href)}
                 onMouseEnter={() => setActiveIndex(i)}
