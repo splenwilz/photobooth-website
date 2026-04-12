@@ -30,6 +30,7 @@ function buildIndex(): SearchResult[] {
 }
 
 const allResults = buildIndex();
+const RESULT_ID_PREFIX = "docs-search-result-";
 
 export default function DocsSearch() {
   const [query, setQuery] = useState("");
@@ -37,6 +38,7 @@ export default function DocsSearch() {
   const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   const filtered = query.trim()
@@ -51,6 +53,17 @@ export default function DocsSearch() {
 
   const visibleResults = filtered.slice(0, 20);
   const showDropdown = open && query.trim().length > 0;
+
+  // Scroll active item into view
+  useEffect(() => {
+    if (activeIndex < 0 || !listRef.current) return;
+    const el = listRef.current.querySelector(
+      `#${RESULT_ID_PREFIX}${activeIndex}`
+    );
+    if (el) {
+      el.scrollIntoView({ block: "nearest" });
+    }
+  }, [activeIndex]);
 
   // ⌘K / Ctrl+K to focus
   useEffect(() => {
@@ -118,6 +131,9 @@ export default function DocsSearch() {
     }
   }
 
+  const activeDescendant =
+    activeIndex >= 0 ? `${RESULT_ID_PREFIX}${activeIndex}` : undefined;
+
   return (
     <div ref={containerRef} className="max-w-2xl mx-auto mb-16 relative z-40">
       <div className="relative">
@@ -151,6 +167,7 @@ export default function DocsSearch() {
           aria-label="Search documentation"
           aria-expanded={showDropdown}
           aria-controls="docs-search-results"
+          aria-activedescendant={activeDescendant}
           role="combobox"
           aria-autocomplete="list"
         />
@@ -163,6 +180,7 @@ export default function DocsSearch() {
 
       {showDropdown && (
         <div
+          ref={listRef}
           id="docs-search-results"
           role="listbox"
           className="absolute top-full left-0 right-0 mt-2 rounded-2xl border border-[var(--border)] shadow-2xl z-40 max-h-80 overflow-y-auto bg-white dark:bg-zinc-900"
@@ -175,6 +193,7 @@ export default function DocsSearch() {
             visibleResults.map((result, i) => (
               <button
                 key={result.href}
+                id={`${RESULT_ID_PREFIX}${i}`}
                 role="option"
                 aria-selected={i === activeIndex}
                 onClick={() => navigate(result.href)}
