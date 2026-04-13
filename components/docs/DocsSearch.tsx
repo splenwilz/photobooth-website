@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { sidebarSections } from "@/app/(main)/docs/_data/sidebar";
 
@@ -41,9 +41,9 @@ export default function DocsSearch() {
   const listRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  const isMac = useMemo(() => {
-    if (typeof navigator === "undefined") return true;
-    return /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
+  const [isMac, setIsMac] = useState(true);
+  useEffect(() => {
+    setIsMac(/Mac|iPhone|iPad|iPod/.test(navigator.userAgent));
   }, []);
 
   const filtered = query.trim()
