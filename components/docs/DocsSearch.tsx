@@ -41,10 +41,10 @@ export default function DocsSearch() {
   const listRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  const [isMac, setIsMac] = useState(true);
-  useEffect(() => {
-    setIsMac(/Mac|iPhone|iPad|iPod/.test(navigator.userAgent));
-  }, []);
+  const isMac =
+    typeof navigator !== "undefined"
+      ? /Mac|iPhone|iPad|iPod/.test(navigator.userAgent)
+      : true;
 
   const filtered = query.trim()
     ? allResults.filter((r) => {
