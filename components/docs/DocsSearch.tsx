@@ -8,7 +8,12 @@ interface SearchResult {
   title: string;
   href: string;
   section: string;
+  aliases?: string[];
 }
+
+const SECTION_ALIASES: Record<string, string[]> = {
+  "/docs/faq": ["frequently asked questions", "frequently", "questions"],
+};
 
 function buildIndex(): SearchResult[] {
   const results: SearchResult[] = [];
@@ -17,12 +22,14 @@ function buildIndex(): SearchResult[] {
       title: section.title,
       href: section.href,
       section: section.title,
+      aliases: SECTION_ALIASES[section.href],
     });
     for (const item of section.items) {
       results.push({
         title: item.title,
         href: item.href,
         section: section.title,
+        aliases: SECTION_ALIASES[item.href],
       });
     }
   }
@@ -51,7 +58,8 @@ export default function DocsSearch() {
         const q = query.trim().toLowerCase();
         return (
           r.title.toLowerCase().includes(q) ||
-          r.section.toLowerCase().includes(q)
+          r.section.toLowerCase().includes(q) ||
+          (r.aliases?.some((a) => a.includes(q)) ?? false)
         );
       })
     : [];
@@ -177,7 +185,10 @@ export default function DocsSearch() {
           aria-autocomplete="list"
         />
         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-          <kbd className="text-xs text-[var(--muted)] border border-[var(--border)] px-1.5 py-0.5 rounded-md font-mono">
+          <kbd
+            suppressHydrationWarning
+            className="text-xs text-[var(--muted)] border border-[var(--border)] px-1.5 py-0.5 rounded-md font-mono"
+          >
             {isMac ? "⌘K" : "Ctrl+K"}
           </kbd>
         </div>

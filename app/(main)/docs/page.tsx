@@ -156,7 +156,7 @@ const helpLinks = [
 export default function DocsLandingPage() {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <section className="relative pt-28 sm:pt-32 lg:pt-36 pb-20 px-6 overflow-visible">
+      <section className="relative pt-28 sm:pt-32 lg:pt-36 pb-20 px-6">
         {/* Background glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#069494]/10 blur-[150px] rounded-full pointer-events-none" />
 
