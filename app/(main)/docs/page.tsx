@@ -157,8 +157,10 @@ export default function DocsLandingPage() {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <section className="relative pt-28 sm:pt-32 lg:pt-36 pb-20 px-6">
-        {/* Background glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#069494]/10 blur-[150px] rounded-full pointer-events-none" />
+        {/* Background glow — wrapper clips horizontal overflow without affecting the search dropdown */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#069494]/10 blur-[150px] rounded-full" />
+        </div>
 
         <div className="relative max-w-5xl mx-auto">
           {/* Hero */}

@@ -59,7 +59,7 @@ export default function DocsSearch() {
         return (
           r.title.toLowerCase().includes(q) ||
           r.section.toLowerCase().includes(q) ||
-          (r.aliases?.some((a) => a.includes(q)) ?? false)
+          (r.aliases?.some((a) => a.toLowerCase().includes(q)) ?? false)
         );
       })
     : [];
