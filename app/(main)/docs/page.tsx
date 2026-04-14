@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import DocsSearch from "@/components/docs/DocsSearch";
 
 export const metadata: Metadata = {
   title: "Documentation",
@@ -155,9 +156,11 @@ const helpLinks = [
 export default function DocsLandingPage() {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <section className="relative pt-28 sm:pt-32 lg:pt-36 pb-20 px-6 overflow-hidden">
-        {/* Background glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#069494]/10 blur-[150px] rounded-full pointer-events-none" />
+      <section className="relative pt-28 sm:pt-32 lg:pt-36 pb-20 px-6">
+        {/* Background glow — wrapper clips horizontal overflow without affecting the search dropdown */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#069494]/10 blur-[150px] rounded-full" />
+        </div>
 
         <div className="relative max-w-5xl mx-auto">
           {/* Hero */}
@@ -188,32 +191,7 @@ export default function DocsLandingPage() {
             </p>
           </div>
 
-          {/* Search bar (visual only — search isn't wired yet) */}
-          <div className="max-w-2xl mx-auto mb-16">
-            <div className="relative">
-              <svg
-                className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--muted)]"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-              <input
-                type="text"
-                placeholder="Search the docs..."
-                disabled
-                className="w-full pl-14 pr-20 py-4 rounded-2xl bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] placeholder-[var(--muted)] focus:outline-none focus:border-[#069494]/50 focus:ring-2 focus:ring-[#069494]/20 transition-all text-base disabled:cursor-not-allowed"
-              />
-              {/* Keyboard shortcut hint hidden until search is implemented */}
-            </div>
-          </div>
+          <DocsSearch />
         </div>
       </section>
 
