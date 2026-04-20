@@ -663,7 +663,15 @@ function DashboardLayoutContent({
 
               {/* Help / Take a Tour */}
               <button
-                onClick={() => setTourActive(true)}
+                onClick={() => {
+                  if (pathname !== "/dashboard") {
+                    router.push("/dashboard");
+                    // Delay to let the overview page mount before opening tour
+                    setTimeout(() => setTourActive(true), 500);
+                  } else {
+                    setTourActive(true);
+                  }
+                }}
                 title="Take a tour"
                 aria-label="Take a tour"
                 className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
@@ -709,7 +717,9 @@ function DashboardLayoutContent({
           onSkip={() => {
             setTourActive(false);
             try {
-              localStorage.setItem(TOUR_STORAGE_KEYS.completed, "true");
+              // Only dismiss the banner, don't mark tour as completed
+              // so user can restart it later
+              localStorage.setItem(TOUR_STORAGE_KEYS.bannerDismissed, "true");
             } catch { /* ignore */ }
           }}
         />
