@@ -281,7 +281,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Period Selector */}
-          <div className="flex gap-1 p-1 bg-slate-200/50 dark:bg-zinc-800/50 rounded-xl">
+          <div data-tour-id="period-selector" className="flex gap-1 p-1 bg-slate-200/50 dark:bg-zinc-800/50 rounded-xl">
             {(["today", "week", "month", "year"] as RevenuePeriod[]).map((period) => (
               <button
                 key={period}
@@ -299,7 +299,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats Cards - Row 1 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div data-tour-id="revenue-cards" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Revenue Card */}
           <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
             <p className="text-sm text-zinc-500 mb-1">Revenue</p>
@@ -463,7 +463,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Hardware Overview - Aggregated (All Booths) */}
         {isAllBooths ? (
-          <section>
+          <section data-tour-id="hardware-status">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Hardware Overview</h2>
@@ -572,7 +572,7 @@ export default function DashboardPage() {
           </section>
         ) : (
           /* Hardware & System - Single Booth */
-          <section>
+          <section data-tour-id="hardware-status">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Hardware & System</h2>
@@ -707,7 +707,7 @@ export default function DashboardPage() {
         )}
 
         {/* Recent Alerts */}
-        <section>
+        <section data-tour-id="recent-alerts">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Recent Alerts</h2>
