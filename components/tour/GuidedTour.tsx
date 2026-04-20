@@ -122,11 +122,17 @@ export function GuidedTour({ steps, isOpen, onComplete, onSkip }: GuidedTourProp
 
   const handleComplete = useCallback(() => {
     setCurrentStep(0);
+    try {
+      localStorage.removeItem(TOUR_STORAGE_KEYS.currentStep);
+    } catch { /* ignore */ }
     onComplete();
   }, [onComplete]);
 
   const handleSkip = useCallback(() => {
     setCurrentStep(0);
+    try {
+      localStorage.removeItem(TOUR_STORAGE_KEYS.currentStep);
+    } catch { /* ignore */ }
     onSkip();
   }, [onSkip]);
 
@@ -194,11 +200,31 @@ export function GuidedTour({ steps, isOpen, onComplete, onSkip }: GuidedTourProp
     stepIdRef.current += 1;
   }, [safeStep]);
 
-  // Initial measurement when step changes
+  // Initial measurement when step changes (with retry for async targets)
   useEffect(() => {
     if (!isOpen) return;
     measureTarget();
-  }, [isOpen, measureTarget]);
+
+    // If target is missing, retry a few times in case it mounts async
+    if (step?.target) {
+      const capturedId = stepIdRef.current;
+      let retries = 0;
+      const maxRetries = 5;
+      const retryTimer = setInterval(() => {
+        if (stepIdRef.current !== capturedId || retries >= maxRetries) {
+          clearInterval(retryTimer);
+          return;
+        }
+        const el = document.querySelector(step.target!);
+        if (el && isElementVisible(el)) {
+          measureTarget();
+          clearInterval(retryTimer);
+        }
+        retries++;
+      }, 300);
+      return () => clearInterval(retryTimer);
+    }
+  }, [isOpen, measureTarget, step]);
 
   // Resize/scroll listener (separate to prevent accumulation)
   useEffect(() => {

@@ -665,6 +665,7 @@ function DashboardLayoutContent({
               <button
                 onClick={() => setTourActive(true)}
                 title="Take a tour"
+                aria-label="Take a tour"
                 className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
               >
                 <svg
@@ -694,23 +695,25 @@ function DashboardLayoutContent({
         </main>
       </div>
 
-      {/* Guided Tour */}
-      <GuidedTour
-        steps={DASHBOARD_TOUR_STEPS}
-        isOpen={tourActive}
-        onComplete={() => {
-          setTourActive(false);
-          try {
-            localStorage.setItem(TOUR_STORAGE_KEYS.completed, "true");
-          } catch { /* ignore */ }
-        }}
-        onSkip={() => {
-          setTourActive(false);
-          try {
-            localStorage.setItem(TOUR_STORAGE_KEYS.completed, "true");
-          } catch { /* ignore */ }
-        }}
-      />
+      {/* Guided Tour — only on overview route where tour targets exist */}
+      {pathname === "/dashboard" && (
+        <GuidedTour
+          steps={DASHBOARD_TOUR_STEPS}
+          isOpen={tourActive}
+          onComplete={() => {
+            setTourActive(false);
+            try {
+              localStorage.setItem(TOUR_STORAGE_KEYS.completed, "true");
+            } catch { /* ignore */ }
+          }}
+          onSkip={() => {
+            setTourActive(false);
+            try {
+              localStorage.setItem(TOUR_STORAGE_KEYS.completed, "true");
+            } catch { /* ignore */ }
+          }}
+        />
+      )}
     </div>
   );
 }

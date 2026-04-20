@@ -60,6 +60,7 @@ export function WelcomeBanner({ onStartTour }: WelcomeBannerProps) {
           {/* Close button */}
           <button
             onClick={dismiss}
+            aria-label="Dismiss welcome banner"
             className="absolute top-3 right-3 p-1.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
           >
             <X className="w-4 h-4" />
