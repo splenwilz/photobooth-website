@@ -17,6 +17,8 @@ export function ResetPasswordForm() {
   );
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
 
   // Handle successful reset
   useEffect(() => {
@@ -73,6 +75,8 @@ export function ResetPasswordForm() {
             minLength={8}
             maxLength={50}
             disabled={isPending}
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
             className="w-full px-4 py-3.5 pr-12 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           />
           <button
@@ -112,6 +116,8 @@ export function ResetPasswordForm() {
             minLength={8}
             maxLength={50}
             disabled={isPending}
+            value={confirmNewPassword}
+            onChange={(e) => setConfirmNewPassword(e.target.value)}
             className="w-full px-4 py-3.5 pr-12 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           />
           <button
