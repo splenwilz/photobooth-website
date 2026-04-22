@@ -20,7 +20,8 @@ const COOKIE_OPTIONS = {
 // The actual JWT expiry (15 min) is enforced by the backend.
 // When JWT expires, API returns 401 + expired header, triggering refresh.
 // This prevents middleware from redirecting before refresh can be attempted.
-const SESSION_MAX_AGE = 7 * 24 * 60 * 60 // 7 days (same for all auth cookies)
+const SESSION_MAX_AGE = 7 * 24 * 60 * 60 // 7 days (default)
+const REMEMBER_ME_MAX_AGE = 30 * 24 * 60 * 60 // 30 days (opt-in via "remember me")
 
 /**
  * Set authentication cookies after successful login/signup
@@ -31,20 +32,25 @@ const SESSION_MAX_AGE = 7 * 24 * 60 * 60 // 7 days (same for all auth cookies)
  * - auth_user: User data for client-side access (non-httpOnly)
  *
  * @param response - Authentication response containing tokens and user data
+ * @param options.remember - If true, cookies persist for 30 days instead of 7
  */
-export async function setAuthCookies(response: AuthResponse): Promise<void> {
+export async function setAuthCookies(
+  response: AuthResponse,
+  { remember = false }: { remember?: boolean } = {}
+): Promise<void> {
   const cookieStore = await cookies()
+  const maxAge = remember ? REMEMBER_ME_MAX_AGE : SESSION_MAX_AGE
 
   // Set access token (cookie lives 7 days, JWT expires in 15 min - enforced by backend)
   cookieStore.set('auth_access_token', response.access_token, {
     ...COOKIE_OPTIONS,
-    maxAge: SESSION_MAX_AGE,
+    maxAge,
   })
 
   // Set refresh token
   cookieStore.set('auth_refresh_token', response.refresh_token, {
     ...COOKIE_OPTIONS,
-    maxAge: SESSION_MAX_AGE,
+    maxAge,
   })
 
   // Set user data (client-accessible for UI purposes)
@@ -53,7 +59,7 @@ export async function setAuthCookies(response: AuthResponse): Promise<void> {
   cookieStore.set('auth_user', JSON.stringify(userData), {
     ...COOKIE_OPTIONS,
     httpOnly: false, // Allow client-side access for user display
-    maxAge: SESSION_MAX_AGE,
+    maxAge,
   })
 }
 

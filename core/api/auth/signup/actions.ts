@@ -86,6 +86,13 @@ export async function signupAction(
             }
         }
 
+        if (!/[A-Za-z]/.test(password)) {
+            return {
+                success: false,
+                error: 'Password must contain at least one letter',
+            }
+        }
+
         if (password !== confirmPassword) {
             return {
                 success: false,

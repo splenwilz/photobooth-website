@@ -46,6 +46,7 @@ export async function signinAction(
         // Extract and validate form data
         const email = formData.get('email')?.toString()
         const password = formData.get('password')?.toString()
+        const remember = formData.get('remember') === 'on'
 
         if (!email || !password) {
             return {
@@ -113,7 +114,7 @@ export async function signinAction(
         // Set authentication cookies using official pattern
         // @see https://nextjs.org/docs/app/building-your-application/authentication
         if ('access_token' in signinResponse && 'refresh_token' in signinResponse) {
-            await setAuthCookies(signinResponse as AuthResponse)
+            await setAuthCookies(signinResponse as AuthResponse, { remember })
         }
 
         // Log successful signin (without sensitive data)
@@ -155,6 +156,7 @@ export async function signinAction(
         return {
             success: false,
             error: errorMessage,
+            rateLimited: rateLimit.remaining <= 0,
             remainingAttempts: rateLimit.remaining,
         }
     }
