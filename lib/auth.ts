@@ -22,6 +22,11 @@ const COOKIE_OPTIONS = {
 // This prevents middleware from redirecting before refresh can be attempted.
 const SESSION_MAX_AGE = 7 * 24 * 60 * 60 // 7 days (default)
 const REMEMBER_ME_MAX_AGE = 30 * 24 * 60 * 60 // 30 days (opt-in via "remember me")
+const REMEMBER_COOKIE = 'auth_remember'
+
+function resolveMaxAge(remember: boolean): number {
+  return remember ? REMEMBER_ME_MAX_AGE : SESSION_MAX_AGE
+}
 
 /**
  * Set authentication cookies after successful login/signup
@@ -39,7 +44,7 @@ export async function setAuthCookies(
   { remember = false }: { remember?: boolean } = {}
 ): Promise<void> {
   const cookieStore = await cookies()
-  const maxAge = remember ? REMEMBER_ME_MAX_AGE : SESSION_MAX_AGE
+  const maxAge = resolveMaxAge(remember)
 
   // Set access token (cookie lives 7 days, JWT expires in 15 min - enforced by backend)
   cookieStore.set('auth_access_token', response.access_token, {
@@ -61,6 +66,13 @@ export async function setAuthCookies(
     httpOnly: false, // Allow client-side access for user display
     maxAge,
   })
+
+  // Persist the remember-me choice so token refreshes don't downgrade a 30-day session.
+  if (remember) {
+    cookieStore.set(REMEMBER_COOKIE, '1', { ...COOKIE_OPTIONS, maxAge })
+  } else {
+    cookieStore.delete(REMEMBER_COOKIE)
+  }
 }
 
 /**
@@ -71,18 +83,25 @@ export async function setAuthCookies(
  */
 export async function updateTokenCookies(tokenData: RefreshTokenResponse): Promise<void> {
   const cookieStore = await cookies()
+  const remember = cookieStore.get(REMEMBER_COOKIE)?.value === '1'
+  const maxAge = resolveMaxAge(remember)
 
   // Update access token
   cookieStore.set('auth_access_token', tokenData.access_token, {
     ...COOKIE_OPTIONS,
-    maxAge: SESSION_MAX_AGE,
+    maxAge,
   })
 
   // Update refresh token
   cookieStore.set('auth_refresh_token', tokenData.refresh_token, {
     ...COOKIE_OPTIONS,
-    maxAge: SESSION_MAX_AGE,
+    maxAge,
   })
+
+  // Refresh the remember flag alongside the tokens so it doesn't expire first.
+  if (remember) {
+    cookieStore.set(REMEMBER_COOKIE, '1', { ...COOKIE_OPTIONS, maxAge })
+  }
 }
 
 /**
@@ -94,6 +113,7 @@ export async function clearAuthCookies(): Promise<void> {
   cookieStore.delete('auth_access_token')
   cookieStore.delete('auth_refresh_token')
   cookieStore.delete('auth_user')
+  cookieStore.delete(REMEMBER_COOKIE)
 }
 
 /**

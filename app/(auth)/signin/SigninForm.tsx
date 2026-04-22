@@ -15,6 +15,7 @@ export function SigninForm({ resetSuccess }: { resetSuccess?: boolean }) {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(false);
 
   // Handle successful signin
   useEffect(() => {
@@ -121,6 +122,8 @@ export function SigninForm({ resetSuccess }: { resetSuccess?: boolean }) {
           type="checkbox"
           id="remember"
           name="remember"
+          checked={remember}
+          onChange={(e) => setRemember(e.target.checked)}
           className="w-4 h-4 rounded bg-white dark:bg-[#111111] border-slate-200 dark:border-zinc-800 text-[#069494] focus:ring-[#069494] focus:ring-offset-0"
         />
         <label htmlFor="remember" className="text-sm text-zinc-500">
