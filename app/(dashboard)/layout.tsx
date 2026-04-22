@@ -665,7 +665,10 @@ function DashboardLayoutContent({
               <button
                 onClick={() => {
                   if (pathname !== "/dashboard") {
-                    router.push("/dashboard");
+                    const dest = selectedBoothId
+                      ? `/dashboard?booth=${selectedBoothId}`
+                      : "/dashboard";
+                    router.push(dest);
                     // Delay to let the overview page mount before opening tour
                     setTimeout(() => setTourActive(true), 500);
                   } else {

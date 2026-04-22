@@ -61,6 +61,7 @@ export const DASHBOARD_TOUR_STEPS: TourStep[] = [
     description:
       "Filter your entire dashboard by a specific booth, or select \"All Booths\" to see aggregated data across your fleet.",
     placement: "bottom",
+    requiresSidebar: true,
   },
   {
     id: "period-selector",
