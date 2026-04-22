@@ -8,6 +8,9 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { useBoothList } from "@/core/api/booths";
 import { useAlerts } from "@/core/api/alerts";
 import type { AuthUser } from "@/core/api/auth/types";
+import { GuidedTour } from "@/components/tour/GuidedTour";
+import { WelcomeBanner } from "@/components/tour/WelcomeBanner";
+import { DASHBOARD_TOUR_STEPS, TOUR_STORAGE_KEYS } from "@/components/tour/tour-steps";
 
 /**
  * Dashboard Layout
@@ -43,7 +46,12 @@ function getInitials(user: AuthUser | null): string {
 }
 
 // Navigation items matching mobile app tabs
-const navItems = [
+const navItems: {
+  name: string;
+  href: string;
+  icon: React.ReactNode;
+  tourId?: string;
+}[] = [
   {
     name: "Overview",
     href: "/dashboard",
@@ -66,6 +74,7 @@ const navItems = [
   {
     name: "Booths",
     href: "/dashboard/booths",
+    tourId: "nav-booths",
     icon: (
       <svg
         className="w-5 h-5"
@@ -109,6 +118,7 @@ const navItems = [
   {
     name: "Analytics",
     href: "/dashboard/analytics",
+    tourId: "nav-analytics",
     icon: (
       <svg
         className="w-5 h-5"
@@ -128,6 +138,7 @@ const navItems = [
   {
     name: "Alerts",
     href: "/dashboard/alerts",
+    tourId: "nav-alerts",
     icon: (
       <svg
         className="w-5 h-5"
@@ -250,6 +261,9 @@ function DashboardLayoutContent({
   const { data: alertsData } = useAlerts();
   const alertsCount = alertsData?.alerts?.length ?? 0;
 
+  // Tour state
+  const [tourActive, setTourActive] = useState(false);
+
   // Load user from cookie on mount
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- read cookie on mount
@@ -340,7 +354,7 @@ function DashboardLayoutContent({
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          <nav data-tour-id="sidebar-nav" className="flex-1 p-4 space-y-1 overflow-y-auto">
             {navItems.map((item) => {
               const isActive =
                 pathname === item.href ||
@@ -355,6 +369,7 @@ function DashboardLayoutContent({
                 <Link
                   key={item.name}
                   href={href}
+                  {...(item.tourId ? { "data-tour-id": item.tourId } : {})}
                   className={`
                     flex items-center gap-3 px-4 py-3 rounded-xl transition-all
                     ${
@@ -472,7 +487,7 @@ function DashboardLayoutContent({
             </button>
 
             {/* Booth Selector */}
-            <div className="relative hidden sm:block">
+            <div data-tour-id="booth-selector" className="relative hidden sm:block">
               <button
                 onClick={() => setBoothSelectorOpen(!boothSelectorOpen)}
                 className="flex items-center gap-3 px-4 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700/50 hover:border-slate-300 dark:hover:border-zinc-600 transition-colors"
@@ -646,8 +661,24 @@ function DashboardLayoutContent({
                 )}
               </Link>
 
-              {/* Help */}
-              <button className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">
+              {/* Help / Take a Tour */}
+              <button
+                onClick={() => {
+                  if (pathname !== "/dashboard") {
+                    const dest = selectedBoothId
+                      ? `/dashboard?booth=${selectedBoothId}`
+                      : "/dashboard";
+                    router.push(dest);
+                    // Delay to let the overview page mount before opening tour
+                    setTimeout(() => setTourActive(true), 500);
+                  } else {
+                    setTourActive(true);
+                  }
+                }}
+                title="Take a tour"
+                aria-label="Take a tour"
+                className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+              >
                 <svg
                   className="w-6 h-6"
                   fill="none"
@@ -667,8 +698,35 @@ function DashboardLayoutContent({
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-6">{children}</main>
+        <main className="flex-1 p-6">
+          {pathname === "/dashboard" && (
+            <WelcomeBanner onStartTour={() => setTourActive(true)} />
+          )}
+          {children}
+        </main>
       </div>
+
+      {/* Guided Tour — only on overview route where tour targets exist */}
+      {pathname === "/dashboard" && (
+        <GuidedTour
+          steps={DASHBOARD_TOUR_STEPS}
+          isOpen={tourActive}
+          onComplete={() => {
+            setTourActive(false);
+            try {
+              localStorage.setItem(TOUR_STORAGE_KEYS.completed, "true");
+            } catch { /* ignore */ }
+          }}
+          onSkip={() => {
+            setTourActive(false);
+            try {
+              // Only dismiss the banner, don't mark tour as completed
+              // so user can restart it later
+              localStorage.setItem(TOUR_STORAGE_KEYS.bannerDismissed, "true");
+            } catch { /* ignore */ }
+          }}
+        />
+      )}
     </div>
   );
 }
