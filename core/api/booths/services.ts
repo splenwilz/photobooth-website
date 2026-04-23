@@ -10,10 +10,13 @@ import type {
 import type {
 	BoothBusinessSettingsResponse,
 	BoothCredentialsResponse,
+	BoothCriticalEventsResponse,
 	BoothDetailResponse,
 	BoothListResponse,
 	BoothOverviewResponse,
+	BoothPaginationParams,
 	BoothPricingResponse,
+	BoothTransactionsResponse,
 	CancelRestartResponse,
 	CreateBoothRequest,
 	CreateBoothResponse,
@@ -22,6 +25,8 @@ import type {
 	DownloadBoothLogsRequest,
 	DownloadBoothLogsResponse,
 	GenerateCodeResponse,
+	RefundTransactionRequest,
+	RefundTransactionResponse,
 	RestartAppResponse,
 	RestartRequest,
 	RestartSystemResponse,
@@ -272,6 +277,90 @@ export async function generateBoothCode(
 		},
 	);
 	return response;
+}
+
+// ============================================================================
+// STRANDED PAID SESSIONS SERVICES
+// ============================================================================
+
+/**
+ * List transactions for a booth, including `stranded_at` / `stranded_reason`
+ * markers used to surface sessions where the customer paid but the
+ * post-payment flow failed.
+ * @see GET /api/v1/booths/{booth_id}/transactions
+ */
+export async function getBoothTransactions(
+	boothId: string,
+	params?: BoothPaginationParams,
+): Promise<BoothTransactionsResponse> {
+	if (!boothId) throw new Error("Booth ID is required for getBoothTransactions");
+	const limit = params?.limit ?? 50;
+	const offset = params?.offset ?? 0;
+	return apiClient<BoothTransactionsResponse>(
+		`/api/v1/booths/${boothId}/transactions?limit=${limit}&offset=${offset}`,
+		{ method: "GET" },
+	);
+}
+
+/**
+ * List critical (operator-alertable) events for a booth. Each event is
+ * server-joined with its transaction so amount and inline refund summary
+ * are available without a second fetch.
+ *
+ * Ordering: newest `occurred_at` first (booth-reported incident time).
+ * @see GET /api/v1/booths/{booth_id}/critical-events
+ */
+export async function getBoothCriticalEvents(
+	boothId: string,
+	params?: BoothPaginationParams,
+): Promise<BoothCriticalEventsResponse> {
+	if (!boothId)
+		throw new Error("Booth ID is required for getBoothCriticalEvents");
+	const limit = params?.limit ?? 50;
+	const offset = params?.offset ?? 0;
+	return apiClient<BoothCriticalEventsResponse>(
+		`/api/v1/booths/${boothId}/critical-events?limit=${limit}&offset=${offset}`,
+		{ method: "GET" },
+	);
+}
+
+/**
+ * Record a refund against a transaction (accounting closure only — money
+ * must be returned physically BEFORE calling this).
+ *
+ * Error cases:
+ *   400 — amount > total_price
+ *   404 — booth not owned, or transaction code not found
+ *   409 — already refunded (existing record returned in body)
+ *   422 — validation error (bad method, amount <= 0)
+ *
+ * @see POST /api/v1/booths/{booth_id}/transactions/{transaction_code}/refund
+ */
+export async function refundBoothTransaction(
+	boothId: string,
+	transactionCode: string,
+	data: RefundTransactionRequest,
+): Promise<RefundTransactionResponse> {
+	if (!boothId)
+		throw new Error("Booth ID is required for refundBoothTransaction");
+	if (!transactionCode)
+		throw new Error(
+			"Transaction code is required for refundBoothTransaction",
+		);
+
+	// Trim before truthy-check — `Boolean("   ")` is true, which would leak a
+	// whitespace-only note past a naive guard and fail server min-length validation.
+	const trimmedNote = data.note?.trim();
+	const body: RefundTransactionRequest = {
+		amount: data.amount,
+		method: data.method,
+		...(trimmedNote ? { note: trimmedNote } : {}),
+	};
+
+	return apiClient<RefundTransactionResponse>(
+		`/api/v1/booths/${boothId}/transactions/${encodeURIComponent(transactionCode)}/refund`,
+		{ method: "POST", body: JSON.stringify(body) },
+	);
 }
 
 // ============================================================================

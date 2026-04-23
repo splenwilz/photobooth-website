@@ -10,4 +10,5 @@
 export * from "./types";
 export * from "./services";
 export * from "./queries";
+export * from "./stranded-sessions-util";
 

@@ -27,6 +27,11 @@ export const queryKeys = {
 		pricing: (boothId: string) => ['booths', 'pricing', boothId] as const,
 		credentials: (boothId: string) => ['booths', 'credentials', boothId] as const,
 		businessSettings: (boothId: string) => ['booths', 'businessSettings', boothId] as const,
+		// 3-element prefix so refund invalidations match any pagination variant
+		transactions: (boothId: string, params?: { limit?: number; offset?: number }) =>
+			['booths', 'transactions', boothId, params] as const,
+		criticalEvents: (boothId: string, params?: { limit?: number; offset?: number }) =>
+			['booths', 'criticalEvents', boothId, params] as const,
 	},
 
 	// User profile queries (account-level business settings)

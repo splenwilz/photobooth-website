@@ -11,9 +11,17 @@
  * @see GET /api/v1/booths/{booth_id}/overview (single booth)
  */
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useDashboardOverview, useBoothDetail } from "@/core/api/booths";
+import Link from "next/link";
+import {
+  isRowUnrefunded,
+  joinCriticalEventsWithTransactions,
+  useBoothCriticalEvents,
+  useBoothDetail,
+  useBoothTransactions,
+  useDashboardOverview,
+} from "@/core/api/booths";
 
 type RevenuePeriod = "today" | "week" | "month" | "year";
 
@@ -61,6 +69,19 @@ export default function DashboardPage() {
   // Use appropriate hook based on selection
   const dashboardQuery = useDashboardOverview({ enabled: isAllBooths });
   const boothDetailQuery = useBoothDetail(selectedBoothId);
+
+  // Stranded paid sessions: only fetch when a single booth is selected.
+  // Both hooks internally short-circuit on null boothId, so they idle in
+  // "All Booths" mode.
+  const strandedEventsQuery = useBoothCriticalEvents(selectedBoothId);
+  const strandedTxQuery = useBoothTransactions(selectedBoothId);
+  const strandedUnrefundedCount = useMemo(() => {
+    if (!selectedBoothId) return 0;
+    return joinCriticalEventsWithTransactions(
+      strandedEventsQuery.data?.events ?? [],
+      strandedTxQuery.data?.transactions ?? [],
+    ).filter(isRowUnrefunded).length;
+  }, [selectedBoothId, strandedEventsQuery.data, strandedTxQuery.data]);
 
   // Select the active query
   const isLoading = isAllBooths ? dashboardQuery.isLoading : boothDetailQuery.isLoading;
@@ -703,6 +724,56 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
+          </section>
+        )}
+
+        {/* Needs Attention: stranded paid sessions for the selected booth */}
+        {selectedBoothId && strandedUnrefundedCount > 0 && (
+          <section>
+            <Link
+              href={`/dashboard/needs-attention?booth=${selectedBoothId}`}
+              className="block p-4 rounded-xl bg-red-500/10 border border-red-500/30 hover:border-red-500/50 transition-colors"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
+                  <svg
+                    className="w-5 h-5 text-red-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <title>Needs attention</title>
+                    <path
+                      fillRule="evenodd"
+                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-zinc-900 dark:text-white">
+                    {strandedUnrefundedCount} session
+                    {strandedUnrefundedCount === 1 ? "" : "s"} need
+                    {strandedUnrefundedCount === 1 ? "s" : ""} review
+                  </p>
+                  <p className="text-sm text-zinc-500 mt-0.5">
+                    Paid but not printed. Customer may need a refund.
+                  </p>
+                </div>
+                <svg
+                  className="w-5 h-5 text-zinc-500 shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                  />
+                </svg>
+              </div>
+            </Link>
           </section>
         )}
 

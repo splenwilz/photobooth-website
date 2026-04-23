@@ -9,11 +9,14 @@ import {
 	generateBoothCode,
 	getBoothBusinessSettings,
 	getBoothCredentials,
+	getBoothCriticalEvents,
 	getBoothDetail,
 	getBoothList,
 	getBoothOverview,
 	getBoothPricing,
+	getBoothTransactions,
 	getDashboardOverview,
+	refundBoothTransaction,
 	restartBoothApp,
 	restartBoothSystem,
 	updateBoothPricing,
@@ -23,14 +26,19 @@ import {
 import type {
 	BoothBusinessSettingsResponse,
 	BoothCredentialsResponse,
+	BoothCriticalEventsResponse,
 	BoothDetailResponse,
 	BoothListResponse,
 	BoothOverviewResponse,
+	BoothPaginationParams,
 	BoothPricingResponse,
+	BoothTransactionsResponse,
 	CreateBoothRequest,
 	DashboardOverviewResponse,
 	DownloadBoothLogsRequest,
 	GenerateCodeResponse,
+	RefundTransactionRequest,
+	RefundTransactionResponse,
 	RestartRequest,
 	UpdateBoothSettingsRequest,
 	UpdatePricingRequest,
@@ -619,6 +627,78 @@ export function useDeleteBoothLogo() {
 		onSuccess: (_, variables) => {
 			queryClient.invalidateQueries({
 				queryKey: queryKeys.booths.businessSettings(variables.boothId),
+			});
+		},
+	});
+}
+
+// ============================================================================
+// STRANDED PAID SESSIONS HOOKS
+// ============================================================================
+
+/**
+ * Fetch paginated booth transactions. Short staleTime so stranded markers
+ * surface promptly after the booth reports them.
+ * @see GET /api/v1/booths/{booth_id}/transactions
+ */
+export function useBoothTransactions(
+	boothId: string | null,
+	params?: BoothPaginationParams,
+) {
+	return useQuery<BoothTransactionsResponse>({
+		queryKey: boothId
+			? queryKeys.booths.transactions(boothId, params)
+			: ["booths", "transactions", null, params],
+		queryFn: () => getBoothTransactions(boothId!, params),
+		enabled: !!boothId,
+		staleTime: 30 * 1000,
+	});
+}
+
+/**
+ * Fetch paginated critical events for a booth (the operator-alertable feed
+ * that surfaces stranded paid sessions).
+ * @see GET /api/v1/booths/{booth_id}/critical-events
+ */
+export function useBoothCriticalEvents(
+	boothId: string | null,
+	params?: BoothPaginationParams,
+) {
+	return useQuery<BoothCriticalEventsResponse>({
+		queryKey: boothId
+			? queryKeys.booths.criticalEvents(boothId, params)
+			: ["booths", "criticalEvents", null, params],
+		queryFn: () => getBoothCriticalEvents(boothId!, params),
+		enabled: !!boothId,
+		staleTime: 30 * 1000,
+	});
+}
+
+/**
+ * Record a refund. Invalidates transactions + critical events caches for the
+ * booth on BOTH success and error — 409 "already refunded" responses indicate
+ * the server has a newer state than the client, so the caches need to refresh
+ * so the UI flips the row to refunded instead of showing a stale Refund button.
+ * Uses 3-element prefix keys so all pagination variants are invalidated
+ * (TanStack Query v5 defaults to prefix matching unless `exact: true`).
+ * @see POST /api/v1/booths/{booth_id}/transactions/{transaction_code}/refund
+ */
+export function useRefundBoothTransaction() {
+	const queryClient = useQueryClient();
+
+	return useMutation<
+		RefundTransactionResponse,
+		Error,
+		{ boothId: string; transactionCode: string } & RefundTransactionRequest
+	>({
+		mutationFn: ({ boothId, transactionCode, ...data }) =>
+			refundBoothTransaction(boothId, transactionCode, data),
+		onSettled: (_data, _error, variables) => {
+			queryClient.invalidateQueries({
+				queryKey: ["booths", "transactions", variables.boothId],
+			});
+			queryClient.invalidateQueries({
+				queryKey: ["booths", "criticalEvents", variables.boothId],
 			});
 		},
 	});
