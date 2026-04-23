@@ -61,17 +61,35 @@ export default function NeedsAttentionPage() {
   const transactionsQuery = useBoothTransactions(boothId);
 
   const rows = useMemo(() => {
-    const events = eventsQuery.data?.events ?? [];
-    const transactions = transactionsQuery.data?.transactions ?? [];
+    // Gate on BOTH queries succeeding so rows aren't built from one real
+    // dataset and one `?? []` fallback. Otherwise the count jitters as
+    // queries resolve out of order: events-first can inflate the count,
+    // transactions-first can suppress it to 0.
+    //
+    // Also filter to STRANDED_PAID_SESSION only — the /critical-events
+    // endpoint is an open tag stream (PAYMENT_RESULT_INVALID and future
+    // tags), and this page only ships the stranded-refund UI.
+    if (!eventsQuery.isSuccess || !transactionsQuery.isSuccess) return [];
+    const events = eventsQuery.data.events.filter(
+      (event) => event.tag === "STRANDED_PAID_SESSION",
+    );
+    const transactions = transactionsQuery.data.transactions;
     return joinCriticalEventsWithTransactions(events, transactions);
-  }, [eventsQuery.data, transactionsQuery.data]);
+  }, [
+    eventsQuery.isSuccess,
+    transactionsQuery.isSuccess,
+    eventsQuery.data,
+    transactionsQuery.data,
+  ]);
 
   const unrefundedCount = rows.filter(isRowUnrefunded).length;
   const refundedCount = rows.length - unrefundedCount;
 
-  const isLoading =
-    (eventsQuery.isLoading || transactionsQuery.isLoading) && rows.length === 0;
+  // In TanStack Query v5, `isLoading` is only true during the initial fetch
+  // (no cached data). The `&& rows.length === 0` guard is redundant.
+  const isLoading = eventsQuery.isLoading || transactionsQuery.isLoading;
   const error = eventsQuery.error ?? transactionsQuery.error;
+  const hasData = eventsQuery.isSuccess && transactionsQuery.isSuccess;
 
   const handleRefresh = () => {
     eventsQuery.refetch();
@@ -169,6 +187,10 @@ export default function NeedsAttentionPage() {
       {/* List / states */}
       {isLoading ? (
         <SessionCardSkeleton />
+      ) : !hasData ? (
+        // Both queries haven't succeeded. The error banner above conveys why;
+        // suppress the empty state so we don't claim "no sessions" on an error.
+        null
       ) : rows.length === 0 ? (
         <EmptyState />
       ) : (

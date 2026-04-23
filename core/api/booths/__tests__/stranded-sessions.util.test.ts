@@ -165,8 +165,8 @@ describe("formatCriticalEventTag", () => {
     expect(formatCriticalEventTag("PAYMENT_RESULT_INVALID")).toBe("Bad Payment");
   });
 
-  it("falls back to lowercased + title-cased for unknowns", () => {
-    expect(formatCriticalEventTag("FUTURE_CLOUD_TAG")).toBe("Future cloud tag");
+  it("falls back to Title Case for unknowns", () => {
+    expect(formatCriticalEventTag("FUTURE_CLOUD_TAG")).toBe("Future Cloud Tag");
   });
 });
 
@@ -179,6 +179,15 @@ describe("inferRefundMethod", () => {
     expect(inferRefundMethod("credit")).toBe("card_void");
     expect(inferRefundMethod("card")).toBe("card_void");
     expect(inferRefundMethod("CARD")).toBe("card_void"); // case-insensitive
+  });
+
+  it("handles multi-word payment methods via substring match", () => {
+    // Backend may emit "Credit Card" or "Debit Card" rather than "credit"/"card".
+    // Strict equality would miss these and pre-select "Other" as the refund
+    // method, which would confuse operators.
+    expect(inferRefundMethod("Credit Card")).toBe("card_void");
+    expect(inferRefundMethod("Debit Card")).toBe("card_void");
+    expect(inferRefundMethod("Cash Register")).toBe("cash_till");
   });
 
   it("falls through to other for unknown or missing methods", () => {

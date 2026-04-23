@@ -9,6 +9,12 @@ global.fetch = mockFetch;
 const mockWindow = { location: { href: "" } };
 const originalWindow = global.window;
 
+// Save original env values so teardown can restore them — otherwise
+// `delete process.env.API_BASE_URL` in beforeEach would leak across files
+// that share a vitest worker and happen to depend on the server-side URL.
+const originalApiBase = process.env.API_BASE_URL;
+const originalPublicApiBase = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 describe("refundBoothTransaction", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -32,6 +38,17 @@ describe("refundBoothTransaction", () => {
 
   afterEach(() => {
     global.window = originalWindow;
+    // Restore env to its original state so other test files aren't polluted
+    if (originalApiBase === undefined) {
+      delete process.env.API_BASE_URL;
+    } else {
+      process.env.API_BASE_URL = originalApiBase;
+    }
+    if (originalPublicApiBase === undefined) {
+      delete process.env.NEXT_PUBLIC_API_BASE_URL;
+    } else {
+      process.env.NEXT_PUBLIC_API_BASE_URL = originalPublicApiBase;
+    }
   });
 
   function getLastBody(): Record<string, unknown> {

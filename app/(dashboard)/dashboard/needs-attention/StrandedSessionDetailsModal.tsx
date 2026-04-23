@@ -249,8 +249,11 @@ export function StrandedSessionDetailsModal({
 
   const { event, transaction } = row;
   const reasonLabel = formatStrandedReason(transaction?.stranded_reason);
-  const paymentMethod =
-    transaction?.payment_method ?? event.refund?.refund_method ?? "";
+  // Only show the payment method when we actually know how the customer paid.
+  // Don't fall back to event.refund.refund_method — those values (e.g.
+  // "cash_till") are refund channels, not payment methods, and surfacing them
+  // as "Paid via cash_till" misleads the operator.
+  const paymentMethod = transaction?.payment_method ?? "";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -384,17 +387,6 @@ export function StrandedSessionDetailsModal({
             </div>
           )}
 
-          {/* Inline error banner */}
-          {formError && (
-            <div
-              role="alert"
-              aria-live="polite"
-              className="p-4 rounded-xl bg-red-500/10 border border-red-500/20"
-            >
-              <p className="text-sm text-red-500 break-words">{formError}</p>
-            </div>
-          )}
-
           {/* Refund details: read-only OR form */}
           {isRefunded && refundSummary ? (
             <div className="p-4 rounded-xl bg-green-500/5 border border-green-500/20 space-y-2 text-sm">
@@ -423,6 +415,19 @@ export function StrandedSessionDetailsModal({
             </div>
           ) : (
             <>
+              {/* Inline error banner — scoped to the unrefunded form so a
+                  stale message (e.g. copy-to-clipboard failure) doesn't linger
+                  into the read-only view after the row flips to refunded. */}
+              {formError && (
+                <div
+                  role="alert"
+                  aria-live="polite"
+                  className="p-4 rounded-xl bg-red-500/10 border border-red-500/20"
+                >
+                  <p className="text-sm text-red-500 break-words">{formError}</p>
+                </div>
+              )}
+
               {/* Amount field */}
               <div className="space-y-2">
                 <label

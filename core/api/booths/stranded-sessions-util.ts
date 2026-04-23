@@ -92,7 +92,7 @@ export function formatCriticalEventTag(tag: CriticalEventTag): string {
 	return tag
 		.toLowerCase()
 		.split("_")
-		.map((w, i) => (i === 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w))
+		.map((w) => (w.length === 0 ? w : w.charAt(0).toUpperCase() + w.slice(1)))
 		.join(" ");
 }
 
@@ -107,7 +107,9 @@ export function formatStrandedReason(
 	if (reason in KNOWN_STRANDED_REASONS) {
 		return KNOWN_STRANDED_REASONS[reason];
 	}
-	const words = reason.split("_");
+	// Lowercase first so single-token uppercase reasons (e.g. "FOO") render
+	// as "Foo" rather than "FOO". Mirrors formatCriticalEventTag's approach.
+	const words = reason.toLowerCase().split("_");
 	const head = words[0].charAt(0).toUpperCase() + words[0].slice(1);
 	const tail = words.length > 1 ? " " + words.slice(1).join(" ") : "";
 	return head + tail;
@@ -121,7 +123,10 @@ export function inferRefundMethod(
 	paymentMethod: string | null | undefined,
 ): "cash_till" | "card_void" | "other" {
 	const pm = (paymentMethod ?? "").toLowerCase();
-	if (pm === "cash") return "cash_till";
-	if (pm === "credit" || pm === "card") return "card_void";
+	// Use substring matching rather than strict equality so multi-word values
+	// from the backend ("Credit Card", "Debit Card", "Cash Register") still
+	// pre-select a sensible refund channel for the operator.
+	if (pm.includes("cash")) return "cash_till";
+	if (pm.includes("card") || pm.includes("credit")) return "card_void";
 	return "other";
 }

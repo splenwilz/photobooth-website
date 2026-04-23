@@ -77,11 +77,27 @@ export default function DashboardPage() {
   const strandedTxQuery = useBoothTransactions(selectedBoothId);
   const strandedUnrefundedCount = useMemo(() => {
     if (!selectedBoothId) return 0;
+    // Gate on BOTH queries succeeding — computing with one real dataset and
+    // one `?? []` fallback produces a count that jitters as queries resolve
+    // out of order, which would flicker the card in and out during load.
+    if (!strandedEventsQuery.isSuccess || !strandedTxQuery.isSuccess) return 0;
+    // Card copy is specific to stranded paid sessions ("paid but not printed
+    // — customer may need a refund"). Filter out other critical event tags
+    // (e.g. PAYMENT_RESULT_INVALID) that don't match the card's message.
+    const strandedEvents = strandedEventsQuery.data.events.filter(
+      (e) => e.tag === "STRANDED_PAID_SESSION",
+    );
     return joinCriticalEventsWithTransactions(
-      strandedEventsQuery.data?.events ?? [],
-      strandedTxQuery.data?.transactions ?? [],
+      strandedEvents,
+      strandedTxQuery.data.transactions,
     ).filter(isRowUnrefunded).length;
-  }, [selectedBoothId, strandedEventsQuery.data, strandedTxQuery.data]);
+  }, [
+    selectedBoothId,
+    strandedEventsQuery.isSuccess,
+    strandedTxQuery.isSuccess,
+    strandedEventsQuery.data,
+    strandedTxQuery.data,
+  ]);
 
   // Select the active query
   const isLoading = isAllBooths ? dashboardQuery.isLoading : boothDetailQuery.isLoading;
