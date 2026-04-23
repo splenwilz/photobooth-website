@@ -4,8 +4,10 @@ import {
 	cancelBoothRestart,
 	createBooth,
 	deleteBooth,
+	deleteBoothLogo,
 	downloadBoothLogs,
 	generateBoothCode,
+	getBoothBusinessSettings,
 	getBoothCredentials,
 	getBoothDetail,
 	getBoothList,
@@ -16,8 +18,10 @@ import {
 	restartBoothSystem,
 	updateBoothPricing,
 	updateBoothSettings,
+	uploadBoothLogo,
 } from "./services";
 import type {
+	BoothBusinessSettingsResponse,
 	BoothCredentialsResponse,
 	BoothDetailResponse,
 	BoothListResponse,
@@ -34,6 +38,7 @@ import type {
 
 interface UpdateBoothSettingsContext {
 	previousOverview: BoothOverviewResponse | undefined;
+	previousBusinessSettings: unknown;
 }
 
 /**
@@ -289,9 +294,12 @@ export function useUpdateBoothSettings() {
 	>({
 		mutationFn: ({ boothId, ...data }) => updateBoothSettings(boothId, data),
 
-		onMutate: async ({ boothId, name, address }) => {
+		onMutate: async ({ boothId, name, address, ...rest }) => {
 			// Cancel in-flight overview refetches so they don't clobber our patch
 			await queryClient.cancelQueries({ queryKey: queryKeys.booths.all(), exact: true });
+			await queryClient.cancelQueries({
+				queryKey: queryKeys.booths.businessSettings(boothId),
+			});
 
 			const previousOverview = queryClient.getQueryData<BoothOverviewResponse>(
 				queryKeys.booths.all(),
@@ -312,13 +320,31 @@ export function useUpdateBoothSettings() {
 				});
 			}
 
-			return { previousOverview };
+			const previousBusinessSettings = queryClient.getQueryData<
+				Record<string, unknown>
+			>(queryKeys.booths.businessSettings(boothId));
+
+			if (previousBusinessSettings) {
+				queryClient.setQueryData(queryKeys.booths.businessSettings(boothId), {
+					...previousBusinessSettings,
+					...(address !== undefined ? { address } : {}),
+					...rest,
+				});
+			}
+
+			return { previousOverview, previousBusinessSettings };
 		},
 
-		onError: (_err, _vars, context) => {
-			// Roll back to the snapshot we took in onMutate
+		onError: (_err, variables, context) => {
+			// Roll back snapshots taken in onMutate
 			if (context?.previousOverview) {
 				queryClient.setQueryData(queryKeys.booths.all(), context.previousOverview);
+			}
+			if (context?.previousBusinessSettings) {
+				queryClient.setQueryData(
+					queryKeys.booths.businessSettings(variables.boothId),
+					context.previousBusinessSettings,
+				);
 			}
 		},
 
@@ -328,6 +354,9 @@ export function useUpdateBoothSettings() {
 			queryClient.invalidateQueries({ queryKey: queryKeys.booths.list() });
 			queryClient.invalidateQueries({
 				queryKey: queryKeys.booths.detail(variables.boothId),
+			});
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.booths.businessSettings(variables.boothId),
 			});
 		},
 	});
@@ -538,5 +567,59 @@ export function useDownloadBoothLogs() {
 			boothId: string;
 			data?: DownloadBoothLogsRequest;
 		}) => downloadBoothLogs(boothId, data),
+	});
+}
+
+// ============================================================================
+// BUSINESS SETTINGS HOOKS
+// ============================================================================
+
+/**
+ * Fetch the effective business settings for a booth (account + booth merged).
+ * @see GET /api/v1/booths/{booth_id}/business-settings
+ */
+export function useBoothBusinessSettings(boothId: string | null) {
+	return useQuery<BoothBusinessSettingsResponse>({
+		queryKey: boothId
+			? queryKeys.booths.businessSettings(boothId)
+			: ["booths", "businessSettings", null],
+		queryFn: () => getBoothBusinessSettings(boothId!),
+		enabled: !!boothId,
+		staleTime: 0,
+	});
+}
+
+/**
+ * Upload or replace a booth's custom logo (overrides the account logo).
+ * @see PUT /api/v1/booths/{booth_id}/logo
+ */
+export function useUploadBoothLogo() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({ boothId, file }: { boothId: string; file: File }) =>
+			uploadBoothLogo(boothId, file),
+		onSuccess: (_, variables) => {
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.booths.businessSettings(variables.boothId),
+			});
+		},
+	});
+}
+
+/**
+ * Remove a booth's custom logo (reverts to the account logo).
+ * @see DELETE /api/v1/booths/{booth_id}/logo
+ */
+export function useDeleteBoothLogo() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({ boothId }: { boothId: string }) => deleteBoothLogo(boothId),
+		onSuccess: (_, variables) => {
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.booths.businessSettings(variables.boothId),
+			});
+		},
 	});
 }

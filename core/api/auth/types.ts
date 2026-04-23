@@ -19,6 +19,12 @@ export interface AuthUser {
   role?: string;
   created_at: string;
   updated_at: string;
+  /** Account-level business name shown across all booths (null if unset) */
+  business_name?: string | null;
+  /** Presigned URL for the account logo (null if none uploaded) */
+  logo_url?: string | null;
+  /** When true, all booths display business_name instead of per-booth display_name */
+  use_display_name_on_booths?: boolean;
 }
 
 /**

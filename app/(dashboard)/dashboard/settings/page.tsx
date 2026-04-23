@@ -21,8 +21,10 @@ import {
 } from "@/core/api/booths";
 import { useBoothCredits } from "@/core/api/credits";
 import { DownloadLogsModal } from "@/components/shared/DownloadLogsModal";
+import { BusinessSettingsModal } from "./BusinessSettingsModal";
 import type { ProductPricingInfo } from "@/core/api/booths/types";
 import type { AuthUser } from "@/core/api/auth/types";
+import { normalizeAuthUser } from "@/hooks/use-user";
 
 interface SettingsItemProps {
   icon: React.ReactNode;
@@ -107,7 +109,9 @@ function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
-// Get user from auth_user cookie (client-side)
+// Get user from auth_user cookie (client-side).
+// Normalize so new optional fields (use_display_name_on_booths) default to
+// concrete values for cookies set before those fields existed.
 function getUserFromCookie(): AuthUser | null {
   if (typeof window === "undefined") return null;
   try {
@@ -115,7 +119,7 @@ function getUserFromCookie(): AuthUser | null {
       .split("; ")
       .find((row) => row.startsWith("auth_user="));
     if (!cookie) return null;
-    return JSON.parse(decodeURIComponent(cookie.split("=")[1]));
+    return normalizeAuthUser(JSON.parse(decodeURIComponent(cookie.split("=")[1])));
   } catch {
     return null;
   }
@@ -227,6 +231,7 @@ export default function SettingsPage() {
   const [deleteBoothModal, setDeleteBoothModal] = useState(false);
   const [logoutModal, setLogoutModal] = useState(false);
   const [downloadLogsModalOpen, setDownloadLogsModalOpen] = useState(false);
+  const [businessSettingsModalOpen, setBusinessSettingsModalOpen] = useState(false);
 
   // API hooks
   const { data: boothListData, isLoading: boothsLoading } = useBoothList();
@@ -486,6 +491,43 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Business Branding Section */}
+      <section>
+        <SectionHeader
+          title="Business Branding"
+          subtitle={
+            selectedBooth
+              ? `Business name, logos, and display settings for ${selectedBooth.name}`
+              : "Business name and account logo shown across all booths"
+          }
+        />
+        <SettingsItem
+          icon={
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z"
+              />
+            </svg>
+          }
+          title="Business Settings"
+          subtitle={
+            selectedBooth
+              ? "Business name, address, display name, logos"
+              : "Business name and account logo"
+          }
+          onClick={() => setBusinessSettingsModalOpen(true)}
+          disabled={!user?.id}
+        />
       </section>
 
       {/* All Booths Mode / No Booths Notice */}
@@ -1047,6 +1089,15 @@ export default function SettingsPage() {
           boothStatus={selectedBooth.status}
         />
       )}
+
+      {/* Business Settings Modal */}
+      <BusinessSettingsModal
+        isOpen={businessSettingsModalOpen}
+        userId={user?.id ?? null}
+        boothId={selectedBooth?.id ?? null}
+        boothName={selectedBooth?.name}
+        onClose={() => setBusinessSettingsModalOpen(false)}
+      />
     </div>
   );
 }

@@ -13,6 +13,7 @@ import { Suspense, useState } from "react";
 
 import type { AuthUser } from "@/core/api/auth/types";
 import { useBoothList } from "@/core/api/booths";
+import { normalizeAuthUser } from "@/hooks/use-user";
 import {
   useBoothSubscription,
   useCreateBoothCheckout,
@@ -20,7 +21,8 @@ import {
 } from "@/core/api/payments";
 import { SUBSCRIPTION_PRICES } from "@/core/config/stripe";
 
-// Get user from auth_user cookie (client-side)
+// Get user from auth_user cookie (client-side).
+// Normalize so new optional fields default to concrete values for older cookies.
 function getUserFromCookie(): AuthUser | null {
   if (typeof window === "undefined") return null;
   try {
@@ -28,7 +30,7 @@ function getUserFromCookie(): AuthUser | null {
       .split("; ")
       .find((row) => row.startsWith("auth_user="));
     if (!cookie) return null;
-    return JSON.parse(decodeURIComponent(cookie.split("=")[1]));
+    return normalizeAuthUser(JSON.parse(decodeURIComponent(cookie.split("=")[1])));
   } catch {
     return null;
   }

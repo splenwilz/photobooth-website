@@ -17,14 +17,30 @@ export interface CreateBoothRequest {
 }
 
 /**
- * Partial update for booth fields (name, address).
+ * Partial update for booth fields.
  * @see PATCH /api/v1/booths/{booth_id}
  */
 export interface UpdateBoothSettingsRequest {
   /** Booth name (1-100 characters) */
   name?: string;
-  /** Booth address (1-200 characters) */
+  /** Per-booth display name for welcome screen (max 255 characters) */
+  display_name?: string;
+  /** Physical location (max 500 characters) */
   address?: string;
+  /** true = use custom booth logo, false = use account logo */
+  use_custom_logo?: boolean;
+  /** Whether to show the logo on printed photos */
+  show_logo_on_prints?: boolean;
+  /** Whether to show the business name on the welcome screen */
+  show_business_name?: boolean;
+  /** Whether to show the logo on the welcome screen */
+  show_logo?: boolean;
+  /** Custom welcome screen subtitle (max 255 characters). null uses default */
+  welcome_subtitle?: string | null;
+  /** Whether to show the subtitle on the welcome screen */
+  show_welcome_subtitle?: boolean;
+  /** Whether the booth accepts cloud-managed business settings */
+  cloud_sync_enabled?: boolean;
 }
 
 /**
@@ -646,6 +662,46 @@ export interface GenerateCodeResponse {
 export interface DeleteBoothResponse {
   success: boolean;
   message: string;
+}
+
+// ============================================================================
+// BUSINESS SETTINGS TYPES
+// ============================================================================
+
+/**
+ * Effective business settings for a booth — combines account-level defaults
+ * (business_name, logo_url, use_display_name_on_booths) with booth-level fields.
+ * @see GET /api/v1/booths/{booth_id}/business-settings
+ */
+export interface BoothBusinessSettingsResponse {
+  /** Account-level business name */
+  business_name: string | null;
+  /** Per-booth display name for welcome screen (null if not set) */
+  display_name: string | null;
+  /** Effective logo (custom if overridden, otherwise account) */
+  logo_url: string | null;
+  /** The booth's own custom logo URL, or null if using account logo */
+  custom_logo_url: string | null;
+  /** Whether this booth uses its custom logo override */
+  use_custom_logo: boolean;
+  /** Whether to show logo on printed photos */
+  show_logo_on_prints: boolean;
+  /** Booth physical address */
+  address: string | null;
+  /** Whether to show the business name on the welcome screen */
+  show_business_name: boolean;
+  /** Whether to show the logo on the welcome screen */
+  show_logo: boolean;
+  /** Custom welcome screen subtitle text */
+  welcome_subtitle: string | null;
+  /** Whether to show the subtitle on the welcome screen */
+  show_welcome_subtitle: boolean;
+  /** Whether the booth accepts cloud-managed business settings */
+  cloud_sync_enabled: boolean;
+  /** ISO timestamp of the last cloud sync settings update */
+  cloud_sync_updated_at: string | null;
+  /** Account-level: when true, business_name overrides per-booth display_name on all booths */
+  use_display_name_on_booths: boolean;
 }
 
 // ============================================================================
