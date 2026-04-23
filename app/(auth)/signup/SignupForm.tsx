@@ -17,6 +17,11 @@ export function SignupForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   // Handle successful signup
   useEffect(() => {
@@ -72,6 +77,8 @@ export function SignupForm() {
             minLength={2}
             maxLength={50}
             disabled={isPending}
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
             className="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
@@ -88,6 +95,8 @@ export function SignupForm() {
             minLength={2}
             maxLength={50}
             disabled={isPending}
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
             className="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
@@ -104,6 +113,8 @@ export function SignupForm() {
           placeholder="john@company.com"
           required
           disabled={isPending}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           className="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         />
       </div>
@@ -122,6 +133,8 @@ export function SignupForm() {
             minLength={8}
             maxLength={50}
             disabled={isPending}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             className="w-full px-4 py-3.5 pr-12 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           />
           <button
@@ -160,6 +173,8 @@ export function SignupForm() {
             minLength={8}
             maxLength={50}
             disabled={isPending}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             className="w-full px-4 py-3.5 pr-12 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           />
           <button

@@ -15,36 +15,48 @@ const COOKIE_OPTIONS = {
   path: '/',
 }
 
-// Cookie expiry times
-// Note: Access token cookie lives as long as refresh token.
-// The actual JWT expiry (15 min) is enforced by the backend.
-// When JWT expires, API returns 401 + expired header, triggering refresh.
-// This prevents middleware from redirecting before refresh can be attempted.
-const SESSION_MAX_AGE = 7 * 24 * 60 * 60 // 7 days (same for all auth cookies)
+// Cookie TTL is dynamic — resolveMaxAge(remember) returns 7 or 30 days.
+// The JWT inside the access token cookie expires in 15 min (backend-enforced);
+// when it does, the API returns 401 + expired header and the refresh flow kicks in.
+// Cookie lifetime is kept in sync with the refresh token so the proxy doesn't
+// redirect before refresh can be attempted.
+const SESSION_MAX_AGE = 7 * 24 * 60 * 60 // 7 days (default)
+const REMEMBER_ME_MAX_AGE = 30 * 24 * 60 * 60 // 30 days (opt-in via "remember me")
+const REMEMBER_COOKIE = 'auth_remember'
+
+function resolveMaxAge(remember: boolean): number {
+  return remember ? REMEMBER_ME_MAX_AGE : SESSION_MAX_AGE
+}
 
 /**
  * Set authentication cookies after successful login/signup
  *
  * Sets:
- * - auth_access_token: Short-lived access token (15 min)
- * - auth_refresh_token: Long-lived refresh token (7 days)
- * - auth_user: User data for client-side access (non-httpOnly)
+ * - auth_access_token: access token cookie (dynamic TTL via resolveMaxAge; the
+ *   JWT itself still expires in 15 min, enforced by the backend)
+ * - auth_refresh_token: refresh token (dynamic TTL via resolveMaxAge)
+ * - auth_user: user data for client-side access (non-httpOnly)
  *
  * @param response - Authentication response containing tokens and user data
+ * @param options.remember - If true, cookies persist for 30 days instead of 7
  */
-export async function setAuthCookies(response: AuthResponse): Promise<void> {
+export async function setAuthCookies(
+  response: AuthResponse,
+  { remember = false }: { remember?: boolean } = {}
+): Promise<void> {
   const cookieStore = await cookies()
+  const maxAge = resolveMaxAge(remember)
 
-  // Set access token (cookie lives 7 days, JWT expires in 15 min - enforced by backend)
+  // Set access token (cookie TTL 7 or 30 days via resolveMaxAge; JWT expires in 15 min, backend-enforced)
   cookieStore.set('auth_access_token', response.access_token, {
     ...COOKIE_OPTIONS,
-    maxAge: SESSION_MAX_AGE,
+    maxAge,
   })
 
   // Set refresh token
   cookieStore.set('auth_refresh_token', response.refresh_token, {
     ...COOKIE_OPTIONS,
-    maxAge: SESSION_MAX_AGE,
+    maxAge,
   })
 
   // Set user data (client-accessible for UI purposes)
@@ -53,8 +65,15 @@ export async function setAuthCookies(response: AuthResponse): Promise<void> {
   cookieStore.set('auth_user', JSON.stringify(userData), {
     ...COOKIE_OPTIONS,
     httpOnly: false, // Allow client-side access for user display
-    maxAge: SESSION_MAX_AGE,
+    maxAge,
   })
+
+  // Persist the remember-me choice so token refreshes don't downgrade a 30-day session.
+  if (remember) {
+    cookieStore.set(REMEMBER_COOKIE, '1', { ...COOKIE_OPTIONS, maxAge })
+  } else {
+    cookieStore.delete(REMEMBER_COOKIE)
+  }
 }
 
 /**
@@ -65,18 +84,25 @@ export async function setAuthCookies(response: AuthResponse): Promise<void> {
  */
 export async function updateTokenCookies(tokenData: RefreshTokenResponse): Promise<void> {
   const cookieStore = await cookies()
+  const remember = cookieStore.get(REMEMBER_COOKIE)?.value === '1'
+  const maxAge = resolveMaxAge(remember)
 
   // Update access token
   cookieStore.set('auth_access_token', tokenData.access_token, {
     ...COOKIE_OPTIONS,
-    maxAge: SESSION_MAX_AGE,
+    maxAge,
   })
 
   // Update refresh token
   cookieStore.set('auth_refresh_token', tokenData.refresh_token, {
     ...COOKIE_OPTIONS,
-    maxAge: SESSION_MAX_AGE,
+    maxAge,
   })
+
+  // Refresh the remember flag alongside the tokens so it doesn't expire first.
+  if (remember) {
+    cookieStore.set(REMEMBER_COOKIE, '1', { ...COOKIE_OPTIONS, maxAge })
+  }
 }
 
 /**
@@ -88,6 +114,7 @@ export async function clearAuthCookies(): Promise<void> {
   cookieStore.delete('auth_access_token')
   cookieStore.delete('auth_refresh_token')
   cookieStore.delete('auth_user')
+  cookieStore.delete(REMEMBER_COOKIE)
 }
 
 /**

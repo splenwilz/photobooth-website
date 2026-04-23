@@ -13,6 +13,9 @@ export function SigninForm({ resetSuccess }: { resetSuccess?: boolean }) {
     null
   );
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(false);
 
   // Handle successful signin
   useEffect(() => {
@@ -66,6 +69,8 @@ export function SigninForm({ resetSuccess }: { resetSuccess?: boolean }) {
           placeholder="you@company.com"
           required
           disabled={isPending}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           className="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         />
       </div>
@@ -88,6 +93,8 @@ export function SigninForm({ resetSuccess }: { resetSuccess?: boolean }) {
             required
             minLength={8}
             disabled={isPending}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             className="w-full px-4 py-3.5 pr-12 rounded-xl bg-white dark:bg-[#111111] border border-slate-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           />
           <button
@@ -115,7 +122,10 @@ export function SigninForm({ resetSuccess }: { resetSuccess?: boolean }) {
           type="checkbox"
           id="remember"
           name="remember"
-          className="w-4 h-4 rounded bg-white dark:bg-[#111111] border-slate-200 dark:border-zinc-800 text-[#069494] focus:ring-[#069494] focus:ring-offset-0"
+          checked={remember}
+          onChange={(e) => setRemember(e.target.checked)}
+          disabled={isPending}
+          className="w-4 h-4 rounded bg-white dark:bg-[#111111] border-slate-200 dark:border-zinc-800 text-[#069494] focus:ring-[#069494] focus:ring-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
         />
         <label htmlFor="remember" className="text-sm text-zinc-500">
           Remember me for 30 days
