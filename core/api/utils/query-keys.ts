@@ -26,6 +26,13 @@ export const queryKeys = {
 		detail: (boothId: string) => ['booths', 'detail', boothId] as const,
 		pricing: (boothId: string) => ['booths', 'pricing', boothId] as const,
 		credentials: (boothId: string) => ['booths', 'credentials', boothId] as const,
+		businessSettings: (boothId: string) => ['booths', 'businessSettings', boothId] as const,
+	},
+
+	// User profile queries (account-level business settings)
+	user: {
+		all: () => ['user'] as const,
+		profile: (userId: string) => ['user', 'profile', userId] as const,
 	},
 
 	// Dashboard queries

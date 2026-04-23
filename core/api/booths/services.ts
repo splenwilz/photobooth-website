@@ -1,5 +1,14 @@
 import { apiClient, ApiError } from "../client";
+import {
+	deleteViaProxy,
+	uploadFileViaProxy,
+} from "../users/services";
 import type {
+	LogoDeleteResponse,
+	LogoUploadResponse,
+} from "../users/types";
+import type {
+	BoothBusinessSettingsResponse,
 	BoothCredentialsResponse,
 	BoothDetailResponse,
 	BoothListResponse,
@@ -263,6 +272,49 @@ export async function generateBoothCode(
 		},
 	);
 	return response;
+}
+
+// ============================================================================
+// BUSINESS SETTINGS SERVICES
+// ============================================================================
+
+/**
+ * Get the effective business settings for a booth (combines account + booth level).
+ * @see GET /api/v1/booths/{booth_id}/business-settings
+ */
+export async function getBoothBusinessSettings(
+	boothId: string,
+): Promise<BoothBusinessSettingsResponse> {
+	return apiClient<BoothBusinessSettingsResponse>(
+		`/api/v1/booths/${boothId}/business-settings`,
+		{ method: "GET" },
+	);
+}
+
+/**
+ * Upload or replace a booth's custom logo (multipart/form-data).
+ * @see PUT /api/v1/booths/{booth_id}/logo
+ */
+export async function uploadBoothLogo(
+	boothId: string,
+	file: File,
+): Promise<LogoUploadResponse> {
+	return uploadFileViaProxy<LogoUploadResponse>(
+		`/api/v1/booths/${boothId}/logo`,
+		file,
+	);
+}
+
+/**
+ * Remove the booth's custom logo (falls back to the account logo).
+ * @see DELETE /api/v1/booths/{booth_id}/logo
+ */
+export async function deleteBoothLogo(
+	boothId: string,
+): Promise<LogoDeleteResponse> {
+	return deleteViaProxy<LogoDeleteResponse>(
+		`/api/v1/booths/${boothId}/logo`,
+	);
 }
 
 // ============================================================================

@@ -4,6 +4,21 @@ import { useState, useEffect } from "react";
 import type { AuthUser } from "@/core/api/auth/types";
 
 /**
+ * Back-compat: cookies set before business-settings fields existed can lack
+ * use_display_name_on_booths. Normalize to `false` so downstream code can
+ * treat it as a concrete boolean instead of undefined.
+ */
+export function normalizeAuthUser(raw: Record<string, unknown>): AuthUser {
+  return {
+    ...(raw as unknown as AuthUser),
+    use_display_name_on_booths:
+      typeof raw.use_display_name_on_booths === "boolean"
+        ? raw.use_display_name_on_booths
+        : false,
+  };
+}
+
+/**
  * Get user from auth_user cookie (client-side)
  */
 function getUserFromCookie(): AuthUser | null {
@@ -13,7 +28,7 @@ function getUserFromCookie(): AuthUser | null {
       .split("; ")
       .find((row) => row.startsWith("auth_user="));
     if (!cookie) return null;
-    return JSON.parse(decodeURIComponent(cookie.split("=")[1]));
+    return normalizeAuthUser(JSON.parse(decodeURIComponent(cookie.split("=")[1])));
   } catch {
     return null;
   }

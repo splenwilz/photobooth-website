@@ -207,7 +207,7 @@ export function EditBoothModal({
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               placeholder="e.g., 123 Main Street, City, State"
-              maxLength={200}
+              maxLength={500}
               disabled={isPending}
               className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:border-[#069494] focus:ring-1 focus:ring-[#069494] transition-all disabled:opacity-50"
             />
