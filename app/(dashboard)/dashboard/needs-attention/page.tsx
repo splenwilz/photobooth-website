@@ -36,7 +36,13 @@ function formatCurrency(amount: number): string {
 
 function formatRelativeTime(timestamp: string): string {
   const date = new Date(timestamp);
-  const diffMs = Date.now() - date.getTime();
+  const timeMs = date.getTime();
+  // Invalid timestamp strings produce NaN from getTime(). All NaN comparisons
+  // are false, so without this guard the function falls through to "NaNd ago".
+  if (Number.isNaN(timeMs)) return "—";
+  // Clamp future timestamps (clock skew, bad server data) to "Just now"
+  // rather than showing negative deltas.
+  const diffMs = Math.max(0, Date.now() - timeMs);
   const diffMin = Math.floor(diffMs / 60000);
   if (diffMin < 1) return "Just now";
   if (diffMin < 60) return `${diffMin}m ago`;
