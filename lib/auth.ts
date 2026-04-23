@@ -15,11 +15,11 @@ const COOKIE_OPTIONS = {
   path: '/',
 }
 
-// Cookie expiry times
-// Note: Access token cookie lives as long as refresh token.
-// The actual JWT expiry (15 min) is enforced by the backend.
-// When JWT expires, API returns 401 + expired header, triggering refresh.
-// This prevents middleware from redirecting before refresh can be attempted.
+// Cookie TTL is dynamic — resolveMaxAge(remember) returns 7 or 30 days.
+// The JWT inside the access token cookie expires in 15 min (backend-enforced);
+// when it does, the API returns 401 + expired header and the refresh flow kicks in.
+// Cookie lifetime is kept in sync with the refresh token so the proxy doesn't
+// redirect before refresh can be attempted.
 const SESSION_MAX_AGE = 7 * 24 * 60 * 60 // 7 days (default)
 const REMEMBER_ME_MAX_AGE = 30 * 24 * 60 * 60 // 30 days (opt-in via "remember me")
 const REMEMBER_COOKIE = 'auth_remember'
@@ -32,9 +32,10 @@ function resolveMaxAge(remember: boolean): number {
  * Set authentication cookies after successful login/signup
  *
  * Sets:
- * - auth_access_token: Short-lived access token (15 min)
- * - auth_refresh_token: Long-lived refresh token (7 days)
- * - auth_user: User data for client-side access (non-httpOnly)
+ * - auth_access_token: access token cookie (dynamic TTL via resolveMaxAge; the
+ *   JWT itself still expires in 15 min, enforced by the backend)
+ * - auth_refresh_token: refresh token (dynamic TTL via resolveMaxAge)
+ * - auth_user: user data for client-side access (non-httpOnly)
  *
  * @param response - Authentication response containing tokens and user data
  * @param options.remember - If true, cookies persist for 30 days instead of 7
@@ -46,7 +47,7 @@ export async function setAuthCookies(
   const cookieStore = await cookies()
   const maxAge = resolveMaxAge(remember)
 
-  // Set access token (cookie lives 7 days, JWT expires in 15 min - enforced by backend)
+  // Set access token (cookie TTL 7 or 30 days via resolveMaxAge; JWT expires in 15 min, backend-enforced)
   cookieStore.set('auth_access_token', response.access_token, {
     ...COOKIE_OPTIONS,
     maxAge,

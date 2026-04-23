@@ -124,7 +124,8 @@ export function SigninForm({ resetSuccess }: { resetSuccess?: boolean }) {
           name="remember"
           checked={remember}
           onChange={(e) => setRemember(e.target.checked)}
-          className="w-4 h-4 rounded bg-white dark:bg-[#111111] border-slate-200 dark:border-zinc-800 text-[#069494] focus:ring-[#069494] focus:ring-offset-0"
+          disabled={isPending}
+          className="w-4 h-4 rounded bg-white dark:bg-[#111111] border-slate-200 dark:border-zinc-800 text-[#069494] focus:ring-[#069494] focus:ring-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
         />
         <label htmlFor="remember" className="text-sm text-zinc-500">
           Remember me for 30 days
