@@ -27,6 +27,14 @@ export const queryKeys = {
 		pricing: (boothId: string) => ['booths', 'pricing', boothId] as const,
 		credentials: (boothId: string) => ['booths', 'credentials', boothId] as const,
 		businessSettings: (boothId: string) => ['booths', 'businessSettings', boothId] as const,
+		// 4-element keys: ['booths', '<kind>', boothId, params]. The first three
+		// elements form a stable prefix so invalidations that pass only the
+		// 3-element prefix (e.g. in useRefundBoothTransaction.onSettled) match
+		// every pagination variant regardless of the params object.
+		transactions: (boothId: string, params?: { limit?: number; offset?: number }) =>
+			['booths', 'transactions', boothId, params] as const,
+		criticalEvents: (boothId: string, params?: { limit?: number; offset?: number }) =>
+			['booths', 'criticalEvents', boothId, params] as const,
 	},
 
 	// User profile queries (account-level business settings)
