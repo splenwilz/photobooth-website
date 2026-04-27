@@ -33,7 +33,11 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         .map((i) => i.template.id),
     [items]
   );
-  const { data: ownedData, isFetching: ownedFetching } = useOwnedFrom({
+  const {
+    data: ownedData,
+    isFetching: ownedFetching,
+    isError: ownedErrored,
+  } = useOwnedFrom({
     booth_id: selectedBoothId,
     template_ids: cartTemplateIds,
   });
@@ -42,9 +46,16 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   // Treat any in-flight or not-yet-fired check (booth just selected,
   // booth changed) as "we don't know yet" — block Pay and show a small
   // status line so they can't race the network.
+  //
+  // If the check ERRORED (network down, backend 5xx), don't keep Pay
+  // disabled forever — the warning is advisory, not authoritative.
+  // Falling through means the user can pay; in the worst case they pay
+  // for a duplicate, which is the same outcome as before this feature
+  // existed. Better than locking them out of checkout entirely.
   const dupCheckPending =
     !!selectedBoothId &&
     cartTemplateIds.length > 0 &&
+    !ownedErrored &&
     (ownedFetching || ownedData === undefined);
   // The query key includes booth_id, so the cache can never serve data
   // from a different booth — no stale-data guard needed.

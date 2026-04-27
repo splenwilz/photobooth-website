@@ -118,7 +118,11 @@ export function parseLayoutFromClipboard(text: string): LayoutClipboardPayload {
       `Clipboard JSON is not a BoothIQ layout (expected _type "${LAYOUT_CLIPBOARD_TYPE}").`
     );
   }
-  if (obj.name === undefined || obj.name === null) {
+  // `name` must be a non-empty string. Accepting non-string types (numbers,
+  // booleans) and silently coercing via `String(...)` would let malformed
+  // clipboard payloads through with junk display values; an empty/blank
+  // string would let a layout be created with no human-readable name.
+  if (typeof obj.name !== "string" || obj.name.trim() === "") {
     throw new Error(`Clipboard layout is missing required field "name".`);
   }
 
@@ -145,7 +149,7 @@ export function parseLayoutFromClipboard(text: string): LayoutClipboardPayload {
   return {
     _type: LAYOUT_CLIPBOARD_TYPE,
     layout_key: typeof obj.layout_key === "string" ? obj.layout_key : "",
-    name: String(obj.name),
+    name: obj.name.trim(),
     description: typeof obj.description === "string" ? obj.description : "",
     width: requireFiniteNumber(obj.width, "width"),
     height: requireFiniteNumber(obj.height, "height"),

@@ -105,6 +105,40 @@ describe("parseLayoutFromClipboard", () => {
     ).toThrow(/missing required field "name"/);
   });
 
+  it("rejects non-string and blank names", () => {
+    // number — would have been silently coerced to "42" by String()
+    expect(() =>
+      parseLayoutFromClipboard(
+        JSON.stringify({ _type: LAYOUT_CLIPBOARD_TYPE, name: 42 })
+      )
+    ).toThrow(/missing required field "name"/);
+    // empty string
+    expect(() =>
+      parseLayoutFromClipboard(
+        JSON.stringify({ _type: LAYOUT_CLIPBOARD_TYPE, name: "" })
+      )
+    ).toThrow(/missing required field "name"/);
+    // whitespace-only
+    expect(() =>
+      parseLayoutFromClipboard(
+        JSON.stringify({ _type: LAYOUT_CLIPBOARD_TYPE, name: "   " })
+      )
+    ).toThrow(/missing required field "name"/);
+  });
+
+  it("trims surrounding whitespace from a valid name", () => {
+    const parsed = parseLayoutFromClipboard(
+      JSON.stringify({
+        _type: LAYOUT_CLIPBOARD_TYPE,
+        name: "  Halloween  ",
+        width: 100,
+        height: 100,
+        product_category_id: 1,
+      })
+    );
+    expect(parsed.name).toBe("Halloween");
+  });
+
   it("rejects non-finite numeric fields (the H1 bug)", () => {
     expect(() =>
       parseLayoutFromClipboard(

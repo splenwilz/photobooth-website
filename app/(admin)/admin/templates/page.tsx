@@ -196,9 +196,16 @@ function NumberInput({ value, onChange, float, emptyValue = 0, ...rest }: Number
     setText(String(value));
   }
 
+  // In float mode default step="any" so the browser doesn't reject typed
+  // decimals (`<input type="number">` defaults to step=1 which fails
+  // validation for "1.5"). Caller-supplied step still wins via {...rest}.
+  const stepFromFloat: InputHTMLAttributes<HTMLInputElement>["step"] =
+    float ? "any" : undefined;
+
   return (
     <input
       type="number"
+      step={stepFromFloat}
       value={text}
       onChange={(e) => {
         const v = e.target.value;
