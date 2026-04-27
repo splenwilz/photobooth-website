@@ -17,6 +17,25 @@ export interface PhotoAreaFormData {
   rotation: number;
   border_radius: number;
   shape_type: AdminShapeType;
+  // Frontend-only React-key. Generated when a row is created (add /
+  // paste / default-init). Stripped from the serialized clipboard
+  // payload — the wire format doesn't carry _draftId, but every row in
+  // the form state has one. Stable across re-renders so removing /
+  // reordering rows doesn't make React re-bind the wrong NumberInput
+  // local state to an existing row.
+  _draftId?: string;
+}
+
+/**
+ * Crypto-strong UUID for React keys on photo-area rows. Falls back to
+ * a Math.random-based id in environments without crypto.randomUUID
+ * (older browsers / jsdom). The id never leaves the client.
+ */
+export function newDraftId(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `area-${Math.random().toString(36).slice(2)}-${Date.now()}`;
 }
 
 export const LAYOUT_CLIPBOARD_TYPE = "boothiq.layout/v1";
@@ -163,12 +182,20 @@ export function parseLayoutFromClipboard(text: string): LayoutClipboardPayload {
           (SHAPE_TYPES as string[]).includes(area.shape_type)
             ? (area.shape_type as AdminShapeType)
             : "rectangle",
+        // Generate a fresh React key per row. Pasted JSON never carries
+        // one (it's a frontend-only concern); add/default flows generate
+        // their own at row-creation time.
+        _draftId: newDraftId(),
       };
     }
   );
   return {
     _type: LAYOUT_CLIPBOARD_TYPE,
-    layout_key: typeof obj.layout_key === "string" ? obj.layout_key : "",
+    // Trim and collapse to "" if blank, mirroring how `name` is handled.
+    // A whitespace-only key would render as a "valid" key client-side
+    // but fail backend validation; nip it at parse time.
+    layout_key:
+      typeof obj.layout_key === "string" ? obj.layout_key.trim() : "",
     name: obj.name.trim(),
     description: typeof obj.description === "string" ? obj.description : "",
     width: requireFiniteNumber(obj.width, "width"),

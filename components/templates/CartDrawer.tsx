@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCartStore } from "@/stores/cart-store";
@@ -22,20 +22,26 @@ export function CartDrawer() {
   }, []);
 
   // Resume checkout after a signin redirect: when the URL carries
-  // ?openCheckout=1 and the cart still has items, auto-open the drawer
-  // and the checkout modal, then strip the param so a refresh does not
-  // re-trigger the modal. The param is only stripped after we
-  // successfully act on it — leaving it intact during the
-  // zustand-persist hydration race lets a later render with hydrated
-  // items still pick it up.
+  // ?openCheckout=1, auto-open the drawer + checkout modal once the
+  // user state has resolved, and ALWAYS strip the param after our first
+  // decision so a later cart mutation can't accidentally re-trigger the
+  // modal. The one-shot ref is the gate; previously we relied on
+  // items.length to skip stripping during a presumed hydration race,
+  // but that left the param sitting in the URL when the user genuinely
+  // had an empty cart, only to fire later when they added an item.
+  const consumedOpenCheckoutRef = useRef(false);
   useEffect(() => {
     if (!mounted || userLoading) return;
+    if (consumedOpenCheckoutRef.current) return;
     if (searchParams.get("openCheckout") !== "1") return;
-    if (!isAuthenticated || items.length === 0) return;
 
-    openCart();
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot URL → modal open intent
-    setShowCheckout(true);
+    consumedOpenCheckoutRef.current = true;
+
+    if (isAuthenticated && items.length > 0) {
+      openCart();
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot URL → modal open intent
+      setShowCheckout(true);
+    }
 
     const next = new URLSearchParams(searchParams.toString());
     next.delete("openCheckout");

@@ -115,11 +115,21 @@ function CheckoutSuccessContent() {
         // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot pending-start tag tied to session id
         setPendingSince({ sessionId, startedAt: Date.now() });
       }
-      const tick = setInterval(() => setNow(Date.now()), 5000);
-      return () => clearInterval(tick);
+      return;
     }
     if (pendingSince !== null) setPendingSince(null);
   }, [session?.fulfillment_status, sessionId, pendingSince]);
+
+  // Tick `now` every 5 s while we're still inside the grace window so
+  // `pendingTooLong` recomputes and the failed view appears once the
+  // threshold trips. Once pendingTooLong is true (or we leave the
+  // pending state), the interval is cleared — previously it kept firing
+  // after we'd given up, harmlessly thrashing setNow forever.
+  useEffect(() => {
+    if (session?.fulfillment_status !== "pending" || pendingTooLong) return;
+    const tick = setInterval(() => setNow(Date.now()), 5000);
+    return () => clearInterval(tick);
+  }, [session?.fulfillment_status, pendingTooLong]);
 
   // Fetch booth subscription details after payment is confirmed
   useEffect(() => {

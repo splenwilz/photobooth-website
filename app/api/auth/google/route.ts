@@ -71,11 +71,21 @@ export async function GET(req: NextRequest) {
     // Redirect to signin with a stable error code; /signin maps the code
     // to fixed copy via mapSigninError(). We don't pass user-facing
     // strings through the URL — a crafted ?message=… would otherwise let
-    // an attacker phish via copy on our own domain.
-    const { origin } = new URL(req.url);
-    const errorUrl = new URL("/signin", origin);
+    // an attacker phish via copy on our own domain. The validated
+    // redirect (if any) is forwarded so the user can retry without
+    // losing their original destination.
+    const { origin: errOrigin, searchParams: errSearchParams } = new URL(req.url);
+    const errorUrl = new URL("/signin", errOrigin);
     errorUrl.searchParams.set("error", "oauth_failed");
-
-    return NextResponse.redirect(errorUrl.toString());
+    const errRawRedirect = errSearchParams.get("redirect");
+    const errValidated = safeRedirectPath(errRawRedirect);
+    if (errRawRedirect && errValidated === errRawRedirect) {
+      errorUrl.searchParams.set("redirect", errValidated);
+    }
+    const errResponse = NextResponse.redirect(errorUrl.toString());
+    // Clear any stale auth_redirect from a previous attempt — we never
+    // got far enough to set a new one in this attempt.
+    errResponse.cookies.delete("auth_redirect");
+    return errResponse;
   }
 }

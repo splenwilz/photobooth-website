@@ -43,6 +43,7 @@ import {
   SHAPE_TYPES,
   serializeLayoutForClipboard,
   parseLayoutFromClipboard,
+  newDraftId,
   type PhotoAreaFormData,
 } from "./layout-clipboard";
 
@@ -701,6 +702,14 @@ export default function AdminTemplatesPage() {
 
   const handlePasteLayout = async () => {
     try {
+      // Match handleCopyLayout's pre-flight guard so we surface a
+      // specific message instead of a TypeError on browsers / dev
+      // origins where the Clipboard API isn't available.
+      if (!navigator.clipboard?.readText) {
+        throw new Error(
+          "Clipboard API is unavailable. This page must run on HTTPS or localhost."
+        );
+      }
       const text = await navigator.clipboard.readText();
       const parsed = parseLayoutFromClipboard(text);
       setLayoutFormData({
@@ -2576,7 +2585,7 @@ export default function AdminTemplatesPage() {
                             ...prev,
                             photo_areas: [
                               ...prev.photo_areas,
-                              { ...defaultPhotoArea, photo_index: prev.photo_areas.length + 1 },
+                              { ...defaultPhotoArea, photo_index: prev.photo_areas.length + 1, _draftId: newDraftId() },
                             ],
                           }))
                         }
@@ -2594,7 +2603,13 @@ export default function AdminTemplatesPage() {
                   <div className="space-y-3">
                     {layoutFormData.photo_areas.map((area, idx) => (
                       <div
-                        key={idx}
+                        // Stable per-row key so removing/reordering rows
+                        // doesn't make React rebind a NumberInput's
+                        // local state to the wrong row. Falls back to
+                        // index for any rare row that somehow lacks
+                        // _draftId (defensive — every create path now
+                        // generates one).
+                        key={area._draftId ?? idx}
                         className="p-3 rounded-lg border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-900"
                       >
                         <div className="flex items-center justify-between mb-2">

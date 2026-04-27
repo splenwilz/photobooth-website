@@ -224,7 +224,12 @@ export function QuickViewModal({ template, isOpen, onClose }: QuickViewModalProp
 
   // The current user's own review, if any. Used to hide the
   // Write-a-Review form once they've already submitted.
-  const userReview = reviews.find((r) => r.is_own_review) ?? null;
+  // Only trust the lookup once reviews have actually loaded; otherwise
+  // an empty `reviews` array would briefly let the "Write a Review"
+  // form flash before the user's existing review hides it.
+  const userReview = !reviewsLoading
+    ? reviews.find((r) => r.is_own_review) ?? null
+    : null;
 
   const handleAddToCart = () => {
     if (inCart) {
@@ -687,7 +692,7 @@ export function QuickViewModal({ template, isOpen, onClose }: QuickViewModalProp
 
             {/* Write a Review — hidden once the current user already has
                 a review in the list (detected via is_own_review). */}
-            {user && !userReview && (
+            {user && !reviewsLoading && !userReview && (
               <div className="mt-6 pt-6 border-t border-[var(--border)]">
                 <h3 className="text-lg font-semibold text-[var(--foreground)] mb-4">
                   Write a Review

@@ -69,7 +69,13 @@ describe("parseLayoutFromClipboard", () => {
   it("round-trips a serialized layout", () => {
     const json = serializeLayoutForClipboard(minimalLayout);
     const parsed = parseLayoutFromClipboard(json);
-    expect(parsed).toEqual({
+    // Strip the parser-generated _draftId before comparing — it's a
+    // frontend-only React-key concept that doesn't survive the wire.
+    const photoAreasNoDrafts = parsed.photo_areas.map(({ _draftId: _id, ...rest }) => {
+      void _id;
+      return rest;
+    });
+    expect({ ...parsed, photo_areas: photoAreasNoDrafts }).toEqual({
       _type: LAYOUT_CLIPBOARD_TYPE,
       layout_key: "strip-3-up",
       name: "Strip 3-up",
@@ -81,6 +87,8 @@ describe("parseLayoutFromClipboard", () => {
       sort_order: 2,
       photo_areas: minimalLayout.photo_areas,
     });
+    // Sanity: _draftId is in fact present on every parsed area.
+    expect(parsed.photo_areas.every((a) => typeof a._draftId === "string")).toBe(true);
   });
 
   it("rejects invalid JSON", () => {

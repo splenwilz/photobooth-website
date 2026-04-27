@@ -10,12 +10,21 @@ export const metadata: Metadata = {
 };
 
 interface SignInPageProps {
+  // Next.js App Router gives string[] when a query key repeats. Type as
+  // the union and collapse to a scalar below so downstream code can
+  // ignore the array case.
   searchParams: Promise<{
-    redirect?: string;
-    reset?: string;
-    error?: string;
-    message?: string;
+    redirect?: string | string[];
+    reset?: string | string[];
+    error?: string | string[];
+    message?: string | string[];
   }>;
+}
+
+/** First scalar of a Next.js searchParams value, or undefined. */
+function firstParam(v: string | string[] | undefined): string | undefined {
+  if (Array.isArray(v)) return v.length > 0 ? v[0] : undefined;
+  return v;
 }
 
 /**
@@ -42,7 +51,10 @@ function mapSigninError(code: string | undefined): string | undefined {
 }
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
-  const { redirect, reset, error } = await searchParams;
+  const raw = await searchParams;
+  const redirect = firstParam(raw.redirect);
+  const reset = firstParam(raw.reset);
+  const error = firstParam(raw.error);
   const initialError = mapSigninError(error);
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex">
