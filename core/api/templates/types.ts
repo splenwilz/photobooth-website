@@ -79,7 +79,9 @@ export interface TemplateListItem {
   preview_url: string;
   overlay_url: string | null;
   // Flat references — full nested objects only on the detail response.
-  category_id: number;
+  // All three are nullable to match the backend's `Optional[…]` schema
+  // (a template can theoretically have no category and no layout).
+  category_id: number | null;
   layout_id: string | null;
   layout_photo_count: number | null;
 }
@@ -90,7 +92,7 @@ export interface TemplateListItem {
  * audit timestamps, admin-only flags).
  */
 export interface Template extends TemplateListItem {
-  category: TemplateCategory;
+  category: TemplateCategory | null;
   layout: TemplateLayout | null;
   status: string;
   is_active: boolean;
@@ -186,6 +188,18 @@ export interface PurchasesResponse {
   page: number;
   per_page: number;
   total_pages: number;
+}
+
+// Membership-check endpoint: which of these template_ids does the
+// supplied booth already own? Bounded by request size, no pagination.
+// See POST /api/v1/templates/owned-from.
+export interface OwnedFromRequest {
+  booth_id: string;
+  template_ids: number[];
+}
+
+export interface OwnedFromResponse {
+  owned_template_ids: number[];
 }
 
 // Cart types (client-side only). Cart items are sourced from the catalog

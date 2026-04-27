@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useCartStore } from "@/stores/cart-store";
 import { useTemplateCheckout } from "@/core/api/payments";
 import { useBoothList } from "@/core/api/booths/queries";
-import { usePurchasedTemplates } from "@/core/api/templates/queries";
+import { useOwnedFrom } from "@/core/api/templates/queries";
 import { ApiError } from "@/core/api/client";
 
 interface CheckoutModalProps {
@@ -20,26 +20,38 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const templateCheckout = useTemplateCheckout();
   const { data: boothListData, isLoading: boothsLoading, isError: boothsError } = useBoothList();
   // Templates are booth-scoped, so a re-purchase for the same booth is a
-  // genuine duplicate. Pull the purchased list for the selected booth and
-  // mark any cart items that overlap.
-  const { data: purchasesData } = usePurchasedTemplates({
+  // genuine duplicate. Ask the backend a direct membership question:
+  // "of these cart template IDs, which has this booth already bought?"
+  // Bounded by cart size — no pagination, no booth-history scaling.
+  // Free templates are excluded: re-downloading is free, so there's
+  // nothing to warn about, and a free-only cart doesn't need to fire
+  // this query at all (avoids a pointless network round-trip + spinner).
+  const cartTemplateIds = useMemo(
+    () =>
+      items
+        .filter((i) => parseFloat(i.template.price) > 0)
+        .map((i) => i.template.id),
+    [items]
+  );
+  const { data: ownedData, isFetching: ownedFetching } = useOwnedFrom({
     booth_id: selectedBoothId,
-    per_page: 100,
+    template_ids: cartTemplateIds,
   });
-  // Stale-data guard: when the user switches booths, React Query's cache
-  // can briefly return the previous booth's purchases before the new
-  // fetch lands. Confirm the data we're reading is for the booth that's
-  // actually selected before trusting it.
-  const purchasesAreForSelectedBooth =
+  // The duplicate check is the only thing protecting the user from
+  // accidentally paying twice for a template their booth already owns.
+  // Treat any in-flight or not-yet-fired check (booth just selected,
+  // booth changed) as "we don't know yet" — block Pay and show a small
+  // status line so they can't race the network.
+  const dupCheckPending =
     !!selectedBoothId &&
-    (purchasesData?.purchases.length === 0 ||
-      purchasesData?.purchases[0]?.booth_id === selectedBoothId);
-  const purchasedTemplateIds = useMemo(() => {
-    const ids = new Set<number>();
-    if (!purchasesAreForSelectedBooth) return ids;
-    for (const p of purchasesData?.purchases ?? []) ids.add(p.template_id);
-    return ids;
-  }, [purchasesData, purchasesAreForSelectedBooth]);
+    cartTemplateIds.length > 0 &&
+    (ownedFetching || ownedData === undefined);
+  // The query key includes booth_id, so the cache can never serve data
+  // from a different booth — no stale-data guard needed.
+  const purchasedTemplateIds = useMemo(
+    () => new Set(ownedData?.owned_template_ids ?? []),
+    [ownedData]
+  );
   // Skip free templates — re-downloading is free, so a "you'll be charged
   // again" warning would be misleading.
   const duplicateItems = useMemo(
@@ -175,11 +187,28 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
             )}
           </div>
 
+          {/* While the duplicate-check is in flight, show a small status
+              line so the user doesn't race the network and pay before the
+              warning has a chance to render. The Pay button is also
+              disabled below for the same reason. We intentionally do NOT
+              use aria-live here — rapid booth switches would flood
+              screen-reader queues. The disabled Pay button + visible
+              spinner are sufficient AT signal. */}
+          {dupCheckPending && (
+            <div className="mb-6 p-3 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 flex items-center gap-2 text-sm text-[var(--muted)]">
+              <svg className="w-4 h-4 animate-spin shrink-0" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              <span>Checking which templates this booth already owns…</span>
+            </div>
+          )}
+
           {/* Duplicate-purchase warning. Templates are booth-scoped, so
               "already purchased" is a per-booth check that only kicks in
               once a booth is selected. Allow proceed (legitimate
               repurchase reasons exist) but make the cost explicit. */}
-          {selectedBoothId && duplicateItems.length > 0 && (
+          {selectedBoothId && !dupCheckPending && duplicateItems.length > 0 && (
             <div
               role="alert"
               className="mb-6 p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/30 flex gap-3"
@@ -279,7 +308,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
             <button
               type="button"
               onClick={handleCheckout}
-              disabled={templateCheckout.isPending || subtotal === 0 || !selectedBoothId}
+              disabled={templateCheckout.isPending || subtotal === 0 || !selectedBoothId || dupCheckPending}
               className="flex-1 py-3.5 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {templateCheckout.isPending ? (

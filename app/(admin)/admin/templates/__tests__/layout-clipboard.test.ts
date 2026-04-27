@@ -169,6 +169,25 @@ describe("parseLayoutFromClipboard", () => {
     expect(parsed.photo_areas[1].photo_index).toBe(2);
   });
 
+  it("treats empty-string photo area fields as fallback (Number(\"\") === 0 trap)", () => {
+    const parsed = parseLayoutFromClipboard(
+      JSON.stringify({
+        _type: LAYOUT_CLIPBOARD_TYPE,
+        name: "x",
+        width: 100,
+        height: 100,
+        product_category_id: 1,
+        photo_areas: [{ photo_index: "", x: "", width: "" }],
+      })
+    );
+    // photo_index falls back to idx + 1 (= 1), x falls back to 0, width
+    // falls back to 400. Without the empty-string guard these would all
+    // silently coerce to 0 via Number("").
+    expect(parsed.photo_areas[0].photo_index).toBe(1);
+    expect(parsed.photo_areas[0].x).toBe(0);
+    expect(parsed.photo_areas[0].width).toBe(400);
+  });
+
   it("treats NaN inside photo area fields as fallback (not as commit)", () => {
     const parsed = parseLayoutFromClipboard(
       JSON.stringify({

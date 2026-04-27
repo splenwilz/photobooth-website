@@ -68,11 +68,13 @@ export async function GET(req: NextRequest) {
       fullError: error,
     });
 
-    // Redirect to signin page with error (use request origin)
+    // Redirect to signin with a stable error code; /signin maps the code
+    // to fixed copy via mapSigninError(). We don't pass user-facing
+    // strings through the URL — a crafted ?message=… would otherwise let
+    // an attacker phish via copy on our own domain.
     const { origin } = new URL(req.url);
     const errorUrl = new URL("/signin", origin);
     errorUrl.searchParams.set("error", "oauth_failed");
-    errorUrl.searchParams.set("message", "Failed to start Google sign in. Please try again.");
 
     return NextResponse.redirect(errorUrl.toString());
   }

@@ -715,9 +715,20 @@ export default function AdminTemplatesPage() {
       });
     } catch (error) {
       console.error("Failed to paste layout:", error);
+      // Permission-denied is the most common clipboard.readText failure
+      // (browser sandbox or a denied permission prompt). Tell the user
+      // exactly what to do instead of surfacing the cryptic
+      // "NotAllowedError" name.
+      const isPermissionError =
+        error instanceof Error &&
+        (error.name === "NotAllowedError" || /not allowed/i.test(error.message));
       setLayoutPasteMessage({
         type: "error",
-        text: error instanceof Error ? error.message : "Failed to read clipboard.",
+        text: isPermissionError
+          ? "Clipboard access was blocked. Allow clipboard access in your browser, or paste the JSON into a Layout Key field manually."
+          : error instanceof Error
+            ? error.message
+            : "Failed to read clipboard.",
       });
     }
   };

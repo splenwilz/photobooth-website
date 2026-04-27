@@ -50,7 +50,10 @@ function requireFiniteNumber(v: unknown, field: string): number {
 }
 
 function optionalFiniteNumber(v: unknown, fallback: number): number {
-  if (v === undefined || v === null) return fallback;
+  // Mirror requireFiniteNumber's "missing" set ("" included) so an empty
+  // string falls back to the supplied default instead of silently
+  // coercing to 0 via Number("").
+  if (v === undefined || v === null || v === "") return fallback;
   const n = typeof v === "number" ? v : Number(v);
   return Number.isFinite(n) ? n : fallback;
 }

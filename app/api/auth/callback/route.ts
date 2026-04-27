@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { oauthCallback } from '@/core/api/auth/oauth/services'
 import { setAuthCookies } from '@/lib/auth'
-import { ApiError } from '@/core/api/client'
 import { safeRedirectPath } from '@/lib/auth-redirect'
 
 /**
@@ -55,32 +54,12 @@ export async function GET(req: NextRequest) {
     } catch (error) {
         console.error('[AUTH] OAuth callback failed:', error)
 
-        // Extract error message
-        let errorMessage = 'Failed to complete OAuth authentication. Please try again.'
-
-        if (error instanceof Error) {
-            errorMessage = error.message
-
-            // Use instanceof for type-safe ApiError detection
-            if (error instanceof ApiError) {
-                // Provide more specific error messages based on status
-                if (error.status === 400) {
-                    errorMessage = 'Invalid authorization code. Please try signing in again.'
-                } else if (error.status === 401) {
-                    errorMessage = 'Authentication failed. Please try signing in again.'
-                } else if (error.status >= 500) {
-                    errorMessage = 'Server error occurred. Please try again later.'
-                } else {
-                    errorMessage = error.message || errorMessage
-                }
-            }
-        }
-
-        // Redirect to signin with error message; clear the single-use
-        // auth_redirect cookie so the next OAuth attempt starts clean.
-        const errorParam = encodeURIComponent(errorMessage)
+        // Map server error to a stable code. /signin maps codes to fixed
+        // copy via mapSigninError() — we never round-trip arbitrary error
+        // text through the URL so a crafted ?error=… can't phish via copy
+        // on our own domain.
         const errResponse = NextResponse.redirect(
-            new URL(`/signin?error=${errorParam}`, req.url)
+            new URL('/signin?error=oauth_failed', req.url)
         )
         errResponse.cookies.delete('auth_redirect')
         return errResponse

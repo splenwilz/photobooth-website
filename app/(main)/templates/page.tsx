@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { TemplateCard } from "@/components/templates/TemplateCard";
 import { CartDrawer } from "@/components/templates/CartDrawer";
@@ -419,8 +419,13 @@ export default function TemplatesPage() {
         </div>
       </section>
 
-      {/* Cart Drawer */}
-      <CartDrawer />
+      {/* Cart Drawer — Suspense boundary required because CartDrawer
+          uses useSearchParams() (for the ?openCheckout=1 resume flow).
+          Without it, the whole /templates page bails out of static
+          prerendering at build time. */}
+      <Suspense fallback={null}>
+        <CartDrawer />
+      </Suspense>
 
       {/* Quick View Modal */}
       <QuickViewModal

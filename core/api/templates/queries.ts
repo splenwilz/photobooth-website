@@ -15,6 +15,7 @@ import {
   deleteReview,
   downloadTemplate,
   getPurchasedTemplates,
+  getOwnedFrom,
 } from "./services";
 import type { TemplatesQueryParams, ReviewsResponse } from "./types";
 
@@ -32,6 +33,8 @@ export const templateKeys = {
     [...templateKeys.all, "reviews", templateId] as const,
   purchased: (params: { booth_id: string; page?: number; per_page?: number }) =>
     [...templateKeys.all, "purchased", params] as const,
+  ownedFrom: (boothId: string, sortedTemplateIds: readonly number[]) =>
+    [...templateKeys.all, "owned-from", boothId, sortedTemplateIds] as const,
 };
 
 export function useTemplates(params: TemplatesQueryParams = {}) {
@@ -209,6 +212,33 @@ export function usePurchasedTemplates(
     queryFn: () => getPurchasedTemplates(params),
     enabled: !!params.booth_id,
     staleTime: 60 * 1000,
+  });
+}
+
+/**
+ * Membership check: which of the supplied template_ids has the booth
+ * already purchased? Use this for duplicate-purchase warnings — bounded
+ * by the input list size, not by booth purchase history. The IDs are
+ * sorted for the cache key so reordered carts hit the same entry.
+ *
+ * staleTime is 0 because this hook gates a payment flow — if the user
+ * bought a template in another tab (or via the kiosk), we want the next
+ * Pay-button click to reflect that. Network cost is bounded (cart size).
+ */
+export function useOwnedFrom(params: { booth_id: string; template_ids: number[] }) {
+  // Sort numerically to keep the cache key stable across cart reorderings.
+  const sortedIds = [...params.template_ids].sort((a, b) => a - b);
+  return useQuery({
+    queryKey: templateKeys.ownedFrom(params.booth_id, sortedIds),
+    queryFn: () =>
+      getOwnedFrom({
+        booth_id: params.booth_id,
+        template_ids: sortedIds,
+      }),
+    // Don't fire when there's no booth selected or the cart is empty —
+    // the response would always be `owned_template_ids: []` anyway.
+    enabled: !!params.booth_id && sortedIds.length > 0,
+    staleTime: 0,
   });
 }
 
