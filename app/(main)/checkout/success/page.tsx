@@ -48,15 +48,33 @@ function CheckoutSuccessContent() {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const hasAttemptedRedirect = useRef(false);
 
+  // Pending-too-long state lives BEFORE the hook so we can pass
+  // `enabled: !pendingTooLong` and stop the 2-s poll once we've given up.
+  // The effect that drives `pendingSince` is declared further down — it
+  // reads session data, but effect-declaration order is independent of
+  // hook-call order; only state declarations need to come up here.
+  const [pendingSince, setPendingSince] = useState<
+    { sessionId: string; startedAt: number } | null
+  >(null);
+  const [now, setNow] = useState(() => Date.now());
+  const PENDING_GRACE_MS = 90_000;
+  const pendingTooLong =
+    pendingSince !== null &&
+    pendingSince.sessionId === sessionId &&
+    now - pendingSince.startedAt > PENDING_GRACE_MS;
+
   // Fetch checkout session to verify payment. The hook polls automatically
-  // while fulfillment_status === "pending" — see queries.ts.
+  // while fulfillment_status === "pending" — see queries.ts. Once the
+  // 90-s grace window expires we disable the hook so polling truly stops
+  // (otherwise it would keep firing every 2 s in the background even
+  // after we've rendered the failed view).
   const {
     data: session,
     isLoading: sessionLoading,
     isError: sessionError,
     refetch: refetchSession,
     isFetching: sessionFetching,
-  } = useCheckoutSession(sessionId);
+  } = useCheckoutSession(sessionId, { enabled: !pendingTooLong });
 
   // Fetch pricing plans for subscription feature details
   const { data: plansData } = usePricingPlans();
@@ -82,20 +100,9 @@ function CheckoutSuccessContent() {
     }
   }, [checkoutType, session?.fulfillment_status, sessionId, clearCart]);
 
-  // Pending-too-long fallback. The hook polls every 2s while
-  // fulfillment_status === "pending"; if we've been pending for more
-  // than 90s without resolving, treat it like a failure so the user has
-  // an escape valve (retry button + support link) instead of staring at
-  // the spinner indefinitely.
-  // Tag the timestamp with the session_id it was started for, so
-  // navigating between two different success URLs on the same page
-  // instance restarts the timer for the new session rather than
-  // inheriting the old one. State (not ref) so the threshold check
-  // recomputes on the 5s tick without violating react-hooks/refs.
-  const [pendingSince, setPendingSince] = useState<
-    { sessionId: string; startedAt: number } | null
-  >(null);
-  const [now, setNow] = useState(() => Date.now());
+  // Drive the pendingSince state declared above. Effect-declaration order
+  // is independent of state-declaration order; the state lives at the
+  // top so the hook above can gate `enabled` on `pendingTooLong`.
   useEffect(() => {
     if (session?.fulfillment_status === "pending" && sessionId) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot pending-start tag tied to session id
@@ -107,11 +114,6 @@ function CheckoutSuccessContent() {
     }
     setPendingSince(null);
   }, [session?.fulfillment_status, sessionId]);
-  const PENDING_GRACE_MS = 90_000;
-  const pendingTooLong =
-    pendingSince !== null &&
-    pendingSince.sessionId === sessionId &&
-    now - pendingSince.startedAt > PENDING_GRACE_MS;
 
   // Fetch booth subscription details after payment is confirmed
   useEffect(() => {
@@ -284,7 +286,13 @@ function CheckoutSuccessContent() {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 type="button"
-                onClick={() => refetchSession()}
+                onClick={() => {
+                  // Reset the pending-too-long timer so a retry gets a
+                  // fresh 90-s window rather than instantly bouncing back
+                  // to this view if the response is "pending" again.
+                  setPendingSince(null);
+                  refetchSession();
+                }}
                 disabled={sessionFetching}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >

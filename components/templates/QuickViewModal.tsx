@@ -52,15 +52,20 @@ function ReviewerAvatar({
   // belt-and-braces, not the primary security boundary.
   const safeAvatarUrl =
     avatarUrl && /^https?:\/\//i.test(avatarUrl) ? avatarUrl : null;
-  const initials = name
-    ? name
-        .trim()
-        .split(/\s+/)
-        .slice(0, 2)
-        .map((part) => part[0] ?? "")
-        .join("")
-        .toUpperCase()
-    : null;
+  // Filter empty parts before extracting first letters so "  " (whitespace
+  // only) or single-character names produce `null` (→ generic person icon)
+  // rather than an empty initials string that would render a blank circle.
+  const initials = (() => {
+    if (!name) return null;
+    const parts = name
+      .trim()
+      .split(/\s+/)
+      .filter((p) => p.length > 0)
+      .slice(0, 2);
+    if (parts.length === 0) return null;
+    const result = parts.map((part) => part[0] ?? "").join("").toUpperCase();
+    return result.length > 0 ? result : null;
+  })();
 
   const showImage = !!safeAvatarUrl && !imgFailed;
 

@@ -732,7 +732,7 @@ export default function AdminTemplatesPage() {
       setLayoutPasteMessage({
         type: "error",
         text: isPermissionError
-          ? "Clipboard access was blocked. Allow clipboard access in your browser, or paste the JSON into a Layout Key field manually."
+          ? "Clipboard access was blocked. Allow clipboard access for this site in your browser settings and try again."
           : error instanceof Error
             ? error.message
             : "Failed to read clipboard.",

@@ -36,18 +36,31 @@ export type LayoutClipboardPayload = {
 
 // Reject null/undefined and any whitespace-only string ("", "   ", "\t").
 // Number("") and Number("   ") and Number(null) all silently coerce to 0,
-// which would let empty fields slip through. typeof "===" check keeps
-// boolean / array inputs flowing into the finite-number check below
-// where they get rejected by Number.isFinite.
+// which would let empty fields slip through.
 function isMissingScalar(v: unknown): boolean {
   if (v === null || v === undefined) return true;
   if (typeof v === "string" && v.trim() === "") return true;
   return false;
 }
 
+// Only numbers and non-empty strings should reach Number(). Booleans
+// (Number(true) === 1, Number(false) === 0), arrays (Number([]) === 0,
+// Number([5]) === 5), and other objects all coerce to plausible numbers
+// silently — the JSON shape is wrong and we should reject up front.
+function isValidNumericPrimitive(v: unknown): boolean {
+  if (typeof v === "number") return true;
+  if (typeof v === "string" && v.trim() !== "") return true;
+  return false;
+}
+
 function requireFiniteNumber(v: unknown, field: string): number {
   if (isMissingScalar(v)) {
     throw new Error(`Field "${field}" is required.`);
+  }
+  if (!isValidNumericPrimitive(v)) {
+    throw new Error(
+      `Field "${field}" must be a finite number, got ${JSON.stringify(v)}.`
+    );
   }
   const n = typeof v === "number" ? v : Number(v);
   if (!Number.isFinite(n)) {
@@ -60,6 +73,7 @@ function requireFiniteNumber(v: unknown, field: string): number {
 
 function optionalFiniteNumber(v: unknown, fallback: number): number {
   if (isMissingScalar(v)) return fallback;
+  if (!isValidNumericPrimitive(v)) return fallback;
   const n = typeof v === "number" ? v : Number(v);
   return Number.isFinite(n) ? n : fallback;
 }

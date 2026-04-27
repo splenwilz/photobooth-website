@@ -192,6 +192,56 @@ describe("parseLayoutFromClipboard", () => {
     ).toThrow(/"product_category_id"/);
   });
 
+  it("rejects booleans in required numeric fields (Number(true)=1, Number(false)=0)", () => {
+    expect(() =>
+      parseLayoutFromClipboard(
+        JSON.stringify({
+          _type: LAYOUT_CLIPBOARD_TYPE,
+          name: "x",
+          width: true,
+          height: 1,
+          product_category_id: 1,
+        })
+      )
+    ).toThrow(/"width" must be a finite number/);
+    expect(() =>
+      parseLayoutFromClipboard(
+        JSON.stringify({
+          _type: LAYOUT_CLIPBOARD_TYPE,
+          name: "x",
+          width: 1,
+          height: false,
+          product_category_id: 1,
+        })
+      )
+    ).toThrow(/"height" must be a finite number/);
+  });
+
+  it("rejects arrays in required numeric fields (Number([])=0, Number([5])=5)", () => {
+    expect(() =>
+      parseLayoutFromClipboard(
+        JSON.stringify({
+          _type: LAYOUT_CLIPBOARD_TYPE,
+          name: "x",
+          width: [],
+          height: 1,
+          product_category_id: 1,
+        })
+      )
+    ).toThrow(/"width" must be a finite number/);
+    expect(() =>
+      parseLayoutFromClipboard(
+        JSON.stringify({
+          _type: LAYOUT_CLIPBOARD_TYPE,
+          name: "x",
+          width: 1,
+          height: [100],
+          product_category_id: 1,
+        })
+      )
+    ).toThrow(/"height" must be a finite number/);
+  });
+
   it("falls back to 'rectangle' for unknown shape types", () => {
     const parsed = parseLayoutFromClipboard(
       JSON.stringify({
@@ -262,6 +312,42 @@ describe("parseLayoutFromClipboard", () => {
     );
     expect(parsed.photo_areas[0].x).toBe(0);
     expect(parsed.photo_areas[0].y).toBe(5);
+  });
+
+  it("treats booleans in photo area fields as fallback", () => {
+    const parsed = parseLayoutFromClipboard(
+      JSON.stringify({
+        _type: LAYOUT_CLIPBOARD_TYPE,
+        name: "x",
+        width: 100,
+        height: 100,
+        product_category_id: 1,
+        photo_areas: [{ x: true, y: false, width: true }],
+      })
+    );
+    // Without the boolean guard, true→1 / false→0 / true→1 silently slip
+    // in. With the guard they fall back to defaults (0/0/400).
+    expect(parsed.photo_areas[0].x).toBe(0);
+    expect(parsed.photo_areas[0].y).toBe(0);
+    expect(parsed.photo_areas[0].width).toBe(400);
+  });
+
+  it("treats arrays in photo area fields as fallback", () => {
+    const parsed = parseLayoutFromClipboard(
+      JSON.stringify({
+        _type: LAYOUT_CLIPBOARD_TYPE,
+        name: "x",
+        width: 100,
+        height: 100,
+        product_category_id: 1,
+        photo_areas: [{ x: [], y: [25], width: [100] }],
+      })
+    );
+    // Without the array guard, []→0 / [25]→25 / [100]→100 silently slip
+    // in. With the guard they fall back to defaults.
+    expect(parsed.photo_areas[0].x).toBe(0);
+    expect(parsed.photo_areas[0].y).toBe(0);
+    expect(parsed.photo_areas[0].width).toBe(400);
   });
 
   it("defaults missing optional fields", () => {
