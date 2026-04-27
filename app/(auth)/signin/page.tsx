@@ -10,11 +10,16 @@ export const metadata: Metadata = {
 };
 
 interface SignInPageProps {
-  searchParams: Promise<{ redirect?: string; reset?: string }>;
+  searchParams: Promise<{
+    redirect?: string;
+    reset?: string;
+    error?: string;
+    message?: string;
+  }>;
 }
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
-  const { redirect, reset } = await searchParams;
+  const { redirect, reset, error, message } = await searchParams;
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex">
       {/* Left Panel - Decorative */}
@@ -132,7 +137,11 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
           </div>
 
           {/* Form */}
-          <SigninForm resetSuccess={reset === 'success'} />
+          <SigninForm
+            resetSuccess={reset === 'success'}
+            redirectTo={redirect}
+            initialError={error ? (message || error) : undefined}
+          />
 
           {/* Sign Up Link */}
           <p className="text-center text-sm text-[var(--muted)] mt-8">

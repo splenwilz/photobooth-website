@@ -91,6 +91,29 @@ export interface CreateTemplateCheckoutRequest {
 // ============================================================================
 
 /**
+ * Backend's view of post-payment fulfillment.
+ *
+ * Stripe's `payment_status` only tells us whether the customer's money was
+ * captured. `fulfillment_status` tells us whether our side actually
+ * recorded the purchase (template rows, booth sync command, etc.). The
+ * checkout-session endpoint runs idempotent fulfillment inline as a
+ * fallback for when the Stripe webhook is delayed or missing — so this
+ * field is the right signal to gate "purchase complete" UI on, not
+ * `payment_status`.
+ *
+ * - "completed":      purchase recorded, booth notified — safe to show success.
+ * - "pending":        Stripe says paid but our state hasn't caught up. Poll.
+ * - "failed":         payment captured but fulfillment hit a structural
+ *                     error (missing metadata etc.). Support notified.
+ * - "not_applicable": session is not a template purchase (e.g. subscription).
+ */
+export type FulfillmentStatus =
+  | "completed"
+  | "pending"
+  | "failed"
+  | "not_applicable";
+
+/**
  * Response from checkout session status endpoint
  * @see GET /api/v1/payments/checkout/{session_id}
  */
@@ -101,6 +124,8 @@ export interface CheckoutSessionResponse {
   status: CheckoutStatus;
   /** Payment status */
   payment_status: PaymentStatus;
+  /** Backend fulfillment state — see FulfillmentStatus. */
+  fulfillment_status: FulfillmentStatus;
   /** Customer email from checkout */
   customer_email: string | null;
   /** Total amount in cents */

@@ -16,7 +16,7 @@ import {
   downloadTemplate,
   getPurchasedTemplates,
 } from "./services";
-import type { TemplatesQueryParams } from "./types";
+import type { TemplatesQueryParams, ReviewsResponse } from "./types";
 
 export const templateKeys = {
   all: ["templates"] as const,
@@ -99,10 +99,34 @@ export function useSubmitReview() {
       templateId: number;
       data: { rating: number; title?: string; comment?: string };
     }) => submitReview(templateId, data),
-    onSuccess: (_, { templateId }) => {
-      queryClient.invalidateQueries({
-        queryKey: templateKeys.reviews(templateId),
-      });
+    onSuccess: (newReview, { templateId }) => {
+      // Optimistically prepend the new review to the FIRST page only —
+      // prepending to page 2+ would shove a non-page-2 row to the top
+      // and double-count once page 1 next refetches. The QuickViewModal
+      // currently uses default params (single page), so this matches
+      // today's UI; the predicate makes it safe when pagination ships.
+      // Other pages get the new review when they refetch (their
+      // staleTime is 60s, see useTemplateReviews), or via a manual
+      // invalidation from the caller if instant consistency matters.
+      queryClient.setQueriesData<ReviewsResponse>(
+        {
+          queryKey: templateKeys.reviews(templateId),
+          predicate: (q) => {
+            const params = q.queryKey[3] as { page?: number } | undefined;
+            return !params || params.page === undefined || params.page === 1;
+          },
+        },
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            reviews: [newReview, ...old.reviews],
+            total: old.total + 1,
+          };
+        }
+      );
+      // Detail + list views still need a refetch to pick up the new
+      // review_count / rating_average computed by the backend.
       queryClient.invalidateQueries({
         queryKey: templateKeys.detail(templateId),
       });
@@ -126,10 +150,22 @@ export function useUpdateReview() {
       reviewId: number;
       data: { rating?: number; title?: string; comment?: string };
     }) => updateReview(templateId, reviewId, data),
-    onSuccess: (_, { templateId }) => {
-      queryClient.invalidateQueries({
-        queryKey: templateKeys.reviews(templateId),
-      });
+    onSuccess: (updatedReview, { templateId }) => {
+      // Replace the existing entry in every cached reviews page. The
+      // PATCH response already has populated identity fields, so the
+      // refetch is unnecessary for the reviews list itself.
+      queryClient.setQueriesData<ReviewsResponse>(
+        { queryKey: templateKeys.reviews(templateId) },
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            reviews: old.reviews.map((r) =>
+              r.id === updatedReview.id ? updatedReview : r
+            ),
+          };
+        }
+      );
       queryClient.invalidateQueries({
         queryKey: templateKeys.detail(templateId),
       });

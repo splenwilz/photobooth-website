@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { oauthCallback } from '@/core/api/auth/oauth/services'
 import { setAuthCookies } from '@/lib/auth'
 import { ApiError } from '@/core/api/client'
+import { safeRedirectPath } from '@/lib/auth-redirect'
 
 /**
  * OAuth callback route handler
@@ -17,9 +18,14 @@ export async function GET(req: NextRequest) {
     const state = searchParams.get('state')
 
     if (!code) {
-        return NextResponse.redirect(
+        // The auth_redirect cookie is single-use intent; if we're not going
+        // to consume it (no auth happened), clear it so a later OAuth attempt
+        // does not pick up a stale value.
+        const errResponse = NextResponse.redirect(
             new URL('/signin?error=missing_code', req.url)
         )
+        errResponse.cookies.delete('auth_redirect')
+        return errResponse
     }
 
     try {
@@ -32,16 +38,16 @@ export async function GET(req: NextRequest) {
         // Set authentication cookies
         await setAuthCookies(authResponse)
 
-        // Check for redirect cookie (set when user started OAuth from a specific page)
+        // Check for redirect cookie (set by the initiate routes). The initiate
+        // routes already validate same-origin before setting it, but we
+        // re-validate here as defense-in-depth in case the cookie is ever set
+        // by another path or tampered with.
         const cookieStore = await cookies()
-        const redirectTo = cookieStore.get('auth_redirect')?.value
-
-        // Create redirect response
-        const redirectUrl = redirectTo || '/dashboard'
+        const rawRedirect = cookieStore.get('auth_redirect')?.value
+        const redirectUrl = safeRedirectPath(rawRedirect)
         const response = NextResponse.redirect(new URL(redirectUrl, req.url))
 
-        // Clear the redirect cookie
-        if (redirectTo) {
+        if (rawRedirect) {
             response.cookies.delete('auth_redirect')
         }
 
@@ -70,11 +76,14 @@ export async function GET(req: NextRequest) {
             }
         }
 
-        // Redirect to signin with error message
+        // Redirect to signin with error message; clear the single-use
+        // auth_redirect cookie so the next OAuth attempt starts clean.
         const errorParam = encodeURIComponent(errorMessage)
-        return NextResponse.redirect(
+        const errResponse = NextResponse.redirect(
             new URL(`/signin?error=${errorParam}`, req.url)
         )
+        errResponse.cookies.delete('auth_redirect')
+        return errResponse
     }
 }
 

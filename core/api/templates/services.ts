@@ -69,8 +69,8 @@ export async function getTemplateReviews(
 export async function submitReview(
   templateId: number,
   data: { rating: number; title?: string; comment?: string }
-): Promise<void> {
-  return apiClient(`${BASE}/${templateId}/reviews`, {
+): Promise<TemplateReview> {
+  return apiClient<TemplateReview>(`${BASE}/${templateId}/reviews`, {
     method: "POST",
     body: JSON.stringify(data),
   });

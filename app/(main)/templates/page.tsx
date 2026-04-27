@@ -7,7 +7,7 @@ import { CartDrawer } from "@/components/templates/CartDrawer";
 import { QuickViewModal } from "@/components/templates/QuickViewModal";
 import { useCartStore } from "@/stores/cart-store";
 import { useTemplates } from "@/core/api/templates/queries";
-import { Template, TemplatesQueryParams } from "@/core/api/templates/types";
+import { TemplateListItem, TemplatesQueryParams } from "@/core/api/templates/types";
 
 type TemplateType = "strip" | "photo_4x6";
 type FilterTab = "all" | "featured" | "new" | "free";
@@ -31,7 +31,7 @@ export default function TemplatesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [quickViewTemplate, setQuickViewTemplate] = useState<Template | null>(null);
+  const [quickViewTemplate, setQuickViewTemplate] = useState<TemplateListItem | null>(null);
 
   const { openCart, getItemCount } = useCartStore();
   const [mounted, setMounted] = useState(false);

@@ -1,12 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { Template } from "@/core/api/templates/types";
+import { TemplateListItem } from "@/core/api/templates/types";
 import { useCartStore } from "@/stores/cart-store";
 
 interface TemplateCardProps {
-  template: Template;
-  onQuickView?: (template: Template) => void;
+  template: TemplateListItem;
+  onQuickView?: (template: TemplateListItem) => void;
 }
 
 export function TemplateCard({ template, onQuickView }: TemplateCardProps) {
@@ -103,13 +103,6 @@ export function TemplateCard({ template, onQuickView }: TemplateCardProps) {
 
       {/* Content */}
       <div className="p-4">
-        {/* Category Tag */}
-        <div className="mb-2">
-          <span className="text-xs text-[var(--muted)] uppercase tracking-wide">
-            {template.layout?.layout_key?.replace(/-/g, " ") || template.template_type.replace(/_/g, " ")}
-          </span>
-        </div>
-
         {/* Title */}
         <h3 className="font-semibold text-[var(--foreground)] mb-1 truncate">
           {template.name}

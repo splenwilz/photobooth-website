@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import { useCartStore } from "@/stores/cart-store";
 import { useTemplateCheckout } from "@/core/api/payments";
 import { useBoothList } from "@/core/api/booths/queries";
+import { usePurchasedTemplates } from "@/core/api/templates/queries";
 import { ApiError } from "@/core/api/client";
 
 interface CheckoutModalProps {
@@ -13,11 +14,43 @@ interface CheckoutModalProps {
 }
 
 export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
-  const { items, getSubtotal, clearCart, closeCart } = useCartStore();
+  const { items, getSubtotal, closeCart } = useCartStore();
   const [error, setError] = useState<string | null>(null);
   const [selectedBoothId, setSelectedBoothId] = useState<string>("");
   const templateCheckout = useTemplateCheckout();
   const { data: boothListData, isLoading: boothsLoading, isError: boothsError } = useBoothList();
+  // Templates are booth-scoped, so a re-purchase for the same booth is a
+  // genuine duplicate. Pull the purchased list for the selected booth and
+  // mark any cart items that overlap.
+  const { data: purchasesData } = usePurchasedTemplates({
+    booth_id: selectedBoothId,
+    per_page: 100,
+  });
+  // Stale-data guard: when the user switches booths, React Query's cache
+  // can briefly return the previous booth's purchases before the new
+  // fetch lands. Confirm the data we're reading is for the booth that's
+  // actually selected before trusting it.
+  const purchasesAreForSelectedBooth =
+    !!selectedBoothId &&
+    (purchasesData?.purchases.length === 0 ||
+      purchasesData?.purchases[0]?.booth_id === selectedBoothId);
+  const purchasedTemplateIds = useMemo(() => {
+    const ids = new Set<number>();
+    if (!purchasesAreForSelectedBooth) return ids;
+    for (const p of purchasesData?.purchases ?? []) ids.add(p.template_id);
+    return ids;
+  }, [purchasesData, purchasesAreForSelectedBooth]);
+  // Skip free templates — re-downloading is free, so a "you'll be charged
+  // again" warning would be misleading.
+  const duplicateItems = useMemo(
+    () =>
+      items.filter(
+        (item) =>
+          parseFloat(item.template.price) > 0 &&
+          purchasedTemplateIds.has(item.template.id)
+      ),
+    [items, purchasedTemplateIds]
+  );
 
   const booths = boothListData?.booths ?? [];
   const subtotal = getSubtotal();
@@ -53,9 +86,12 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
       {
         onSuccess: (data) => {
           if (data.success && data.checkout_url) {
+            // Don't clear the cart here — the user hasn't paid yet, and a
+            // Stripe-side cancel would otherwise leave them with an empty
+            // cart back on /templates. The cart is cleared on the success
+            // page once fulfillment_status === "completed".
             closeCart();
             window.location.href = data.checkout_url;
-            clearCart();
           } else {
             setError(data.error_message || "Failed to create checkout session.");
           }
@@ -139,11 +175,43 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
             )}
           </div>
 
+          {/* Duplicate-purchase warning. Templates are booth-scoped, so
+              "already purchased" is a per-booth check that only kicks in
+              once a booth is selected. Allow proceed (legitimate
+              repurchase reasons exist) but make the cost explicit. */}
+          {selectedBoothId && duplicateItems.length > 0 && (
+            <div
+              role="alert"
+              className="mb-6 p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/30 flex gap-3"
+            >
+              <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div className="text-sm">
+                <p className="font-semibold text-yellow-700 dark:text-yellow-300">
+                  {duplicateItems.length === 1
+                    ? "1 template is already purchased for this booth"
+                    : `${duplicateItems.length} templates are already purchased for this booth`}
+                </p>
+                <p className="text-yellow-700/80 dark:text-yellow-400/80 mt-0.5">
+                  You can proceed if you want, but you&apos;ll be charged again. Remove them from your cart or pick a different booth to avoid duplicate charges.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Order Items */}
           <div className="space-y-3 mb-6">
             {items.map((item) => {
               const price = parseFloat(item.template.price);
               const isFree = price === 0;
+              // Free items are always re-downloadable; only paid duplicates
+              // imply a "you'll be charged again" outcome, so the duplicate
+              // badge is paid-only.
+              const isDuplicate =
+                !isFree &&
+                !!selectedBoothId &&
+                purchasedTemplateIds.has(item.template.id);
               return (
                 <div key={item.template.id} className="flex items-center gap-3">
                   <div className="relative w-12 h-16 rounded-lg overflow-hidden bg-slate-100 dark:bg-zinc-900 shrink-0">
@@ -159,9 +227,13 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                     <p className="text-sm font-medium text-[var(--foreground)] truncate">
                       {item.template.name}
                     </p>
-                    {isFree && (
+                    {isFree ? (
                       <p className="text-xs text-[#10B981]">Free — download directly</p>
-                    )}
+                    ) : isDuplicate ? (
+                      <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                        Already purchased for this booth
+                      </p>
+                    ) : null}
                   </div>
                   <span className="text-sm font-semibold text-[var(--foreground)]">
                     {isFree ? "Free" : `$${price.toFixed(2)}`}
