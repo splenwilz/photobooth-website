@@ -34,10 +34,19 @@ export type LayoutClipboardPayload = {
   photo_areas: PhotoAreaFormData[];
 };
 
+// Reject null/undefined and any whitespace-only string ("", "   ", "\t").
+// Number("") and Number("   ") and Number(null) all silently coerce to 0,
+// which would let empty fields slip through. typeof "===" check keeps
+// boolean / array inputs flowing into the finite-number check below
+// where they get rejected by Number.isFinite.
+function isMissingScalar(v: unknown): boolean {
+  if (v === null || v === undefined) return true;
+  if (typeof v === "string" && v.trim() === "") return true;
+  return false;
+}
+
 function requireFiniteNumber(v: unknown, field: string): number {
-  // Reject null/undefined/"" up front because Number(null) and Number("") both
-  // silently coerce to 0, which would let empty fields slip through.
-  if (v === null || v === undefined || v === "") {
+  if (isMissingScalar(v)) {
     throw new Error(`Field "${field}" is required.`);
   }
   const n = typeof v === "number" ? v : Number(v);
@@ -50,10 +59,7 @@ function requireFiniteNumber(v: unknown, field: string): number {
 }
 
 function optionalFiniteNumber(v: unknown, fallback: number): number {
-  // Mirror requireFiniteNumber's "missing" set ("" included) so an empty
-  // string falls back to the supplied default instead of silently
-  // coercing to 0 via Number("").
-  if (v === undefined || v === null || v === "") return fallback;
+  if (isMissingScalar(v)) return fallback;
   const n = typeof v === "number" ? v : Number(v);
   return Number.isFinite(n) ? n : fallback;
 }

@@ -18,9 +18,14 @@ const DEFAULT_DESTINATION = "/dashboard";
  * - empty / null / undefined
  * - paths that do not start with "/" (e.g. "https://evil.com/...")
  * - protocol-relative URLs ("//evil.com/...")
+ * - any string containing a backslash. WHATWG URL parsers in some
+ *   browsers/Node.js versions normalize "\" to "/", so "/\evil.com"
+ *   would resolve to "//evil.com" (protocol-relative) and bypass the
+ *   "//" check.
  */
 export function safeRedirectPath(target: string | null | undefined): string {
   if (!target) return DEFAULT_DESTINATION;
+  if (target.includes("\\")) return DEFAULT_DESTINATION;
   if (!target.startsWith("/")) return DEFAULT_DESTINATION;
   if (target.startsWith("//")) return DEFAULT_DESTINATION;
   return target;

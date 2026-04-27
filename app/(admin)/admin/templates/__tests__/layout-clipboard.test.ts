@@ -139,6 +139,33 @@ describe("parseLayoutFromClipboard", () => {
     expect(parsed.name).toBe("Halloween");
   });
 
+  it("rejects whitespace-only strings on required numeric fields", () => {
+    // Number("   ") === 0 (finite) — a previous version of the validator
+    // let whitespace strings slip through as zeros.
+    expect(() =>
+      parseLayoutFromClipboard(
+        JSON.stringify({
+          _type: LAYOUT_CLIPBOARD_TYPE,
+          name: "x",
+          width: "   ",
+          height: 1,
+          product_category_id: 1,
+        })
+      )
+    ).toThrow(/"width"/);
+    expect(() =>
+      parseLayoutFromClipboard(
+        JSON.stringify({
+          _type: LAYOUT_CLIPBOARD_TYPE,
+          name: "x",
+          width: 1,
+          height: "\t\n",
+          product_category_id: 1,
+        })
+      )
+    ).toThrow(/"height"/);
+  });
+
   it("rejects non-finite numeric fields (the H1 bug)", () => {
     expect(() =>
       parseLayoutFromClipboard(

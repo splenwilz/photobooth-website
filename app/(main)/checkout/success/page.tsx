@@ -87,20 +87,31 @@ function CheckoutSuccessContent() {
   // than 90s without resolving, treat it like a failure so the user has
   // an escape valve (retry button + support link) instead of staring at
   // the spinner indefinitely.
-  const pendingSinceRef = useRef<number | null>(null);
+  // Tag the timestamp with the session_id it was started for, so
+  // navigating between two different success URLs on the same page
+  // instance restarts the timer for the new session rather than
+  // inheriting the old one. State (not ref) so the threshold check
+  // recomputes on the 5s tick without violating react-hooks/refs.
+  const [pendingSince, setPendingSince] = useState<
+    { sessionId: string; startedAt: number } | null
+  >(null);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    if (session?.fulfillment_status === "pending") {
-      pendingSinceRef.current ??= Date.now();
+    if (session?.fulfillment_status === "pending" && sessionId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot pending-start tag tied to session id
+      setPendingSince((prev) =>
+        prev?.sessionId === sessionId ? prev : { sessionId, startedAt: Date.now() }
+      );
       const tick = setInterval(() => setNow(Date.now()), 5000);
       return () => clearInterval(tick);
     }
-    pendingSinceRef.current = null;
-  }, [session?.fulfillment_status]);
+    setPendingSince(null);
+  }, [session?.fulfillment_status, sessionId]);
   const PENDING_GRACE_MS = 90_000;
   const pendingTooLong =
-    pendingSinceRef.current !== null &&
-    now - pendingSinceRef.current > PENDING_GRACE_MS;
+    pendingSince !== null &&
+    pendingSince.sessionId === sessionId &&
+    now - pendingSince.startedAt > PENDING_GRACE_MS;
 
   // Fetch booth subscription details after payment is confirmed
   useEffect(() => {
@@ -110,6 +121,7 @@ function CheckoutSuccessContent() {
       session?.payment_status === "paid" &&
       !hasAttemptedBoothFetch
     ) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- guard flag for one-time fetch
       setHasAttemptedBoothFetch(true);
       getBoothSubscription(boothId)
         .then((data) => {
@@ -126,6 +138,7 @@ function CheckoutSuccessContent() {
     if (typeof window === "undefined") return;
 
     const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- detect device on mount
     setIsMobileUser(isMobile);
 
     // For templates, also require fulfillment_status === "completed" so we
