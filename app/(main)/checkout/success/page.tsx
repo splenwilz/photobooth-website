@@ -103,17 +103,23 @@ function CheckoutSuccessContent() {
   // Drive the pendingSince state declared above. Effect-declaration order
   // is independent of state-declaration order; the state lives at the
   // top so the hook above can gate `enabled` on `pendingTooLong`.
+  //
+  // pendingSince is in the deps because the Try-again handler resets it
+  // to null while status is still "pending" — without it in the deps
+  // the effect wouldn't re-run and the timer would never restart. The
+  // inner null/different-session check makes the setter idempotent so
+  // the effect doesn't loop on its own state changes.
   useEffect(() => {
     if (session?.fulfillment_status === "pending" && sessionId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot pending-start tag tied to session id
-      setPendingSince((prev) =>
-        prev?.sessionId === sessionId ? prev : { sessionId, startedAt: Date.now() }
-      );
+      if (pendingSince === null || pendingSince.sessionId !== sessionId) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot pending-start tag tied to session id
+        setPendingSince({ sessionId, startedAt: Date.now() });
+      }
       const tick = setInterval(() => setNow(Date.now()), 5000);
       return () => clearInterval(tick);
     }
-    setPendingSince(null);
-  }, [session?.fulfillment_status, sessionId]);
+    if (pendingSince !== null) setPendingSince(null);
+  }, [session?.fulfillment_status, sessionId, pendingSince]);
 
   // Fetch booth subscription details after payment is confirmed
   useEffect(() => {
@@ -134,6 +140,18 @@ function CheckoutSuccessContent() {
         });
     }
   }, [checkoutType, boothId, session, hasAttemptedBoothFetch]);
+
+  // Reset the deeplink-attempt flags whenever the session changes (e.g.,
+  // browser-back from one success URL to a different one within the same
+  // component instance). Without this, hasAttemptedRedirect.current
+  // would still be `true` from the previous session and the redirect
+  // wouldn't fire for the new one.
+  useEffect(() => {
+    hasAttemptedRedirect.current = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset stale per-session flags
+    setIsRedirecting(false);
+    setShowAppButton(false);
+  }, [sessionId]);
 
   // Mobile detection and app redirect for templates/subscription purchases
   useEffect(() => {
