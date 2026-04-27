@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { oauth } from "@/core/api/auth/oauth/services";
+import { safeRedirectPath } from "@/lib/auth-redirect";
 
 /**
  * GET /api/auth/apple
@@ -17,9 +18,13 @@ export async function GET(req: NextRequest) {
     const { origin } = new URL(req.url);
     const redirectUri = process.env.NEXT_PUBLIC_WORKOS_REDIRECT_URI || `${origin}/api/auth/callback`;
 
-    // Store redirect URL in cookie if provided
+    // Store redirect URL in cookie if provided. We validate same-origin here
+    // (and again on read in /api/auth/callback) to prevent open-redirect via a
+    // crafted /api/auth/apple?redirect=https://evil.com/... URL.
     const { searchParams } = new URL(req.url);
-    const redirectTo = searchParams.get("redirect");
+    const rawRedirect = searchParams.get("redirect");
+    const validated = safeRedirectPath(rawRedirect);
+    const redirectTo = rawRedirect && validated === rawRedirect ? validated : null;
 
     const response = await oauth({
       provider: "AppleOAuth",
@@ -28,7 +33,9 @@ export async function GET(req: NextRequest) {
 
     const redirectResponse = NextResponse.redirect(response.authorization_url);
 
-    // Set redirect cookie if provided (expires in 10 minutes)
+    // Always clear any stale auth_redirect from a previous (possibly
+    // cancelled) OAuth attempt before conditionally setting a fresh one.
+    redirectResponse.cookies.delete("auth_redirect");
     if (redirectTo) {
       redirectResponse.cookies.set("auth_redirect", redirectTo, {
         httpOnly: true,
@@ -43,11 +50,13 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error("[AUTH] Apple OAuth initiate failed:", error);
 
-    // Redirect to signin page with error (use request origin)
+    // Redirect to signin with a stable error code; /signin maps the code
+    // to fixed copy via mapSigninError(). We don't pass user-facing
+    // strings through the URL — a crafted ?message=… would otherwise let
+    // an attacker phish via copy on our own domain.
     const { origin } = new URL(req.url);
     const errorUrl = new URL("/signin", origin);
     errorUrl.searchParams.set("error", "oauth_failed");
-    errorUrl.searchParams.set("message", "Failed to start Apple sign in. Please try again.");
 
     return NextResponse.redirect(errorUrl.toString());
   }

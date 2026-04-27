@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { oauthCallback } from '@/core/api/auth/oauth/services'
 import { setAuthCookies } from '@/lib/auth'
-import { ApiError } from '@/core/api/client'
+import { safeRedirectPath } from '@/lib/auth-redirect'
 
 /**
  * OAuth callback route handler
@@ -17,9 +17,14 @@ export async function GET(req: NextRequest) {
     const state = searchParams.get('state')
 
     if (!code) {
-        return NextResponse.redirect(
+        // The auth_redirect cookie is single-use intent; if we're not going
+        // to consume it (no auth happened), clear it so a later OAuth attempt
+        // does not pick up a stale value.
+        const errResponse = NextResponse.redirect(
             new URL('/signin?error=missing_code', req.url)
         )
+        errResponse.cookies.delete('auth_redirect')
+        return errResponse
     }
 
     try {
@@ -32,16 +37,16 @@ export async function GET(req: NextRequest) {
         // Set authentication cookies
         await setAuthCookies(authResponse)
 
-        // Check for redirect cookie (set when user started OAuth from a specific page)
+        // Check for redirect cookie (set by the initiate routes). The initiate
+        // routes already validate same-origin before setting it, but we
+        // re-validate here as defense-in-depth in case the cookie is ever set
+        // by another path or tampered with.
         const cookieStore = await cookies()
-        const redirectTo = cookieStore.get('auth_redirect')?.value
-
-        // Create redirect response
-        const redirectUrl = redirectTo || '/dashboard'
+        const rawRedirect = cookieStore.get('auth_redirect')?.value
+        const redirectUrl = safeRedirectPath(rawRedirect)
         const response = NextResponse.redirect(new URL(redirectUrl, req.url))
 
-        // Clear the redirect cookie
-        if (redirectTo) {
+        if (rawRedirect) {
             response.cookies.delete('auth_redirect')
         }
 
@@ -49,32 +54,15 @@ export async function GET(req: NextRequest) {
     } catch (error) {
         console.error('[AUTH] OAuth callback failed:', error)
 
-        // Extract error message
-        let errorMessage = 'Failed to complete OAuth authentication. Please try again.'
-
-        if (error instanceof Error) {
-            errorMessage = error.message
-
-            // Use instanceof for type-safe ApiError detection
-            if (error instanceof ApiError) {
-                // Provide more specific error messages based on status
-                if (error.status === 400) {
-                    errorMessage = 'Invalid authorization code. Please try signing in again.'
-                } else if (error.status === 401) {
-                    errorMessage = 'Authentication failed. Please try signing in again.'
-                } else if (error.status >= 500) {
-                    errorMessage = 'Server error occurred. Please try again later.'
-                } else {
-                    errorMessage = error.message || errorMessage
-                }
-            }
-        }
-
-        // Redirect to signin with error message
-        const errorParam = encodeURIComponent(errorMessage)
-        return NextResponse.redirect(
-            new URL(`/signin?error=${errorParam}`, req.url)
+        // Map server error to a stable code. /signin maps codes to fixed
+        // copy via mapSigninError() — we never round-trip arbitrary error
+        // text through the URL so a crafted ?error=… can't phish via copy
+        // on our own domain.
+        const errResponse = NextResponse.redirect(
+            new URL('/signin?error=oauth_failed', req.url)
         )
+        errResponse.cookies.delete('auth_redirect')
+        return errResponse
     }
 }
 

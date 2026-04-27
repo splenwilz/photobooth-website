@@ -27,7 +27,6 @@ export function proxy(request: NextRequest) {
     const protectedRoutes = [
         '/dashboard',
         '/admin',
-        '/templates',
     ]
 
     // Check if route is public

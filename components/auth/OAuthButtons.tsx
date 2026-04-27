@@ -1,46 +1,31 @@
 "use client";
 import { Loader } from "lucide-react";
 import { useState } from "react";
-import { oauthInitiateAction, type OAuthProvider } from "@/core/api/auth/oauth/actions";
+
+type OAuthProvider = "google" | "apple";
 
 interface OAuthButtonsProps {
   disabled?: boolean;
   redirectTo?: string;
 }
 
-export function OAuthButtons({ disabled = false, redirectTo: _redirectTo }: OAuthButtonsProps) {
+export function OAuthButtons({ disabled = false, redirectTo }: OAuthButtonsProps) {
   const [isLoading, setIsLoading] = useState<OAuthProvider | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
-  const handleOAuth = async (provider: OAuthProvider) => {
+  const handleOAuth = (provider: OAuthProvider) => {
     setIsLoading(provider);
-    setError(null);
-
-    try {
-      const result = await oauthInitiateAction(provider);
-
-      if (result.success) {
-        // Redirect to OAuth provider
-        window.location.href = result.authorizationUrl;
-      } else {
-        setError(result.error);
-        setIsLoading(null);
-      }
-    } catch (err) {
-      console.error("[AUTH] OAuth initiate error:", err);
-      setError("Failed to start authentication. Please try again.");
-      setIsLoading(null);
-    }
+    // Hand off to the dedicated initiate route. It validates the redirect
+    // target server-side, stores it in an httpOnly cookie, and forwards the
+    // browser to the provider. After the provider round-trip the callback
+    // route (/api/auth/callback) reads that cookie and redirects there.
+    const params = new URLSearchParams();
+    if (redirectTo) params.set("redirect", redirectTo);
+    const qs = params.toString();
+    window.location.href = `/api/auth/${provider}${qs ? `?${qs}` : ""}`;
   };
 
   return (
     <div className="space-y-4">
-      {error && (
-        <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm text-center">
-          {error}
-        </div>
-      )}
-
       <div className="grid grid-cols-2 gap-4">
         <button
           type="button"

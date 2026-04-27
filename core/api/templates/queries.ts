@@ -15,8 +15,9 @@ import {
   deleteReview,
   downloadTemplate,
   getPurchasedTemplates,
+  getOwnedFrom,
 } from "./services";
-import type { TemplatesQueryParams } from "./types";
+import type { TemplatesQueryParams, ReviewsResponse } from "./types";
 
 export const templateKeys = {
   all: ["templates"] as const,
@@ -32,6 +33,8 @@ export const templateKeys = {
     [...templateKeys.all, "reviews", templateId] as const,
   purchased: (params: { booth_id: string; page?: number; per_page?: number }) =>
     [...templateKeys.all, "purchased", params] as const,
+  ownedFrom: (boothId: string, sortedTemplateIds: readonly number[]) =>
+    [...templateKeys.all, "owned-from", boothId, sortedTemplateIds] as const,
 };
 
 export function useTemplates(params: TemplatesQueryParams = {}) {
@@ -99,10 +102,34 @@ export function useSubmitReview() {
       templateId: number;
       data: { rating: number; title?: string; comment?: string };
     }) => submitReview(templateId, data),
-    onSuccess: (_, { templateId }) => {
-      queryClient.invalidateQueries({
-        queryKey: templateKeys.reviews(templateId),
-      });
+    onSuccess: (newReview, { templateId }) => {
+      // Optimistically prepend the new review to the FIRST page only —
+      // prepending to page 2+ would shove a non-page-2 row to the top
+      // and double-count once page 1 next refetches. The QuickViewModal
+      // currently uses default params (single page), so this matches
+      // today's UI; the predicate makes it safe when pagination ships.
+      // Other pages get the new review when they refetch (their
+      // staleTime is 60s, see useTemplateReviews), or via a manual
+      // invalidation from the caller if instant consistency matters.
+      queryClient.setQueriesData<ReviewsResponse>(
+        {
+          queryKey: templateKeys.reviews(templateId),
+          predicate: (q) => {
+            const params = q.queryKey[3] as { page?: number } | undefined;
+            return !params || params.page === undefined || params.page === 1;
+          },
+        },
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            reviews: [newReview, ...old.reviews],
+            total: old.total + 1,
+          };
+        }
+      );
+      // Detail + list views still need a refetch to pick up the new
+      // review_count / rating_average computed by the backend.
       queryClient.invalidateQueries({
         queryKey: templateKeys.detail(templateId),
       });
@@ -126,10 +153,22 @@ export function useUpdateReview() {
       reviewId: number;
       data: { rating?: number; title?: string; comment?: string };
     }) => updateReview(templateId, reviewId, data),
-    onSuccess: (_, { templateId }) => {
-      queryClient.invalidateQueries({
-        queryKey: templateKeys.reviews(templateId),
-      });
+    onSuccess: (updatedReview, { templateId }) => {
+      // Replace the existing entry in every cached reviews page. The
+      // PATCH response already has populated identity fields, so the
+      // refetch is unnecessary for the reviews list itself.
+      queryClient.setQueriesData<ReviewsResponse>(
+        { queryKey: templateKeys.reviews(templateId) },
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            reviews: old.reviews.map((r) =>
+              r.id === updatedReview.id ? updatedReview : r
+            ),
+          };
+        }
+      );
       queryClient.invalidateQueries({
         queryKey: templateKeys.detail(templateId),
       });
@@ -173,6 +212,33 @@ export function usePurchasedTemplates(
     queryFn: () => getPurchasedTemplates(params),
     enabled: !!params.booth_id,
     staleTime: 60 * 1000,
+  });
+}
+
+/**
+ * Membership check: which of the supplied template_ids has the booth
+ * already purchased? Use this for duplicate-purchase warnings — bounded
+ * by the input list size, not by booth purchase history. The IDs are
+ * sorted for the cache key so reordered carts hit the same entry.
+ *
+ * staleTime is 0 because this hook gates a payment flow — if the user
+ * bought a template in another tab (or via the kiosk), we want the next
+ * Pay-button click to reflect that. Network cost is bounded (cart size).
+ */
+export function useOwnedFrom(params: { booth_id: string; template_ids: number[] }) {
+  // Sort numerically to keep the cache key stable across cart reorderings.
+  const sortedIds = [...params.template_ids].sort((a, b) => a - b);
+  return useQuery({
+    queryKey: templateKeys.ownedFrom(params.booth_id, sortedIds),
+    queryFn: () =>
+      getOwnedFrom({
+        booth_id: params.booth_id,
+        template_ids: sortedIds,
+      }),
+    // Don't fire when there's no booth selected or the cart is empty —
+    // the response would always be `owned_template_ids: []` anyway.
+    enabled: !!params.booth_id && sortedIds.length > 0,
+    staleTime: 0,
   });
 }
 

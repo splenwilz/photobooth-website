@@ -78,6 +78,11 @@ export function useCheckoutSession(
     queryFn: () => getCheckoutSession(sessionId!),
     enabled: !!sessionId && (options?.enabled ?? true),
     staleTime: 0, // Always fetch fresh data for payment status
+    // While the backend is still finalizing the order (Stripe webhook
+    // delayed or in-flight inline fulfillment), keep polling so the
+    // success page transitions on its own without a manual refresh.
+    refetchInterval: (query) =>
+      query.state.data?.fulfillment_status === "pending" ? 2000 : false,
   });
 }
 

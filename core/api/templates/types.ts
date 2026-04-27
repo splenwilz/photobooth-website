@@ -49,35 +49,60 @@ export interface TemplatePhotoArea {
   shape_type: string;
 }
 
-export interface Template {
+/**
+ * Lean shape returned by the catalog list endpoint (`GET /templates`).
+ * The detail endpoints (`/templates/{id}`, `/templates/by-slug/{slug}`)
+ * return the full `Template`, which extends this with the heavy
+ * category/layout objects, file metadata, and audit fields.
+ *
+ * The catalog grid + Quick View modal both render purely from this lean
+ * shape — no detail-endpoint roundtrip needed.
+ */
+export interface TemplateListItem {
   id: number;
-  name: string;
   slug: string;
+  name: string;
   description: string | null;
-  category_id: number;
-  category: TemplateCategory;
-  layout_id: string | null;
-  layout: TemplateLayout | null;
   template_type: TemplateType;
+  price: string;
+  original_price: string | null;
+  tags: string | null;
+  is_new: boolean;
+  rating_average: string;
+  review_count: number;
+  download_count: number;
+  // Nullable on catalog endpoints when the viewer doesn't own the paid
+  // template (anonymous, signed-in non-owner). Always set for free
+  // templates and for owners. Use `download_url != null` as a "viewable
+  // by this user" check; don't rely on it for paid-vs-free (use price).
+  download_url: string | null;
+  preview_url: string;
+  overlay_url: string | null;
+  // Flat references — full nested objects only on the detail response.
+  // All three are nullable to match the backend's `Optional[…]` schema
+  // (a template can theoretically have no category and no layout).
+  category_id: number | null;
+  layout_id: string | null;
+  layout_photo_count: number | null;
+}
+
+/**
+ * Full template returned by the detail endpoints. Adds heavy fields the
+ * catalog grid doesn't need (full nested category/layout, file metadata,
+ * audit timestamps, admin-only flags).
+ */
+export interface Template extends TemplateListItem {
+  category: TemplateCategory | null;
+  layout: TemplateLayout | null;
   status: string;
   is_active: boolean;
   sort_order: number;
-  price: string;
-  original_price: string | null;
   file_size: number;
   file_type: string;
   original_filename: string;
   width: number | null;
   height: number | null;
-  tags: string | null;
   is_featured: boolean;
-  is_new: boolean;
-  download_count: number;
-  rating_average: string;
-  review_count: number;
-  download_url: string;
-  preview_url: string;
-  overlay_url: string | null;
   color_config: unknown;
   created_by: string;
   created_at: string;
@@ -85,7 +110,7 @@ export interface Template {
 }
 
 export interface TemplatesResponse {
-  templates: Template[];
+  templates: TemplateListItem[];
   total: number;
   page: number;
   per_page: number;
@@ -118,7 +143,17 @@ export interface LayoutsResponse {
 export interface TemplateReview {
   id: number;
   template_id: number;
-  user_id: string;
+  // Display name and avatar are populated server-side from a cached
+  // WorkOS lookup (10-min TTL, deduped across reviewers). Both can be
+  // null when the WorkOS user has no name/picture set, or when the
+  // lookup fails — render with neutral fallbacks rather than fabricating
+  // a value. Format: "First L." (privacy-respecting initial-only surname).
+  reviewer_display_name: string | null;
+  reviewer_avatar_url: string | null;
+  // True when the current authenticated viewer authored this review.
+  // Always false for anonymous viewers. Pure UX hint — the backend
+  // enforces ownership on PATCH/DELETE regardless of this flag.
+  is_own_review: boolean;
   rating: number;
   title: string | null;
   comment: string | null;
@@ -155,9 +190,22 @@ export interface PurchasesResponse {
   total_pages: number;
 }
 
-// Cart types (client-side only)
+// Membership-check endpoint: which of these template_ids does the
+// supplied booth already own? Bounded by request size, no pagination.
+// See POST /api/v1/templates/owned-from.
+export interface OwnedFromRequest {
+  booth_id: string;
+  template_ids: number[];
+}
+
+export interface OwnedFromResponse {
+  owned_template_ids: number[];
+}
+
+// Cart types (client-side only). Cart items are sourced from the catalog
+// grid, which only has the lean shape — no detail roundtrip needed.
 export interface CartItem {
-  template: Template;
+  template: TemplateListItem;
   quantity: number;
 }
 

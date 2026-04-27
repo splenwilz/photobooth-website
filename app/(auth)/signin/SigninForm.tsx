@@ -5,8 +5,17 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { signinAction, type SigninActionResult } from "@/core/api/auth/signin/actions";
+import { safeRedirectPath } from "@/lib/auth-redirect";
 
-export function SigninForm({ resetSuccess }: { resetSuccess?: boolean }) {
+export function SigninForm({
+  resetSuccess,
+  redirectTo,
+  initialError,
+}: {
+  resetSuccess?: boolean;
+  redirectTo?: string;
+  initialError?: string;
+}) {
   const router = useRouter();
   const [state, formAction, isPending] = useActionState<SigninActionResult | null, FormData>(
     signinAction,
@@ -31,11 +40,11 @@ export function SigninForm({ resetSuccess }: { resetSuccess?: boolean }) {
         });
         router.push(`/verify-email?${params.toString()}`);
       } else {
-        // No verification needed, redirect to dashboard
-        router.push('/dashboard');
+        // No verification needed, honor the redirect param if it's a same-origin path
+        router.push(safeRedirectPath(redirectTo));
       }
     }
-  }, [state, router]);
+  }, [state, router, redirectTo]);
 
   return (
     <form action={formAction} className="space-y-5">
@@ -46,9 +55,12 @@ export function SigninForm({ resetSuccess }: { resetSuccess?: boolean }) {
         </div>
       )}
 
-      {/* Error Message */}
-      {state && !state.success && (
-        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm">
+      {/* Error Message — from a server-action submit (state) or from a URL
+          parameter set by an upstream OAuth redirect (initialError). The
+          submit-state error wins when both are present so we don't shadow
+          the user's most recent action. */}
+      {state && !state.success ? (
+        <div role="alert" className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm">
           {state.error}
           {state.rateLimited && (
             <p className="mt-1 text-xs opacity-75">
@@ -56,7 +68,11 @@ export function SigninForm({ resetSuccess }: { resetSuccess?: boolean }) {
             </p>
           )}
         </div>
-      )}
+      ) : initialError ? (
+        <div role="alert" className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm">
+          {initialError}
+        </div>
+      ) : null}
 
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">

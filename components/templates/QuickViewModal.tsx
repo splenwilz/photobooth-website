@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Template, TemplateReview } from "@/core/api/templates/types";
+import { TemplateListItem, TemplateReview } from "@/core/api/templates/types";
 import { useCartStore } from "@/stores/cart-store";
 import {
   useTemplateReviews,
@@ -14,9 +14,93 @@ import { ApiError } from "@/core/api/client";
 import { useUser } from "@/hooks/use-user";
 
 interface QuickViewModalProps {
-  template: Template | null;
+  template: TemplateListItem | null;
   isOpen: boolean;
   onClose: () => void;
+}
+
+// Deterministic color palette indexed by review id so the same reviewer
+// keeps the same chip color across renders.
+const AVATAR_COLORS = [
+  "bg-[#069494]",
+  "bg-[#176161]",
+  "bg-[#0EA5E9]",
+  "bg-[#8B5CF6]",
+  "bg-[#F59E0B]",
+  "bg-[#EF4444]",
+  "bg-[#EC4899]",
+  "bg-[#10B981]",
+];
+
+function ReviewerAvatar({
+  name,
+  avatarUrl,
+  seed,
+}: {
+  name: string | null;
+  avatarUrl: string | null;
+  seed: number;
+}) {
+  // Fallback chain: avatar URL → initials chip → generic person icon.
+  // We track image-load failure locally so a 404'd Gravatar / revoked
+  // Google profile picture falls through to initials cleanly.
+  const [imgFailed, setImgFailed] = useState(false);
+  // Defense-in-depth: backend already strips non-HTTP(S) avatar URLs to
+  // null, but we also gate at render time so a future server regression
+  // doesn't reach an <img src> with a `javascript:` / `data:` URL. Note
+  // <img> already won't execute scripts from those schemes — this is
+  // belt-and-braces, not the primary security boundary.
+  const safeAvatarUrl =
+    avatarUrl && /^https?:\/\//i.test(avatarUrl) ? avatarUrl : null;
+  const initials = name
+    ? name
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((part) => part[0] ?? "")
+        .join("")
+        .toUpperCase()
+    : null;
+
+  const showImage = !!safeAvatarUrl && !imgFailed;
+
+  if (showImage) {
+    return (
+      // Plain <img> rather than next/image: avatar URLs come from arbitrary
+      // domains (Gravatar, Google, WorkOS CDN) and aren't worth wiring into
+      // remotePatterns for a 32px circle.
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={safeAvatarUrl}
+        alt=""
+        loading="lazy"
+        referrerPolicy="no-referrer"
+        onError={() => setImgFailed(true)}
+        className="w-8 h-8 rounded-full object-cover shrink-0 bg-slate-200 dark:bg-zinc-800"
+        aria-hidden="true"
+      />
+    );
+  }
+
+  const bg = initials
+    ? AVATAR_COLORS[Math.abs(seed) % AVATAR_COLORS.length]
+    : "bg-slate-400 dark:bg-zinc-600";
+  return (
+    <div
+      className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold shrink-0 ${bg}`}
+      aria-hidden="true"
+    >
+      {initials ?? (
+        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            fillRule="evenodd"
+            d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+            clipRule="evenodd"
+          />
+        </svg>
+      )}
+    </div>
+  );
 }
 
 function StarIcon({ filled, className }: { filled: boolean; className?: string }) {
@@ -133,7 +217,9 @@ export function QuickViewModal({ template, isOpen, onClose }: QuickViewModalProp
   const reviews = reviewsData?.reviews ?? [];
   const reviewCount = reviewsData?.total ?? template.review_count;
 
-  const userReview = user ? reviews.find((r) => r.user_id === user.id) : null;
+  // The current user's own review, if any. Used to hide the
+  // Write-a-Review form once they've already submitted.
+  const userReview = reviews.find((r) => r.is_own_review) ?? null;
 
   const handleAddToCart = () => {
     if (inCart) {
@@ -291,13 +377,6 @@ export function QuickViewModal({ template, isOpen, onClose }: QuickViewModalProp
 
           {/* Details */}
           <div className="p-6 md:p-8">
-            {/* Category */}
-            <div className="mb-2">
-              <span className="text-xs text-[var(--muted)] uppercase tracking-wide">
-                {template.layout?.layout_key?.replace(/-/g, " ") || template.template_type.replace(/_/g, " ")}
-              </span>
-            </div>
-
             {/* Title */}
             <h2 className="text-2xl font-bold text-[var(--foreground)] mb-2">
               {template.name}
@@ -445,8 +524,6 @@ export function QuickViewModal({ template, isOpen, onClose }: QuickViewModalProp
               ) : reviews.length > 0 ? (
                 <div className="space-y-3 max-h-64 overflow-y-auto">
                   {reviews.map((review) => {
-                    const isOwn = user?.id === review.user_id;
-
                     // Inline edit form
                     if (editingReview?.id === review.id) {
                       return (
@@ -537,35 +614,50 @@ export function QuickViewModal({ template, isOpen, onClose }: QuickViewModalProp
                         key={review.id}
                         className="p-4 rounded-xl bg-[var(--card)] border border-[var(--border)]"
                       >
-                        <div className="flex items-center justify-between mb-1">
-                          <div className="flex">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <StarIcon key={star} filled={star <= review.rating} className="w-3.5 h-3.5" />
-                            ))}
+                        <div className="flex items-start gap-3 mb-2">
+                          <ReviewerAvatar
+                            name={review.reviewer_display_name}
+                            avatarUrl={review.reviewer_avatar_url}
+                            seed={review.id}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <p className="text-sm font-medium text-[var(--foreground)] truncate">
+                                {review.reviewer_display_name ?? "Reviewer"}
+                              </p>
+                              {review.is_own_review && (
+                                <span className="text-xs text-[#069494]">Your review</span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <div className="flex">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <StarIcon key={star} filled={star <= review.rating} className="w-3.5 h-3.5" />
+                                ))}
+                              </div>
+                              <span className="text-xs text-[var(--muted)]">
+                                {formatRelativeDate(review.created_at)}
+                              </span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            {isOwn && (
-                              <>
-                                <button
-                                  type="button"
-                                  onClick={() => startEditing(review)}
-                                  className="text-xs text-[#069494] hover:underline"
-                                >
-                                  Edit
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setDeletingReviewId(review.id)}
-                                  className="text-xs text-[#EF4444] hover:underline"
-                                >
-                                  Delete
-                                </button>
-                              </>
-                            )}
-                            <span className="text-xs text-[var(--muted)]">
-                              {formatRelativeDate(review.created_at)}
-                            </span>
-                          </div>
+                          {review.is_own_review && (
+                            <div className="flex items-center gap-2 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => startEditing(review)}
+                                className="text-xs text-[#069494] hover:underline"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeletingReviewId(review.id)}
+                                className="text-xs text-[#EF4444] hover:underline"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          )}
                         </div>
                         {review.title && (
                           <p className="text-sm font-semibold text-[var(--foreground)] mb-1">
@@ -576,9 +668,6 @@ export function QuickViewModal({ template, isOpen, onClose }: QuickViewModalProp
                           <p className="text-sm text-[var(--muted)]">
                             {review.comment}
                           </p>
-                        )}
-                        {isOwn && (
-                          <span className="inline-block mt-1 text-xs text-[#069494]">Your review</span>
                         )}
                       </div>
                     );
@@ -591,7 +680,8 @@ export function QuickViewModal({ template, isOpen, onClose }: QuickViewModalProp
               )}
             </div>
 
-            {/* Write a Review */}
+            {/* Write a Review — hidden once the current user already has
+                a review in the list (detected via is_own_review). */}
             {user && !userReview && (
               <div className="mt-6 pt-6 border-t border-[var(--border)]">
                 <h3 className="text-lg font-semibold text-[var(--foreground)] mb-4">

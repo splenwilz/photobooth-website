@@ -10,11 +10,40 @@ export const metadata: Metadata = {
 };
 
 interface SignInPageProps {
-  searchParams: Promise<{ redirect?: string; reset?: string }>;
+  searchParams: Promise<{
+    redirect?: string;
+    reset?: string;
+    error?: string;
+    message?: string;
+  }>;
+}
+
+/**
+ * Map known error codes from our own redirect sources to fixed copy. We
+ * intentionally do NOT render the user-controlled `message` query param —
+ * a crafted /signin?error=…&message=Click+here+to+restore+your+account
+ * URL would otherwise let an attacker phish via copy on our own domain.
+ * React already escapes HTML; this guards the attack surface in plain
+ * text.
+ */
+function mapSigninError(code: string | undefined): string | undefined {
+  switch (code) {
+    case "oauth_failed":
+      return "Sign in with your provider failed. Please try again.";
+    case "missing_code":
+      return "Sign in didn't complete. Please try again.";
+    case undefined:
+      return undefined;
+    default:
+      // Unknown code — fall back to a generic message so an attacker
+      // can't push tailored copy via ?error=anything.
+      return "We couldn't complete sign in. Please try again.";
+  }
 }
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
-  const { redirect, reset } = await searchParams;
+  const { redirect, reset, error } = await searchParams;
+  const initialError = mapSigninError(error);
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex">
       {/* Left Panel - Decorative */}
@@ -132,7 +161,11 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
           </div>
 
           {/* Form */}
-          <SigninForm resetSuccess={reset === 'success'} />
+          <SigninForm
+            resetSuccess={reset === 'success'}
+            redirectTo={redirect}
+            initialError={initialError}
+          />
 
           {/* Sign Up Link */}
           <p className="text-center text-sm text-[var(--muted)] mt-8">
