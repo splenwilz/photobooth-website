@@ -52,19 +52,29 @@ export function SubscribeBoothModal({
       // checkout/success page can render a personalised confirmation
       // without depending on the post-payment API lookup matching the
       // right plan by stripe_price_id (which has been unreliable).
-      const successParams = new URLSearchParams({
-        session_id: "{CHECKOUT_SESSION_ID}", // Stripe replaces this server-side
+      //
+      // CRITICAL: `{CHECKOUT_SESSION_ID}` must be a *literal* substring
+      // for Stripe to substitute it server-side. URLSearchParams encodes
+      // `{` / `}` to `%7B` / `%7D`, breaking the substitution. Use
+      // string concatenation for the placeholder and only encode the
+      // other params (which may contain spaces / unicode in
+      // booth_name/plan_name).
+      const otherParams = new URLSearchParams({
         type: "subscription",
         booth_id: boothId,
         booth_name: boothName,
         plan_name: plan.name,
         billing: isAnnual && plan.has_annual_option ? "annual" : "monthly",
       });
+      const successUrl =
+        `${window.location.origin}/checkout/success` +
+        `?session_id={CHECKOUT_SESSION_ID}` +
+        `&${otherParams.toString()}`;
 
       // Create checkout session via API
       const result = await createSubscriptionCheckout(boothId, {
         price_id: priceId,
-        success_url: `${window.location.origin}/checkout/success?${successParams.toString()}`,
+        success_url: successUrl,
         cancel_url: `${window.location.origin}/dashboard/booths?canceled=true`,
       });
 
