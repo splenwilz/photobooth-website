@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { oauth } from "@/core/api/auth/oauth/services";
+import { safeRedirectPath } from "@/lib/auth-redirect";
 
 /**
  * GET /api/auth/google
@@ -24,9 +25,15 @@ export async function GET(req: NextRequest) {
       apiBaseUrl: process.env.API_BASE_URL,
     });
 
-    // Store redirect URL in cookie if provided
+    // Store redirect URL in cookie if provided. We validate same-origin here
+    // (and again on read in /api/auth/callback) to prevent open-redirect via a
+    // crafted /api/auth/google?redirect=https://evil.com/... URL.
     const { searchParams } = new URL(req.url);
-    const redirectTo = searchParams.get("redirect");
+    const rawRedirect = searchParams.get("redirect");
+    const validated = safeRedirectPath(rawRedirect);
+    // safeRedirectPath returns the default ("/dashboard") for invalid input —
+    // only persist the cookie when the caller actually supplied a real target.
+    const redirectTo = rawRedirect && validated === rawRedirect ? validated : null;
 
     const response = await oauth({
       provider: "GoogleOAuth",
@@ -39,7 +46,9 @@ export async function GET(req: NextRequest) {
 
     const redirectResponse = NextResponse.redirect(response.authorization_url);
 
-    // Set redirect cookie if provided (expires in 10 minutes)
+    // Always clear any stale auth_redirect from a previous (possibly
+    // cancelled) OAuth attempt before conditionally setting a fresh one.
+    redirectResponse.cookies.delete("auth_redirect");
     if (redirectTo) {
       redirectResponse.cookies.set("auth_redirect", redirectTo, {
         httpOnly: true,
@@ -59,12 +68,24 @@ export async function GET(req: NextRequest) {
       fullError: error,
     });
 
-    // Redirect to signin page with error (use request origin)
-    const { origin } = new URL(req.url);
-    const errorUrl = new URL("/signin", origin);
+    // Redirect to signin with a stable error code; /signin maps the code
+    // to fixed copy via mapSigninError(). We don't pass user-facing
+    // strings through the URL — a crafted ?message=… would otherwise let
+    // an attacker phish via copy on our own domain. The validated
+    // redirect (if any) is forwarded so the user can retry without
+    // losing their original destination.
+    const { origin: errOrigin, searchParams: errSearchParams } = new URL(req.url);
+    const errorUrl = new URL("/signin", errOrigin);
     errorUrl.searchParams.set("error", "oauth_failed");
-    errorUrl.searchParams.set("message", "Failed to start Google sign in. Please try again.");
-
-    return NextResponse.redirect(errorUrl.toString());
+    const errRawRedirect = errSearchParams.get("redirect");
+    const errValidated = safeRedirectPath(errRawRedirect);
+    if (errRawRedirect && errValidated === errRawRedirect) {
+      errorUrl.searchParams.set("redirect", errValidated);
+    }
+    const errResponse = NextResponse.redirect(errorUrl.toString());
+    // Clear any stale auth_redirect from a previous attempt — we never
+    // got far enough to set a new one in this attempt.
+    errResponse.cookies.delete("auth_redirect");
+    return errResponse;
   }
 }

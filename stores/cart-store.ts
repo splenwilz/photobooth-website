@@ -1,13 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Template, CartItem } from "@/core/api/templates/types";
+import { TemplateListItem, CartItem } from "@/core/api/templates/types";
 
 interface CartState {
   items: CartItem[];
   isOpen: boolean;
 
   // Actions
-  addItem: (template: Template) => void;
+  addItem: (template: TemplateListItem) => void;
   removeItem: (templateId: number) => void;
   updateQuantity: (templateId: number, quantity: number) => void;
   clearCart: () => void;
@@ -27,7 +27,7 @@ export const useCartStore = create<CartState>()(
       items: [],
       isOpen: false,
 
-      addItem: (template: Template) => {
+      addItem: (template: TemplateListItem) => {
         const { items } = get();
         const existingItem = items.find((item) => item.template.id === template.id);
 

@@ -12,6 +12,8 @@ import type {
   TemplateReview,
   ReviewsResponse,
   PurchasesResponse,
+  OwnedFromRequest,
+  OwnedFromResponse,
 } from "./types";
 
 const BASE = "/api/v1/templates";
@@ -69,8 +71,8 @@ export async function getTemplateReviews(
 export async function submitReview(
   templateId: number,
   data: { rating: number; title?: string; comment?: string }
-): Promise<void> {
-  return apiClient(`${BASE}/${templateId}/reviews`, {
+): Promise<TemplateReview> {
+  return apiClient<TemplateReview>(`${BASE}/${templateId}/reviews`, {
     method: "POST",
     body: JSON.stringify(data),
   });
@@ -104,4 +106,21 @@ export async function getPurchasedTemplates(
 ): Promise<PurchasesResponse> {
   const qs = buildQueryString(params);
   return apiClient<PurchasesResponse>(`${BASE}/purchased${qs}`);
+}
+
+/**
+ * Membership check: of the supplied template_ids, which has the booth
+ * already purchased? Bounded by request size — no pagination, single
+ * indexed query server-side.
+ *
+ * Use this for the duplicate-purchase warning in cart/checkout flows
+ * rather than fetching the full purchase list.
+ */
+export async function getOwnedFrom(
+  body: OwnedFromRequest
+): Promise<OwnedFromResponse> {
+  return apiClient<OwnedFromResponse>(`${BASE}/owned-from`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
 }

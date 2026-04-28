@@ -7,7 +7,7 @@
  * Includes sub-tabs for Templates, Categories, and Layouts management.
  */
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, type InputHTMLAttributes } from "react";
 import Image from "next/image";
 import {
   useAdminTemplates,
@@ -39,6 +39,13 @@ import type {
   AdminLayoutsResponse,
   AdminShapeType,
 } from "@/core/api/templates/admin-types";
+import {
+  SHAPE_TYPES,
+  serializeLayoutForClipboard,
+  parseLayoutFromClipboard,
+  newDraftId,
+  type PhotoAreaFormData,
+} from "./layout-clipboard";
 
 // ============================================================================
 // TYPES
@@ -71,17 +78,6 @@ interface CategoryFormData {
   season_start_date: string;
   season_end_date: string;
   seasonal_priority: number;
-}
-
-interface PhotoAreaFormData {
-  photo_index: number;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  rotation: number;
-  border_radius: number;
-  shape_type: AdminShapeType;
 }
 
 interface LayoutFormData {
@@ -155,8 +151,6 @@ const PRODUCT_CATEGORIES = [
   { id: 3, name: "Smartphone" },
 ];
 
-const SHAPE_TYPES: AdminShapeType[] = ["rectangle", "rounded_rectangle", "circle", "heart", "petal"];
-
 // ============================================================================
 // UTILITIES
 // ============================================================================
@@ -176,6 +170,67 @@ function formatFileSize(bytes: number): string {
   const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+}
+
+// ============================================================================
+// COMPONENTS
+// ============================================================================
+
+type NumberInputProps = Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  "value" | "onChange" | "type"
+> & {
+  value: number;
+  onChange: (n: number) => void;
+  float?: boolean;
+  emptyValue?: number;
+};
+
+function NumberInput({ value, onChange, float, emptyValue = 0, ...rest }: NumberInputProps) {
+  const [text, setText] = useState(() => String(value));
+  const [lastCommitted, setLastCommitted] = useState(value);
+
+  // Re-sync local string when parent resets value externally (form reset, edit-mode load).
+  // Object.is treats NaN === NaN and -0 !== 0, which matches React's own bail-out semantics.
+  if (!Object.is(value, lastCommitted)) {
+    setLastCommitted(value);
+    setText(String(value));
+  }
+
+  // In float mode default step="any" so the browser doesn't reject typed
+  // decimals (`<input type="number">` defaults to step=1 which fails
+  // validation for "1.5"). Caller-supplied step still wins via {...rest}.
+  const stepFromFloat: InputHTMLAttributes<HTMLInputElement>["step"] =
+    float ? "any" : undefined;
+
+  return (
+    <input
+      type="number"
+      step={stepFromFloat}
+      value={text}
+      onChange={(e) => {
+        const v = e.target.value;
+        if (v === "" || v === "-") {
+          setText(v);
+          setLastCommitted(emptyValue);
+          onChange(emptyValue);
+          return;
+        }
+        const n = float ? parseFloat(v) : parseInt(v, 10);
+        if (Number.isNaN(n)) {
+          setText(v);
+          return;
+        }
+        // In integer mode, snap the displayed text to the truncated integer
+        // so the user does not see "1.5" while we silently commit 1.
+        const snapped = !float && String(n) !== v ? String(n) : v;
+        setText(snapped);
+        setLastCommitted(n);
+        onChange(n);
+      }}
+      {...rest}
+    />
+  );
 }
 
 // ============================================================================
@@ -231,6 +286,9 @@ export default function AdminTemplatesPage() {
   const [photoAreaForm, setPhotoAreaForm] = useState<PhotoAreaFormData>(defaultPhotoArea);
   const [editingPhotoArea, setEditingPhotoArea] = useState<{ layoutId: string; photoAreaId: number } | null>(null);
   const [deletePhotoAreaConfirm, setDeletePhotoAreaConfirm] = useState<{ layoutId: string; photoAreaId: number } | null>(null);
+  const [copiedLayoutId, setCopiedLayoutId] = useState<string | null>(null);
+  const [copyErrorMessage, setCopyErrorMessage] = useState<string | null>(null);
+  const [layoutPasteMessage, setLayoutPasteMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Sync result state
   const [syncResult, setSyncResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -277,7 +335,6 @@ export default function AdminTemplatesPage() {
 
   // Reset page when filters change
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset pagination on filter change
     setPage(1);
   }, [filterCategory, filterStatus, filterTemplateType]);
 
@@ -617,7 +674,79 @@ export default function AdminTemplatesPage() {
   const openCreateLayoutModal = () => {
     setEditingLayoutId(null);
     setLayoutFormData(defaultLayoutFormData);
+    setLayoutPasteMessage(null);
     setIsLayoutModalOpen(true);
+  };
+
+  const handleCopyLayout = async (layout: (typeof layouts)[0]) => {
+    try {
+      if (!navigator.clipboard?.writeText) {
+        throw new Error("Clipboard API is unavailable. This page must run on HTTPS or localhost.");
+      }
+      const json = serializeLayoutForClipboard(layout);
+      await navigator.clipboard.writeText(json);
+      setCopyErrorMessage(null);
+      setCopiedLayoutId(layout.id);
+      setTimeout(() => {
+        setCopiedLayoutId((prev) => (prev === layout.id ? null : prev));
+      }, 2000);
+    } catch (error) {
+      console.error("Failed to copy layout:", error);
+      const text = error instanceof Error ? error.message : "Failed to copy layout to clipboard.";
+      setCopyErrorMessage(text);
+      setTimeout(() => {
+        setCopyErrorMessage((prev) => (prev === text ? null : prev));
+      }, 5000);
+    }
+  };
+
+  const handlePasteLayout = async () => {
+    try {
+      // Match handleCopyLayout's pre-flight guard so we surface a
+      // specific message instead of a TypeError on browsers / dev
+      // origins where the Clipboard API isn't available.
+      if (!navigator.clipboard?.readText) {
+        throw new Error(
+          "Clipboard API is unavailable. This page must run on HTTPS or localhost."
+        );
+      }
+      const text = await navigator.clipboard.readText();
+      const parsed = parseLayoutFromClipboard(text);
+      setLayoutFormData({
+        layout_key: parsed.layout_key,
+        name: parsed.name,
+        description: parsed.description,
+        width: parsed.width,
+        height: parsed.height,
+        photo_count: parsed.photo_areas.length,
+        product_category_id: parsed.product_category_id,
+        is_active: parsed.is_active,
+        sort_order: parsed.sort_order,
+        photo_areas: parsed.photo_areas,
+      });
+      const areaCount = parsed.photo_areas.length;
+      setLayoutPasteMessage({
+        type: "success",
+        text: `Pasted layout with ${areaCount} photo area${areaCount === 1 ? "" : "s"}.${parsed.layout_key ? " Layout key was copied — change it if you want a new layout in the same environment." : ""}`,
+      });
+    } catch (error) {
+      console.error("Failed to paste layout:", error);
+      // Permission-denied is the most common clipboard.readText failure
+      // (browser sandbox or a denied permission prompt). Tell the user
+      // exactly what to do instead of surfacing the cryptic
+      // "NotAllowedError" name.
+      const isPermissionError =
+        error instanceof Error &&
+        (error.name === "NotAllowedError" || /not allowed/i.test(error.message));
+      setLayoutPasteMessage({
+        type: "error",
+        text: isPermissionError
+          ? "Clipboard access was blocked. Allow clipboard access for this site in your browser settings and try again."
+          : error instanceof Error
+            ? error.message
+            : "Failed to read clipboard.",
+      });
+    }
   };
 
   const openEditLayoutModal = (layout: (typeof layouts)[0]) => {
@@ -1335,6 +1464,28 @@ export default function AdminTemplatesPage() {
 
       {activeTab === "layouts" && (
         <>
+          {copyErrorMessage && (
+            <div
+              role="alert"
+              aria-live="assertive"
+              className="fixed top-6 right-6 z-50 max-w-sm px-4 py-3 rounded-lg shadow-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm flex items-start gap-2"
+            >
+              <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <span className="flex-1">{copyErrorMessage}</span>
+              <button
+                type="button"
+                onClick={() => setCopyErrorMessage(null)}
+                className="text-red-500 hover:text-red-700 dark:hover:text-red-200"
+                aria-label="Dismiss"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          )}
           {/* Layouts Header Actions */}
           <div className="flex items-center justify-between">
             <div className="flex gap-2">
@@ -1441,6 +1592,30 @@ export default function AdminTemplatesPage() {
                         {layout.is_active ? "Active" : "Inactive"}
                       </span>
                       <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleCopyLayout(layout)}
+                          title="Copy layout as JSON"
+                          aria-label="Copy layout as JSON"
+                          className={`p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 ${
+                            copiedLayoutId === layout.id
+                              ? "text-[#069494]"
+                              : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+                          }`}
+                        >
+                          {copiedLayoutId === layout.id ? (
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          ) : (
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h4a2 2 0 002-2M8 5a2 2 0 012-2h4a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
+                              />
+                            </svg>
+                          )}
+                        </button>
                         <button
                           onClick={() => openEditLayoutModal(layout)}
                           className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
@@ -1977,11 +2152,10 @@ export default function AdminTemplatesPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">Sort Order</label>
-                  <input
-                    type="number"
-                    min="0"
+                  <NumberInput
+                    min={0}
                     value={templateFormData.sort_order}
-                    onChange={(e) => setTemplateFormData((prev) => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))}
+                    onChange={(n) => setTemplateFormData((prev) => ({ ...prev, sort_order: n }))}
                     className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
                     placeholder="0"
                   />
@@ -2134,21 +2308,17 @@ export default function AdminTemplatesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Sort Order</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     value={categoryFormData.sort_order}
-                    onChange={(e) => setCategoryFormData({ ...categoryFormData, sort_order: parseInt(e.target.value) || 0 })}
+                    onChange={(n) => setCategoryFormData({ ...categoryFormData, sort_order: n })}
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Priority</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     value={categoryFormData.seasonal_priority}
-                    onChange={(e) =>
-                      setCategoryFormData({ ...categoryFormData, seasonal_priority: parseInt(e.target.value) || 0 })
-                    }
+                    onChange={(n) => setCategoryFormData({ ...categoryFormData, seasonal_priority: n })}
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
                   />
                 </div>
@@ -2265,9 +2435,41 @@ export default function AdminTemplatesPage() {
           <div className="absolute inset-0 bg-black/60" onClick={() => setIsLayoutModalOpen(false)} />
           <div className="relative w-full max-w-xl bg-white dark:bg-[#111111] rounded-2xl shadow-xl overflow-hidden max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-slate-200 dark:border-zinc-800 sticky top-0 bg-white dark:bg-[#111111]">
-              <h2 className="text-lg font-bold text-zinc-900 dark:text-white">
-                {editingLayoutId ? "Edit Layout" : "Create Layout"}
-              </h2>
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-lg font-bold text-zinc-900 dark:text-white">
+                  {editingLayoutId ? "Edit Layout" : "Create Layout"}
+                </h2>
+                {!editingLayoutId && (
+                  <button
+                    type="button"
+                    onClick={handlePasteLayout}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800"
+                    title="Fill the form from a copied layout JSON"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                      />
+                    </svg>
+                    Paste from clipboard
+                  </button>
+                )}
+              </div>
+              {layoutPasteMessage && !editingLayoutId && (
+                <div
+                  role="alert"
+                  aria-live={layoutPasteMessage.type === "error" ? "assertive" : "polite"}
+                  className={`mt-3 px-3 py-2 rounded-lg text-xs ${
+                    layoutPasteMessage.type === "success"
+                      ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400"
+                      : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400"
+                  }`}
+                >
+                  {layoutPasteMessage.text}
+                </div>
+              )}
             </div>
             <form onSubmit={handleSaveLayout} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -2305,20 +2507,18 @@ export default function AdminTemplatesPage() {
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Width (px)</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     value={layoutFormData.width}
-                    onChange={(e) => setLayoutFormData({ ...layoutFormData, width: parseInt(e.target.value) || 0 })}
+                    onChange={(n) => setLayoutFormData({ ...layoutFormData, width: n })}
                     required
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Height (px)</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     value={layoutFormData.height}
-                    onChange={(e) => setLayoutFormData({ ...layoutFormData, height: parseInt(e.target.value) || 0 })}
+                    onChange={(n) => setLayoutFormData({ ...layoutFormData, height: n })}
                     required
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
                   />
@@ -2352,10 +2552,9 @@ export default function AdminTemplatesPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Sort Order</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     value={layoutFormData.sort_order}
-                    onChange={(e) => setLayoutFormData({ ...layoutFormData, sort_order: parseInt(e.target.value) || 0 })}
+                    onChange={(n) => setLayoutFormData({ ...layoutFormData, sort_order: n })}
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
                   />
                 </div>
@@ -2386,7 +2585,7 @@ export default function AdminTemplatesPage() {
                             ...prev,
                             photo_areas: [
                               ...prev.photo_areas,
-                              { ...defaultPhotoArea, photo_index: prev.photo_areas.length + 1 },
+                              { ...defaultPhotoArea, photo_index: prev.photo_areas.length + 1, _draftId: newDraftId() },
                             ],
                           }))
                         }
@@ -2404,7 +2603,13 @@ export default function AdminTemplatesPage() {
                   <div className="space-y-3">
                     {layoutFormData.photo_areas.map((area, idx) => (
                       <div
-                        key={idx}
+                        // Stable per-row key so removing/reordering rows
+                        // doesn't make React rebind a NumberInput's
+                        // local state to the wrong row. Falls back to
+                        // index for any rare row that somehow lacks
+                        // _draftId (defensive — every create path now
+                        // generates one).
+                        key={area._draftId ?? idx}
                         className="p-3 rounded-lg border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-900"
                       >
                         <div className="flex items-center justify-between mb-2">
@@ -2427,16 +2632,15 @@ export default function AdminTemplatesPage() {
                         <div className="grid grid-cols-4 gap-2">
                           <div>
                             <label className="block text-[10px] text-zinc-500 mb-0.5">Index</label>
-                            <input
-                              type="number"
+                            <NumberInput
                               min={1}
-
+                              emptyValue={1}
                               value={area.photo_index}
-                              onChange={(e) =>
+                              onChange={(n) =>
                                 setLayoutFormData((prev) => ({
                                   ...prev,
                                   photo_areas: prev.photo_areas.map((a, i) =>
-                                    i === idx ? { ...a, photo_index: parseInt(e.target.value) || 1 } : a
+                                    i === idx ? { ...a, photo_index: n } : a
                                   ),
                                 }))
                               }
@@ -2466,14 +2670,13 @@ export default function AdminTemplatesPage() {
                           </div>
                           <div>
                             <label className="block text-[10px] text-zinc-500 mb-0.5">X</label>
-                            <input
-                              type="number"
+                            <NumberInput
                               value={area.x}
-                              onChange={(e) =>
+                              onChange={(n) =>
                                 setLayoutFormData((prev) => ({
                                   ...prev,
                                   photo_areas: prev.photo_areas.map((a, i) =>
-                                    i === idx ? { ...a, x: parseInt(e.target.value) || 0 } : a
+                                    i === idx ? { ...a, x: n } : a
                                   ),
                                 }))
                               }
@@ -2482,14 +2685,13 @@ export default function AdminTemplatesPage() {
                           </div>
                           <div>
                             <label className="block text-[10px] text-zinc-500 mb-0.5">Y</label>
-                            <input
-                              type="number"
+                            <NumberInput
                               value={area.y}
-                              onChange={(e) =>
+                              onChange={(n) =>
                                 setLayoutFormData((prev) => ({
                                   ...prev,
                                   photo_areas: prev.photo_areas.map((a, i) =>
-                                    i === idx ? { ...a, y: parseInt(e.target.value) || 0 } : a
+                                    i === idx ? { ...a, y: n } : a
                                   ),
                                 }))
                               }
@@ -2498,14 +2700,13 @@ export default function AdminTemplatesPage() {
                           </div>
                           <div>
                             <label className="block text-[10px] text-zinc-500 mb-0.5">Width</label>
-                            <input
-                              type="number"
+                            <NumberInput
                               value={area.width}
-                              onChange={(e) =>
+                              onChange={(n) =>
                                 setLayoutFormData((prev) => ({
                                   ...prev,
                                   photo_areas: prev.photo_areas.map((a, i) =>
-                                    i === idx ? { ...a, width: parseInt(e.target.value) || 0 } : a
+                                    i === idx ? { ...a, width: n } : a
                                   ),
                                 }))
                               }
@@ -2514,14 +2715,13 @@ export default function AdminTemplatesPage() {
                           </div>
                           <div>
                             <label className="block text-[10px] text-zinc-500 mb-0.5">Height</label>
-                            <input
-                              type="number"
+                            <NumberInput
                               value={area.height}
-                              onChange={(e) =>
+                              onChange={(n) =>
                                 setLayoutFormData((prev) => ({
                                   ...prev,
                                   photo_areas: prev.photo_areas.map((a, i) =>
-                                    i === idx ? { ...a, height: parseInt(e.target.value) || 0 } : a
+                                    i === idx ? { ...a, height: n } : a
                                   ),
                                 }))
                               }
@@ -2530,14 +2730,14 @@ export default function AdminTemplatesPage() {
                           </div>
                           <div>
                             <label className="block text-[10px] text-zinc-500 mb-0.5">Rotation</label>
-                            <input
-                              type="number"
+                            <NumberInput
+                              float
                               value={area.rotation}
-                              onChange={(e) =>
+                              onChange={(n) =>
                                 setLayoutFormData((prev) => ({
                                   ...prev,
                                   photo_areas: prev.photo_areas.map((a, i) =>
-                                    i === idx ? { ...a, rotation: parseFloat(e.target.value) || 0 } : a
+                                    i === idx ? { ...a, rotation: n } : a
                                   ),
                                 }))
                               }
@@ -2546,14 +2746,13 @@ export default function AdminTemplatesPage() {
                           </div>
                           <div>
                             <label className="block text-[10px] text-zinc-500 mb-0.5">Radius</label>
-                            <input
-                              type="number"
+                            <NumberInput
                               value={area.border_radius}
-                              onChange={(e) =>
+                              onChange={(n) =>
                                 setLayoutFormData((prev) => ({
                                   ...prev,
                                   photo_areas: prev.photo_areas.map((a, i) =>
-                                    i === idx ? { ...a, border_radius: parseInt(e.target.value) || 0 } : a
+                                    i === idx ? { ...a, border_radius: n } : a
                                   ),
                                 }))
                               }
@@ -2599,12 +2798,11 @@ export default function AdminTemplatesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Photo Index</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     value={photoAreaForm.photo_index}
-                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, photo_index: parseInt(e.target.value) || 1 })}
+                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, photo_index: n })}
                     min={1}
-
+                    emptyValue={1}
                     required
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
                   />
@@ -2627,20 +2825,18 @@ export default function AdminTemplatesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">X Position</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     value={photoAreaForm.x}
-                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, x: parseInt(e.target.value) || 0 })}
+                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, x: n })}
                     required
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Y Position</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     value={photoAreaForm.y}
-                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, y: parseInt(e.target.value) || 0 })}
+                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, y: n })}
                     required
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
                   />
@@ -2649,20 +2845,18 @@ export default function AdminTemplatesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Width</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     value={photoAreaForm.width}
-                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, width: parseInt(e.target.value) || 0 })}
+                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, width: n })}
                     required
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Height</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     value={photoAreaForm.height}
-                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, height: parseInt(e.target.value) || 0 })}
+                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, height: n })}
                     required
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
                   />
@@ -2671,19 +2865,18 @@ export default function AdminTemplatesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Rotation (°)</label>
-                  <input
-                    type="number"
+                  <NumberInput
+                    float
                     value={photoAreaForm.rotation}
-                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, rotation: parseFloat(e.target.value) || 0 })}
+                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, rotation: n })}
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Border Radius</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     value={photoAreaForm.border_radius}
-                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, border_radius: parseInt(e.target.value) || 0 })}
+                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, border_radius: n })}
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
                   />
                 </div>
@@ -2721,12 +2914,11 @@ export default function AdminTemplatesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Photo Index</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     value={photoAreaForm.photo_index}
-                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, photo_index: parseInt(e.target.value) || 1 })}
+                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, photo_index: n })}
                     min={1}
-
+                    emptyValue={1}
                     required
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
                   />
@@ -2749,20 +2941,18 @@ export default function AdminTemplatesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">X Position</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     value={photoAreaForm.x}
-                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, x: parseInt(e.target.value) || 0 })}
+                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, x: n })}
                     required
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Y Position</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     value={photoAreaForm.y}
-                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, y: parseInt(e.target.value) || 0 })}
+                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, y: n })}
                     required
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
                   />
@@ -2771,20 +2961,18 @@ export default function AdminTemplatesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Width</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     value={photoAreaForm.width}
-                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, width: parseInt(e.target.value) || 0 })}
+                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, width: n })}
                     required
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Height</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     value={photoAreaForm.height}
-                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, height: parseInt(e.target.value) || 0 })}
+                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, height: n })}
                     required
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
                   />
@@ -2793,19 +2981,18 @@ export default function AdminTemplatesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Rotation (°)</label>
-                  <input
-                    type="number"
+                  <NumberInput
+                    float
                     value={photoAreaForm.rotation}
-                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, rotation: parseFloat(e.target.value) || 0 })}
+                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, rotation: n })}
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Border Radius</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     value={photoAreaForm.border_radius}
-                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, border_radius: parseInt(e.target.value) || 0 })}
+                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, border_radius: n })}
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
                   />
                 </div>

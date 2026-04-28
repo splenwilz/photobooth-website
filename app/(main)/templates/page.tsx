@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { TemplateCard } from "@/components/templates/TemplateCard";
 import { CartDrawer } from "@/components/templates/CartDrawer";
 import { QuickViewModal } from "@/components/templates/QuickViewModal";
 import { useCartStore } from "@/stores/cart-store";
 import { useTemplates } from "@/core/api/templates/queries";
-import { Template, TemplatesQueryParams } from "@/core/api/templates/types";
+import { TemplateListItem, TemplatesQueryParams } from "@/core/api/templates/types";
 
 type TemplateType = "strip" | "photo_4x6";
 type FilterTab = "all" | "featured" | "new" | "free";
@@ -31,7 +31,7 @@ export default function TemplatesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [quickViewTemplate, setQuickViewTemplate] = useState<Template | null>(null);
+  const [quickViewTemplate, setQuickViewTemplate] = useState<TemplateListItem | null>(null);
 
   const { openCart, getItemCount } = useCartStore();
   const [mounted, setMounted] = useState(false);
@@ -419,8 +419,13 @@ export default function TemplatesPage() {
         </div>
       </section>
 
-      {/* Cart Drawer */}
-      <CartDrawer />
+      {/* Cart Drawer — Suspense boundary required because CartDrawer
+          uses useSearchParams() (for the ?openCheckout=1 resume flow).
+          Without it, the whole /templates page bails out of static
+          prerendering at build time. */}
+      <Suspense fallback={null}>
+        <CartDrawer />
+      </Suspense>
 
       {/* Quick View Modal */}
       <QuickViewModal

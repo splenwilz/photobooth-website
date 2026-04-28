@@ -6,6 +6,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { useCheckoutSession, getBoothSubscription } from "@/core/api/payments";
 import type { BoothSubscriptionItem } from "@/core/api/payments";
 import { usePricingPlans } from "@/core/api/pricing";
+import { useCartStore } from "@/stores/cart-store";
 
 /**
  * Checkout success page.
@@ -47,16 +48,88 @@ function CheckoutSuccessContent() {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const hasAttemptedRedirect = useRef(false);
 
-  // Fetch checkout session to verify payment
+  // Pending-too-long state lives BEFORE the hook so we can pass
+  // `enabled: !pendingTooLong` and stop the 2-s poll once we've given up.
+  // The effect that drives `pendingSince` is declared further down — it
+  // reads session data, but effect-declaration order is independent of
+  // hook-call order; only state declarations need to come up here.
+  const [pendingSince, setPendingSince] = useState<
+    { sessionId: string; startedAt: number } | null
+  >(null);
+  const [now, setNow] = useState(() => Date.now());
+  const PENDING_GRACE_MS = 90_000;
+  const pendingTooLong =
+    pendingSince !== null &&
+    pendingSince.sessionId === sessionId &&
+    now - pendingSince.startedAt > PENDING_GRACE_MS;
+
+  // Fetch checkout session to verify payment. The hook polls automatically
+  // while fulfillment_status === "pending" — see queries.ts. Once the
+  // 90-s grace window expires we disable the hook so polling truly stops
+  // (otherwise it would keep firing every 2 s in the background even
+  // after we've rendered the failed view).
   const {
     data: session,
     isLoading: sessionLoading,
     isError: sessionError,
-  } = useCheckoutSession(sessionId);
+    refetch: refetchSession,
+    isFetching: sessionFetching,
+  } = useCheckoutSession(sessionId, { enabled: !pendingTooLong });
 
   // Fetch pricing plans for subscription feature details
   const { data: plansData } = usePricingPlans();
   const plans = plansData?.plans ?? [];
+
+  // Clear the cart only once fulfillment is confirmed by the backend, not
+  // when the user clicked "Pay" (the previous CheckoutModal logic). That
+  // way a Stripe-side cancellation leaves the cart intact. We track the
+  // last-cleared session id rather than a boolean so a second purchase
+  // that lands on the same Next.js page instance (no remount) still
+  // clears its own cart instead of skipping the second clear.
+  const clearCart = useCartStore((s) => s.clearCart);
+  const lastClearedSessionIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (
+      checkoutType === "templates" &&
+      session?.fulfillment_status === "completed" &&
+      sessionId &&
+      lastClearedSessionIdRef.current !== sessionId
+    ) {
+      lastClearedSessionIdRef.current = sessionId;
+      clearCart();
+    }
+  }, [checkoutType, session?.fulfillment_status, sessionId, clearCart]);
+
+  // Drive the pendingSince state declared above. Effect-declaration order
+  // is independent of state-declaration order; the state lives at the
+  // top so the hook above can gate `enabled` on `pendingTooLong`.
+  //
+  // pendingSince is in the deps because the Try-again handler resets it
+  // to null while status is still "pending" — without it in the deps
+  // the effect wouldn't re-run and the timer would never restart. The
+  // inner null/different-session check makes the setter idempotent so
+  // the effect doesn't loop on its own state changes.
+  useEffect(() => {
+    if (session?.fulfillment_status === "pending" && sessionId) {
+      if (pendingSince === null || pendingSince.sessionId !== sessionId) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot pending-start tag tied to session id
+        setPendingSince({ sessionId, startedAt: Date.now() });
+      }
+      return;
+    }
+    if (pendingSince !== null) setPendingSince(null);
+  }, [session?.fulfillment_status, sessionId, pendingSince]);
+
+  // Tick `now` every 5 s while we're still inside the grace window so
+  // `pendingTooLong` recomputes and the failed view appears once the
+  // threshold trips. Once pendingTooLong is true (or we leave the
+  // pending state), the interval is cleared — previously it kept firing
+  // after we'd given up, harmlessly thrashing setNow forever.
+  useEffect(() => {
+    if (session?.fulfillment_status !== "pending" || pendingTooLong) return;
+    const tick = setInterval(() => setNow(Date.now()), 5000);
+    return () => clearInterval(tick);
+  }, [session?.fulfillment_status, pendingTooLong]);
 
   // Fetch booth subscription details after payment is confirmed
   useEffect(() => {
@@ -78,6 +151,18 @@ function CheckoutSuccessContent() {
     }
   }, [checkoutType, boothId, session, hasAttemptedBoothFetch]);
 
+  // Reset the deeplink-attempt flags whenever the session changes (e.g.,
+  // browser-back from one success URL to a different one within the same
+  // component instance). Without this, hasAttemptedRedirect.current
+  // would still be `true` from the previous session and the redirect
+  // wouldn't fire for the new one.
+  useEffect(() => {
+    hasAttemptedRedirect.current = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset stale per-session flags
+    setIsRedirecting(false);
+    setShowAppButton(false);
+  }, [sessionId]);
+
   // Mobile detection and app redirect for templates/subscription purchases
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -86,10 +171,20 @@ function CheckoutSuccessContent() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- detect device on mount
     setIsMobileUser(isMobile);
 
+    // For templates, also require fulfillment_status === "completed" so we
+    // don't deeplink the user into the app while their purchases are still
+    // in flight on the backend. Subscriptions have fulfillment_status =
+    // "not_applicable" and only need payment_status === "paid".
+    const fulfilled =
+      checkoutType === "templates"
+        ? session?.fulfillment_status === "completed"
+        : true;
+
     // Guard against duplicate redirect attempts (e.g., from React Query refetch)
     if (
       isMobile &&
       session?.payment_status === "paid" &&
+      fulfilled &&
       sessionId &&
       !hasAttemptedRedirect.current
     ) {
@@ -182,6 +277,92 @@ function CheckoutSuccessContent() {
         </div>
       </div>
     );
+  }
+
+  // For template purchases the backend distinguishes "Stripe captured the
+  // money" (payment_status) from "we recorded the purchase, queued the
+  // booth sync, and the user can actually use the templates"
+  // (fulfillment_status). Subscription checkout exposes fulfillment_status
+  // = "not_applicable" and we fall through to the existing flow.
+  if (checkoutType === "templates") {
+    if (session?.fulfillment_status === "failed" || pendingTooLong) {
+      // Some failures are transient (DB hiccup, race against the webhook).
+      // The backend's inline fulfillment is idempotent, so a retry costs
+      // nothing — if it's truly structural the next response will be
+      // "failed" again and we land back here. The session_id is shown
+      // prominently because support needs it to find the failed row.
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-[var(--background)] px-6 py-12">
+          <div className="max-w-md w-full text-center">
+            <div className="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold mb-2">Payment received — but we hit a snag</h1>
+            <p className="text-[var(--muted)] mb-6">
+              Your payment is safe. We couldn&apos;t finish recording the order on our side. Try again below — most snags clear up on retry. If it doesn&apos;t, email support with the order ID and we&apos;ll either finish the order or refund.
+            </p>
+
+            <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 mb-6 text-left">
+              <p className="text-xs uppercase tracking-wider text-[var(--muted)] mb-1">Order ID</p>
+              <p className="font-mono text-sm break-all select-all text-[var(--foreground)]">
+                {session.session_id}
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                type="button"
+                onClick={() => {
+                  // Reset the pending-too-long timer so a retry gets a
+                  // fresh 90-s window rather than instantly bouncing back
+                  // to this view if the response is "pending" again.
+                  setPendingSince(null);
+                  refetchSession();
+                }}
+                disabled={sessionFetching}
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {sessionFetching ? (
+                  <>
+                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Retrying…
+                  </>
+                ) : (
+                  "Try again"
+                )}
+              </button>
+              <Link
+                href="/contact"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-[var(--border)] font-semibold hover:bg-[#069494]/5 hover:border-[#069494]/30 transition-colors"
+              >
+                Email Support
+              </Link>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    if (session?.fulfillment_status !== "completed") {
+      // "pending" — Stripe paid but our state hasn't caught up yet. The
+      // useCheckoutSession hook polls every 2s; this view is the waiting
+      // room and transitions to the success view automatically.
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-[var(--background)] px-6">
+          <div className="max-w-md w-full text-center">
+            <div className="w-16 h-16 border-4 border-[#069494] border-t-transparent rounded-full animate-spin mx-auto mb-6" />
+            <h1 className="text-2xl font-bold mb-2">Finalizing your order…</h1>
+            <p className="text-[var(--muted)]">
+              Your payment was received. We&apos;re recording your templates now — this usually takes a few seconds.
+            </p>
+          </div>
+        </div>
+      );
+    }
   }
 
   // Mobile app redirect view — both subscription and templates checkout

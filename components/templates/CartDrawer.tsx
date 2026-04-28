@@ -1,12 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCartStore } from "@/stores/cart-store";
+import { useUser } from "@/hooks/use-user";
 import { CheckoutModal } from "./CheckoutModal";
 
 export function CartDrawer() {
-  const { items, isOpen, closeCart, removeItem, getSubtotal, getItemCount } = useCartStore();
+  const { items, isOpen, openCart, closeCart, removeItem, getSubtotal, getItemCount } = useCartStore();
+  const { isAuthenticated, isLoading: userLoading } = useUser();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [showCheckout, setShowCheckout] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -14,6 +20,50 @@ export function CartDrawer() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration pattern
     setMounted(true);
   }, []);
+
+  // Resume checkout after a signin redirect: when the URL carries
+  // ?openCheckout=1, auto-open the drawer + checkout modal once the
+  // user state has resolved, and ALWAYS strip the param after our first
+  // decision so a later cart mutation can't accidentally re-trigger the
+  // modal. The one-shot ref is the gate; previously we relied on
+  // items.length to skip stripping during a presumed hydration race,
+  // but that left the param sitting in the URL when the user genuinely
+  // had an empty cart, only to fire later when they added an item.
+  const consumedOpenCheckoutRef = useRef(false);
+  useEffect(() => {
+    if (!mounted || userLoading) return;
+    if (consumedOpenCheckoutRef.current) return;
+    if (searchParams.get("openCheckout") !== "1") return;
+
+    consumedOpenCheckoutRef.current = true;
+
+    if (isAuthenticated && items.length > 0) {
+      openCart();
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot URL → modal open intent
+      setShowCheckout(true);
+    }
+
+    const next = new URLSearchParams(searchParams.toString());
+    next.delete("openCheckout");
+    const qs = next.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [mounted, userLoading, isAuthenticated, items.length, searchParams, pathname, router, openCart]);
+
+  const handleCheckoutClick = () => {
+    // While useUser is still resolving the cookie, treat the click as a no-op
+    // rather than bouncing a signed-in user to /signin.
+    if (userLoading) return;
+    if (!isAuthenticated) {
+      // Preserve any existing query params on the current URL alongside
+      // openCheckout=1 so URL-driven page state survives the round-trip.
+      const next = new URLSearchParams(searchParams.toString());
+      next.set("openCheckout", "1");
+      const target = `${pathname}?${next.toString()}`;
+      router.push(`/signin?redirect=${encodeURIComponent(target)}`);
+      return;
+    }
+    setShowCheckout(true);
+  };
 
   // Prevent body scroll when drawer is open
   useEffect(() => {
@@ -113,12 +163,9 @@ export function CartDrawer() {
 
                   {/* Details */}
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-[var(--foreground)] truncate">
+                    <h4 className="font-semibold text-[var(--foreground)] truncate mb-2">
                       {item.template.name}
                     </h4>
-                    <p className="text-xs text-[var(--muted)] mb-2">
-                      {item.template.layout?.layout_key?.replace(/-/g, " ") || item.template.template_type.replace(/_/g, " ")}
-                    </p>
                     <div className="flex items-center gap-2">
                       {parseFloat(item.template.price) === 0 ? (
                         <span className="text-sm font-bold text-[#10B981]">Free</span>
@@ -166,8 +213,9 @@ export function CartDrawer() {
             {/* Checkout Button */}
             <button
               type="button"
-              onClick={() => setShowCheckout(true)}
-              className="w-full py-3.5 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors flex items-center justify-center gap-2"
+              onClick={handleCheckoutClick}
+              disabled={userLoading}
+              className="w-full py-3.5 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#069494]"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -194,11 +242,14 @@ export function CartDrawer() {
         )}
       </div>
 
-      {/* Checkout Modal */}
-      <CheckoutModal
-        isOpen={showCheckout}
-        onClose={() => setShowCheckout(false)}
-      />
+      {/* Checkout Modal — mount only when opened so the booth fetch
+          inside it does not fire for logged-out visitors browsing /templates. */}
+      {showCheckout && (
+        <CheckoutModal
+          isOpen={showCheckout}
+          onClose={() => setShowCheckout(false)}
+        />
+      )}
     </>
   );
 }

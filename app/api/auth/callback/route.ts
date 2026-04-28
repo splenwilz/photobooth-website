@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { oauthCallback } from '@/core/api/auth/oauth/services'
 import { setAuthCookies } from '@/lib/auth'
-import { ApiError } from '@/core/api/client'
+import { safeRedirectPath } from '@/lib/auth-redirect'
 
 /**
  * OAuth callback route handler
@@ -16,11 +16,29 @@ export async function GET(req: NextRequest) {
     const code = searchParams.get('code')
     const state = searchParams.get('state')
 
-    if (!code) {
-        return NextResponse.redirect(
-            new URL('/signin?error=missing_code', req.url)
-        )
+    // Read (and re-validate) the auth_redirect cookie now so we can
+    // forward it on any error path. Previously we just deleted it on
+    // error, which meant the user lost their original destination after
+    // a cancellation/failure even though they still wanted to land
+    // there after retry.
+    const cookieStore = await cookies()
+    const rawRedirect = cookieStore.get('auth_redirect')?.value
+    const validatedRedirect = safeRedirectPath(rawRedirect)
+    const isResumable = !!rawRedirect && validatedRedirect === rawRedirect
+
+    function signinError(code: string): NextResponse {
+        const url = new URL(`/signin?error=${code}`, req.url)
+        if (isResumable) {
+            url.searchParams.set('redirect', validatedRedirect)
+        }
+        const res = NextResponse.redirect(url)
+        // Cookie is single-use; the redirect is now in the URL where
+        // SigninForm/OAuthButtons will pick it up if the user retries.
+        res.cookies.delete('auth_redirect')
+        return res
     }
+
+    if (!code) return signinError('missing_code')
 
     try {
         // Call OAuth callback service
@@ -32,49 +50,21 @@ export async function GET(req: NextRequest) {
         // Set authentication cookies
         await setAuthCookies(authResponse)
 
-        // Check for redirect cookie (set when user started OAuth from a specific page)
-        const cookieStore = await cookies()
-        const redirectTo = cookieStore.get('auth_redirect')?.value
-
-        // Create redirect response
-        const redirectUrl = redirectTo || '/dashboard'
-        const response = NextResponse.redirect(new URL(redirectUrl, req.url))
-
-        // Clear the redirect cookie
-        if (redirectTo) {
+        // Use the redirect we already validated above (defense-in-depth
+        // against the cookie being set/tampered through another path).
+        const response = NextResponse.redirect(new URL(validatedRedirect, req.url))
+        if (rawRedirect) {
             response.cookies.delete('auth_redirect')
         }
-
         return response
     } catch (error) {
         console.error('[AUTH] OAuth callback failed:', error)
-
-        // Extract error message
-        let errorMessage = 'Failed to complete OAuth authentication. Please try again.'
-
-        if (error instanceof Error) {
-            errorMessage = error.message
-
-            // Use instanceof for type-safe ApiError detection
-            if (error instanceof ApiError) {
-                // Provide more specific error messages based on status
-                if (error.status === 400) {
-                    errorMessage = 'Invalid authorization code. Please try signing in again.'
-                } else if (error.status === 401) {
-                    errorMessage = 'Authentication failed. Please try signing in again.'
-                } else if (error.status >= 500) {
-                    errorMessage = 'Server error occurred. Please try again later.'
-                } else {
-                    errorMessage = error.message || errorMessage
-                }
-            }
-        }
-
-        // Redirect to signin with error message
-        const errorParam = encodeURIComponent(errorMessage)
-        return NextResponse.redirect(
-            new URL(`/signin?error=${errorParam}`, req.url)
-        )
+        // Map server error to a stable code. /signin maps codes to fixed
+        // copy via mapSigninError() — we never round-trip arbitrary error
+        // text through the URL so a crafted ?error=… can't phish via copy
+        // on our own domain. The validated redirect is forwarded so the
+        // user can resume to their original destination after retry.
+        return signinError('oauth_failed')
     }
 }
 
