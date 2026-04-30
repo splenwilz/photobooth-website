@@ -279,90 +279,107 @@ function CheckoutSuccessContent() {
     );
   }
 
-  // For template purchases the backend distinguishes "Stripe captured the
-  // money" (payment_status) from "we recorded the purchase, queued the
-  // booth sync, and the user can actually use the templates"
-  // (fulfillment_status). Subscription checkout exposes fulfillment_status
-  // = "not_applicable" and we fall through to the existing flow.
-  if (checkoutType === "templates") {
-    if (session?.fulfillment_status === "failed" || pendingTooLong) {
-      // Some failures are transient (DB hiccup, race against the webhook).
-      // The backend's inline fulfillment is idempotent, so a retry costs
-      // nothing — if it's truly structural the next response will be
-      // "failed" again and we land back here. The session_id is shown
-      // prominently because support needs it to find the failed row.
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-[var(--background)] px-6 py-12">
-          <div className="max-w-md w-full text-center">
-            <div className="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-6">
-              <svg className="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-            <h1 className="text-2xl font-bold mb-2">Payment received — but we hit a snag</h1>
-            <p className="text-[var(--muted)] mb-6">
-              Your payment is safe. We couldn&apos;t finish recording the order on our side. Try again below — most snags clear up on retry. If it doesn&apos;t, email support with the order ID and we&apos;ll either finish the order or refund.
-            </p>
+  // The backend distinguishes "Stripe captured the money" (payment_status)
+  // from "we finished recording the order on our side" (fulfillment_status).
+  // Both checkout types go through this gate now; "not_applicable" means
+  // the session has no booth-side fulfillment to wait for, so we treat it
+  // the same as "completed" and fall through to the success view.
+  //
+  // Timeout policy differs by type:
+  //   - Templates have NO server-side reconciler backstop — if the user
+  //     bails before fulfillment lands, the order is genuinely stuck and
+  //     they need to retry / contact support.
+  //   - Subscriptions DO have a reconciler that runs every ~10 min, so
+  //     timeout falls through to the success view optimistically; the
+  //     booth detail page will surface the active sub once the reconciler
+  //     ticks.
+  const fulfillmentStatus = session?.fulfillment_status;
+  const isFailed = fulfillmentStatus === "failed";
+  const showFailedOnTimeout = pendingTooLong && checkoutType === "templates";
 
-            <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 mb-6 text-left">
-              <p className="text-xs uppercase tracking-wider text-[var(--muted)] mb-1">Order ID</p>
-              <p className="font-mono text-sm break-all select-all text-[var(--foreground)]">
-                {session.session_id}
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button
-                type="button"
-                onClick={() => {
-                  // Reset the pending-too-long timer so a retry gets a
-                  // fresh 90-s window rather than instantly bouncing back
-                  // to this view if the response is "pending" again.
-                  setPendingSince(null);
-                  refetchSession();
-                }}
-                disabled={sessionFetching}
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {sessionFetching ? (
-                  <>
-                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    Retrying…
-                  </>
-                ) : (
-                  "Try again"
-                )}
-              </button>
-              <Link
-                href="/contact"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-[var(--border)] font-semibold hover:bg-[#069494]/5 hover:border-[#069494]/30 transition-colors"
-              >
-                Email Support
-              </Link>
-            </div>
+  if (isFailed || showFailedOnTimeout) {
+    // Some failures are transient (DB hiccup, race against the webhook).
+    // The backend's inline fulfillment is idempotent, so a retry costs
+    // nothing — if it's truly structural the next response will be
+    // "failed" again and we land back here. The session_id is shown
+    // prominently because support needs it to find the failed row.
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--background)] px-6 py-12">
+        <div className="max-w-md w-full text-center">
+          <div className="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-6">
+            <svg className="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
           </div>
-        </div>
-      );
-    }
-    if (session?.fulfillment_status !== "completed") {
-      // "pending" — Stripe paid but our state hasn't caught up yet. The
-      // useCheckoutSession hook polls every 2s; this view is the waiting
-      // room and transitions to the success view automatically.
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-[var(--background)] px-6">
-          <div className="max-w-md w-full text-center">
-            <div className="w-16 h-16 border-4 border-[#069494] border-t-transparent rounded-full animate-spin mx-auto mb-6" />
-            <h1 className="text-2xl font-bold mb-2">Finalizing your order…</h1>
-            <p className="text-[var(--muted)]">
-              Your payment was received. We&apos;re recording your templates now — this usually takes a few seconds.
+          <h1 className="text-2xl font-bold mb-2">Payment received — but we hit a snag</h1>
+          <p className="text-[var(--muted)] mb-6">
+            Your payment is safe. We couldn&apos;t finish recording the order on our side. Try again below — most snags clear up on retry. If it doesn&apos;t, email support with the order ID and we&apos;ll either finish the order or refund.
+          </p>
+
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 mb-6 text-left">
+            <p className="text-xs uppercase tracking-wider text-[var(--muted)] mb-1">Order ID</p>
+            <p className="font-mono text-sm break-all select-all text-[var(--foreground)]">
+              {session.session_id}
             </p>
           </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              type="button"
+              onClick={() => {
+                // Reset the pending-too-long timer so a retry gets a
+                // fresh 90-s window rather than instantly bouncing back
+                // to this view if the response is "pending" again.
+                setPendingSince(null);
+                refetchSession();
+              }}
+              disabled={sessionFetching}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {sessionFetching ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Retrying…
+                </>
+              ) : (
+                "Try again"
+              )}
+            </button>
+            <Link
+              href="/contact"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-[var(--border)] font-semibold hover:bg-[#069494]/5 hover:border-[#069494]/30 transition-colors"
+            >
+              Email Support
+            </Link>
+          </div>
         </div>
-      );
-    }
+      </div>
+    );
+  }
+  // "pending" — Stripe paid but our state hasn't caught up yet. The
+  // useCheckoutSession hook polls every 2s; this view is the waiting
+  // room and transitions to the success view automatically. Subscription
+  // copy says "activating your subscription"; templates says "recording
+  // your templates"; both reach the same code path. Once pendingTooLong
+  // fires for subscription we fall through optimistically (reconciler).
+  if (fulfillmentStatus === "pending" && !pendingTooLong) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--background)] px-6">
+        <div className="max-w-md w-full text-center">
+          <div className="w-16 h-16 border-4 border-[#069494] border-t-transparent rounded-full animate-spin mx-auto mb-6" />
+          <h1 className="text-2xl font-bold mb-2">Finalizing your order…</h1>
+          <p className="text-[var(--muted)]">
+            Your payment was received.
+            {checkoutType === "subscription"
+              ? " We're activating your subscription now — this usually takes a few seconds."
+              : " We're recording your templates now — this usually takes a few seconds."}
+          </p>
+        </div>
+      </div>
+    );
   }
 
   // Mobile app redirect view — both subscription and templates checkout
