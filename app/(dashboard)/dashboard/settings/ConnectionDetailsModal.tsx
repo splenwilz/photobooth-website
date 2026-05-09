@@ -142,7 +142,9 @@ export function ConnectionDetailsModal({
         type="button"
         aria-label="Close connection details"
         className="absolute inset-0 bg-black/50 backdrop-blur-sm cursor-default"
-        onClick={onClose}
+        onClick={() => {
+          if (!isGeneratingCode) onClose();
+        }}
         tabIndex={-1}
       />
 
@@ -172,7 +174,8 @@ export function ConnectionDetailsModal({
             ref={closeButtonRef}
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+            disabled={isGeneratingCode}
+            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Close"
           >
             <svg

@@ -9,10 +9,30 @@ import {
     clearRateLimit,
     clearAllRateLimits
 } from './rate-limit'
+import { ApiError } from '../../client'
 import type { SigninRequest, EmailVerificationResponse } from './types'
 import type { AuthResponse } from '../types'
 import { setAuthCookies } from '@/lib/auth'
 import { signinPerfLog } from '@/lib/signin-perf'
+
+/**
+ * Map a thrown error to a stable, non-sensitive log key. The user-facing
+ * `errorMessage` is still rendered in the UI alert, but logs and perf
+ * traces should never contain raw backend strings (which can vary, leak
+ * internals, or echo input). Add new branches as new error shapes appear.
+ */
+function classifySigninError(err: unknown): string {
+    if (err instanceof ApiError) {
+        if (err.status === 0) return 'network_error'
+        if (err.status === 401 || err.status === 403) return 'invalid_credentials'
+        if (err.status === 422) return 'validation_error'
+        if (err.status === 429) return 'rate_limited_upstream'
+        if (err.status >= 500) return 'server_error'
+        return `http_${err.status}`
+    }
+    if (err instanceof Error) return 'unknown_error'
+    return 'non_error_thrown'
+}
 
 /**
  * Server action result type for signin
@@ -157,22 +177,26 @@ export async function signinAction(
         // Get updated rate limit status
         const rateLimit = await checkRateLimit(clientId)
 
-        // Handle API errors
+        // Handle API errors. errorMessage is what the user sees in the UI
+        // alert; errorKind is a stable classification that's safe to log.
+        // Never put raw error.message into logs or perf payloads — backend
+        // strings can leak internals or echo input.
         const errorMessage = error instanceof Error
             ? error.message
             : 'Failed to login. Please try again.'
+        const errorKind = classifySigninError(error)
 
         // Log failed signin attempt
         const duration = Date.now() - startTime
         console.error('[AUTH] Failed signin attempt', {
             clientId,
-            error: errorMessage,
+            error_kind: errorKind,
             duration: `${duration}ms`,
             timestamp: new Date().toISOString(),
             remainingAttempts: rateLimit.remaining,
         })
 
-        perf('action_returning_error', { error: errorMessage })
+        perf('action_returning_error', { error_kind: errorKind })
         return {
             success: false,
             error: errorMessage,

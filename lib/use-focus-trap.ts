@@ -45,10 +45,13 @@ export function useFocusTrap<T extends HTMLElement>(
       const focusables = Array.from(
         container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
       ).filter(
-        // querySelectorAll doesn't filter visibility; skip elements that
-        // are hidden via display:none or aria-hidden ancestors. Cheap
-        // approximation: offsetParent === null.
-        (el) => el.offsetParent !== null || el === document.activeElement,
+        // querySelectorAll doesn't filter visibility. Use getClientRects:
+        // returns 0 rects for `display: none` (correctly excluded) but a
+        // non-empty list for visible elements including `position: fixed`,
+        // which has a null `offsetParent` and would be wrongly dropped by
+        // an offsetParent-based check.
+        (el) =>
+          el === document.activeElement || el.getClientRects().length > 0,
       );
 
       if (focusables.length === 0) {

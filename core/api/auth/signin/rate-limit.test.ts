@@ -190,11 +190,21 @@ describe('rate-limit: clear functions', () => {
         mockRedis.keys.mockResolvedValue(['rate_limit:signin:1', 'rate_limit:signin:2'])
         const mod = await import('./rate-limit')
 
-        // Seed the memory store with one entry by failing Redis once
-        // before triggering clearAll.
-        await mod.recordFailedAttempt('signin:9.9.9.9') // memory side-effect indirect
-        const before = mod.__testing.getMemoryStoreSize()
+        // Force the seed call onto the memory path: with healthy defaults
+        // recordFailedAttempt would write to Redis (mocked) and leave the
+        // in-memory Map empty, which would mean the "clears memory" half of
+        // this test was never actually exercised. Failing Redis on the read
+        // routes the write through the memory fallback.
+        mockRedis.get.mockRejectedValueOnce(new Error('seed: force memory path'))
+        await mod.recordFailedAttempt('signin:9.9.9.9')
+        expect(mod.__testing.getMemoryStoreSize()).toBeGreaterThan(0)
 
+        // The seed failure tripped the circuit breaker. Reset it so
+        // clearAllRateLimits actually attempts Redis (we want to verify
+        // both the Redis keys+del path AND the memory clear together).
+        mod.__testing.resetCircuitBreaker()
+
+        const before = mod.__testing.getMemoryStoreSize()
         const cleared = await mod.clearAllRateLimits()
 
         expect(mockRedis.keys).toHaveBeenCalledWith('rate_limit:*')
