@@ -12,6 +12,7 @@ import {
 import type { SigninRequest, EmailVerificationResponse } from './types'
 import type { AuthResponse } from '../types'
 import { setAuthCookies } from '@/lib/auth'
+import { signinPerfLog } from '@/lib/signin-perf'
 
 /**
  * Server action result type for signin
@@ -39,7 +40,15 @@ export async function signinAction(
     formData: FormData
 ): Promise<SigninActionResult> {
     const startTime = Date.now()
+    // Diagnostic per-request id so concurrent signins are distinguishable in logs.
+    const reqId = Math.random().toString(36).slice(2, 8)
+    const perf = (phase: string, extra: Record<string, unknown> = {}) => {
+        signinPerfLog({ reqId, phase, elapsed_ms: Date.now() - startTime, ...extra })
+    }
+    perf('action_start')
+
     const headersList = await headers()
+    perf('headers_resolved')
     const clientId = getClientIdentifier(headersList)
 
     try {
@@ -80,7 +89,9 @@ export async function signinAction(
 
 
         // Rate limiting check
+        const rlStart = Date.now()
         const rateLimit = await checkRateLimit(clientId)
+        perf('rate_limit_checked', { rate_limit_ms: Date.now() - rlStart })
 
         // If rate limit is exceeded, return error
         if (!rateLimit.allowed) {
@@ -109,12 +120,19 @@ export async function signinAction(
             password,
         }
 
-        const signinResponse = await signin(requestBody)
+        const beStart = Date.now()
+        perf('backend_call_start')
+        const signinResponse = await signin(requestBody, reqId)
+        perf('backend_call_end', { backend_ms: Date.now() - beStart })
 
         // Set authentication cookies using official pattern
         // @see https://nextjs.org/docs/app/building-your-application/authentication
         if ('access_token' in signinResponse && 'refresh_token' in signinResponse) {
-            await setAuthCookies(signinResponse as AuthResponse, { remember })
+            const ckStart = Date.now()
+            await setAuthCookies(signinResponse, { remember })
+            perf('cookies_set', { cookies_ms: Date.now() - ckStart })
+        } else {
+            perf('cookies_skipped_verification_required')
         }
 
         // Log successful signin (without sensitive data)
@@ -127,6 +145,7 @@ export async function signinAction(
                 : false,
         })
 
+        perf('action_returning_success')
         return {
             success: true,
             data: signinResponse,
@@ -153,6 +172,7 @@ export async function signinAction(
             remainingAttempts: rateLimit.remaining,
         })
 
+        perf('action_returning_error', { error: errorMessage })
         return {
             success: false,
             error: errorMessage,

@@ -22,6 +22,9 @@ import {
 import { useBoothCredits } from "@/core/api/credits";
 import { DownloadLogsModal } from "@/components/shared/DownloadLogsModal";
 import { BusinessSettingsModal } from "./BusinessSettingsModal";
+import { ConnectionDetailsModal } from "./ConnectionDetailsModal";
+import { AddCreditsModal } from "./AddCreditsModal";
+import { CreditsHistoryModal } from "./CreditsHistoryModal";
 import type { ProductPricingInfo } from "@/core/api/booths/types";
 import type { AuthUser } from "@/core/api/auth/types";
 import { normalizeAuthUser } from "@/hooks/use-user";
@@ -232,6 +235,13 @@ export default function SettingsPage() {
   const [logoutModal, setLogoutModal] = useState(false);
   const [downloadLogsModalOpen, setDownloadLogsModalOpen] = useState(false);
   const [businessSettingsModalOpen, setBusinessSettingsModalOpen] = useState(false);
+  // Single discriminated state for the three booth-scoped modals so they
+  // can't end up open simultaneously and so the page only carries one
+  // useState slot per region. Existing modals that aren't part of this
+  // group (download-logs, business-settings) keep their own booleans.
+  type BoothModal = "connection" | "addCredits" | "creditsHistory";
+  const [openBoothModal, setOpenBoothModal] = useState<BoothModal | null>(null);
+  const closeBoothModal = () => setOpenBoothModal(null);
 
   // API hooks
   const { data: boothListData, isLoading: boothsLoading } = useBoothList();
@@ -737,7 +747,11 @@ export default function SettingsPage() {
 
             {/* Credits Actions */}
             <div className="flex gap-3">
-              <button className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#069494] text-white font-medium hover:bg-[#176161] transition-colors">
+              <button
+                type="button"
+                onClick={() => setOpenBoothModal("addCredits")}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#069494] text-white font-medium hover:bg-[#176161] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
                 <svg
                   className="w-5 h-5"
                   fill="none"
@@ -753,7 +767,11 @@ export default function SettingsPage() {
                 </svg>
                 Add Credits
               </button>
-              <button className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#069494]/15 text-[#069494] font-medium hover:bg-[#069494]/25 transition-colors">
+              <button
+                type="button"
+                onClick={() => setOpenBoothModal("creditsHistory")}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#069494]/15 text-[#069494] font-medium hover:bg-[#069494]/25 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
                 <svg
                   className="w-5 h-5"
                   fill="none"
@@ -835,6 +853,7 @@ export default function SettingsPage() {
               }
               title="Connection Details"
               subtitle="View or generate registration code"
+              onClick={() => setOpenBoothModal("connection")}
             />
             <SettingsItem
               icon={
@@ -1098,6 +1117,35 @@ export default function SettingsPage() {
         boothName={selectedBooth?.name}
         onClose={() => setBusinessSettingsModalOpen(false)}
       />
+
+      {/* Connection Details Modal */}
+      {openBoothModal === "connection" && (
+        <ConnectionDetailsModal
+          boothId={effectiveBoothId}
+          boothName={selectedBooth?.name}
+          onClose={closeBoothModal}
+        />
+      )}
+
+      {/* Add Credits Modal */}
+      {openBoothModal === "addCredits" && (
+        <AddCreditsModal
+          boothId={effectiveBoothId}
+          boothName={selectedBooth?.name}
+          currentBalance={creditsData?.credit_balance}
+          onClose={closeBoothModal}
+        />
+      )}
+
+      {/* Credits History Modal */}
+      {openBoothModal === "creditsHistory" && (
+        <CreditsHistoryModal
+          boothId={effectiveBoothId}
+          boothName={selectedBooth?.name}
+          currentBalance={creditsData?.credit_balance}
+          onClose={closeBoothModal}
+        />
+      )}
     </div>
   );
 }
