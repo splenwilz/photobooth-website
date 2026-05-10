@@ -2,10 +2,11 @@
 
 import { useActionState } from "react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { signinAction, type SigninActionResult } from "@/core/api/auth/signin/actions";
 import { safeRedirectPath } from "@/lib/auth-redirect";
+import { signinPerfLog } from "@/lib/signin-perf";
 
 export function SigninForm({
   resetSuccess,
@@ -26,9 +27,43 @@ export function SigninForm({
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
 
+  // Diagnostic timing for the post-backend gap.
+  // submitStartRef captures performance.now() the moment isPending flips true,
+  // so we can measure how long it takes for the action result to round-trip
+  // back to the client and for the redirect to fire.
+  const submitStartRef = useRef<number | null>(null);
+  const wasPendingRef = useRef<boolean>(false);
+  // Latches once the success effect has fired router.push so re-renders
+  // (e.g. redirectTo prop change) cannot trigger a second navigation.
+  const redirectFiredRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    if (!wasPendingRef.current && isPending) {
+      submitStartRef.current = performance.now();
+      // New submission attempt: clear the redirect latch so a future
+      // success can navigate again (e.g. user clicked twice with a
+      // different redirectTo, or the first attempt errored).
+      redirectFiredRef.current = false;
+      signinPerfLog({ phase: 'client_isPending_true' });
+    } else if (wasPendingRef.current && !isPending) {
+      const start = submitStartRef.current ?? performance.now();
+      signinPerfLog({
+        phase: 'client_isPending_false',
+        elapsed_since_submit_ms: Math.round(performance.now() - start),
+      });
+    }
+    wasPendingRef.current = isPending;
+  }, [isPending]);
+
   // Handle successful signin
   useEffect(() => {
-    if (state?.success) {
+    if (state?.success && !redirectFiredRef.current) {
+      redirectFiredRef.current = true;
+      const start = submitStartRef.current ?? performance.now();
+      signinPerfLog({
+        phase: 'client_state_success_received',
+        elapsed_since_submit_ms: Math.round(performance.now() - start),
+      });
       const data = state.data;
 
       // Check if email verification is required
@@ -38,11 +73,31 @@ export function SigninForm({
           email: data.email,
           token: data.pending_authentication_token,
         });
+        signinPerfLog({
+          phase: 'client_router_push_verify',
+          elapsed_since_submit_ms: Math.round(performance.now() - start),
+        });
         router.push(`/verify-email?${params.toString()}`);
       } else {
         // No verification needed, honor the redirect param if it's a same-origin path
-        router.push(safeRedirectPath(redirectTo));
+        const target = safeRedirectPath(redirectTo);
+        signinPerfLog({
+          phase: 'client_router_push_target',
+          target,
+          elapsed_since_submit_ms: Math.round(performance.now() - start),
+        });
+        router.push(target);
       }
+    } else if (state && !state.success) {
+      const start = submitStartRef.current ?? performance.now();
+      // Intentionally not logging state.error here. The error message is
+      // already shown to the user in the alert UI, and we don't want
+      // backend-supplied strings (which could echo input) in the
+      // browser console.
+      signinPerfLog({
+        phase: 'client_state_error_received',
+        elapsed_since_submit_ms: Math.round(performance.now() - start),
+      });
     }
   }, [state, router, redirectTo]);
 

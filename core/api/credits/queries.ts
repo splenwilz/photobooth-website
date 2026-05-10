@@ -125,6 +125,11 @@ export function useCreditsHistoryInfinite(
 		queryFn: ({ pageParam }) =>
 			getCreditsHistory(boothId!, { limit, offset: pageParam }),
 		enabled: !!boothId,
+		// Cache for 30s so repeatedly reopening the History modal in a single
+		// session doesn't re-paginate from scratch. Mutations (add credits,
+		// clear history) still invalidate this key explicitly via their
+		// onSuccess hooks, so the user always sees a fresh view after writes.
+		staleTime: 30_000,
 		initialPageParam: 0,
 		getNextPageParam: (lastPage, allPages) => {
 			// Calculate total items loaded across all pages
