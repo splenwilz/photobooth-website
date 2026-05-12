@@ -8,9 +8,10 @@
  */
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import type { BoothSubscription } from "@/core/api/booths";
 import { usePricingPlans } from "@/core/api/pricing";
-import { createPortalSession, cancelBoothSubscription } from "@/core/api/payments";
+import { createPortalSession, useCancelBoothSubscription } from "@/core/api/payments";
 
 interface ManageSubscriptionModalProps {
   isOpen: boolean;
@@ -51,6 +52,8 @@ export function ManageSubscriptionModal({
   subscription,
   onClose,
 }: ManageSubscriptionModalProps) {
+  const router = useRouter();
+  const { mutateAsync: cancelMutation } = useCancelBoothSubscription();
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
   const [isLoadingPortal, setIsLoadingPortal] = useState(false);
@@ -91,8 +94,11 @@ export function ManageSubscriptionModal({
     setError(null);
 
     try {
+      const portalReturnUrl = boothId
+        ? `${window.location.origin}/dashboard/subscription-cancelled?booth_id=${encodeURIComponent(boothId)}`
+        : `${window.location.origin}/dashboard/booths`;
       const result = await createPortalSession({
-        return_url: `${window.location.origin}/dashboard/booths`,
+        return_url: portalReturnUrl,
       });
 
       if (result.portal_url) {
@@ -114,10 +120,13 @@ export function ManageSubscriptionModal({
     setError(null);
 
     try {
-      await cancelBoothSubscription(boothId, false); // Cancel at period end
+      const result = await cancelMutation({ boothId, immediately: false });
       setIsCanceling(false);
       setShowCancelConfirm(false);
       onClose();
+      const params = new URLSearchParams({ booth_id: boothId });
+      if (result.subscription_id) params.set("sub_id", result.subscription_id);
+      router.push(`/dashboard/subscription-cancelled?${params.toString()}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to cancel subscription");
       setIsCanceling(false);
