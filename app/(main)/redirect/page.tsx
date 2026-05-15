@@ -9,7 +9,7 @@ type Target = (typeof VALID_TARGETS)[number];
 const WEB_URL_MAP: Record<Target, string> = {
   booths: "/dashboard/booths",
   alerts: "/dashboard/alerts",
-  pricing: "/pricing",
+  pricing: "/dashboard/booths",
   billing: "/dashboard/booths",
 };
 

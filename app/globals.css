@@ -114,7 +114,7 @@ html {
  *
  * Used for HTML coming from external sources (e.g. release notes
  * from the GitHub API rendered via dangerouslySetInnerHTML on the
- * /downloads page). The @tailwindcss/typography plugin should
+ * changelog page). The @tailwindcss/typography plugin should
  * provide these via `prose` classes, but the plugin doesn't
  * always load reliably under Tailwind v4 — these explicit styles
  * are a fallback that always works.

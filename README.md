@@ -31,7 +31,7 @@ BoothIQ is a complete photo booth solution that includes:
 
 ```
 app/
-├── (main)/          # Public pages (home, features, pricing, docs, downloads)
+├── (main)/          # Public pages (home, features, templates, docs, support, contact)
 ├── (auth)/          # Authentication (signin, signup)
 ├── (dashboard)/     # User dashboard (booths, analytics, alerts, settings)
 └── (admin)/         # Admin panel (users, subscriptions, revenue, tickets)

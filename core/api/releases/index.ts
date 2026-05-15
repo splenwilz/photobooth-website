@@ -1,8 +1,7 @@
 /**
  * Releases API Module
  *
- * Public API for fetching GitHub releases.
- * Used on the downloads page to show latest version and download links.
+ * Public API for fetching GitHub release metadata (version, assets, changelog).
  */
 
 // Types
