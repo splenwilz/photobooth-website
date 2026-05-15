@@ -7,23 +7,17 @@
  * Includes sub-tabs for Templates, Categories, and Layouts management.
  */
 
-import { useState, useMemo, useRef, useEffect, type InputHTMLAttributes } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import {
   useAdminTemplates,
   useTemplateCategories,
   useTemplateLayouts,
-  useCreateTemplate,
-  useUpdateTemplate,
   useDeleteTemplate,
-  useCreateCategory,
-  useUpdateCategory,
+  useUpdateTemplate,
   useDeleteCategory,
-  useCreateLayout,
   useUpdateLayout,
   useDeleteLayout,
-  useAddPhotoArea,
-  useUpdatePhotoArea,
   useDeletePhotoArea,
   useBroadcastSyncCategories,
   useBroadcastSyncLayouts,
@@ -31,21 +25,22 @@ import {
   adminTemplateKeys,
 } from "@/core/api/templates/admin-queries";
 import { useQueryClient } from "@tanstack/react-query";
+import { ApiError } from "@/core/api/client";
 import type {
   AdminTemplate,
+  AdminTemplateCategory,
+  AdminTemplateLayout,
   AdminTemplateStatus,
   AdminTemplateType,
   AdminTemplatesQueryParams,
   AdminLayoutsResponse,
-  AdminShapeType,
+  AdminPhotoArea,
 } from "@/core/api/templates/admin-types";
-import {
-  SHAPE_TYPES,
-  serializeLayoutForClipboard,
-  parseLayoutFromClipboard,
-  newDraftId,
-  type PhotoAreaFormData,
-} from "./layout-clipboard";
+import { serializeLayoutForClipboard } from "@/core/templates/layout-clipboard";
+import { TemplateFormModal } from "@/components/templates/forms/TemplateFormModal";
+import { CategoryFormModal } from "@/components/templates/forms/CategoryFormModal";
+import { LayoutFormModal } from "@/components/templates/forms/LayoutFormModal";
+import { PhotoAreaFormModal } from "@/components/templates/forms/PhotoAreaFormModal";
 
 // ============================================================================
 // TYPES
@@ -55,101 +50,6 @@ type ActiveTab = "templates" | "categories" | "layouts";
 type FilterStatus = "all" | AdminTemplateStatus;
 type FilterCategory = "all" | number;
 type FilterTemplateType = "all" | AdminTemplateType;
-
-interface TemplateFormData {
-  name: string;
-  description: string;
-  category_id: number | null;
-  layout_id: string | null;
-  template_type: AdminTemplateType;
-  status: AdminTemplateStatus;
-  price: string;
-  sort_order: number;
-  tags: string;
-}
-
-interface CategoryFormData {
-  name: string;
-  description: string;
-  is_active: boolean;
-  is_premium: boolean;
-  sort_order: number;
-  is_seasonal_category: boolean;
-  season_start_date: string;
-  season_end_date: string;
-  seasonal_priority: number;
-}
-
-interface LayoutFormData {
-  layout_key: string;
-  name: string;
-  description: string;
-  width: number;
-  height: number;
-  photo_count: number;
-  product_category_id: number;
-  is_active: boolean;
-  sort_order: number;
-  photo_areas: PhotoAreaFormData[];
-}
-
-// ============================================================================
-// DEFAULTS
-// ============================================================================
-
-const initialTemplateFormData: TemplateFormData = {
-  name: "",
-  description: "",
-  category_id: null,
-  layout_id: null,
-  template_type: "strip",
-  status: "draft",
-  price: "0.00",
-  sort_order: 0,
-  tags: "",
-};
-
-const defaultCategoryFormData: CategoryFormData = {
-  name: "",
-  description: "",
-  is_active: true,
-  is_premium: false,
-  sort_order: 0,
-  is_seasonal_category: false,
-  season_start_date: "",
-  season_end_date: "",
-  seasonal_priority: 0,
-};
-
-const defaultPhotoArea: PhotoAreaFormData = {
-  photo_index: 1,
-  x: 0,
-  y: 0,
-  width: 400,
-  height: 400,
-  rotation: 0,
-  border_radius: 0,
-  shape_type: "rectangle",
-};
-
-const defaultLayoutFormData: LayoutFormData = {
-  layout_key: "",
-  name: "",
-  description: "",
-  width: 603,
-  height: 1803,
-  photo_count: 0,
-  product_category_id: 1,
-  is_active: true,
-  sort_order: 0,
-  photo_areas: [],
-};
-
-const PRODUCT_CATEGORIES = [
-  { id: 1, name: "Strips" },
-  { id: 2, name: "4x6" },
-  { id: 3, name: "Smartphone" },
-];
 
 // ============================================================================
 // UTILITIES
@@ -173,67 +73,6 @@ function formatFileSize(bytes: number): string {
 }
 
 // ============================================================================
-// COMPONENTS
-// ============================================================================
-
-type NumberInputProps = Omit<
-  InputHTMLAttributes<HTMLInputElement>,
-  "value" | "onChange" | "type"
-> & {
-  value: number;
-  onChange: (n: number) => void;
-  float?: boolean;
-  emptyValue?: number;
-};
-
-function NumberInput({ value, onChange, float, emptyValue = 0, ...rest }: NumberInputProps) {
-  const [text, setText] = useState(() => String(value));
-  const [lastCommitted, setLastCommitted] = useState(value);
-
-  // Re-sync local string when parent resets value externally (form reset, edit-mode load).
-  // Object.is treats NaN === NaN and -0 !== 0, which matches React's own bail-out semantics.
-  if (!Object.is(value, lastCommitted)) {
-    setLastCommitted(value);
-    setText(String(value));
-  }
-
-  // In float mode default step="any" so the browser doesn't reject typed
-  // decimals (`<input type="number">` defaults to step=1 which fails
-  // validation for "1.5"). Caller-supplied step still wins via {...rest}.
-  const stepFromFloat: InputHTMLAttributes<HTMLInputElement>["step"] =
-    float ? "any" : undefined;
-
-  return (
-    <input
-      type="number"
-      step={stepFromFloat}
-      value={text}
-      onChange={(e) => {
-        const v = e.target.value;
-        if (v === "" || v === "-") {
-          setText(v);
-          setLastCommitted(emptyValue);
-          onChange(emptyValue);
-          return;
-        }
-        const n = float ? parseFloat(v) : parseInt(v, 10);
-        if (Number.isNaN(n)) {
-          setText(v);
-          return;
-        }
-        // In integer mode, snap the displayed text to the truncated integer
-        // so the user does not see "1.5" while we silently commit 1.
-        const snapped = !float && String(n) !== v ? String(n) : v;
-        setText(snapped);
-        setLastCommitted(n);
-        onChange(n);
-      }}
-      {...rest}
-    />
-  );
-}
-
-// ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
@@ -254,41 +93,23 @@ export default function AdminTemplatesPage() {
   const [editingTemplate, setEditingTemplate] = useState<AdminTemplate | null>(null);
   const [isDeleteTemplateModalOpen, setIsDeleteTemplateModalOpen] = useState(false);
   const [templateToDelete, setTemplateToDelete] = useState<AdminTemplate | null>(null);
-
-  // Template form state
-  const [templateFormData, setTemplateFormData] = useState<TemplateFormData>(initialTemplateFormData);
-  const [tagInput, setTagInput] = useState("");
-  const [templateFile, setTemplateFile] = useState<File | null>(null);
-  const [previewFile, setPreviewFile] = useState<File | null>(null);
-  const [overlayFile, setOverlayFile] = useState<File | null>(null);
-  const [removeOverlay, setRemoveOverlay] = useState(false);
-  const [dragActiveTemplate, setDragActiveTemplate] = useState(false);
-  const [dragActivePreview, setDragActivePreview] = useState(false);
-  const [dragActiveOverlay, setDragActiveOverlay] = useState(false);
-  const templateFileRef = useRef<HTMLInputElement>(null);
-  const previewFileRef = useRef<HTMLInputElement>(null);
-  const overlayFileRef = useRef<HTMLInputElement>(null);
-  const [templateFormError, setTemplateFormError] = useState<string | null>(null);
+  const [deleteTemplateError, setDeleteTemplateError] = useState<string | null>(null);
 
   // Category state
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [editingCategoryId, setEditingCategoryId] = useState<number | null>(null);
-  const [categoryFormData, setCategoryFormData] = useState<CategoryFormData>(defaultCategoryFormData);
+  const [editingCategory, setEditingCategory] = useState<AdminTemplateCategory | null>(null);
   const [deleteCategoryConfirmId, setDeleteCategoryConfirmId] = useState<number | null>(null);
 
   // Layout state
   const [isLayoutModalOpen, setIsLayoutModalOpen] = useState(false);
-  const [editingLayoutId, setEditingLayoutId] = useState<string | null>(null);
-  const [layoutFormData, setLayoutFormData] = useState<LayoutFormData>(defaultLayoutFormData);
+  const [editingLayout, setEditingLayout] = useState<AdminTemplateLayout | null>(null);
   const [deleteLayoutConfirmId, setDeleteLayoutConfirmId] = useState<string | null>(null);
   const [expandedLayoutId, setExpandedLayoutId] = useState<string | null>(null);
-  const [addingPhotoAreaTo, setAddingPhotoAreaTo] = useState<string | null>(null);
-  const [photoAreaForm, setPhotoAreaForm] = useState<PhotoAreaFormData>(defaultPhotoArea);
-  const [editingPhotoArea, setEditingPhotoArea] = useState<{ layoutId: string; photoAreaId: number } | null>(null);
+  const [photoAreaModalLayoutId, setPhotoAreaModalLayoutId] = useState<string | null>(null);
+  const [editingPhotoAreaState, setEditingPhotoAreaState] = useState<AdminPhotoArea | null>(null);
   const [deletePhotoAreaConfirm, setDeletePhotoAreaConfirm] = useState<{ layoutId: string; photoAreaId: number } | null>(null);
   const [copiedLayoutId, setCopiedLayoutId] = useState<string | null>(null);
   const [copyErrorMessage, setCopyErrorMessage] = useState<string | null>(null);
-  const [layoutPasteMessage, setLayoutPasteMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Sync result state
   const [syncResult, setSyncResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -312,24 +133,14 @@ export default function AdminTemplatesPage() {
   const { data: categoriesData, isLoading: categoriesLoading } = useTemplateCategories();
   const { data: layoutsData, isLoading: layoutsLoading } = useTemplateLayouts();
 
-  // Template mutations
-  const uploadMutation = useCreateTemplate();
-  const updateTemplateMutation = useUpdateTemplate();
+  // Mutations (only those used directly on this page; form modals own their own)
   const deleteTemplateMutation = useDeleteTemplate();
+  const updateTemplateMutation = useUpdateTemplate();
   const broadcastSyncTemplatesMutation = useBroadcastSyncTemplates();
-
-  // Category mutations
-  const createCategoryMutation = useCreateCategory();
-  const updateCategoryMutation = useUpdateCategory();
   const deleteCategoryMutation = useDeleteCategory();
   const broadcastSyncCategoriesMutation = useBroadcastSyncCategories();
-
-  // Layout mutations
-  const createLayoutMutation = useCreateLayout();
   const updateLayoutMutation = useUpdateLayout();
   const deleteLayoutMutation = useDeleteLayout();
-  const addPhotoAreaMutation = useAddPhotoArea();
-  const updatePhotoAreaMutation = useUpdatePhotoArea();
   const deletePhotoAreaMutation = useDeletePhotoArea();
   const broadcastSyncLayoutsMutation = useBroadcastSyncLayouts();
 
@@ -363,226 +174,97 @@ export default function AdminTemplatesPage() {
     };
   }, [templatesData]);
 
-  // Filter layouts by template type
-  const availableLayouts = useMemo(() => {
-    if (!layoutsData?.layouts) return [];
-    const productCategoryId = templateFormData.template_type === "strip" ? 1 : 2;
-    return layoutsData.layouts.filter((l) => l.product_category_id === productCategoryId);
-  }, [layoutsData, templateFormData.template_type]);
-
   const categories = categoriesData?.categories ?? [];
   const layouts = layoutsData?.layouts ?? [];
+
+  // Build the picker options the TemplateFormModal expects.
+  const templateModalCategories = useMemo(
+    () => categories.map((c) => ({ id: c.id, name: c.name })),
+    [categories],
+  );
+  const templateModalLayouts = useMemo(
+    () =>
+      layouts.map((l) => ({
+        id: l.id,
+        name: l.name,
+        layout_key: l.layout_key,
+        product_category_id: l.product_category_id,
+        photo_count: l.photo_count,
+      })),
+    [layouts],
+  );
 
   // ============================================================================
   // TEMPLATE HANDLERS
   // ============================================================================
 
-  const handleTemplateTypeChange = (type: AdminTemplateType) => {
-    setTemplateFormData((prev) => ({
-      ...prev,
-      template_type: type,
-      layout_id: null,
-    }));
-  };
-
-  const handleAddTag = () => {
-    if (tagInput.trim()) {
-      const currentTags = templateFormData.tags ? templateFormData.tags.split(",").filter(Boolean) : [];
-      const newTag = tagInput.trim().toLowerCase();
-      if (!currentTags.includes(newTag)) {
-        setTemplateFormData((prev) => ({
-          ...prev,
-          tags: [...currentTags, newTag].join(","),
-        }));
-      }
-      setTagInput("");
-    }
-  };
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    const currentTags = templateFormData.tags.split(",").filter(Boolean);
-    setTemplateFormData((prev) => ({
-      ...prev,
-      tags: currentTags.filter((t) => t !== tagToRemove).join(","),
-    }));
-  };
-
-  const handleTagKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault();
-      handleAddTag();
-    }
-  };
-
-  const handleDrag = (e: React.DragEvent, type: "template" | "preview" | "overlay") => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      if (type === "template") {
-        setDragActiveTemplate(true);
-      } else if (type === "preview") {
-        setDragActivePreview(true);
-      } else {
-        setDragActiveOverlay(true);
-      }
-    } else if (e.type === "dragleave") {
-      if (type === "template") {
-        setDragActiveTemplate(false);
-      } else if (type === "preview") {
-        setDragActivePreview(false);
-      } else {
-        setDragActiveOverlay(false);
-      }
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent, type: "template" | "preview" | "overlay") => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (type === "template") {
-      setDragActiveTemplate(false);
-    } else if (type === "preview") {
-      setDragActivePreview(false);
-    } else {
-      setDragActiveOverlay(false);
-    }
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-      if (file.type.startsWith("image/")) {
-        if (type === "template") {
-          setTemplateFile(file);
-        } else if (type === "preview") {
-          setPreviewFile(file);
-        } else {
-          setOverlayFile(file);
-          setRemoveOverlay(false);
-        }
-      }
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "template" | "preview" | "overlay") => {
-    if (e.target.files && e.target.files[0]) {
-      if (type === "template") {
-        setTemplateFile(e.target.files[0]);
-      } else if (type === "preview") {
-        setPreviewFile(e.target.files[0]);
-      } else {
-        setOverlayFile(e.target.files[0]);
-        setRemoveOverlay(false);
-      }
-    }
-  };
-
   const openAddTemplateModal = () => {
     setEditingTemplate(null);
-    setTemplateFormData(initialTemplateFormData);
-    setTagInput("");
-    setTemplateFile(null);
-    setPreviewFile(null);
-    setOverlayFile(null);
-    setRemoveOverlay(false);
-    setTemplateFormError(null);
     setIsTemplateModalOpen(true);
   };
 
   const openEditTemplateModal = (template: AdminTemplate) => {
     setEditingTemplate(template);
-    setTemplateFormData({
-      name: template.name,
-      description: template.description,
-      category_id: template.category_id,
-      layout_id: template.layout_id,
-      template_type: template.template_type,
-      status: template.status,
-      price: template.price,
-      sort_order: template.sort_order,
-      tags: template.tags,
-    });
-    setTagInput("");
-    setTemplateFile(null);
-    setPreviewFile(null);
-    setOverlayFile(null);
-    setRemoveOverlay(false);
-    setTemplateFormError(null);
     setIsTemplateModalOpen(true);
-  };
-
-  const handleSaveTemplate = async () => {
-    setTemplateFormError(null);
-
-    if (editingTemplate) {
-      try {
-        await updateTemplateMutation.mutateAsync({
-          id: editingTemplate.id,
-          data: {
-            name: templateFormData.name,
-            description: templateFormData.description,
-            category_id: templateFormData.category_id ?? undefined,
-            layout_id: templateFormData.layout_id ?? undefined,
-            template_type: templateFormData.template_type,
-            status: templateFormData.status,
-            price: templateFormData.price,
-            sort_order: templateFormData.sort_order,
-            tags: templateFormData.tags,
-          },
-          templateFile: templateFile || undefined,
-          previewFile: previewFile || undefined,
-          overlayFile: overlayFile || undefined,
-          removeOverlay,
-        });
-        setIsTemplateModalOpen(false);
-      } catch (error) {
-        setTemplateFormError(error instanceof Error ? error.message : "Failed to update template");
-      }
-    } else {
-      if (!templateFile || !previewFile) {
-        setTemplateFormError("Both template file and preview file are required");
-        return;
-      }
-      if (!templateFormData.name.trim()) {
-        setTemplateFormError("Template name is required");
-        return;
-      }
-
-      try {
-        await uploadMutation.mutateAsync({
-          templateFile,
-          previewFile,
-          overlayFile: overlayFile || undefined,
-          metadata: {
-            name: templateFormData.name,
-            description: templateFormData.description || undefined,
-            category_id: templateFormData.category_id ?? undefined,
-            layout_id: templateFormData.layout_id ?? undefined,
-            template_type: templateFormData.template_type,
-            status: templateFormData.status,
-            price: templateFormData.price,
-            sort_order: templateFormData.sort_order,
-            tags: templateFormData.tags || undefined,
-          },
-        });
-        setIsTemplateModalOpen(false);
-      } catch (error) {
-        setTemplateFormError(error instanceof Error ? error.message : "Failed to upload template");
-      }
-    }
   };
 
   const openDeleteTemplateModal = (template: AdminTemplate) => {
     setTemplateToDelete(template);
+    setDeleteTemplateError(null);
     setIsDeleteTemplateModalOpen(true);
   };
 
+  const closeDeleteTemplateModal = () => {
+    setIsDeleteTemplateModalOpen(false);
+    setTemplateToDelete(null);
+    setDeleteTemplateError(null);
+  };
+
   const handleDeleteTemplate = async () => {
-    if (templateToDelete) {
-      try {
-        await deleteTemplateMutation.mutateAsync(templateToDelete.id);
-        setIsDeleteTemplateModalOpen(false);
-        setTemplateToDelete(null);
-      } catch (error) {
-        console.error("Failed to delete template:", error);
+    if (!templateToDelete) return;
+    setDeleteTemplateError(null);
+    try {
+      await deleteTemplateMutation.mutateAsync(templateToDelete.id);
+      closeDeleteTemplateModal();
+    } catch (error) {
+      // 409 from the delete-gate carries `{ can_delete, purchase_count, reason }`.
+      // Surface `reason` to the admin and keep the modal open so they can
+      // pivot to the retire flow without a second click into the row.
+      if (error instanceof ApiError && error.status === 409) {
+        setDeleteTemplateError(error.message);
+        if (error.detail && typeof error.detail === "object") {
+          const d = error.detail as { purchase_count?: number; can_delete?: boolean };
+          setTemplateToDelete((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  purchase_count: d.purchase_count ?? prev.purchase_count,
+                  can_delete: d.can_delete ?? prev.can_delete,
+                }
+              : prev,
+          );
+        }
+        return;
       }
+      setDeleteTemplateError(
+        error instanceof Error ? error.message : "Failed to delete template",
+      );
+    }
+  };
+
+  const handleRetireTemplate = async () => {
+    if (!templateToDelete) return;
+    setDeleteTemplateError(null);
+    try {
+      await updateTemplateMutation.mutateAsync({
+        id: templateToDelete.id,
+        data: { is_active: false },
+      });
+      closeDeleteTemplateModal();
+    } catch (error) {
+      setDeleteTemplateError(
+        error instanceof Error ? error.message : "Failed to retire template",
+      );
     }
   };
 
@@ -601,51 +283,13 @@ export default function AdminTemplatesPage() {
   // ============================================================================
 
   const openCreateCategoryModal = () => {
-    setEditingCategoryId(null);
-    setCategoryFormData(defaultCategoryFormData);
+    setEditingCategory(null);
     setIsCategoryModalOpen(true);
   };
 
-  const openEditCategoryModal = (category: (typeof categories)[0]) => {
-    setEditingCategoryId(category.id);
-    setCategoryFormData({
-      name: category.name,
-      description: category.description || "",
-      is_active: category.is_active,
-      is_premium: category.is_premium,
-      sort_order: category.sort_order,
-      is_seasonal_category: category.is_seasonal_category,
-      season_start_date: category.season_start_date || "",
-      season_end_date: category.season_end_date || "",
-      seasonal_priority: category.seasonal_priority,
-    });
+  const openEditCategoryModal = (category: AdminTemplateCategory) => {
+    setEditingCategory(category);
     setIsCategoryModalOpen(true);
-  };
-
-  const handleSaveCategory = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const submitData = {
-        ...categoryFormData,
-        season_start_date:
-          categoryFormData.is_seasonal_category && categoryFormData.season_start_date
-            ? categoryFormData.season_start_date
-            : undefined,
-        season_end_date:
-          categoryFormData.is_seasonal_category && categoryFormData.season_end_date
-            ? categoryFormData.season_end_date
-            : undefined,
-      };
-      if (editingCategoryId) {
-        await updateCategoryMutation.mutateAsync({ id: editingCategoryId, data: submitData });
-      } else {
-        await createCategoryMutation.mutateAsync(submitData);
-      }
-      setIsCategoryModalOpen(false);
-      setCategoryFormData(defaultCategoryFormData);
-    } catch (error) {
-      console.error("Failed to save category:", error);
-    }
   };
 
   const handleDeleteCategory = async (id: number) => {
@@ -672,13 +316,16 @@ export default function AdminTemplatesPage() {
   // ============================================================================
 
   const openCreateLayoutModal = () => {
-    setEditingLayoutId(null);
-    setLayoutFormData(defaultLayoutFormData);
-    setLayoutPasteMessage(null);
+    setEditingLayout(null);
     setIsLayoutModalOpen(true);
   };
 
-  const handleCopyLayout = async (layout: (typeof layouts)[0]) => {
+  const openEditLayoutModal = (layout: AdminTemplateLayout) => {
+    setEditingLayout(layout);
+    setIsLayoutModalOpen(true);
+  };
+
+  const handleCopyLayout = async (layout: AdminTemplateLayout) => {
     try {
       if (!navigator.clipboard?.writeText) {
         throw new Error("Clipboard API is unavailable. This page must run on HTTPS or localhost.");
@@ -700,91 +347,6 @@ export default function AdminTemplatesPage() {
     }
   };
 
-  const handlePasteLayout = async () => {
-    try {
-      // Match handleCopyLayout's pre-flight guard so we surface a
-      // specific message instead of a TypeError on browsers / dev
-      // origins where the Clipboard API isn't available.
-      if (!navigator.clipboard?.readText) {
-        throw new Error(
-          "Clipboard API is unavailable. This page must run on HTTPS or localhost."
-        );
-      }
-      const text = await navigator.clipboard.readText();
-      const parsed = parseLayoutFromClipboard(text);
-      setLayoutFormData({
-        layout_key: parsed.layout_key,
-        name: parsed.name,
-        description: parsed.description,
-        width: parsed.width,
-        height: parsed.height,
-        photo_count: parsed.photo_areas.length,
-        product_category_id: parsed.product_category_id,
-        is_active: parsed.is_active,
-        sort_order: parsed.sort_order,
-        photo_areas: parsed.photo_areas,
-      });
-      const areaCount = parsed.photo_areas.length;
-      setLayoutPasteMessage({
-        type: "success",
-        text: `Pasted layout with ${areaCount} photo area${areaCount === 1 ? "" : "s"}.${parsed.layout_key ? " Layout key was copied — change it if you want a new layout in the same environment." : ""}`,
-      });
-    } catch (error) {
-      console.error("Failed to paste layout:", error);
-      // Permission-denied is the most common clipboard.readText failure
-      // (browser sandbox or a denied permission prompt). Tell the user
-      // exactly what to do instead of surfacing the cryptic
-      // "NotAllowedError" name.
-      const isPermissionError =
-        error instanceof Error &&
-        (error.name === "NotAllowedError" || /not allowed/i.test(error.message));
-      setLayoutPasteMessage({
-        type: "error",
-        text: isPermissionError
-          ? "Clipboard access was blocked. Allow clipboard access for this site in your browser settings and try again."
-          : error instanceof Error
-            ? error.message
-            : "Failed to read clipboard.",
-      });
-    }
-  };
-
-  const openEditLayoutModal = (layout: (typeof layouts)[0]) => {
-    setEditingLayoutId(layout.id);
-    setLayoutFormData({
-      layout_key: layout.layout_key,
-      name: layout.name,
-      description: layout.description || "",
-      width: layout.width,
-      height: layout.height,
-      photo_count: layout.photo_count,
-      product_category_id: layout.product_category_id,
-      is_active: layout.is_active,
-      sort_order: layout.sort_order,
-      photo_areas: [],
-    });
-    setIsLayoutModalOpen(true);
-  };
-
-  const handleSaveLayout = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      if (editingLayoutId) {
-        const { photo_areas: _photo_areas, photo_count: _photo_count, ...updateData } = layoutFormData;
-        await updateLayoutMutation.mutateAsync({ id: editingLayoutId, data: updateData });
-      } else {
-        await createLayoutMutation.mutateAsync({
-          ...layoutFormData,
-          photo_count: layoutFormData.photo_areas.length,
-        });
-      }
-      setIsLayoutModalOpen(false);
-      setLayoutFormData(defaultLayoutFormData);
-    } catch (error) {
-      console.error("Failed to save layout:", error);
-    }
-  };
-
   const handleDeleteLayout = async (id: string) => {
     try {
       await deleteLayoutMutation.mutateAsync(id);
@@ -794,19 +356,18 @@ export default function AdminTemplatesPage() {
     }
   };
 
-  const handleAddPhotoArea = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!addingPhotoAreaTo) return;
-    const layoutId = addingPhotoAreaTo;
-    try {
-      await addPhotoAreaMutation.mutateAsync({
-        layoutId,
-        data: photoAreaForm,
-      });
-      setAddingPhotoAreaTo(null);
-      setPhotoAreaForm(defaultPhotoArea);
-      // Best-effort: sync photo_count in the background
-      queryClient.fetchQuery<AdminLayoutsResponse>({ queryKey: [...adminTemplateKeys.layouts, { includeInactive: true }] }).then((fresh) => {
+  /**
+   * After the photo-area modal saves (add or update), sync the parent
+   * layout's `photo_count` to match the actual photo_areas length. The
+   * backend doesn't auto-update photo_count, so we refetch fresh layouts
+   * and patch it best-effort.
+   */
+  const syncLayoutPhotoCount = (layoutId: string) => {
+    queryClient
+      .fetchQuery<AdminLayoutsResponse>({
+        queryKey: [...adminTemplateKeys.layouts, { includeInactive: true }],
+      })
+      .then((fresh) => {
         const freshLayout = fresh.layouts.find((l) => l.id === layoutId);
         if (freshLayout) {
           updateLayoutMutation.mutate({
@@ -814,56 +375,30 @@ export default function AdminTemplatesPage() {
             data: { photo_count: freshLayout.photo_areas?.length ?? 0 },
           });
         }
-      }).catch((err) => console.error("Failed to sync photo_count:", err));
-    } catch (error) {
-      console.error("Failed to add photo area:", error);
-    }
+      })
+      .catch((err) => console.error("Failed to sync photo_count:", err));
   };
 
-  const openEditPhotoAreaModal = (layoutId: string, area: { id: number; photo_index: number; x: number; y: number; width: number; height: number; rotation: number; border_radius: number; shape_type: AdminShapeType }) => {
-    setEditingPhotoArea({ layoutId, photoAreaId: area.id });
-    setPhotoAreaForm({
-      photo_index: area.photo_index,
-      x: area.x,
-      y: area.y,
-      width: area.width,
-      height: area.height,
-      rotation: area.rotation,
-      border_radius: area.border_radius,
-      shape_type: area.shape_type,
-    });
+  const openAddPhotoAreaModal = (layoutId: string) => {
+    setPhotoAreaModalLayoutId(layoutId);
+    setEditingPhotoAreaState(null);
   };
 
-  const handleUpdatePhotoArea = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingPhotoArea) return;
-    try {
-      await updatePhotoAreaMutation.mutateAsync({
-        layoutId: editingPhotoArea.layoutId,
-        photoAreaId: editingPhotoArea.photoAreaId,
-        data: photoAreaForm,
-      });
-      setEditingPhotoArea(null);
-      setPhotoAreaForm(defaultPhotoArea);
-    } catch (error) {
-      console.error("Failed to update photo area:", error);
-    }
+  const openEditPhotoAreaModal = (layoutId: string, area: AdminPhotoArea) => {
+    setPhotoAreaModalLayoutId(layoutId);
+    setEditingPhotoAreaState(area);
+  };
+
+  const closePhotoAreaModal = () => {
+    setPhotoAreaModalLayoutId(null);
+    setEditingPhotoAreaState(null);
   };
 
   const handleDeletePhotoArea = async (layoutId: string, photoAreaId: number) => {
     try {
       await deletePhotoAreaMutation.mutateAsync({ layoutId, photoAreaId });
       setDeletePhotoAreaConfirm(null);
-      // Best-effort: sync photo_count in the background
-      queryClient.fetchQuery<AdminLayoutsResponse>({ queryKey: [...adminTemplateKeys.layouts, { includeInactive: true }] }).then((fresh) => {
-        const freshLayout = fresh.layouts.find((l) => l.id === layoutId);
-        if (freshLayout) {
-          updateLayoutMutation.mutate({
-            id: layoutId,
-            data: { photo_count: freshLayout.photo_areas?.length ?? 0 },
-          });
-        }
-      }).catch((err) => console.error("Failed to sync photo_count:", err));
+      syncLayoutPhotoCount(layoutId);
     } catch (error) {
       console.error("Failed to delete photo area:", error);
     }
@@ -1192,6 +727,14 @@ export default function AdminTemplatesPage() {
                           Free
                         </span>
                       )}
+                      {/* Purchased Badge — surfaces the delete-gate state inline so admins know
+                          why the row's delete button is disabled before opening the modal. */}
+                      {typeof template.purchase_count === "number" &&
+                        template.purchase_count > 0 && (
+                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                            Purchased &times; {template.purchase_count}
+                          </span>
+                        )}
                     </div>
                     <p className="text-sm text-zinc-500 mt-0.5">
                       {template.category?.name || "No Category"} &bull; {template.layout?.name || template.template_type}
@@ -1230,7 +773,13 @@ export default function AdminTemplatesPage() {
                     <button
                       type="button"
                       onClick={() => openDeleteTemplateModal(template)}
-                      className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 text-zinc-500 hover:text-red-500 transition-colors"
+                      disabled={template.can_delete === false}
+                      title={
+                        template.can_delete === false
+                          ? `Cannot delete — purchased by ${template.purchase_count ?? 0} booth(s). Retire via inactive instead.`
+                          : undefined
+                      }
+                      className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 text-zinc-500 hover:text-red-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-zinc-500"
                       aria-label="Delete template"
                     >
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -1650,10 +1199,8 @@ export default function AdminTemplatesPage() {
                       <div className="flex items-center justify-between mb-4">
                         <h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Photo Areas</h4>
                         <button
-                          onClick={() => {
-                            setAddingPhotoAreaTo(layout.id);
-                            setPhotoAreaForm({ ...defaultPhotoArea, photo_index: (layout.photo_areas?.length || 0) + 1 });
-                          }}
+                          type="button"
+                          onClick={() => openAddPhotoAreaModal(layout.id)}
                           className="text-sm text-[#069494] hover:underline font-medium"
                         >
                           + Add Photo Area
@@ -1733,673 +1280,107 @@ export default function AdminTemplatesPage() {
       {/* MODALS */}
       {/* ============================================================================ */}
 
-      {/* Template Add/Edit Modal */}
-      {isTemplateModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setIsTemplateModalOpen(false)}
-            aria-hidden="true"
-          />
-          <div className="relative w-full max-w-2xl bg-white dark:bg-[#111111] rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
-            <button
-              type="button"
-              onClick={() => setIsTemplateModalOpen(false)}
-              className="absolute top-4 right-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors z-10"
-              aria-label="Close"
-            >
-              <svg className="w-5 h-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            <div className="p-6 border-b border-[var(--border)]">
-              <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
-                {editingTemplate ? "Edit Template" : "Add New Template"}
-              </h2>
-              <p className="text-zinc-500 mt-1">
-                {editingTemplate ? "Update template details" : "Upload a new template to the marketplace"}
-              </p>
-            </div>
-            <div className="p-6 space-y-6">
-              {templateFormError && (
-                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
-                  {templateFormError}
-                </div>
-              )}
-              <div>
-                <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">Template Name *</label>
-                <input
-                  type="text"
-                  value={templateFormData.name}
-                  onChange={(e) => setTemplateFormData((prev) => ({ ...prev, name: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
-                  placeholder="Enter template name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">Description</label>
-                <textarea
-                  value={templateFormData.description ?? ""}
-                  onChange={(e) => setTemplateFormData((prev) => ({ ...prev, description: e.target.value }))}
-                  rows={3}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494] resize-none"
-                  placeholder="Describe the template..."
-                />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">Template Type</label>
-                  <select
-                    value={templateFormData.template_type}
-                    onChange={(e) => handleTemplateTypeChange(e.target.value as AdminTemplateType)}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
-                  >
-                    <option value="strip">Strip</option>
-                    <option value="photo_4x6">4x6 Photo</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">Status</label>
-                  <select
-                    value={templateFormData.status}
-                    onChange={(e) =>
-                      setTemplateFormData((prev) => ({ ...prev, status: e.target.value as AdminTemplateStatus }))
-                    }
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
-                  >
-                    <option value="draft">Draft</option>
-                    <option value="active">Active</option>
-                    <option value="archived">Archived</option>
-                  </select>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">Category</label>
-                  <select
-                    value={templateFormData.category_id ?? ""}
-                    onChange={(e) =>
-                      setTemplateFormData((prev) => ({ ...prev, category_id: e.target.value ? Number(e.target.value) : null }))
-                    }
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
-                    disabled={categoriesLoading}
-                  >
-                    <option value="">Select category...</option>
-                    {categoriesData?.categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">Layout</label>
-                  <select
-                    value={templateFormData.layout_id ?? ""}
-                    onChange={(e) => setTemplateFormData((prev) => ({ ...prev, layout_id: e.target.value || null }))}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
-                    disabled={layoutsLoading}
-                  >
-                    <option value="">Select layout...</option>
-                    {availableLayouts.map((layout) => (
-                      <option key={layout.id} value={layout.id}>
-                        {layout.name} ({layout.photo_count} photos)
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
-                      Template File {!editingTemplate && "*"}
-                      {editingTemplate && <span className="text-zinc-400 font-normal"> (Replace)</span>}
-                    </label>
-                    <div
-                      className={`relative border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
-                        dragActiveTemplate
-                          ? "border-[#069494] bg-[#069494]/10"
-                          : "border-[var(--border)] hover:border-[#069494]/50"
-                      }`}
-                      onDragEnter={(e) => handleDrag(e, "template")}
-                      onDragLeave={(e) => handleDrag(e, "template")}
-                      onDragOver={(e) => handleDrag(e, "template")}
-                      onDrop={(e) => handleDrop(e, "template")}
-                    >
-                      <input
-                        ref={templateFileRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleFileChange(e, "template")}
-                        className="hidden"
-                      />
-                      {templateFile ? (
-                        <div className="space-y-2">
-                          <div className="w-12 h-12 mx-auto rounded-lg bg-[#10B981]/20 flex items-center justify-center">
-                            <svg
-                              className="w-6 h-6 text-[#10B981]"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                            </svg>
-                          </div>
-                          <p className="text-sm text-zinc-900 dark:text-white font-medium truncate">{templateFile.name}</p>
-                          <button
-                            type="button"
-                            onClick={() => templateFileRef.current?.click()}
-                            className="text-sm text-[#069494] hover:underline"
-                          >
-                            Change
-                          </button>
-                        </div>
-                      ) : editingTemplate?.download_url ? (
-                        <div className="space-y-2">
-                          <img
-                            src={editingTemplate.download_url}
-                            alt="Current template"
-                            className="w-16 h-24 mx-auto object-contain rounded-lg bg-slate-100 dark:bg-zinc-800"
-                          />
-                          <p className="text-xs text-zinc-500 truncate">{editingTemplate.original_filename}</p>
-                          <button
-                            type="button"
-                            onClick={() => templateFileRef.current?.click()}
-                            className="text-sm text-[#069494] hover:underline"
-                          >
-                            Replace
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="space-y-2">
-                          <div className="w-12 h-12 mx-auto rounded-lg bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
-                            <svg
-                              className="w-6 h-6 text-zinc-400"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={1.5}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
-                              />
-                            </svg>
-                          </div>
-                          <p className="text-sm text-zinc-500">
-                            <button
-                              type="button"
-                              onClick={() => templateFileRef.current?.click()}
-                              className="text-[#069494] hover:underline"
-                            >
-                              Upload template
-                            </button>
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
-                      Preview Image {!editingTemplate && "*"}
-                      {editingTemplate && <span className="text-zinc-400 font-normal"> (Replace)</span>}
-                    </label>
-                    <div
-                      className={`relative border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
-                        dragActivePreview
-                          ? "border-[#069494] bg-[#069494]/10"
-                          : "border-[var(--border)] hover:border-[#069494]/50"
-                      }`}
-                      onDragEnter={(e) => handleDrag(e, "preview")}
-                      onDragLeave={(e) => handleDrag(e, "preview")}
-                      onDragOver={(e) => handleDrag(e, "preview")}
-                      onDrop={(e) => handleDrop(e, "preview")}
-                    >
-                      <input
-                        ref={previewFileRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleFileChange(e, "preview")}
-                        className="hidden"
-                      />
-                      {previewFile ? (
-                        <div className="space-y-2">
-                          <div className="w-12 h-12 mx-auto rounded-lg bg-[#10B981]/20 flex items-center justify-center">
-                            <svg
-                              className="w-6 h-6 text-[#10B981]"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                            </svg>
-                          </div>
-                          <p className="text-sm text-zinc-900 dark:text-white font-medium truncate">{previewFile.name}</p>
-                          <button
-                            type="button"
-                            onClick={() => previewFileRef.current?.click()}
-                            className="text-sm text-[#069494] hover:underline"
-                          >
-                            Change
-                          </button>
-                        </div>
-                      ) : editingTemplate?.preview_url ? (
-                        <div className="space-y-2">
-                          <img
-                            src={editingTemplate.preview_url}
-                            alt="Current preview"
-                            className="w-16 h-24 mx-auto object-contain rounded-lg bg-slate-100 dark:bg-zinc-800"
-                          />
-                          <p className="text-xs text-zinc-500">Current preview</p>
-                          <button
-                            type="button"
-                            onClick={() => previewFileRef.current?.click()}
-                            className="text-sm text-[#069494] hover:underline"
-                          >
-                            Replace
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="space-y-2">
-                          <div className="w-12 h-12 mx-auto rounded-lg bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
-                            <svg
-                              className="w-6 h-6 text-zinc-400"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={1.5}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
-                              />
-                            </svg>
-                          </div>
-                          <p className="text-sm text-zinc-500">
-                            <button
-                              type="button"
-                              onClick={() => previewFileRef.current?.click()}
-                              className="text-[#069494] hover:underline"
-                            >
-                              Upload thumbnail
-                            </button>
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
-                    Overlay File <span className="text-zinc-400 font-normal">(Optional)</span>
-                  </label>
-                  <div
-                    className={`relative border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
-                      dragActiveOverlay
-                        ? "border-[#069494] bg-[#069494]/10"
-                        : "border-[var(--border)] hover:border-[#069494]/50"
-                    }`}
-                    onDragEnter={(e) => handleDrag(e, "overlay")}
-                    onDragLeave={(e) => handleDrag(e, "overlay")}
-                    onDragOver={(e) => handleDrag(e, "overlay")}
-                    onDrop={(e) => handleDrop(e, "overlay")}
-                  >
-                    <input
-                      ref={overlayFileRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleFileChange(e, "overlay")}
-                      className="hidden"
-                    />
-                    {overlayFile ? (
-                      <div className="flex items-center justify-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-[#10B981]/20 flex items-center justify-center flex-shrink-0">
-                          <svg
-                            className="w-5 h-5 text-[#10B981]"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                          </svg>
-                        </div>
-                        <p className="text-sm text-zinc-900 dark:text-white font-medium truncate">{overlayFile.name}</p>
-                        <button
-                          type="button"
-                          onClick={() => overlayFileRef.current?.click()}
-                          className="text-sm text-[#069494] hover:underline flex-shrink-0"
-                        >
-                          Change
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => { setOverlayFile(null); setRemoveOverlay(false); }}
-                          className="text-sm text-red-500 hover:underline flex-shrink-0"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ) : editingTemplate?.overlay_url && !removeOverlay ? (
-                      <div className="flex items-center justify-center gap-3">
-                        <img
-                          src={editingTemplate.overlay_url}
-                          alt="Current overlay"
-                          className="w-10 h-16 object-contain rounded-lg bg-slate-100 dark:bg-zinc-800 flex-shrink-0"
-                        />
-                        <p className="text-sm text-zinc-500">Current overlay</p>
-                        <button
-                          type="button"
-                          onClick={() => overlayFileRef.current?.click()}
-                          className="text-sm text-[#069494] hover:underline flex-shrink-0"
-                        >
-                          Replace
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setRemoveOverlay(true)}
-                          className="text-sm text-red-500 hover:underline flex-shrink-0"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
-                          <svg
-                            className="w-5 h-5 text-zinc-400"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={1.5}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-5.571 3v7.5M11.25 3l-4.821 2.75L12 8.5l5.571-2.75L12 3z"
-                            />
-                          </svg>
-                        </div>
-                        <p className="text-sm text-zinc-500">
-                          <button
-                            type="button"
-                            onClick={() => overlayFileRef.current?.click()}
-                            className="text-[#069494] hover:underline"
-                          >
-                            Upload overlay
-                          </button>
-                          {" "}— Decorative elements drawn on top of photos
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">Price ($)</label>
-                  <input
-                    type="text"
-                    value={templateFormData.price}
-                    onChange={(e) => setTemplateFormData((prev) => ({ ...prev, price: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
-                    placeholder="0.00"
-                  />
-                  <p className="text-xs text-zinc-500 mt-1">Set to 0.00 for free templates</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">Sort Order</label>
-                  <NumberInput
-                    min={0}
-                    value={templateFormData.sort_order}
-                    onChange={(n) => setTemplateFormData((prev) => ({ ...prev, sort_order: n }))}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
-                    placeholder="0"
-                  />
-                  <p className="text-xs text-zinc-500 mt-1">Lower numbers appear first</p>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">Tags</label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {(templateFormData.tags || "")
-                    .split(",")
-                    .filter(Boolean)
-                    .map((tag) => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-200 dark:bg-zinc-800 text-sm text-zinc-700 dark:text-zinc-300"
-                      >
-                        {tag}
-                        <button type="button" onClick={() => handleRemoveTag(tag)} className="hover:text-red-500">
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </span>
-                    ))}
-                </div>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    onKeyDown={handleTagKeyDown}
-                    className="flex-1 px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
-                    placeholder="Add tag and press Enter"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleAddTag}
-                    className="px-4 py-3 rounded-xl bg-slate-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-slate-300 dark:hover:bg-zinc-700 transition-colors"
-                  >
-                    Add
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="p-6 border-t border-[var(--border)] flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setIsTemplateModalOpen(false)}
-                className="px-6 py-2.5 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveTemplate}
-                disabled={uploadMutation.isPending || updateTemplateMutation.isPending}
-                className="px-6 py-2.5 rounded-xl bg-[#069494] text-white font-medium hover:bg-[#176161] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {(uploadMutation.isPending || updateTemplateMutation.isPending) && (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                )}
-                {editingTemplate ? "Save Changes" : "Create Template"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Template Delete Confirmation Modal */}
-      {isDeleteTemplateModalOpen && templateToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setIsDeleteTemplateModalOpen(false)}
-            aria-hidden="true"
-          />
-          <div className="relative w-full max-w-md bg-white dark:bg-[#111111] rounded-2xl shadow-2xl overflow-hidden">
-            <div className="p-6 text-center">
-              <div className="w-16 h-16 mx-auto rounded-full bg-red-500/20 flex items-center justify-center mb-4">
-                <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">Delete Template</h3>
-              <p className="text-zinc-500 mb-6">
-                Are you sure you want to delete{" "}
-                <span className="font-medium text-zinc-900 dark:text-white">{templateToDelete.name}</span>? This action cannot
-                be undone.
-              </p>
-              <div className="flex gap-3 justify-center">
-                <button
-                  type="button"
-                  onClick={() => setIsDeleteTemplateModalOpen(false)}
-                  className="px-6 py-2.5 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 transition-colors"
+      {isDeleteTemplateModalOpen && templateToDelete && (() => {
+        const isBlocked = templateToDelete.can_delete === false;
+        const purchaseCount = templateToDelete.purchase_count ?? 0;
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={closeDeleteTemplateModal}
+              aria-hidden="true"
+            />
+            <div className="relative w-full max-w-md bg-white dark:bg-[#111111] rounded-2xl shadow-2xl overflow-hidden">
+              <div className="p-6 text-center">
+                <div
+                  className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4 ${
+                    isBlocked ? "bg-amber-500/20" : "bg-red-500/20"
+                  }`}
                 >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDeleteTemplate}
-                  disabled={deleteTemplateMutation.isPending}
-                  className="px-6 py-2.5 rounded-xl bg-red-500 text-white font-medium hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center gap-2"
-                >
-                  {deleteTemplateMutation.isPending && (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <svg
+                    className={`w-8 h-8 ${isBlocked ? "text-amber-500" : "text-red-500"}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">
+                  {isBlocked ? "Cannot Delete Template" : "Delete Template"}
+                </h3>
+                {isBlocked ? (
+                  <p className="text-zinc-500 mb-6">
+                    <span className="font-medium text-zinc-900 dark:text-white">
+                      {templateToDelete.name}
+                    </span>{" "}
+                    has been purchased by {purchaseCount} booth
+                    {purchaseCount === 1 ? "" : "s"} and cannot be hard-deleted —
+                    that would wipe the refund and audit history. Retire it
+                    instead by setting it inactive; purchasing kiosks reconcile
+                    the change within ~30s and remove it locally.
+                  </p>
+                ) : (
+                  <p className="text-zinc-500 mb-6">
+                    Are you sure you want to delete{" "}
+                    <span className="font-medium text-zinc-900 dark:text-white">
+                      {templateToDelete.name}
+                    </span>
+                    ? This action cannot be undone.
+                  </p>
+                )}
+                {deleteTemplateError && !isBlocked && (
+                  <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500 text-left">
+                    {deleteTemplateError}
+                  </div>
+                )}
+                <div className="flex gap-3 justify-center">
+                  <button
+                    type="button"
+                    onClick={closeDeleteTemplateModal}
+                    className="px-6 py-2.5 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  {isBlocked ? (
+                    <button
+                      type="button"
+                      onClick={handleRetireTemplate}
+                      disabled={updateTemplateMutation.isPending}
+                      className="px-6 py-2.5 rounded-xl bg-amber-500 text-white font-medium hover:bg-amber-600 transition-colors disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {updateTemplateMutation.isPending && (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      )}
+                      Retire (Set Inactive)
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleDeleteTemplate}
+                      disabled={deleteTemplateMutation.isPending}
+                      className="px-6 py-2.5 rounded-xl bg-red-500 text-white font-medium hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {deleteTemplateMutation.isPending && (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      )}
+                      Delete
+                    </button>
                   )}
-                  Delete
-                </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
-      {/* Category Create/Edit Modal */}
-      {isCategoryModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setIsCategoryModalOpen(false)} />
-          <div className="relative w-full max-w-lg bg-white dark:bg-[#111111] rounded-2xl shadow-xl overflow-hidden">
-            <div className="p-6 border-b border-slate-200 dark:border-zinc-800">
-              <h2 className="text-lg font-bold text-zinc-900 dark:text-white">
-                {editingCategoryId ? "Edit Category" : "Create Category"}
-              </h2>
-            </div>
-            <form onSubmit={handleSaveCategory} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Name</label>
-                <input
-                  type="text"
-                  value={categoryFormData.name}
-                  onChange={(e) => setCategoryFormData({ ...categoryFormData, name: e.target.value })}
-                  required
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Description</label>
-                <textarea
-                  value={categoryFormData.description}
-                  onChange={(e) => setCategoryFormData({ ...categoryFormData, description: e.target.value })}
-                  rows={2}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Sort Order</label>
-                  <NumberInput
-                    value={categoryFormData.sort_order}
-                    onChange={(n) => setCategoryFormData({ ...categoryFormData, sort_order: n })}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Priority</label>
-                  <NumberInput
-                    value={categoryFormData.seasonal_priority}
-                    onChange={(n) => setCategoryFormData({ ...categoryFormData, seasonal_priority: n })}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  />
-                </div>
-              </div>
-              <div className="flex items-center gap-6">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={categoryFormData.is_active}
-                    onChange={(e) => setCategoryFormData({ ...categoryFormData, is_active: e.target.checked })}
-                    className="w-4 h-4 rounded border-slate-300 text-[#069494] focus:ring-[#069494]"
-                  />
-                  <span className="text-sm text-zinc-700 dark:text-zinc-300">Active</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={categoryFormData.is_premium}
-                    onChange={(e) => setCategoryFormData({ ...categoryFormData, is_premium: e.target.checked })}
-                    className="w-4 h-4 rounded border-slate-300 text-[#069494] focus:ring-[#069494]"
-                  />
-                  <span className="text-sm text-zinc-700 dark:text-zinc-300">Premium</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={categoryFormData.is_seasonal_category}
-                    onChange={(e) => setCategoryFormData({ ...categoryFormData, is_seasonal_category: e.target.checked })}
-                    className="w-4 h-4 rounded border-slate-300 text-[#069494] focus:ring-[#069494]"
-                  />
-                  <span className="text-sm text-zinc-700 dark:text-zinc-300">Seasonal</span>
-                </label>
-              </div>
-              {categoryFormData.is_seasonal_category && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                      Start Date (MM-DD)
-                    </label>
-                    <input
-                      type="text"
-                      value={categoryFormData.season_start_date}
-                      onChange={(e) => setCategoryFormData({ ...categoryFormData, season_start_date: e.target.value })}
-                      placeholder="12-01"
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                      End Date (MM-DD)
-                    </label>
-                    <input
-                      type="text"
-                      value={categoryFormData.season_end_date}
-                      onChange={(e) => setCategoryFormData({ ...categoryFormData, season_end_date: e.target.value })}
-                      placeholder="12-26"
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                    />
-                  </div>
-                </div>
-              )}
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsCategoryModalOpen(false)}
-                  className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-slate-50 dark:hover:bg-zinc-800"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={createCategoryMutation.isPending || updateCategoryMutation.isPending}
-                  className="flex-1 px-4 py-2.5 rounded-lg bg-[#069494] text-white font-medium hover:bg-[#176161] disabled:opacity-50"
-                >
-                  {createCategoryMutation.isPending || updateCategoryMutation.isPending ? "Saving..." : "Save"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* Category Delete Confirmation Modal */}
       {deleteCategoryConfirmId && (
@@ -2429,594 +1410,8 @@ export default function AdminTemplatesPage() {
         </div>
       )}
 
-      {/* Layout Create/Edit Modal */}
-      {isLayoutModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setIsLayoutModalOpen(false)} />
-          <div className="relative w-full max-w-xl bg-white dark:bg-[#111111] rounded-2xl shadow-xl overflow-hidden max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-slate-200 dark:border-zinc-800 sticky top-0 bg-white dark:bg-[#111111]">
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="text-lg font-bold text-zinc-900 dark:text-white">
-                  {editingLayoutId ? "Edit Layout" : "Create Layout"}
-                </h2>
-                {!editingLayoutId && (
-                  <button
-                    type="button"
-                    onClick={handlePasteLayout}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800"
-                    title="Fill the form from a copied layout JSON"
-                  >
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                      />
-                    </svg>
-                    Paste from clipboard
-                  </button>
-                )}
-              </div>
-              {layoutPasteMessage && !editingLayoutId && (
-                <div
-                  role="alert"
-                  aria-live={layoutPasteMessage.type === "error" ? "assertive" : "polite"}
-                  className={`mt-3 px-3 py-2 rounded-lg text-xs ${
-                    layoutPasteMessage.type === "success"
-                      ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400"
-                      : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400"
-                  }`}
-                >
-                  {layoutPasteMessage.text}
-                </div>
-              )}
-            </div>
-            <form onSubmit={handleSaveLayout} className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Name</label>
-                  <input
-                    type="text"
-                    value={layoutFormData.name}
-                    onChange={(e) => setLayoutFormData({ ...layoutFormData, name: e.target.value })}
-                    required
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Layout Key</label>
-                  <input
-                    type="text"
-                    value={layoutFormData.layout_key}
-                    onChange={(e) => setLayoutFormData({ ...layoutFormData, layout_key: e.target.value })}
-                    required
-                    placeholder="Strip-3-Shot-Custom"
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Description</label>
-                <textarea
-                  value={layoutFormData.description}
-                  onChange={(e) => setLayoutFormData({ ...layoutFormData, description: e.target.value })}
-                  rows={2}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                />
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Width (px)</label>
-                  <NumberInput
-                    value={layoutFormData.width}
-                    onChange={(n) => setLayoutFormData({ ...layoutFormData, width: n })}
-                    required
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Height (px)</label>
-                  <NumberInput
-                    value={layoutFormData.height}
-                    onChange={(n) => setLayoutFormData({ ...layoutFormData, height: n })}
-                    required
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Photo Count</label>
-                  <div className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-zinc-900 dark:text-white">
-                    {editingLayoutId
-                      ? layoutFormData.photo_count
-                      : layoutFormData.photo_areas.length}
-                  </div>
-                  <p className="text-xs text-zinc-500 mt-1">
-                    {editingLayoutId ? "Managed via photo areas in the expanded view" : "Auto-set from photo areas below"}
-                  </p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Product Type</label>
-                  <select
-                    value={layoutFormData.product_category_id}
-                    onChange={(e) => setLayoutFormData({ ...layoutFormData, product_category_id: parseInt(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  >
-                    {PRODUCT_CATEGORIES.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Sort Order</label>
-                  <NumberInput
-                    value={layoutFormData.sort_order}
-                    onChange={(n) => setLayoutFormData({ ...layoutFormData, sort_order: n })}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={layoutFormData.is_active}
-                    onChange={(e) => setLayoutFormData({ ...layoutFormData, is_active: e.target.checked })}
-                    className="w-4 h-4 rounded border-slate-300 text-[#069494] focus:ring-[#069494]"
-                  />
-                  <span className="text-sm text-zinc-700 dark:text-zinc-300">Active</span>
-                </label>
-              </div>
-              {/* Inline Photo Areas Editor (create mode only) */}
-              {!editingLayoutId && (
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                      Photo Areas ({layoutFormData.photo_areas.length})
-                    </label>
-                    {!editingLayoutId && (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setLayoutFormData((prev) => ({
-                            ...prev,
-                            photo_areas: [
-                              ...prev.photo_areas,
-                              { ...defaultPhotoArea, photo_index: prev.photo_areas.length + 1, _draftId: newDraftId() },
-                            ],
-                          }))
-                        }
-                        className="text-xs px-2.5 py-1 rounded-lg bg-[#069494] text-white hover:bg-[#176161]"
-                      >
-                        + Add Photo Area
-                      </button>
-                    )}
-                  </div>
-                  {layoutFormData.photo_areas.length === 0 && (
-                    <p className="text-xs text-zinc-400 italic py-3 text-center border border-dashed border-slate-200 dark:border-zinc-700 rounded-lg">
-                      No photo areas added yet. Click &quot;+ Add Photo Area&quot; to get started.
-                    </p>
-                  )}
-                  <div className="space-y-3">
-                    {layoutFormData.photo_areas.map((area, idx) => (
-                      <div
-                        // Stable per-row key so removing/reordering rows
-                        // doesn't make React rebind a NumberInput's
-                        // local state to the wrong row. Falls back to
-                        // index for any rare row that somehow lacks
-                        // _draftId (defensive — every create path now
-                        // generates one).
-                        key={area._draftId ?? idx}
-                        className="p-3 rounded-lg border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-900"
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-                            Photo Area #{area.photo_index}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setLayoutFormData((prev) => ({
-                                ...prev,
-                                photo_areas: prev.photo_areas.filter((_, i) => i !== idx),
-                              }))
-                            }
-                            className="text-xs text-red-500 hover:underline"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                        <div className="grid grid-cols-4 gap-2">
-                          <div>
-                            <label className="block text-[10px] text-zinc-500 mb-0.5">Index</label>
-                            <NumberInput
-                              min={1}
-                              emptyValue={1}
-                              value={area.photo_index}
-                              onChange={(n) =>
-                                setLayoutFormData((prev) => ({
-                                  ...prev,
-                                  photo_areas: prev.photo_areas.map((a, i) =>
-                                    i === idx ? { ...a, photo_index: n } : a
-                                  ),
-                                }))
-                              }
-                              className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] text-zinc-500 mb-0.5">Shape</label>
-                            <select
-                              value={area.shape_type}
-                              onChange={(e) =>
-                                setLayoutFormData((prev) => ({
-                                  ...prev,
-                                  photo_areas: prev.photo_areas.map((a, i) =>
-                                    i === idx ? { ...a, shape_type: e.target.value as AdminShapeType } : a
-                                  ),
-                                }))
-                              }
-                              className="w-full px-1 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
-                            >
-                              <option value="rectangle">Rect</option>
-                              <option value="rounded_rectangle">Rounded</option>
-                              <option value="circle">Circle</option>
-                              <option value="heart">Heart</option>
-                              <option value="petal">Petal</option>
-                            </select>
-                          </div>
-                          <div>
-                            <label className="block text-[10px] text-zinc-500 mb-0.5">X</label>
-                            <NumberInput
-                              value={area.x}
-                              onChange={(n) =>
-                                setLayoutFormData((prev) => ({
-                                  ...prev,
-                                  photo_areas: prev.photo_areas.map((a, i) =>
-                                    i === idx ? { ...a, x: n } : a
-                                  ),
-                                }))
-                              }
-                              className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] text-zinc-500 mb-0.5">Y</label>
-                            <NumberInput
-                              value={area.y}
-                              onChange={(n) =>
-                                setLayoutFormData((prev) => ({
-                                  ...prev,
-                                  photo_areas: prev.photo_areas.map((a, i) =>
-                                    i === idx ? { ...a, y: n } : a
-                                  ),
-                                }))
-                              }
-                              className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] text-zinc-500 mb-0.5">Width</label>
-                            <NumberInput
-                              value={area.width}
-                              onChange={(n) =>
-                                setLayoutFormData((prev) => ({
-                                  ...prev,
-                                  photo_areas: prev.photo_areas.map((a, i) =>
-                                    i === idx ? { ...a, width: n } : a
-                                  ),
-                                }))
-                              }
-                              className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] text-zinc-500 mb-0.5">Height</label>
-                            <NumberInput
-                              value={area.height}
-                              onChange={(n) =>
-                                setLayoutFormData((prev) => ({
-                                  ...prev,
-                                  photo_areas: prev.photo_areas.map((a, i) =>
-                                    i === idx ? { ...a, height: n } : a
-                                  ),
-                                }))
-                              }
-                              className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] text-zinc-500 mb-0.5">Rotation</label>
-                            <NumberInput
-                              float
-                              value={area.rotation}
-                              onChange={(n) =>
-                                setLayoutFormData((prev) => ({
-                                  ...prev,
-                                  photo_areas: prev.photo_areas.map((a, i) =>
-                                    i === idx ? { ...a, rotation: n } : a
-                                  ),
-                                }))
-                              }
-                              className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] text-zinc-500 mb-0.5">Radius</label>
-                            <NumberInput
-                              value={area.border_radius}
-                              onChange={(n) =>
-                                setLayoutFormData((prev) => ({
-                                  ...prev,
-                                  photo_areas: prev.photo_areas.map((a, i) =>
-                                    i === idx ? { ...a, border_radius: n } : a
-                                  ),
-                                }))
-                              }
-                              className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsLayoutModalOpen(false)}
-                  className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-slate-50 dark:hover:bg-zinc-800"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={createLayoutMutation.isPending || updateLayoutMutation.isPending}
-                  className="flex-1 px-4 py-2.5 rounded-lg bg-[#069494] text-white font-medium hover:bg-[#176161] disabled:opacity-50"
-                >
-                  {createLayoutMutation.isPending || updateLayoutMutation.isPending ? "Saving..." : "Save"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
-      {/* Add Photo Area Modal */}
-      {addingPhotoAreaTo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setAddingPhotoAreaTo(null)} />
-          <div className="relative w-full max-w-md bg-white dark:bg-[#111111] rounded-2xl shadow-xl overflow-hidden">
-            <div className="p-6 border-b border-slate-200 dark:border-zinc-800">
-              <h2 className="text-lg font-bold text-zinc-900 dark:text-white">Add Photo Area</h2>
-            </div>
-            <form onSubmit={handleAddPhotoArea} className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Photo Index</label>
-                  <NumberInput
-                    value={photoAreaForm.photo_index}
-                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, photo_index: n })}
-                    min={1}
-                    emptyValue={1}
-                    required
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Shape</label>
-                  <select
-                    value={photoAreaForm.shape_type}
-                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, shape_type: e.target.value as AdminShapeType })}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  >
-                    {SHAPE_TYPES.map((shape) => (
-                      <option key={shape} value={shape}>
-                        {shape}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">X Position</label>
-                  <NumberInput
-                    value={photoAreaForm.x}
-                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, x: n })}
-                    required
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Y Position</label>
-                  <NumberInput
-                    value={photoAreaForm.y}
-                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, y: n })}
-                    required
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Width</label>
-                  <NumberInput
-                    value={photoAreaForm.width}
-                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, width: n })}
-                    required
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Height</label>
-                  <NumberInput
-                    value={photoAreaForm.height}
-                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, height: n })}
-                    required
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Rotation (°)</label>
-                  <NumberInput
-                    float
-                    value={photoAreaForm.rotation}
-                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, rotation: n })}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Border Radius</label>
-                  <NumberInput
-                    value={photoAreaForm.border_radius}
-                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, border_radius: n })}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  />
-                </div>
-              </div>
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setAddingPhotoAreaTo(null)}
-                  className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-slate-50 dark:hover:bg-zinc-800"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={addPhotoAreaMutation.isPending}
-                  className="flex-1 px-4 py-2.5 rounded-lg bg-[#069494] text-white font-medium hover:bg-[#176161] disabled:opacity-50"
-                >
-                  {addPhotoAreaMutation.isPending ? "Adding..." : "Add"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
-      {/* Edit Photo Area Modal */}
-      {editingPhotoArea && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60" onClick={() => { setEditingPhotoArea(null); setPhotoAreaForm(defaultPhotoArea); }} />
-          <div className="relative w-full max-w-md bg-white dark:bg-[#111111] rounded-2xl shadow-xl overflow-hidden">
-            <div className="p-6 border-b border-slate-200 dark:border-zinc-800">
-              <h2 className="text-lg font-bold text-zinc-900 dark:text-white">Edit Photo Area</h2>
-            </div>
-            <form onSubmit={handleUpdatePhotoArea} className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Photo Index</label>
-                  <NumberInput
-                    value={photoAreaForm.photo_index}
-                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, photo_index: n })}
-                    min={1}
-                    emptyValue={1}
-                    required
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Shape</label>
-                  <select
-                    value={photoAreaForm.shape_type}
-                    onChange={(e) => setPhotoAreaForm({ ...photoAreaForm, shape_type: e.target.value as AdminShapeType })}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  >
-                    {SHAPE_TYPES.map((shape) => (
-                      <option key={shape} value={shape}>
-                        {shape}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">X Position</label>
-                  <NumberInput
-                    value={photoAreaForm.x}
-                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, x: n })}
-                    required
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Y Position</label>
-                  <NumberInput
-                    value={photoAreaForm.y}
-                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, y: n })}
-                    required
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Width</label>
-                  <NumberInput
-                    value={photoAreaForm.width}
-                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, width: n })}
-                    required
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Height</label>
-                  <NumberInput
-                    value={photoAreaForm.height}
-                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, height: n })}
-                    required
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Rotation (°)</label>
-                  <NumberInput
-                    float
-                    value={photoAreaForm.rotation}
-                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, rotation: n })}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Border Radius</label>
-                  <NumberInput
-                    value={photoAreaForm.border_radius}
-                    onChange={(n) => setPhotoAreaForm({ ...photoAreaForm, border_radius: n })}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-                  />
-                </div>
-              </div>
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => { setEditingPhotoArea(null); setPhotoAreaForm(defaultPhotoArea); }}
-                  className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-slate-50 dark:hover:bg-zinc-800"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={updatePhotoAreaMutation.isPending}
-                  className="flex-1 px-4 py-2.5 rounded-lg bg-[#069494] text-white font-medium hover:bg-[#176161] disabled:opacity-50"
-                >
-                  {updatePhotoAreaMutation.isPending ? "Saving..." : "Save Changes"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* Delete Photo Area Confirmation Modal */}
       {deletePhotoAreaConfirm && (
@@ -3075,6 +1470,38 @@ export default function AdminTemplatesPage() {
           </div>
         </div>
       )}
+
+      {/* Shared form modals */}
+      <TemplateFormModal
+        isOpen={isTemplateModalOpen}
+        onClose={() => setIsTemplateModalOpen(false)}
+        mode="admin"
+        editing={editingTemplate}
+        categories={templateModalCategories}
+        layouts={templateModalLayouts}
+      />
+      <CategoryFormModal
+        isOpen={isCategoryModalOpen}
+        onClose={() => setIsCategoryModalOpen(false)}
+        mode="admin"
+        editing={editingCategory}
+      />
+      <LayoutFormModal
+        isOpen={isLayoutModalOpen}
+        onClose={() => setIsLayoutModalOpen(false)}
+        mode="admin"
+        editing={editingLayout}
+      />
+      <PhotoAreaFormModal
+        isOpen={photoAreaModalLayoutId !== null}
+        onClose={closePhotoAreaModal}
+        mode="admin"
+        layoutId={photoAreaModalLayoutId ?? ""}
+        editing={editingPhotoAreaState}
+        onSaved={() =>
+          photoAreaModalLayoutId && syncLayoutPhotoCount(photoAreaModalLayoutId)
+        }
+      />
     </div>
   );
 }

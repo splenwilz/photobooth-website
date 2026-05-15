@@ -30,6 +30,9 @@ export interface AdminTemplateCategory {
   season_start_date: string | null; // "MM-DD" format
   season_end_date: string | null; // "MM-DD" format
   seasonal_priority: number;
+  // null = global ("Built-in"), non-null = caller-private ("Custom").
+  // Surfaced when `?include_global=true` returns the union of both.
+  owner_id: string | null;
   created_at: string;
 }
 
@@ -64,6 +67,8 @@ export interface AdminTemplateLayout {
   is_active: boolean;
   sort_order: number;
   photo_areas: AdminPhotoArea[];
+  // null = global ("Built-in"), non-null = caller-private ("Custom").
+  owner_id: string | null;
   created_at: string;
 }
 
@@ -113,6 +118,14 @@ export interface AdminTemplate {
   created_by: string;
   created_at: string;
   updated_at: string;
+  // Admin-only delete-gate metadata. Null on non-admin responses
+  // (anonymous marketplace / authenticated non-admin) — same redaction
+  // posture as `created_by`. `can_delete` is `purchase_count === 0`;
+  // hard-delete is blocked once any booth has purchased the template
+  // (would cascade-wipe refund/audit history). Use PATCH is_active=false
+  // to retire purchased templates instead — kiosks reconcile within ~30s.
+  purchase_count: number | null;
+  can_delete: boolean | null;
 }
 
 /**

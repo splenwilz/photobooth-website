@@ -1,0 +1,580 @@
+"use client";
+
+import { useState } from "react";
+import {
+	useCreateLayout,
+	useUpdateLayout,
+} from "@/core/api/templates/admin-queries";
+import {
+	useCreateMyLayout,
+	useUpdateMyLayout,
+} from "@/core/api/templates/me-queries";
+import type {
+	AdminShapeType,
+	AdminTemplateLayout,
+} from "@/core/api/templates/admin-types";
+import {
+	newDraftId,
+	parseLayoutFromClipboard,
+	serializeLayoutForClipboard,
+	type PhotoAreaFormData,
+} from "@/core/templates/layout-clipboard";
+import { NumberInput } from "./NumberInput";
+
+interface LayoutFormState {
+	layout_key: string;
+	name: string;
+	description: string;
+	width: number;
+	height: number;
+	photo_count: number;
+	product_category_id: number;
+	is_active: boolean;
+	sort_order: number;
+	photo_areas: PhotoAreaFormData[];
+}
+
+const PRODUCT_CATEGORIES = [
+	{ id: 1, name: "Strips" },
+	{ id: 2, name: "4x6" },
+	{ id: 3, name: "Smartphone" },
+];
+
+const DEFAULT_PHOTO_AREA: PhotoAreaFormData = {
+	photo_index: 1,
+	x: 0,
+	y: 0,
+	width: 400,
+	height: 400,
+	rotation: 0,
+	border_radius: 0,
+	shape_type: "rectangle",
+};
+
+const DEFAULT_LAYOUT_FORM: LayoutFormState = {
+	layout_key: "",
+	name: "",
+	description: "",
+	width: 603,
+	height: 1803,
+	photo_count: 0,
+	product_category_id: 1,
+	is_active: true,
+	sort_order: 0,
+	photo_areas: [],
+};
+
+export interface LayoutFormModalProps {
+	isOpen: boolean;
+	onClose: () => void;
+	mode: "admin" | "me";
+	editing: AdminTemplateLayout | null;
+}
+
+export function LayoutFormModal(props: LayoutFormModalProps) {
+	if (!props.isOpen) return null;
+	return <LayoutFormModalContent key={props.editing?.id ?? "new"} {...props} />;
+}
+
+function LayoutFormModalContent({
+	onClose,
+	mode,
+	editing,
+}: LayoutFormModalProps) {
+	const isAdmin = mode === "admin";
+	const [form, setForm] = useState<LayoutFormState>(() =>
+		editing
+			? {
+					layout_key: editing.layout_key,
+					name: editing.name,
+					description: editing.description ?? "",
+					width: editing.width,
+					height: editing.height,
+					photo_count: editing.photo_count,
+					product_category_id: editing.product_category_id,
+					is_active: editing.is_active,
+					sort_order: editing.sort_order,
+					photo_areas: [],
+				}
+			: DEFAULT_LAYOUT_FORM,
+	);
+	const [pasteMessage, setPasteMessage] = useState<{
+		type: "success" | "error";
+		text: string;
+	} | null>(null);
+
+	const adminCreate = useCreateLayout();
+	const adminUpdate = useUpdateLayout();
+	const meCreate = useCreateMyLayout();
+	const meUpdate = useUpdateMyLayout();
+	const create = isAdmin ? adminCreate : meCreate;
+	const update = isAdmin ? adminUpdate : meUpdate;
+	const isPending = create.isPending || update.isPending;
+	const error = create.error || update.error;
+
+	const handlePasteLayout = async () => {
+		try {
+			if (!navigator.clipboard?.readText) {
+				throw new Error(
+					"Clipboard API is unavailable. This page must run on HTTPS or localhost.",
+				);
+			}
+			const text = await navigator.clipboard.readText();
+			const parsed = parseLayoutFromClipboard(text);
+			setForm({
+				layout_key: parsed.layout_key,
+				name: parsed.name,
+				description: parsed.description,
+				width: parsed.width,
+				height: parsed.height,
+				photo_count: parsed.photo_areas.length,
+				product_category_id: parsed.product_category_id,
+				is_active: parsed.is_active,
+				sort_order: parsed.sort_order,
+				photo_areas: parsed.photo_areas,
+			});
+			const areaCount = parsed.photo_areas.length;
+			setPasteMessage({
+				type: "success",
+				text: `Pasted layout with ${areaCount} photo area${areaCount === 1 ? "" : "s"}.${parsed.layout_key ? " Layout key was copied — change it if you want a new layout in the same environment." : ""}`,
+			});
+		} catch (err) {
+			const isPermissionError =
+				err instanceof Error &&
+				(err.name === "NotAllowedError" || /not allowed/i.test(err.message));
+			setPasteMessage({
+				type: "error",
+				text: isPermissionError
+					? "Clipboard access was blocked. Allow clipboard access for this site in your browser settings and try again."
+					: err instanceof Error
+						? err.message
+						: "Failed to read clipboard.",
+			});
+		}
+	};
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		try {
+			if (editing) {
+				const updateData = {
+					layout_key: form.layout_key,
+					name: form.name,
+					description: form.description,
+					width: form.width,
+					height: form.height,
+					product_category_id: form.product_category_id,
+					is_active: form.is_active,
+					sort_order: form.sort_order,
+				};
+				if (isAdmin) {
+					await adminUpdate.mutateAsync({ id: editing.id, data: updateData });
+				} else {
+					await meUpdate.mutateAsync({ id: editing.id, data: updateData });
+				}
+			} else {
+				const createData = {
+					layout_key: form.layout_key,
+					name: form.name,
+					description: form.description,
+					width: form.width,
+					height: form.height,
+					photo_count: form.photo_areas.length,
+					product_category_id: form.product_category_id,
+					is_active: form.is_active,
+					sort_order: form.sort_order,
+					photo_areas: form.photo_areas,
+				};
+				if (isAdmin) {
+					await adminCreate.mutateAsync(createData);
+				} else {
+					await meCreate.mutateAsync(createData);
+				}
+			}
+			onClose();
+		} catch {
+			// error rendered below
+		}
+	};
+
+	const updateArea = (idx: number, patch: Partial<PhotoAreaFormData>) => {
+		setForm((prev) => ({
+			...prev,
+			photo_areas: prev.photo_areas.map((a, i) =>
+				i === idx ? { ...a, ...patch } : a,
+			),
+		}));
+	};
+
+	return (
+		<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+			<button
+				type="button"
+				aria-label="Close"
+				tabIndex={-1}
+				onClick={onClose}
+				className="absolute inset-0 bg-black/60 cursor-default"
+			/>
+			<div className="relative w-full max-w-xl bg-white dark:bg-[#111111] rounded-2xl shadow-xl overflow-hidden max-h-[90vh] overflow-y-auto">
+				<div className="p-6 border-b border-slate-200 dark:border-zinc-800 sticky top-0 bg-white dark:bg-[#111111]">
+					<div className="flex items-center justify-between gap-3">
+						<div>
+							<h2 className="text-lg font-bold text-zinc-900 dark:text-white">
+								{editing ? "Edit Layout" : "Create Layout"}
+							</h2>
+							{!isAdmin && (
+								<p className="text-sm text-zinc-500 mt-0.5">
+									Private layout for your own templates
+								</p>
+							)}
+						</div>
+						{isAdmin && !editing && (
+							<button
+								type="button"
+								onClick={handlePasteLayout}
+								className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800"
+								title="Fill the form from a copied layout JSON"
+							>
+								<svg
+									className="w-3.5 h-3.5"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+									strokeWidth={2}
+									aria-hidden="true"
+								>
+									<title>Paste</title>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+									/>
+								</svg>
+								Paste from clipboard
+							</button>
+						)}
+					</div>
+					{pasteMessage && !editing && isAdmin && (
+						<div
+							role="alert"
+							aria-live={pasteMessage.type === "error" ? "assertive" : "polite"}
+							className={`mt-3 px-3 py-2 rounded-lg text-xs ${
+								pasteMessage.type === "success"
+									? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400"
+									: "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400"
+							}`}
+						>
+							{pasteMessage.text}
+						</div>
+					)}
+				</div>
+				<form onSubmit={handleSubmit} className="p-6 space-y-4">
+					{error && (
+						<div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500">
+							{error.message}
+						</div>
+					)}
+					<div className="grid grid-cols-2 gap-4">
+						<div>
+							<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+								Name
+							</label>
+							<input
+								type="text"
+								value={form.name}
+								onChange={(e) => setForm({ ...form, name: e.target.value })}
+								required
+								className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
+							/>
+						</div>
+						<div>
+							<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+								Layout Key
+							</label>
+							<input
+								type="text"
+								value={form.layout_key}
+								onChange={(e) =>
+									setForm({ ...form, layout_key: e.target.value })
+								}
+								required
+								placeholder="Strip-3-Shot-Custom"
+								className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
+							/>
+						</div>
+					</div>
+					<div>
+						<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+							Description
+						</label>
+						<textarea
+							value={form.description}
+							onChange={(e) =>
+								setForm({ ...form, description: e.target.value })
+							}
+							rows={2}
+							className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
+						/>
+					</div>
+					<div className="grid grid-cols-3 gap-4">
+						<div>
+							<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+								Width (px)
+							</label>
+							<NumberInput
+								value={form.width}
+								onChange={(n) => setForm({ ...form, width: n })}
+								required
+								className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
+							/>
+						</div>
+						<div>
+							<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+								Height (px)
+							</label>
+							<NumberInput
+								value={form.height}
+								onChange={(n) => setForm({ ...form, height: n })}
+								required
+								className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
+							/>
+						</div>
+						<div>
+							<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+								Photo Count
+							</label>
+							<div className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-zinc-900 dark:text-white">
+								{editing ? form.photo_count : form.photo_areas.length}
+							</div>
+							<p className="text-xs text-zinc-500 mt-1">
+								{editing
+									? "Managed via photo areas in the expanded view"
+									: "Auto-set from photo areas below"}
+							</p>
+						</div>
+					</div>
+					<div className="grid grid-cols-2 gap-4">
+						<div>
+							<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+								Product Type
+							</label>
+							<select
+								value={form.product_category_id}
+								onChange={(e) =>
+									setForm({
+										...form,
+										product_category_id: parseInt(e.target.value, 10),
+									})
+								}
+								className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
+							>
+								{PRODUCT_CATEGORIES.map((cat) => (
+									<option key={cat.id} value={cat.id}>
+										{cat.name}
+									</option>
+								))}
+							</select>
+						</div>
+						{isAdmin && (
+							<div>
+								<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+									Sort Order
+								</label>
+								<NumberInput
+									value={form.sort_order}
+									onChange={(n) => setForm({ ...form, sort_order: n })}
+									className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
+								/>
+							</div>
+						)}
+					</div>
+					{isAdmin && (
+						<div>
+							<label className="flex items-center gap-2 cursor-pointer">
+								<input
+									type="checkbox"
+									checked={form.is_active}
+									onChange={(e) =>
+										setForm({ ...form, is_active: e.target.checked })
+									}
+									className="w-4 h-4 rounded border-slate-300 text-[#069494] focus:ring-[#069494]"
+								/>
+								<span className="text-sm text-zinc-700 dark:text-zinc-300">
+									Active
+								</span>
+							</label>
+						</div>
+					)}
+					{!editing && (
+						<div>
+							<div className="flex items-center justify-between mb-2">
+								<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+									Photo Areas ({form.photo_areas.length})
+								</label>
+								<button
+									type="button"
+									onClick={() =>
+										setForm((prev) => ({
+											...prev,
+											photo_areas: [
+												...prev.photo_areas,
+												{
+													...DEFAULT_PHOTO_AREA,
+													photo_index: prev.photo_areas.length + 1,
+													_draftId: newDraftId(),
+												},
+											],
+										}))
+									}
+									className="text-xs px-2.5 py-1 rounded-lg bg-[#069494] text-white hover:bg-[#176161]"
+								>
+									+ Add Photo Area
+								</button>
+							</div>
+							{form.photo_areas.length === 0 && (
+								<p className="text-xs text-zinc-400 italic py-3 text-center border border-dashed border-slate-200 dark:border-zinc-700 rounded-lg">
+									No photo areas added yet. Click &quot;+ Add Photo Area&quot; to get started.
+								</p>
+							)}
+							<div className="space-y-3">
+								{form.photo_areas.map((area, idx) => (
+									<div
+										key={area._draftId ?? idx}
+										className="p-3 rounded-lg border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-900"
+									>
+										<div className="flex items-center justify-between mb-2">
+											<span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+												Photo Area #{area.photo_index}
+											</span>
+											<button
+												type="button"
+												onClick={() =>
+													setForm((prev) => ({
+														...prev,
+														photo_areas: prev.photo_areas.filter(
+															(_, i) => i !== idx,
+														),
+													}))
+												}
+												className="text-xs text-red-500 hover:underline"
+											>
+												Remove
+											</button>
+										</div>
+										<div className="grid grid-cols-4 gap-2">
+											<MiniField label="Index">
+												<NumberInput
+													min={1}
+													emptyValue={1}
+													value={area.photo_index}
+													onChange={(n) => updateArea(idx, { photo_index: n })}
+													className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
+												/>
+											</MiniField>
+											<MiniField label="Shape">
+												<select
+													value={area.shape_type}
+													onChange={(e) =>
+														updateArea(idx, {
+															shape_type: e.target.value as AdminShapeType,
+														})
+													}
+													className="w-full px-1 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
+												>
+													<option value="rectangle">Rect</option>
+													<option value="rounded_rectangle">Rounded</option>
+													<option value="circle">Circle</option>
+													<option value="heart">Heart</option>
+													<option value="petal">Petal</option>
+												</select>
+											</MiniField>
+											<MiniField label="X">
+												<NumberInput
+													value={area.x}
+													onChange={(n) => updateArea(idx, { x: n })}
+													className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
+												/>
+											</MiniField>
+											<MiniField label="Y">
+												<NumberInput
+													value={area.y}
+													onChange={(n) => updateArea(idx, { y: n })}
+													className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
+												/>
+											</MiniField>
+											<MiniField label="Width">
+												<NumberInput
+													value={area.width}
+													onChange={(n) => updateArea(idx, { width: n })}
+													className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
+												/>
+											</MiniField>
+											<MiniField label="Height">
+												<NumberInput
+													value={area.height}
+													onChange={(n) => updateArea(idx, { height: n })}
+													className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
+												/>
+											</MiniField>
+											<MiniField label="Rotation">
+												<NumberInput
+													float
+													value={area.rotation}
+													onChange={(n) => updateArea(idx, { rotation: n })}
+													className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
+												/>
+											</MiniField>
+											<MiniField label="Radius">
+												<NumberInput
+													value={area.border_radius}
+													onChange={(n) =>
+														updateArea(idx, { border_radius: n })
+													}
+													className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
+												/>
+											</MiniField>
+										</div>
+									</div>
+								))}
+							</div>
+						</div>
+					)}
+					<div className="flex gap-3 pt-4">
+						<button
+							type="button"
+							onClick={onClose}
+							className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-slate-50 dark:hover:bg-zinc-800"
+						>
+							Cancel
+						</button>
+						<button
+							type="submit"
+							disabled={isPending}
+							className="flex-1 px-4 py-2.5 rounded-lg bg-[#069494] text-white font-medium hover:bg-[#176161] disabled:opacity-50"
+						>
+							{isPending ? "Saving..." : "Save"}
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	);
+}
+
+function MiniField({
+	label,
+	children,
+}: {
+	label: string;
+	children: React.ReactNode;
+}) {
+	return (
+		<div>
+			<label className="block text-[10px] text-zinc-500 mb-0.5">{label}</label>
+			{children}
+		</div>
+	);
+}
+
+// Re-export so callers can use the same util the admin page does without importing it.
+export { serializeLayoutForClipboard };
