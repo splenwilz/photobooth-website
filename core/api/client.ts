@@ -87,31 +87,42 @@ function isExpiredByHeader(res: Response): boolean {
  * @see https://nextjs.org/docs/app/building-your-application/authentication
  * @see https://nextjs.org/docs/app/building-your-application/routing/route-handlers
  */
-let inflightRefresh: Promise<boolean> | null = null
+// Browser-only: dedupe concurrent refreshes so a stale tab's parallel React
+// Query refetches share a single /api/auth/refresh round-trip. Do NOT extend
+// this to the server branch: the module is shared across requests on a
+// long-running Node process, so a server-side inflight promise would leak
+// user A's refresh result to user B.
+let inflightBrowserRefresh: Promise<boolean> | null = null
 
 async function triggerRefresh(): Promise<boolean> {
-  if (inflightRefresh) return inflightRefresh
-  inflightRefresh = (async () => {
-    try {
-      if (typeof window !== 'undefined') {
+  if (typeof window !== 'undefined') {
+    if (inflightBrowserRefresh) return inflightBrowserRefresh
+    inflightBrowserRefresh = (async () => {
+      try {
         const r = await fetch('/api/auth/refresh', {
           method: 'POST',
           credentials: 'include',
         })
         return r.ok
-      } else {
-        const { refreshTokenAction } = await import('@/core/api/auth/refresh/actions')
-        const result = await refreshTokenAction()
-        return result.success
+      } catch (e) {
+        console.error('Token refresh failed:', e)
+        return false
+      } finally {
+        inflightBrowserRefresh = null
       }
-    } catch (e) {
-      console.error('Token refresh failed:', e)
-      return false
-    } finally {
-      inflightRefresh = null
-    }
-  })()
-  return inflightRefresh
+    })()
+    return inflightBrowserRefresh
+  }
+
+  // Server-side: call the action directly. Each request gets its own promise.
+  try {
+    const { refreshTokenAction } = await import('@/core/api/auth/refresh/actions')
+    const result = await refreshTokenAction()
+    return result.success
+  } catch (e) {
+    console.error('Token refresh failed:', e)
+    return false
+  }
 }
 
 /**

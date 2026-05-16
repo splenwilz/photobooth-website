@@ -74,7 +74,7 @@ export default function TermsPage() {
 
       {/* Body */}
       <section className="px-6 pb-24">
-        <div className="prose max-w-3xl mx-auto scroll-smooth">
+        <div className="prose max-w-3xl mx-auto">
           <h2 id="introduction">Introduction</h2>
           <p>
             These Terms of Service (the <strong>Terms</strong>) are a contract
