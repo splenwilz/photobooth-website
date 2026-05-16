@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { ContactForm } from "./ContactForm";
 
 export const metadata: Metadata = {
@@ -33,8 +34,6 @@ const contactOptions = [
 
 const quickLinks = [
   { title: "Documentation", href: "/docs", description: "Browse our guides and tutorials" },
-  { title: "Downloads", href: "/downloads", description: "Get the latest version of BoothIQ" },
-  { title: "Pricing", href: "/pricing", description: "View plans and hardware packages" },
   { title: "Features", href: "/features", description: "Explore all BoothIQ features" },
 ];
 
@@ -99,7 +98,9 @@ export default function ContactPage() {
               <p className="text-[var(--muted)] mb-8">
                 Fill out the form below and we&apos;ll get back to you within 24 hours.
               </p>
-              <ContactForm />
+              <Suspense fallback={<div className="h-[600px]" aria-hidden="true" />}>
+                <ContactForm />
+              </Suspense>
             </div>
 
             {/* Info Panel */}
@@ -224,10 +225,6 @@ export default function ContactPage() {
             Can&apos;t find what you&apos;re looking for? Check our{" "}
             <Link href="/docs" className="text-[#069494] hover:text-[#0EC7C7] transition-colors">
               documentation
-            </Link>{" "}
-            or{" "}
-            <Link href="/pricing" className="text-[#069494] hover:text-[#0EC7C7] transition-colors">
-              pricing FAQ
             </Link>
             .
           </p>
@@ -237,12 +234,6 @@ export default function ContactPage() {
               className="px-6 py-3 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors"
             >
               Browse Documentation
-            </Link>
-            <Link
-              href="/pricing#faq"
-              className="px-6 py-3 rounded-xl border border-[var(--border)] font-semibold hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
-            >
-              View Pricing FAQ
             </Link>
           </div>
         </div>

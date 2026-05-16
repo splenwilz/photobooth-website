@@ -49,7 +49,7 @@ export function usePricingPlans() {
  *   data: {
  *     price_id: "price_abc123",
  *     success_url: window.location.origin + "/success",
- *     cancel_url: window.location.origin + "/pricing",
+ *     cancel_url: window.location.origin + "/dashboard/booths",
  *   },
  * }, {
  *   onSuccess: (data) => {

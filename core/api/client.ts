@@ -87,23 +87,31 @@ function isExpiredByHeader(res: Response): boolean {
  * @see https://nextjs.org/docs/app/building-your-application/authentication
  * @see https://nextjs.org/docs/app/building-your-application/routing/route-handlers
  */
+let inflightRefresh: Promise<boolean> | null = null
+
 async function triggerRefresh(): Promise<boolean> {
-  try {
-    if (typeof window !== 'undefined') {
-      const r = await fetch('/api/auth/refresh', {
-        method: 'POST',
-        credentials: 'include',
-      })
-      return r.ok
-    } else {
-      const { refreshTokenAction } = await import('@/core/api/auth/refresh/actions')
-      const result = await refreshTokenAction()
-      return result.success
+  if (inflightRefresh) return inflightRefresh
+  inflightRefresh = (async () => {
+    try {
+      if (typeof window !== 'undefined') {
+        const r = await fetch('/api/auth/refresh', {
+          method: 'POST',
+          credentials: 'include',
+        })
+        return r.ok
+      } else {
+        const { refreshTokenAction } = await import('@/core/api/auth/refresh/actions')
+        const result = await refreshTokenAction()
+        return result.success
+      }
+    } catch (e) {
+      console.error('Token refresh failed:', e)
+      return false
+    } finally {
+      inflightRefresh = null
     }
-  } catch (e) {
-    console.error('Token refresh failed:', e)
-    return false
-  }
+  })()
+  return inflightRefresh
 }
 
 /**
