@@ -1,13 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  useReleases,
-  formatFileSize,
-  getAssetDownloadUrl,
-  type Release,
-  type ReleaseAsset,
-} from "@/core/api/releases";
+import { useReleases } from "@/core/api/releases";
 
 /**
  * Format date for display
@@ -19,49 +13,6 @@ function formatReleaseDate(dateString: string): string {
     day: "numeric",
     year: "numeric",
   });
-}
-
-/**
- * Get Windows asset from release (with fallbacks)
- * Returns undefined if no Windows asset is found
- */
-function getWindowsAsset(release: Release): ReleaseAsset | undefined {
-  if (!release.assets || release.assets.length === 0) {
-    return undefined;
-  }
-
-  // Try exact match: windows + x64
-  let asset = release.assets.find(
-    (a) => a.platform === "windows" && a.architecture === "x64"
-  );
-  if (asset) return asset;
-
-  // Try any windows asset
-  asset = release.assets.find((a) => a.platform === "windows");
-  if (asset) return asset;
-
-  // Try by filename (case-insensitive)
-  // Note: Use "windows" or extension checks, avoid "win" as it matches "darwin"
-  asset = release.assets.find((a) => {
-    const name = a.name.toLowerCase();
-    // Exclude macOS/Linux explicitly
-    if (name.includes("darwin") || name.includes("macos") || name.includes("linux")) {
-      return false;
-    }
-    // Match Windows-specific patterns
-    return name.includes("windows") || name.endsWith(".exe") || name.endsWith(".msi");
-  });
-  if (asset) return asset;
-
-  // No Windows asset found - return undefined instead of wrong platform
-  return undefined;
-}
-
-/**
- * Get total download count for a release
- */
-function getTotalDownloads(release: Release): number {
-  return release.assets.reduce((sum, asset) => sum + asset.download_count, 0);
 }
 
 export default function ChangelogPage() {
@@ -107,8 +58,6 @@ export default function ChangelogPage() {
                         </div>
                         <div className="flex gap-4">
                           <div className="h-4 w-28 bg-[var(--border)] rounded animate-pulse" />
-                          <div className="h-4 w-20 bg-[var(--border)] rounded animate-pulse" />
-                          <div className="h-4 w-32 bg-[var(--border)] rounded animate-pulse" />
                         </div>
                       </div>
 
@@ -122,10 +71,6 @@ export default function ChangelogPage() {
                         </div>
                       </div>
 
-                      {/* Download button skeleton */}
-                      <div className="px-6 pb-6">
-                        <div className="h-10 w-36 bg-[var(--border)] rounded-xl animate-pulse" />
-                      </div>
                     </div>
                   </div>
                 ))}
@@ -171,13 +116,13 @@ export default function ChangelogPage() {
 
         <div className="relative max-w-4xl mx-auto">
           <Link
-            href="/downloads"
+            href="/docs"
             className="inline-flex items-center gap-2 text-[var(--muted)] hover:text-[var(--foreground)] transition-colors mb-8"
           >
             <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
-            Back to Downloads
+            Back to Docs
           </Link>
 
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#069494]/10 border border-[#069494]/20 text-[#176161] dark:text-[#0EC7C7] text-sm font-medium mb-6">
@@ -205,10 +150,6 @@ export default function ChangelogPage() {
               {releases.map((release, index) => {
                 const version = release.tag_name.replace(/^v/, "");
                 const date = formatReleaseDate(release.published_at);
-                const windowsAsset = getWindowsAsset(release);
-                const downloadUrl = windowsAsset ? getAssetDownloadUrl(windowsAsset.id) : "#";
-                const fileSize = windowsAsset ? formatFileSize(windowsAsset.size) : null;
-                const downloads = getTotalDownloads(release);
                 const isLatest = index === 0;
 
                 return (
@@ -258,20 +199,6 @@ export default function ChangelogPage() {
                             </svg>
                             {date}
                           </span>
-                          {fileSize && (
-                            <span className="flex items-center gap-1.5">
-                              <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                              </svg>
-                              {fileSize}
-                            </span>
-                          )}
-                          <span className="flex items-center gap-1.5">
-                            <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>
-                            {downloads.toLocaleString()} downloads
-                          </span>
                         </div>
                       </div>
 
@@ -295,20 +222,6 @@ export default function ChangelogPage() {
                         )}
                       </div>
 
-                      {/* Download button */}
-                      {windowsAsset && (
-                        <div className="px-6 pb-6">
-                          <a
-                            href={downloadUrl}
-                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#069494] text-white font-medium hover:bg-[#176161] transition-colors"
-                          >
-                            <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>
-                            Download v{version}
-                          </a>
-                        </div>
-                      )}
                     </div>
                   </div>
                 );

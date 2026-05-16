@@ -38,6 +38,6 @@ export function getCheckoutUrls() {
 
   return {
     success: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel: `${origin}/pricing`,
+    cancel: `${origin}/dashboard/booths`,
   };
 }

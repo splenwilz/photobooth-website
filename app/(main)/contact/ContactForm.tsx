@@ -1,8 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 
-type InquiryType = "sales" | "support" | "partnership" | "other";
+type InquiryType = "demo" | "sales" | "support" | "partnership" | "other";
+
+const INQUIRY_TYPES: readonly InquiryType[] = ["demo", "sales", "support", "partnership", "other"];
+
+function isInquiryType(value: string | null): value is InquiryType {
+  return value !== null && (INQUIRY_TYPES as readonly string[]).includes(value);
+}
 
 interface FormData {
   name: string;
@@ -13,11 +20,15 @@ interface FormData {
 }
 
 export function ContactForm() {
+  const searchParams = useSearchParams();
+  const initialInquiry: InquiryType = isInquiryType(searchParams.get("inquiry"))
+    ? (searchParams.get("inquiry") as InquiryType)
+    : "sales";
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
     company: "",
-    inquiryType: "sales",
+    inquiryType: initialInquiry,
     message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -141,6 +152,7 @@ export function ContactForm() {
           onChange={(e) => setFormData({ ...formData, inquiryType: e.target.value as InquiryType })}
           className="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#069494] focus:border-transparent transition-all"
         >
+          <option value="demo">Demo request</option>
           <option value="sales">Sales inquiry</option>
           <option value="support">Technical support</option>
           <option value="partnership">Partnership opportunity</option>

@@ -243,10 +243,10 @@ function CheckoutSuccessContent() {
             We couldn&apos;t verify your payment. Please contact support if you believe this is an error.
           </p>
           <Link
-            href="/pricing"
+            href="/dashboard/booths"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#069494] text-white font-semibold hover:bg-[#176161] transition-colors"
           >
-            Back to Pricing
+            Back to Dashboard
           </Link>
         </div>
       </div>

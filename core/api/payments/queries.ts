@@ -160,7 +160,7 @@ export function useBoothSubscription(boothId: string | null) {
  *   mutate({
  *     booth_id: boothId,
  *     success_url: `${window.location.origin}/checkout/success`,
- *     cancel_url: `${window.location.origin}/pricing`,
+ *     cancel_url: `${window.location.origin}/dashboard/booths`,
  *   }, {
  *     onSuccess: (data) => {
  *       window.location.href = data.checkout_url;

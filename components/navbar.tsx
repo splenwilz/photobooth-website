@@ -10,9 +10,9 @@ import type { AuthUser } from "@/core/api/auth/types";
 const links = [
   { href: "/features", label: "Features" },
   { href: "/templates", label: "Templates" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/docs", label: "Docs" },
-  { href: "/downloads", label: "Downloads" },
+  { href: "/docs", label: "Learn" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
 ];
 
 function getUserFromCookie(): AuthUser | null {

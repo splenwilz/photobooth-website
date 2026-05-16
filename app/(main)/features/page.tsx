@@ -545,12 +545,6 @@ export default function FeaturesPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </Link>
-            <Link
-              href="/pricing"
-              className="w-full sm:w-auto px-10 py-5 rounded-xl border-2 border-[#069494]/40 font-semibold text-lg hover:bg-[#069494]/10 transition-all"
-            >
-              View Pricing
-            </Link>
           </div>
         </div>
       </section>

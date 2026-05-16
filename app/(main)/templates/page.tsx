@@ -79,7 +79,7 @@ export default function TemplatesPage() {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       {/* Hero Section — top padding clears the sticky navbar (~96-100px)
-          on every breakpoint, same fix as the pricing/downloads heroes. */}
+          on every breakpoint. */}
       <section className="relative pt-28 sm:pt-32 lg:pt-36 pb-12 px-6 overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#069494]/10 blur-[150px] rounded-full" />
 
@@ -361,12 +361,6 @@ export default function TemplatesPage() {
                 >
                   Request Custom Template
                 </Link>
-                <Link
-                  href="/pricing"
-                  className="px-8 py-3.5 rounded-xl border border-white/30 text-white font-semibold hover:bg-white/10 transition-colors"
-                >
-                  View Pricing
-                </Link>
               </div>
             </div>
           </div>
@@ -374,10 +368,9 @@ export default function TemplatesPage() {
       </section>
 
       {/* ============================================
-       * FAQ Section — matches the FAQ pattern on features/pricing/
-       * downloads (header pill, simple stacked cards). Dropped the
+       * FAQ Section — header pill, simple stacked cards. Dropped the
        * "30-day money-back guarantee" question because that policy
-       * doesn&apos;t exist; same lie we removed from the pricing page.
+       * doesn&apos;t exist.
        * ============================================ */}
       <section className="py-24 px-6">
         <div className="max-w-3xl mx-auto">

@@ -10,9 +10,8 @@ export const metadata: Metadata = {
 /**
  * Public Support landing page.
  *
- * The marketing site, the auth flows, the downloads page, and the docs
- * all link visitors to /support when they need help. Before this page
- * existed those links were 404s. This page funnels visitors to the
+ * The marketing site, the auth flows, and the docs all link visitors
+ * to /support when they need help. This page funnels visitors to the
  * right place:
  *   1. Self-service via the docs (most common case)
  *   2. The dashboard ticketing system at /dashboard/support (logged-in
@@ -69,16 +68,6 @@ const commonIssues = [
     q: "How do I link my booth to my account?",
     href: "/docs/getting-started",
     cta: "Setup guide",
-  },
-  {
-    q: "How do I install the Windows app?",
-    href: "/downloads",
-    cta: "Downloads",
-  },
-  {
-    q: "How does per-booth pricing work?",
-    href: "/pricing",
-    cta: "Pricing",
   },
   {
     q: "What features are included?",
