@@ -23,6 +23,7 @@
   --background: #ffffff;
   --background-elevated: #f8fafc;
   --background-card: #f1f5f9;
+  --card: var(--background-card);
   --foreground: #0f172a;
   --foreground-muted: #475569;
   --muted: #64748b;
@@ -39,6 +40,7 @@
   --background: #0a0a0a;
   --background-elevated: #111111;
   --background-card: #18181b;
+  --card: var(--background-card);
   --foreground: #f1f5f9;
   --foreground-muted: #a1a1aa;
   --muted: #94a3b8;

@@ -6,7 +6,7 @@ const footerLinks = [
     title: "Product",
     links: [
       { href: "/features", label: "Features" },
-      { href: "/changelog", label: "Changelog" },
+      { href: "/docs/changelog", label: "Changelog" },
     ],
   },
   {
@@ -15,6 +15,7 @@ const footerLinks = [
       { href: "/docs", label: "Documentation" },
       { href: "/docs/getting-started", label: "Getting Started" },
       { href: "/support", label: "Support" },
+      { href: "/about", label: "About" },
     ],
   },
   {
