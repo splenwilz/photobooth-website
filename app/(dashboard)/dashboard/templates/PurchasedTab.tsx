@@ -223,7 +223,7 @@ export function PurchasedTab() {
 											type="button"
 											onClick={() => handleDownload(purchase)}
 											disabled={downloadingId === purchase.template.id}
-											className="opacity-0 group-hover:opacity-100 transition-opacity px-4 py-2.5 rounded-xl bg-white text-zinc-900 font-semibold text-sm hover:bg-zinc-100 disabled:opacity-50 flex items-center gap-2"
+											className="px-4 py-2.5 rounded-xl bg-white text-zinc-900 font-semibold text-sm hover:bg-zinc-100 disabled:opacity-50 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#069494] focus-visible:ring-offset-2"
 										>
 											{downloadingId === purchase.template.id ? (
 												<svg

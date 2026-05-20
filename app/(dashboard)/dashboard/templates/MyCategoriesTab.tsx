@@ -35,6 +35,15 @@ export function MyCategoriesTab({ onCount }: MyCategoriesTabProps) {
 		onCount?.(mineCount);
 	}, [onCount, mineCount]);
 
+	useEffect(() => {
+		if (confirmDeleteId === null) return;
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key === "Escape") setConfirmDeleteId(null);
+		};
+		document.addEventListener("keydown", onKey);
+		return () => document.removeEventListener("keydown", onKey);
+	}, [confirmDeleteId]);
+
 	const openCreate = () => {
 		setEditing(null);
 		setIsOpen(true);
@@ -232,9 +241,15 @@ export function MyCategoriesTab({ onCount }: MyCategoriesTabProps) {
 						className="absolute inset-0 bg-black/60 cursor-default"
 						onClick={() => setConfirmDeleteId(null)}
 					/>
-					<div className="relative w-full max-w-sm bg-white dark:bg-[#111111] rounded-2xl shadow-xl p-6">
-						<h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-2">Delete Category</h3>
-						<p className="text-sm text-zinc-500 mb-6">
+					<div
+						role="dialog"
+						aria-modal="true"
+						aria-labelledby="delete-category-title"
+						aria-describedby="delete-category-desc"
+						className="relative w-full max-w-sm bg-white dark:bg-[#111111] rounded-2xl shadow-xl p-6"
+					>
+						<h3 id="delete-category-title" className="text-lg font-bold text-zinc-900 dark:text-white mb-2">Delete Category</h3>
+						<p id="delete-category-desc" className="text-sm text-zinc-500 mb-6">
 							Are you sure you want to delete this category? This action cannot be undone.
 						</p>
 						{del.error && (
@@ -245,6 +260,7 @@ export function MyCategoriesTab({ onCount }: MyCategoriesTabProps) {
 						<div className="flex gap-3">
 							<button
 								type="button"
+								autoFocus
 								onClick={() => setConfirmDeleteId(null)}
 								className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-slate-50 dark:hover:bg-zinc-800"
 							>

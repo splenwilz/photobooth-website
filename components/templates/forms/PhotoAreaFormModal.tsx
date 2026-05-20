@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import {
 	useAddPhotoArea,
 	useUpdatePhotoArea,
@@ -85,7 +85,7 @@ function PhotoAreaFormModalContent({
 	const isPending = add.isPending || update.isPending;
 	const error = add.error || update.error;
 
-	const handleSubmit = async (e: React.FormEvent) => {
+	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
 		try {
 			if (editing?.id !== undefined) {
@@ -241,7 +241,7 @@ function Field({
 	children,
 }: {
 	label: string;
-	children: React.ReactNode;
+	children: ReactNode;
 }) {
 	return (
 		<div>

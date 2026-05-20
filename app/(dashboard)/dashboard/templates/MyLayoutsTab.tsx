@@ -45,6 +45,24 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 		onCount?.(mineCount);
 	}, [onCount, mineCount]);
 
+	useEffect(() => {
+		if (confirmDeleteLayoutId === null) return;
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key === "Escape") setConfirmDeleteLayoutId(null);
+		};
+		document.addEventListener("keydown", onKey);
+		return () => document.removeEventListener("keydown", onKey);
+	}, [confirmDeleteLayoutId]);
+
+	useEffect(() => {
+		if (confirmDeleteArea === null) return;
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key === "Escape") setConfirmDeleteArea(null);
+		};
+		document.addEventListener("keydown", onKey);
+		return () => document.removeEventListener("keydown", onKey);
+	}, [confirmDeleteArea]);
+
 	const openCreateLayout = () => {
 		setEditingLayout(null);
 		setLayoutModalOpen(true);
@@ -130,6 +148,8 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 											}
 											className="p-1 rounded hover:bg-slate-100 dark:hover:bg-zinc-800"
 											aria-label={isExpanded ? "Collapse" : "Expand"}
+											aria-expanded={isExpanded}
+											aria-controls={`panel-${layout.id}`}
 										>
 											<svg
 												className={`w-5 h-5 text-zinc-500 transition-transform ${
@@ -230,7 +250,12 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 								</div>
 
 								{isExpanded && (
-									<div className="border-t border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/50 p-4">
+									<div
+										id={`panel-${layout.id}`}
+										role="region"
+										aria-label={`Photo areas for ${layout.name}`}
+										className="border-t border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/50 p-4"
+									>
 										<div className="flex items-center justify-between mb-4">
 											<h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
 												Photo Areas
@@ -374,9 +399,15 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 						className="absolute inset-0 bg-black/60 cursor-default"
 						onClick={() => setConfirmDeleteLayoutId(null)}
 					/>
-					<div className="relative w-full max-w-sm bg-white dark:bg-[#111111] rounded-2xl shadow-xl p-6">
-						<h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-2">Delete Layout</h3>
-						<p className="text-sm text-zinc-500 mb-6">
+					<div
+						role="dialog"
+						aria-modal="true"
+						aria-labelledby="delete-layout-title"
+						aria-describedby="delete-layout-desc"
+						className="relative w-full max-w-sm bg-white dark:bg-[#111111] rounded-2xl shadow-xl p-6"
+					>
+						<h3 id="delete-layout-title" className="text-lg font-bold text-zinc-900 dark:text-white mb-2">Delete Layout</h3>
+						<p id="delete-layout-desc" className="text-sm text-zinc-500 mb-6">
 							This will also delete all photo areas in this layout. This action cannot be undone.
 						</p>
 						{delLayout.error && (
@@ -387,6 +418,7 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 						<div className="flex gap-3">
 							<button
 								type="button"
+								autoFocus
 								onClick={() => setConfirmDeleteLayoutId(null)}
 								className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-slate-50 dark:hover:bg-zinc-800"
 							>
@@ -418,14 +450,26 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 						className="absolute inset-0 bg-black/60 cursor-default"
 						onClick={() => setConfirmDeleteArea(null)}
 					/>
-					<div className="relative w-full max-w-sm bg-white dark:bg-[#111111] rounded-2xl shadow-xl p-6">
-						<h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-2">Delete Photo Area</h3>
-						<p className="text-sm text-zinc-500 mb-6">
+					<div
+						role="dialog"
+						aria-modal="true"
+						aria-labelledby="delete-area-title"
+						aria-describedby="delete-area-desc"
+						className="relative w-full max-w-sm bg-white dark:bg-[#111111] rounded-2xl shadow-xl p-6"
+					>
+						<h3 id="delete-area-title" className="text-lg font-bold text-zinc-900 dark:text-white mb-2">Delete Photo Area</h3>
+						<p id="delete-area-desc" className="text-sm text-zinc-500 mb-6">
 							Are you sure you want to delete this photo area? This action cannot be undone.
 						</p>
+						{delArea.error && (
+							<div className="p-3 mb-4 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500">
+								{delArea.error.message}
+							</div>
+						)}
 						<div className="flex gap-3">
 							<button
 								type="button"
+								autoFocus
 								onClick={() => setConfirmDeleteArea(null)}
 								className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-slate-50 dark:hover:bg-zinc-800"
 							>

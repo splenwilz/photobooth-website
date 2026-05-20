@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import {
 	useCreateCategory,
 	useUpdateCategory,
@@ -80,7 +80,7 @@ function CategoryFormModalContent({
 	const isPending = create.isPending || update.isPending;
 	const error = create.error || update.error;
 
-	const handleSubmit = async (e: React.FormEvent) => {
+	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
 		const seasonal = form.is_seasonal_category
 			? {

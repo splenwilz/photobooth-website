@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import {
 	useCreateLayout,
 	useUpdateLayout,
@@ -153,7 +153,7 @@ function LayoutFormModalContent({
 		}
 	};
 
-	const handleSubmit = async (e: React.FormEvent) => {
+	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
 		try {
 			if (editing) {
@@ -566,7 +566,7 @@ function MiniField({
 	children,
 }: {
 	label: string;
-	children: React.ReactNode;
+	children: ReactNode;
 }) {
 	return (
 		<div>

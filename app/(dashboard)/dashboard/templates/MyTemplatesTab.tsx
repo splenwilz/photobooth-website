@@ -74,6 +74,15 @@ export function MyTemplatesTab({ onCount }: MyTemplatesTabProps) {
 		onCount?.(total);
 	}, [onCount, total]);
 
+	useEffect(() => {
+		if (confirmDelete === null) return;
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key === "Escape") setConfirmDelete(null);
+		};
+		document.addEventListener("keydown", onKey);
+		return () => document.removeEventListener("keydown", onKey);
+	}, [confirmDelete]);
+
 	const filteredTemplates = useMemo(() => {
 		if (!searchQuery) return templates;
 		const q = searchQuery.toLowerCase();
@@ -383,7 +392,13 @@ export function MyTemplatesTab({ onCount }: MyTemplatesTabProps) {
 						className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-default"
 						onClick={() => setConfirmDelete(null)}
 					/>
-					<div className="relative w-full max-w-md bg-white dark:bg-[#111111] rounded-2xl shadow-2xl overflow-hidden">
+					<div
+						role="dialog"
+						aria-modal="true"
+						aria-labelledby="delete-template-title"
+						aria-describedby="delete-template-desc"
+						className="relative w-full max-w-md bg-white dark:bg-[#111111] rounded-2xl shadow-2xl overflow-hidden"
+					>
 						<div className="p-6 text-center">
 							<div className="w-16 h-16 mx-auto rounded-full bg-red-500/20 flex items-center justify-center mb-4">
 								<svg
@@ -402,8 +417,8 @@ export function MyTemplatesTab({ onCount }: MyTemplatesTabProps) {
 									/>
 								</svg>
 							</div>
-							<h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">Delete Template</h3>
-							<p className="text-zinc-500 mb-6">
+							<h3 id="delete-template-title" className="text-xl font-bold text-zinc-900 dark:text-white mb-2">Delete Template</h3>
+							<p id="delete-template-desc" className="text-zinc-500 mb-6">
 								Are you sure you want to delete{" "}
 								<span className="font-medium text-zinc-900 dark:text-white">{confirmDelete.name}</span>?
 								This action cannot be undone.
@@ -411,6 +426,7 @@ export function MyTemplatesTab({ onCount }: MyTemplatesTabProps) {
 							<div className="flex gap-3 justify-center">
 								<button
 									type="button"
+									autoFocus
 									onClick={() => setConfirmDelete(null)}
 									className="px-6 py-2.5 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 transition-colors"
 								>

@@ -21,6 +21,7 @@ import type {
 	MyLayoutsResponse,
 	MyPresignRequest,
 	MyPresignResponse,
+	MyShapeType,
 	MyTemplate,
 	MyTemplateCreateRequest,
 	MyTemplateCreateResponse,
@@ -206,7 +207,7 @@ export async function addMyPhotoAreaToLayout(
 		height: number;
 		rotation?: number;
 		border_radius?: number;
-		shape_type?: string;
+		shape_type?: MyShapeType;
 	},
 ): Promise<{ id: number; layout_id: string }> {
 	return apiClient(`${ME_BASE}/layouts/${layoutId}/photo-areas`, {
@@ -226,7 +227,7 @@ export async function updateMyPhotoArea(
 		height: number;
 		rotation: number;
 		border_radius: number;
-		shape_type: string;
+		shape_type: MyShapeType;
 	}>,
 ): Promise<{ id: number; layout_id: string }> {
 	return apiClient(

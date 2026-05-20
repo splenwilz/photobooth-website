@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
 	useCreateTemplate,
 	useUpdateTemplate,
@@ -108,6 +108,14 @@ function TemplateFormModalContent({
 	const previewFileRef = useRef<HTMLInputElement>(null);
 	const overlayFileRef = useRef<HTMLInputElement>(null);
 
+	useEffect(() => {
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key === "Escape") onClose();
+		};
+		document.addEventListener("keydown", onKey);
+		return () => document.removeEventListener("keydown", onKey);
+	}, [onClose]);
+
 	const adminCreate = useCreateTemplate();
 	const adminUpdate = useUpdateTemplate();
 	const meCreate = useCreateMyTemplate();
@@ -213,8 +221,32 @@ function TemplateFormModalContent({
 	const handleSubmit = async () => {
 		setFormError(null);
 
+		const trimmedName = form.name.trim();
+		if (!trimmedName) {
+			setFormError("Template name is required");
+			return;
+		}
+
+		// Admins set price; non-admin users don't. Validate as a finite,
+		// non-negative number, then format back to a 2dp decimal string for
+		// the API (AdminTemplateUpdateRequest.price is `string`).
+		let validatedPrice: string | undefined;
+		if (isAdmin) {
+			const priceRaw = form.price.trim();
+			if (priceRaw === "") {
+				setFormError("Price is required");
+				return;
+			}
+			const priceNum = Number(priceRaw);
+			if (!Number.isFinite(priceNum) || priceNum < 0) {
+				setFormError("Price must be a non-negative number");
+				return;
+			}
+			validatedPrice = priceNum.toFixed(2);
+		}
+
 		const baseMeta = {
-			name: form.name,
+			name: trimmedName,
 			description: form.description || undefined,
 			category_id: form.category_id ?? undefined,
 			layout_id: form.layout_id ?? undefined,
@@ -227,7 +259,7 @@ function TemplateFormModalContent({
 				const adminUpdateData = {
 					...baseMeta,
 					status: form.status,
-					price: form.price,
+					price: validatedPrice,
 					sort_order: form.sort_order,
 				};
 				if (isAdmin) {
@@ -257,10 +289,6 @@ function TemplateFormModalContent({
 				setFormError("Both template file and preview file are required");
 				return;
 			}
-			if (!form.name.trim()) {
-				setFormError("Template name is required");
-				return;
-			}
 
 			if (isAdmin) {
 				await adminCreate.mutateAsync({
@@ -270,7 +298,7 @@ function TemplateFormModalContent({
 					metadata: {
 						...baseMeta,
 						status: form.status,
-						price: form.price,
+						price: validatedPrice,
 						sort_order: form.sort_order,
 					},
 				});
@@ -303,7 +331,12 @@ function TemplateFormModalContent({
 				onClick={onClose}
 				className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-default"
 			/>
-			<div className="relative w-full max-w-2xl bg-white dark:bg-[#111111] rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+			<div
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby="template-modal-title"
+				className="relative w-full max-w-2xl bg-white dark:bg-[#111111] rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
+			>
 				<button
 					type="button"
 					onClick={onClose}
@@ -327,7 +360,7 @@ function TemplateFormModalContent({
 					</svg>
 				</button>
 				<div className="p-6 border-b border-[var(--border)]">
-					<h2 className="text-xl font-bold text-zinc-900 dark:text-white">
+					<h2 id="template-modal-title" className="text-xl font-bold text-zinc-900 dark:text-white">
 						{editing ? "Edit Template" : "Add New Template"}
 					</h2>
 					<p className="text-zinc-500 mt-1">
