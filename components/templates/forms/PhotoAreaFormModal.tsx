@@ -144,8 +144,9 @@ function PhotoAreaFormModalContent({
 						</div>
 					)}
 					<div className="grid grid-cols-2 gap-4">
-						<Field label="Photo Index">
+						<Field label="Photo Index" htmlFor="pa-photo-index">
 							<NumberInput
+								id="pa-photo-index"
 								value={form.photo_index}
 								onChange={(n) => setForm({ ...form, photo_index: n })}
 								min={1}
@@ -154,8 +155,9 @@ function PhotoAreaFormModalContent({
 								className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
 							/>
 						</Field>
-						<Field label="Shape">
+						<Field label="Shape" htmlFor="pa-shape">
 							<select
+								id="pa-shape"
 								value={form.shape_type}
 								onChange={(e) =>
 									setForm({
@@ -174,16 +176,18 @@ function PhotoAreaFormModalContent({
 						</Field>
 					</div>
 					<div className="grid grid-cols-2 gap-4">
-						<Field label="X Position">
+						<Field label="X Position" htmlFor="pa-x">
 							<NumberInput
+								id="pa-x"
 								value={form.x}
 								onChange={(n) => setForm({ ...form, x: n })}
 								required
 								className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
 							/>
 						</Field>
-						<Field label="Y Position">
+						<Field label="Y Position" htmlFor="pa-y">
 							<NumberInput
+								id="pa-y"
 								value={form.y}
 								onChange={(n) => setForm({ ...form, y: n })}
 								required
@@ -192,16 +196,18 @@ function PhotoAreaFormModalContent({
 						</Field>
 					</div>
 					<div className="grid grid-cols-2 gap-4">
-						<Field label="Width">
+						<Field label="Width" htmlFor="pa-width">
 							<NumberInput
+								id="pa-width"
 								value={form.width}
 								onChange={(n) => setForm({ ...form, width: n })}
 								required
 								className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
 							/>
 						</Field>
-						<Field label="Height">
+						<Field label="Height" htmlFor="pa-height">
 							<NumberInput
+								id="pa-height"
 								value={form.height}
 								onChange={(n) => setForm({ ...form, height: n })}
 								required
@@ -210,16 +216,18 @@ function PhotoAreaFormModalContent({
 						</Field>
 					</div>
 					<div className="grid grid-cols-2 gap-4">
-						<Field label="Rotation (°)">
+						<Field label="Rotation (°)" htmlFor="pa-rotation">
 							<NumberInput
+								id="pa-rotation"
 								float
 								value={form.rotation}
 								onChange={(n) => setForm({ ...form, rotation: n })}
 								className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
 							/>
 						</Field>
-						<Field label="Border Radius">
+						<Field label="Border Radius" htmlFor="pa-border-radius">
 							<NumberInput
+								id="pa-border-radius"
 								value={form.border_radius}
 								onChange={(n) => setForm({ ...form, border_radius: n })}
 								className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
@@ -256,14 +264,16 @@ function PhotoAreaFormModalContent({
 
 function Field({
 	label,
+	htmlFor,
 	children,
 }: {
 	label: string;
+	htmlFor: string;
 	children: ReactNode;
 }) {
 	return (
 		<div>
-			<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+			<label htmlFor={htmlFor} className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
 				{label}
 			</label>
 			{children}

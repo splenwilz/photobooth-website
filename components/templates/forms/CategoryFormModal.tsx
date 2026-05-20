@@ -164,10 +164,11 @@ function CategoryFormModalContent({
 						</div>
 					)}
 					<div>
-						<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+						<label htmlFor="category-name" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
 							Name
 						</label>
 						<input
+							id="category-name"
 							type="text"
 							value={form.name}
 							onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -176,10 +177,11 @@ function CategoryFormModalContent({
 						/>
 					</div>
 					<div>
-						<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+						<label htmlFor="category-description" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
 							Description
 						</label>
 						<textarea
+							id="category-description"
 							value={form.description}
 							onChange={(e) =>
 								setForm({ ...form, description: e.target.value })
@@ -191,20 +193,22 @@ function CategoryFormModalContent({
 					{isAdmin && (
 						<div className="grid grid-cols-2 gap-4">
 							<div>
-								<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+								<label htmlFor="category-sort-order" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
 									Sort Order
 								</label>
 								<NumberInput
+									id="category-sort-order"
 									value={form.sort_order}
 									onChange={(n) => setForm({ ...form, sort_order: n })}
 									className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
 								/>
 							</div>
 							<div>
-								<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+								<label htmlFor="category-priority" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
 									Priority
 								</label>
 								<NumberInput
+									id="category-priority"
 									value={form.seasonal_priority}
 									onChange={(n) => setForm({ ...form, seasonal_priority: n })}
 									className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
@@ -263,10 +267,11 @@ function CategoryFormModalContent({
 					{form.is_seasonal_category && (
 						<div className="grid grid-cols-2 gap-4">
 							<div>
-								<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+								<label htmlFor="category-season-start" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
 									Start Date (MM-DD)
 								</label>
 								<input
+									id="category-season-start"
 									type="text"
 									value={form.season_start_date}
 									onChange={(e) =>
@@ -277,10 +282,11 @@ function CategoryFormModalContent({
 								/>
 							</div>
 							<div>
-								<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+								<label htmlFor="category-season-end" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
 									End Date (MM-DD)
 								</label>
 								<input
+									id="category-season-end"
 									type="text"
 									value={form.season_end_date}
 									onChange={(e) =>

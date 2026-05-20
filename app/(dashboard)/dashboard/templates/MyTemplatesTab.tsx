@@ -60,6 +60,7 @@ export function MyTemplatesTab({ onCount }: MyTemplatesTabProps) {
 
 	const { data, isLoading, isError, refetch } = useMyTemplates(queryParams);
 	const del = useDeleteMyTemplate();
+	const { reset: resetDel } = del;
 	const { data: catsData } = useMyCategories({ includeGlobal: true });
 	const { data: layoutsData } = useMyLayouts({ includeGlobal: true });
 
@@ -83,8 +84,8 @@ export function MyTemplatesTab({ onCount }: MyTemplatesTabProps) {
 	// Clear any stale mutation error when the modal opens, so a previously
 	// failed delete doesn't leak its error into a fresh confirmation.
 	useEffect(() => {
-		if (confirmDelete !== null) del.reset();
-	}, [confirmDelete, del]);
+		if (confirmDelete !== null) resetDel();
+	}, [confirmDelete, resetDel]);
 
 	const filteredTemplates = useMemo(() => {
 		if (!searchQuery) return templates;
@@ -429,7 +430,7 @@ export function MyTemplatesTab({ onCount }: MyTemplatesTabProps) {
 								This action cannot be undone.
 							</p>
 							{del.error && (
-								<div className="p-3 mb-4 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500 text-left">
+								<div role="alert" className="p-3 mb-4 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500 text-left">
 									{del.error.message}
 								</div>
 							)}

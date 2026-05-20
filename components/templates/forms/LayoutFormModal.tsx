@@ -300,10 +300,11 @@ function LayoutFormModalContent({
 					)}
 					<div className="grid grid-cols-2 gap-4">
 						<div>
-							<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+							<label htmlFor="layout-name" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
 								Name
 							</label>
 							<input
+								id="layout-name"
 								type="text"
 								value={form.name}
 								onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -312,10 +313,11 @@ function LayoutFormModalContent({
 							/>
 						</div>
 						<div>
-							<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+							<label htmlFor="layout-key" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
 								Layout Key
 							</label>
 							<input
+								id="layout-key"
 								type="text"
 								value={form.layout_key}
 								onChange={(e) =>
@@ -328,10 +330,11 @@ function LayoutFormModalContent({
 						</div>
 					</div>
 					<div>
-						<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+						<label htmlFor="layout-description" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
 							Description
 						</label>
 						<textarea
+							id="layout-description"
 							value={form.description}
 							onChange={(e) =>
 								setForm({ ...form, description: e.target.value })
@@ -342,10 +345,11 @@ function LayoutFormModalContent({
 					</div>
 					<div className="grid grid-cols-3 gap-4">
 						<div>
-							<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+							<label htmlFor="layout-width" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
 								Width (px)
 							</label>
 							<NumberInput
+								id="layout-width"
 								value={form.width}
 								onChange={(n) => setForm({ ...form, width: n })}
 								required
@@ -353,10 +357,11 @@ function LayoutFormModalContent({
 							/>
 						</div>
 						<div>
-							<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+							<label htmlFor="layout-height" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
 								Height (px)
 							</label>
 							<NumberInput
+								id="layout-height"
 								value={form.height}
 								onChange={(n) => setForm({ ...form, height: n })}
 								required
@@ -379,10 +384,11 @@ function LayoutFormModalContent({
 					</div>
 					<div className="grid grid-cols-2 gap-4">
 						<div>
-							<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+							<label htmlFor="layout-product-type" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
 								Product Type
 							</label>
 							<select
+								id="layout-product-type"
 								value={form.product_category_id}
 								onChange={(e) =>
 									setForm({
@@ -401,10 +407,11 @@ function LayoutFormModalContent({
 						</div>
 						{isAdmin && (
 							<div>
-								<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+								<label htmlFor="layout-sort-order" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
 									Sort Order
 								</label>
 								<NumberInput
+									id="layout-sort-order"
 									value={form.sort_order}
 									onChange={(n) => setForm({ ...form, sort_order: n })}
 									className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
@@ -486,8 +493,9 @@ function LayoutFormModalContent({
 											</button>
 										</div>
 										<div className="grid grid-cols-4 gap-2">
-											<MiniField label="Index">
+											<MiniField label="Index" htmlFor={`pa-${idx}-index`}>
 												<NumberInput
+													id={`pa-${idx}-index`}
 													min={1}
 													emptyValue={1}
 													value={area.photo_index}
@@ -495,8 +503,9 @@ function LayoutFormModalContent({
 													className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
 												/>
 											</MiniField>
-											<MiniField label="Shape">
+											<MiniField label="Shape" htmlFor={`pa-${idx}-shape`}>
 												<select
+													id={`pa-${idx}-shape`}
 													value={area.shape_type}
 													onChange={(e) =>
 														updateArea(idx, {
@@ -512,44 +521,50 @@ function LayoutFormModalContent({
 													<option value="petal">Petal</option>
 												</select>
 											</MiniField>
-											<MiniField label="X">
+											<MiniField label="X" htmlFor={`pa-${idx}-x`}>
 												<NumberInput
+													id={`pa-${idx}-x`}
 													value={area.x}
 													onChange={(n) => updateArea(idx, { x: n })}
 													className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
 												/>
 											</MiniField>
-											<MiniField label="Y">
+											<MiniField label="Y" htmlFor={`pa-${idx}-y`}>
 												<NumberInput
+													id={`pa-${idx}-y`}
 													value={area.y}
 													onChange={(n) => updateArea(idx, { y: n })}
 													className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
 												/>
 											</MiniField>
-											<MiniField label="Width">
+											<MiniField label="Width" htmlFor={`pa-${idx}-width`}>
 												<NumberInput
+													id={`pa-${idx}-width`}
 													value={area.width}
 													onChange={(n) => updateArea(idx, { width: n })}
 													className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
 												/>
 											</MiniField>
-											<MiniField label="Height">
+											<MiniField label="Height" htmlFor={`pa-${idx}-height`}>
 												<NumberInput
+													id={`pa-${idx}-height`}
 													value={area.height}
 													onChange={(n) => updateArea(idx, { height: n })}
 													className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
 												/>
 											</MiniField>
-											<MiniField label="Rotation">
+											<MiniField label="Rotation" htmlFor={`pa-${idx}-rotation`}>
 												<NumberInput
+													id={`pa-${idx}-rotation`}
 													float
 													value={area.rotation}
 													onChange={(n) => updateArea(idx, { rotation: n })}
 													className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
 												/>
 											</MiniField>
-											<MiniField label="Radius">
+											<MiniField label="Radius" htmlFor={`pa-${idx}-radius`}>
 												<NumberInput
+													id={`pa-${idx}-radius`}
 													value={area.border_radius}
 													onChange={(n) =>
 														updateArea(idx, { border_radius: n })
@@ -587,14 +602,16 @@ function LayoutFormModalContent({
 
 function MiniField({
 	label,
+	htmlFor,
 	children,
 }: {
 	label: string;
+	htmlFor: string;
 	children: ReactNode;
 }) {
 	return (
 		<div>
-			<label className="block text-[10px] text-zinc-500 mb-0.5">{label}</label>
+			<label htmlFor={htmlFor} className="block text-[10px] text-zinc-500 mb-0.5">{label}</label>
 			{children}
 		</div>
 	);
