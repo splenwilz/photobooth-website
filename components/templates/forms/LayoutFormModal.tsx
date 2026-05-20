@@ -115,7 +115,16 @@ function LayoutFormModalContent({
 	const error = create.error || update.error;
 	const displayError = validationError ?? error?.message ?? null;
 
-	const dialogRef = useDialogFocusTrap<HTMLDivElement>({ open: true, onClose });
+	// Block user-initiated dismissal while a save is in flight. handleSubmit
+	// still calls onClose() itself once mutateAsync resolves successfully.
+	const guardedClose = () => {
+		if (!isPending) onClose();
+	};
+
+	const dialogRef = useDialogFocusTrap<HTMLDivElement>({
+		open: true,
+		onClose: guardedClose,
+	});
 
 	const handlePasteLayout = async () => {
 		try {
@@ -197,40 +206,45 @@ function LayoutFormModalContent({
 			}
 		}
 
+		// User-editable fields shared between admin and me variants.
+		const meUpdateData = {
+			layout_key: trimmedKey,
+			name: trimmedName,
+			description: form.description,
+			width: form.width,
+			height: form.height,
+			product_category_id: form.product_category_id,
+		};
+		// Admin-only adds is_active and sort_order; the me-side endpoint
+		// strips those server-side, so we don't send them.
+		const adminUpdateData = {
+			...meUpdateData,
+			is_active: form.is_active,
+			sort_order: form.sort_order,
+		};
+
 		try {
 			if (editing) {
-				const updateData = {
-					layout_key: trimmedKey,
-					name: trimmedName,
-					description: form.description,
-					width: form.width,
-					height: form.height,
-					product_category_id: form.product_category_id,
-					is_active: form.is_active,
-					sort_order: form.sort_order,
-				};
 				if (isAdmin) {
-					await adminUpdate.mutateAsync({ id: editing.id, data: updateData });
+					await adminUpdate.mutateAsync({ id: editing.id, data: adminUpdateData });
 				} else {
-					await meUpdate.mutateAsync({ id: editing.id, data: updateData });
+					await meUpdate.mutateAsync({ id: editing.id, data: meUpdateData });
 				}
 			} else {
-				const createData = {
-					layout_key: trimmedKey,
-					name: trimmedName,
-					description: form.description,
-					width: form.width,
-					height: form.height,
+				const meCreateData = {
+					...meUpdateData,
 					photo_count: form.photo_areas.length,
-					product_category_id: form.product_category_id,
-					is_active: form.is_active,
-					sort_order: form.sort_order,
+					photo_areas: form.photo_areas,
+				};
+				const adminCreateData = {
+					...adminUpdateData,
+					photo_count: form.photo_areas.length,
 					photo_areas: form.photo_areas,
 				};
 				if (isAdmin) {
-					await adminCreate.mutateAsync(createData);
+					await adminCreate.mutateAsync(adminCreateData);
 				} else {
-					await meCreate.mutateAsync(createData);
+					await meCreate.mutateAsync(meCreateData);
 				}
 			}
 			onClose();
@@ -254,7 +268,7 @@ function LayoutFormModalContent({
 				type="button"
 				aria-label="Close"
 				tabIndex={-1}
-				onClick={onClose}
+				onClick={guardedClose}
 				className="absolute inset-0 bg-black/60 cursor-default"
 			/>
 			<div
@@ -605,8 +619,9 @@ function LayoutFormModalContent({
 					<div className="flex gap-3 pt-4">
 						<button
 							type="button"
-							onClick={onClose}
-							className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-slate-50 dark:hover:bg-zinc-800"
+							onClick={guardedClose}
+							disabled={isPending}
+							className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-slate-50 dark:hover:bg-zinc-800 disabled:opacity-50"
 						>
 							Cancel
 						</button>

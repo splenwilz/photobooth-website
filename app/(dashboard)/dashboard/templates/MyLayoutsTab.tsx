@@ -150,7 +150,11 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 												setExpandedLayoutId(isExpanded ? null : layout.id)
 											}
 											className="p-1 rounded hover:bg-slate-100 dark:hover:bg-zinc-800"
-											aria-label={isExpanded ? "Collapse" : "Expand"}
+											aria-label={
+												isExpanded
+													? `Collapse ${layout.name}`
+													: `Expand ${layout.name}`
+											}
 											aria-expanded={isExpanded}
 											aria-controls={`panel-${layout.id}`}
 										>

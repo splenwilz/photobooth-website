@@ -109,8 +109,6 @@ function TemplateFormModalContent({
 	const previewFileRef = useRef<HTMLInputElement>(null);
 	const overlayFileRef = useRef<HTMLInputElement>(null);
 
-	const dialogRef = useDialogFocusTrap<HTMLDivElement>({ open: true, onClose });
-
 	const adminCreate = useCreateTemplate();
 	const adminUpdate = useUpdateTemplate();
 	const meCreate = useCreateMyTemplate();
@@ -121,6 +119,17 @@ function TemplateFormModalContent({
 		adminUpdate.isPending ||
 		meCreate.isPending ||
 		meUpdate.isPending;
+
+	// Block user-initiated dismissal while a save is in flight. handleSubmit
+	// still calls onClose() itself once mutateAsync resolves successfully.
+	const guardedClose = () => {
+		if (!isPending) onClose();
+	};
+
+	const dialogRef = useDialogFocusTrap<HTMLDivElement>({
+		open: true,
+		onClose: guardedClose,
+	});
 
 	const availableLayouts = useMemo(() => {
 		const productCategoryId = form.template_type === "strip" ? 1 : 2;
@@ -325,7 +334,7 @@ function TemplateFormModalContent({
 				type="button"
 				aria-label="Close"
 				tabIndex={-1}
-				onClick={onClose}
+				onClick={guardedClose}
 				className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-default"
 			/>
 			<div
@@ -337,8 +346,9 @@ function TemplateFormModalContent({
 			>
 				<button
 					type="button"
-					onClick={onClose}
-					className="absolute top-4 right-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors z-10"
+					onClick={guardedClose}
+					disabled={isPending}
+					className="absolute top-4 right-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors z-10 disabled:opacity-50"
 					aria-label="Close"
 				>
 					<svg
@@ -643,8 +653,9 @@ function TemplateFormModalContent({
 				<div className="p-6 border-t border-[var(--border)] flex justify-end gap-3">
 					<button
 						type="button"
-						onClick={onClose}
-						className="px-6 py-2.5 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 transition-colors"
+						onClick={guardedClose}
+						disabled={isPending}
+						className="px-6 py-2.5 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 transition-colors disabled:opacity-50"
 					>
 						Cancel
 					</button>
