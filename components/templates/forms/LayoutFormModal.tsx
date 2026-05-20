@@ -173,6 +173,19 @@ function LayoutFormModalContent({
 			return;
 		}
 
+		// Photo areas must have distinct photo_index values. The backend
+		// keys areas by index, so duplicates collide and gaps are
+		// confusing. Catch this here before round-tripping to the server.
+		if (!editing && form.photo_areas.length > 0) {
+			const indexes = form.photo_areas.map((a) => a.photo_index);
+			if (new Set(indexes).size !== indexes.length) {
+				setValidationError(
+					"Each photo area must have a unique Index. Adjust the duplicates and try again.",
+				);
+				return;
+			}
+		}
+
 		try {
 			if (editing) {
 				const updateData = {

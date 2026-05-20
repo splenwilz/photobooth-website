@@ -55,6 +55,17 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 		onClose: () => setConfirmDeleteArea(null),
 	});
 
+	const { reset: resetDelLayout } = delLayout;
+	const { reset: resetDelArea } = delArea;
+
+	// Clear stale mutation errors when each dialog opens.
+	useEffect(() => {
+		if (confirmDeleteLayoutId !== null) resetDelLayout();
+	}, [confirmDeleteLayoutId, resetDelLayout]);
+	useEffect(() => {
+		if (confirmDeleteArea !== null) resetDelArea();
+	}, [confirmDeleteArea, resetDelArea]);
+
 	const openCreateLayout = () => {
 		setEditingLayout(null);
 		setLayoutModalOpen(true);

@@ -374,10 +374,11 @@ function TemplateFormModalContent({
 						</div>
 					)}
 					<div>
-						<label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
+						<label htmlFor="template-name" className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
 							Template Name *
 						</label>
 						<input
+							id="template-name"
 							type="text"
 							value={form.name}
 							onChange={(e) =>
@@ -388,10 +389,11 @@ function TemplateFormModalContent({
 						/>
 					</div>
 					<div>
-						<label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
+						<label htmlFor="template-description" className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
 							Description
 						</label>
 						<textarea
+							id="template-description"
 							value={form.description}
 							onChange={(e) =>
 								setForm((prev) => ({ ...prev, description: e.target.value }))
@@ -403,10 +405,11 @@ function TemplateFormModalContent({
 					</div>
 					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<div>
-							<label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
+							<label htmlFor="template-type" className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
 								Template Type
 							</label>
 							<select
+								id="template-type"
 								value={form.template_type}
 								onChange={(e) =>
 									handleTemplateTypeChange(e.target.value as AdminTemplateType)
@@ -419,10 +422,11 @@ function TemplateFormModalContent({
 						</div>
 						{isAdmin && (
 							<div>
-								<label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
+								<label htmlFor="template-status" className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
 									Status
 								</label>
 								<select
+									id="template-status"
 									value={form.status}
 									onChange={(e) =>
 										setForm((prev) => ({
@@ -441,10 +445,11 @@ function TemplateFormModalContent({
 					</div>
 					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<div>
-							<label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
+							<label htmlFor="template-category" className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
 								Category
 							</label>
 							<select
+								id="template-category"
 								value={form.category_id ?? ""}
 								onChange={(e) =>
 									setForm((prev) => ({
@@ -468,10 +473,11 @@ function TemplateFormModalContent({
 							</select>
 						</div>
 						<div>
-							<label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
+							<label htmlFor="template-layout" className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
 								Layout
 							</label>
 							<select
+								id="template-layout"
 								value={form.layout_id ?? ""}
 								onChange={(e) =>
 									setForm((prev) => ({

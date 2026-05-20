@@ -12,12 +12,26 @@ function TemplatesPageInner() {
 	const active = useActiveTab();
 	const [counts, setCounts] = useState<Partial<Record<TemplatesTab, number>>>({});
 
-	// Stable identity prevents child useEffect(() => onCount?.(n), [onCount, n])
-	// from re-firing on every parent render. The setCounts bail-out would catch
-	// it anyway, but useCallback keeps the render graph clean.
-	const updateCount = useCallback(
-		(key: TemplatesTab) => (n: number) =>
-			setCounts((prev) => (prev[key] === n ? prev : { ...prev, [key]: n })),
+	// One stable handler per tab. A curried factory would return a fresh
+	// closure each render, defeating any useEffect(..., [onCount, n]) the
+	// children rely on.
+	const onCountMine = useCallback(
+		(n: number) =>
+			setCounts((prev) => (prev.mine === n ? prev : { ...prev, mine: n })),
+		[],
+	);
+	const onCountCategories = useCallback(
+		(n: number) =>
+			setCounts((prev) =>
+				prev.categories === n ? prev : { ...prev, categories: n },
+			),
+		[],
+	);
+	const onCountLayouts = useCallback(
+		(n: number) =>
+			setCounts((prev) =>
+				prev.layouts === n ? prev : { ...prev, layouts: n },
+			),
 		[],
 	);
 
@@ -43,9 +57,9 @@ function TemplatesPageInner() {
 			<TabBar counts={counts} />
 
 			{active === "purchased" && <PurchasedTab />}
-			{active === "mine" && <MyTemplatesTab onCount={updateCount("mine")} />}
-			{active === "categories" && <MyCategoriesTab onCount={updateCount("categories")} />}
-			{active === "layouts" && <MyLayoutsTab onCount={updateCount("layouts")} />}
+			{active === "mine" && <MyTemplatesTab onCount={onCountMine} />}
+			{active === "categories" && <MyCategoriesTab onCount={onCountCategories} />}
+			{active === "layouts" && <MyLayoutsTab onCount={onCountLayouts} />}
 		</div>
 	);
 }

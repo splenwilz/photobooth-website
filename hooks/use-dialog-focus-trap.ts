@@ -66,6 +66,14 @@ export function useDialogFocusTrap<T extends HTMLElement = HTMLDivElement>({
 			const first = list[0];
 			const last = list[list.length - 1];
 			const active = document.activeElement as HTMLElement | null;
+			// If focus is somehow outside the dialog (e.g. user clicked the
+			// backdrop and Tab'd from <body>), pull it back in so it can't
+			// escape past the modal.
+			if (!active || !list.includes(active)) {
+				e.preventDefault();
+				(e.shiftKey ? last : first).focus();
+				return;
+			}
 			if (e.shiftKey && active === first) {
 				e.preventDefault();
 				last.focus();

@@ -22,6 +22,7 @@ export function MyCategoriesTab({ onCount }: MyCategoriesTabProps) {
 		includeGlobal: showBuiltIns,
 	});
 	const del = useDeleteMyCategory();
+	const { reset: resetDel } = del;
 
 	const [editing, setEditing] = useState<MyTemplateCategory | null>(null);
 	const [isOpen, setIsOpen] = useState(false);
@@ -40,6 +41,12 @@ export function MyCategoriesTab({ onCount }: MyCategoriesTabProps) {
 		open: confirmDeleteId !== null,
 		onClose: () => setConfirmDeleteId(null),
 	});
+
+	// Clear any stale mutation error when the modal opens, so a previously
+	// failed delete doesn't leak its error into a fresh confirmation.
+	useEffect(() => {
+		if (confirmDeleteId !== null) resetDel();
+	}, [confirmDeleteId, resetDel]);
 
 	const openCreate = () => {
 		setEditing(null);
