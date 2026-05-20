@@ -204,7 +204,9 @@ function TemplateFormModalContent({
 		type: "template" | "preview" | "overlay",
 	) => {
 		const file = e.target.files?.[0];
-		if (!file) return;
+		// Mirror the drag/drop path's MIME check so non-images picked via
+		// the file dialog are rejected too.
+		if (!file || !file.type.startsWith("image/")) return;
 		if (type === "template") setTemplateFile(file);
 		else if (type === "preview") setPreviewFile(file);
 		else {
@@ -369,7 +371,7 @@ function TemplateFormModalContent({
 				</div>
 				<div className="p-6 space-y-6">
 					{formError && (
-						<div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
+						<div role="alert" className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
 							{formError}
 						</div>
 					)}

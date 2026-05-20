@@ -32,8 +32,8 @@ interface ParsedErrorBody {
  * need the raw payload (e.g. delete-gate metadata on 409).
  */
 async function parseErrorResponse(response: Response): Promise<ParsedErrorBody> {
+  const errorText = await response.text();
   try {
-    const errorText = await response.text();
     // Try to parse as JSON
     const errorJson = JSON.parse(errorText);
 
@@ -73,8 +73,9 @@ async function parseErrorResponse(response: Response): Promise<ParsedErrorBody> 
     // Extract detail or message field (common API error formats)
     return { message: errorJson.detail || errorJson.message || errorText };
   } catch {
-    // If parsing fails, use status text
-    return { message: response.statusText || "An error occurred" };
+    // Body wasn't valid JSON — keep the plain-text body if there was one,
+    // otherwise fall back to the HTTP status text.
+    return { message: errorText || response.statusText || "An error occurred" };
   }
 }
 

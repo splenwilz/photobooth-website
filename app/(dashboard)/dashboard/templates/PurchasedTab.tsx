@@ -52,10 +52,17 @@ export function PurchasedTab() {
 	const [downloadError, setDownloadError] = useState<string | null>(null);
 
 	const handleDownload = async (purchase: TemplatePurchase) => {
-		setDownloadingId(purchase.template.id);
+		// Block overlapping downloads so a slow first request can't have its
+		// loading state cleared by a second click on a different template.
+		if (downloadingId !== null) {
+			setDownloadError("Another download is in progress. Please wait.");
+			return;
+		}
+		const startedId = purchase.template.id;
+		setDownloadingId(startedId);
 		setDownloadError(null);
 		try {
-			const result = await downloadMutation.mutateAsync(purchase.template.id);
+			const result = await downloadMutation.mutateAsync(startedId);
 			if (!result.download_url) {
 				setDownloadError("Download link not available. Please try again.");
 				return;
@@ -70,7 +77,8 @@ export function PurchasedTab() {
 		} catch {
 			setDownloadError("Failed to download template. Please try again.");
 		} finally {
-			setDownloadingId(null);
+			// Only clear if our own download is still the in-flight one.
+			setDownloadingId((current) => (current === startedId ? null : current));
 		}
 	};
 

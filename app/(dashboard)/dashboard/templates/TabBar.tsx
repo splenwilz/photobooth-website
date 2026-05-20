@@ -67,7 +67,11 @@ export function TabBar({ counts, active }: TabBarProps) {
 
 	return (
 		<div className="border-b border-[var(--border)]">
-			<nav className="-mb-px flex gap-6 overflow-x-auto" aria-label="Templates sections">
+			<nav
+				role="tablist"
+				aria-label="Templates sections"
+				className="-mb-px flex gap-6 overflow-x-auto"
+			>
 				{TABS.map((t) => {
 					const isActive = active === t.key;
 					const count = counts[t.key];
@@ -75,6 +79,11 @@ export function TabBar({ counts, active }: TabBarProps) {
 						<button
 							key={t.key}
 							type="button"
+							role="tab"
+							id={`${t.key}-tab`}
+							aria-selected={isActive}
+							aria-controls={`${t.key}-panel`}
+							tabIndex={isActive ? 0 : -1}
 							onClick={() => setTab(t.key)}
 							className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap ${
 								isActive

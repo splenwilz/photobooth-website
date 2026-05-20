@@ -173,11 +173,22 @@ function LayoutFormModalContent({
 			return;
 		}
 
-		// Photo areas must have distinct photo_index values. The backend
-		// keys areas by index, so duplicates collide and gaps are
-		// confusing. Catch this here before round-tripping to the server.
+		// Photo areas must have distinct photo_index values within the
+		// 1..N range. The backend keys areas by index, so duplicates collide
+		// and out-of-range values would render against missing slots in a
+		// downstream layout grid. Catch both here before the round-trip.
 		if (!editing && form.photo_areas.length > 0) {
+			const count = form.photo_areas.length;
 			const indexes = form.photo_areas.map((a) => a.photo_index);
+			const outOfRange = indexes.some(
+				(i) => !Number.isInteger(i) || i < 1 || i > count,
+			);
+			if (outOfRange) {
+				setValidationError(
+					`Each photo area's Index must be a whole number between 1 and ${count}.`,
+				);
+				return;
+			}
 			if (new Set(indexes).size !== indexes.length) {
 				setValidationError(
 					"Each photo area must have a unique Index. Adjust the duplicates and try again.",
@@ -307,7 +318,7 @@ function LayoutFormModalContent({
 				</div>
 				<form onSubmit={handleSubmit} className="p-6 space-y-4">
 					{displayError && (
-						<div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500">
+						<div role="alert" className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500">
 							{displayError}
 						</div>
 					)}

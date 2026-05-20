@@ -56,10 +56,26 @@ function TemplatesPageInner() {
 
 			<TabBar counts={counts} active={active} />
 
-			{active === "purchased" && <PurchasedTab />}
-			{active === "mine" && <MyTemplatesTab onCount={onCountMine} />}
-			{active === "categories" && <MyCategoriesTab onCount={onCountCategories} />}
-			{active === "layouts" && <MyLayoutsTab onCount={onCountLayouts} />}
+			{active === "purchased" && (
+				<div role="tabpanel" id="purchased-panel" aria-labelledby="purchased-tab">
+					<PurchasedTab />
+				</div>
+			)}
+			{active === "mine" && (
+				<div role="tabpanel" id="mine-panel" aria-labelledby="mine-tab">
+					<MyTemplatesTab onCount={onCountMine} />
+				</div>
+			)}
+			{active === "categories" && (
+				<div role="tabpanel" id="categories-panel" aria-labelledby="categories-tab">
+					<MyCategoriesTab onCount={onCountCategories} />
+				</div>
+			)}
+			{active === "layouts" && (
+				<div role="tabpanel" id="layouts-panel" aria-labelledby="layouts-tab">
+					<MyLayoutsTab onCount={onCountLayouts} />
+				</div>
+			)}
 		</div>
 	);
 }

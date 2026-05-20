@@ -88,7 +88,16 @@ function PhotoAreaFormModalContent({
 	const [validationError, setValidationError] = useState<string | null>(null);
 	const displayError = validationError ?? error?.message ?? null;
 
-	const dialogRef = useDialogFocusTrap<HTMLDivElement>({ open: true, onClose });
+	// Block user-initiated dismissal while a save is in flight. handleSubmit
+	// still calls onClose() itself once mutateAsync resolves successfully.
+	const guardedClose = () => {
+		if (!isPending) onClose();
+	};
+
+	const dialogRef = useDialogFocusTrap<HTMLDivElement>({
+		open: true,
+		onClose: guardedClose,
+	});
 
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
@@ -122,7 +131,7 @@ function PhotoAreaFormModalContent({
 				type="button"
 				aria-label="Close"
 				tabIndex={-1}
-				onClick={onClose}
+				onClick={guardedClose}
 				className="absolute inset-0 bg-black/60 cursor-default"
 			/>
 			<div
@@ -237,8 +246,9 @@ function PhotoAreaFormModalContent({
 					<div className="flex gap-3 pt-4">
 						<button
 							type="button"
-							onClick={onClose}
-							className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-slate-50 dark:hover:bg-zinc-800"
+							onClick={guardedClose}
+							disabled={isPending}
+							className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-slate-50 dark:hover:bg-zinc-800 disabled:opacity-50"
 						>
 							Cancel
 						</button>

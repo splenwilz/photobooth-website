@@ -53,11 +53,15 @@ export function NumberInput({
 					onChange(emptyValue);
 					return;
 				}
-				const n = float ? parseFloat(v) : parseInt(v, 10);
-				if (Number.isNaN(n)) {
+				// Use Number(v) instead of parseInt/parseFloat so exponent
+				// notation like "1e2" parses as 100 instead of 1 in integer mode.
+				// Then Math.trunc collapses to a whole number when float is off.
+				const parsed = Number(v);
+				if (!Number.isFinite(parsed)) {
 					setText(v);
 					return;
 				}
+				const n = float ? parsed : Math.trunc(parsed);
 				const snapped = !float && String(n) !== v ? String(n) : v;
 				setText(snapped);
 				setLastCommitted(n);
