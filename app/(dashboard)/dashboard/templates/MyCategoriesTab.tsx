@@ -7,6 +7,7 @@ import {
 } from "@/core/api/templates/me-queries";
 import type { MyTemplateCategory } from "@/core/api/templates/me-types";
 import { CategoryFormModal } from "@/components/templates/forms/CategoryFormModal";
+import { useDialogFocusTrap } from "@/hooks/use-dialog-focus-trap";
 
 interface MyCategoriesTabProps {
 	onCount?: (count: number) => void;
@@ -35,14 +36,10 @@ export function MyCategoriesTab({ onCount }: MyCategoriesTabProps) {
 		onCount?.(mineCount);
 	}, [onCount, mineCount]);
 
-	useEffect(() => {
-		if (confirmDeleteId === null) return;
-		const onKey = (e: KeyboardEvent) => {
-			if (e.key === "Escape") setConfirmDeleteId(null);
-		};
-		document.addEventListener("keydown", onKey);
-		return () => document.removeEventListener("keydown", onKey);
-	}, [confirmDeleteId]);
+	const deleteDialogRef = useDialogFocusTrap<HTMLDivElement>({
+		open: confirmDeleteId !== null,
+		onClose: () => setConfirmDeleteId(null),
+	});
 
 	const openCreate = () => {
 		setEditing(null);
@@ -242,6 +239,7 @@ export function MyCategoriesTab({ onCount }: MyCategoriesTabProps) {
 						onClick={() => setConfirmDeleteId(null)}
 					/>
 					<div
+						ref={deleteDialogRef}
 						role="dialog"
 						aria-modal="true"
 						aria-labelledby="delete-category-title"
@@ -260,7 +258,6 @@ export function MyCategoriesTab({ onCount }: MyCategoriesTabProps) {
 						<div className="flex gap-3">
 							<button
 								type="button"
-								autoFocus
 								onClick={() => setConfirmDeleteId(null)}
 								className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-slate-50 dark:hover:bg-zinc-800"
 							>

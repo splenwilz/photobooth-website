@@ -109,8 +109,10 @@ function LayoutFormModalContent({
 	const meUpdate = useUpdateMyLayout();
 	const create = isAdmin ? adminCreate : meCreate;
 	const update = isAdmin ? adminUpdate : meUpdate;
+	const [validationError, setValidationError] = useState<string | null>(null);
 	const isPending = create.isPending || update.isPending;
 	const error = create.error || update.error;
+	const displayError = validationError ?? error?.message ?? null;
 
 	const handlePasteLayout = async () => {
 		try {
@@ -155,11 +157,24 @@ function LayoutFormModalContent({
 
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
+		setValidationError(null);
+
+		const trimmedName = form.name.trim();
+		const trimmedKey = form.layout_key.trim();
+		if (!trimmedName) {
+			setValidationError("Layout name is required");
+			return;
+		}
+		if (!trimmedKey) {
+			setValidationError("Layout key is required");
+			return;
+		}
+
 		try {
 			if (editing) {
 				const updateData = {
-					layout_key: form.layout_key,
-					name: form.name,
+					layout_key: trimmedKey,
+					name: trimmedName,
 					description: form.description,
 					width: form.width,
 					height: form.height,
@@ -174,8 +189,8 @@ function LayoutFormModalContent({
 				}
 			} else {
 				const createData = {
-					layout_key: form.layout_key,
-					name: form.name,
+					layout_key: trimmedKey,
+					name: trimmedName,
 					description: form.description,
 					width: form.width,
 					height: form.height,
@@ -269,9 +284,9 @@ function LayoutFormModalContent({
 					)}
 				</div>
 				<form onSubmit={handleSubmit} className="p-6 space-y-4">
-					{error && (
+					{displayError && (
 						<div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500">
-							{error.message}
+							{displayError}
 						</div>
 					)}
 					<div className="grid grid-cols-2 gap-4">

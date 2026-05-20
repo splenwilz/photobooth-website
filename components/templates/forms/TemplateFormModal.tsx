@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { useDialogFocusTrap } from "@/hooks/use-dialog-focus-trap";
 import {
 	useCreateTemplate,
 	useUpdateTemplate,
@@ -108,13 +109,7 @@ function TemplateFormModalContent({
 	const previewFileRef = useRef<HTMLInputElement>(null);
 	const overlayFileRef = useRef<HTMLInputElement>(null);
 
-	useEffect(() => {
-		const onKey = (e: KeyboardEvent) => {
-			if (e.key === "Escape") onClose();
-		};
-		document.addEventListener("keydown", onKey);
-		return () => document.removeEventListener("keydown", onKey);
-	}, [onClose]);
+	const dialogRef = useDialogFocusTrap<HTMLDivElement>({ open: true, onClose });
 
 	const adminCreate = useCreateTemplate();
 	const adminUpdate = useUpdateTemplate();
@@ -332,6 +327,7 @@ function TemplateFormModalContent({
 				className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-default"
 			/>
 			<div
+				ref={dialogRef}
 				role="dialog"
 				aria-modal="true"
 				aria-labelledby="template-modal-title"

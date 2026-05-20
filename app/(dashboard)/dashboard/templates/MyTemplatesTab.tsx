@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
+import { useDialogFocusTrap } from "@/hooks/use-dialog-focus-trap";
 import {
 	useDeleteMyTemplate,
 	useMyCategories,
@@ -74,14 +75,10 @@ export function MyTemplatesTab({ onCount }: MyTemplatesTabProps) {
 		onCount?.(total);
 	}, [onCount, total]);
 
-	useEffect(() => {
-		if (confirmDelete === null) return;
-		const onKey = (e: KeyboardEvent) => {
-			if (e.key === "Escape") setConfirmDelete(null);
-		};
-		document.addEventListener("keydown", onKey);
-		return () => document.removeEventListener("keydown", onKey);
-	}, [confirmDelete]);
+	const deleteDialogRef = useDialogFocusTrap<HTMLDivElement>({
+		open: confirmDelete !== null,
+		onClose: () => setConfirmDelete(null),
+	});
 
 	const filteredTemplates = useMemo(() => {
 		if (!searchQuery) return templates;
@@ -393,6 +390,7 @@ export function MyTemplatesTab({ onCount }: MyTemplatesTabProps) {
 						onClick={() => setConfirmDelete(null)}
 					/>
 					<div
+						ref={deleteDialogRef}
 						role="dialog"
 						aria-modal="true"
 						aria-labelledby="delete-template-title"
@@ -426,7 +424,6 @@ export function MyTemplatesTab({ onCount }: MyTemplatesTabProps) {
 							<div className="flex gap-3 justify-center">
 								<button
 									type="button"
-									autoFocus
 									onClick={() => setConfirmDelete(null)}
 									className="px-6 py-2.5 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 transition-colors"
 								>

@@ -84,9 +84,18 @@ function PhotoAreaFormModalContent({
 
 	const isPending = add.isPending || update.isPending;
 	const error = add.error || update.error;
+	const [validationError, setValidationError] = useState<string | null>(null);
+	const displayError = validationError ?? error?.message ?? null;
 
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
+		setValidationError(null);
+
+		if (form.width <= 0 || form.height <= 0) {
+			setValidationError("Width and height must be greater than zero");
+			return;
+		}
+
 		try {
 			if (editing?.id !== undefined) {
 				await update.mutateAsync({
@@ -120,9 +129,9 @@ function PhotoAreaFormModalContent({
 					</h2>
 				</div>
 				<form onSubmit={handleSubmit} className="p-6 space-y-4">
-					{error && (
+					{displayError && (
 						<div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500">
-							{error.message}
+							{displayError}
 						</div>
 					)}
 					<div className="grid grid-cols-2 gap-4">

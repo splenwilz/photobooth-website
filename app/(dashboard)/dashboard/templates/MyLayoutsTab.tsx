@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useDialogFocusTrap } from "@/hooks/use-dialog-focus-trap";
 import {
 	useDeleteMyLayout,
 	useDeleteMyPhotoArea,
@@ -45,23 +46,14 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 		onCount?.(mineCount);
 	}, [onCount, mineCount]);
 
-	useEffect(() => {
-		if (confirmDeleteLayoutId === null) return;
-		const onKey = (e: KeyboardEvent) => {
-			if (e.key === "Escape") setConfirmDeleteLayoutId(null);
-		};
-		document.addEventListener("keydown", onKey);
-		return () => document.removeEventListener("keydown", onKey);
-	}, [confirmDeleteLayoutId]);
-
-	useEffect(() => {
-		if (confirmDeleteArea === null) return;
-		const onKey = (e: KeyboardEvent) => {
-			if (e.key === "Escape") setConfirmDeleteArea(null);
-		};
-		document.addEventListener("keydown", onKey);
-		return () => document.removeEventListener("keydown", onKey);
-	}, [confirmDeleteArea]);
+	const deleteLayoutDialogRef = useDialogFocusTrap<HTMLDivElement>({
+		open: confirmDeleteLayoutId !== null,
+		onClose: () => setConfirmDeleteLayoutId(null),
+	});
+	const deleteAreaDialogRef = useDialogFocusTrap<HTMLDivElement>({
+		open: confirmDeleteArea !== null,
+		onClose: () => setConfirmDeleteArea(null),
+	});
 
 	const openCreateLayout = () => {
 		setEditingLayout(null);
@@ -400,6 +392,7 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 						onClick={() => setConfirmDeleteLayoutId(null)}
 					/>
 					<div
+						ref={deleteLayoutDialogRef}
 						role="dialog"
 						aria-modal="true"
 						aria-labelledby="delete-layout-title"
@@ -418,7 +411,6 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 						<div className="flex gap-3">
 							<button
 								type="button"
-								autoFocus
 								onClick={() => setConfirmDeleteLayoutId(null)}
 								className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-slate-50 dark:hover:bg-zinc-800"
 							>
@@ -451,6 +443,7 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 						onClick={() => setConfirmDeleteArea(null)}
 					/>
 					<div
+						ref={deleteAreaDialogRef}
 						role="dialog"
 						aria-modal="true"
 						aria-labelledby="delete-area-title"
@@ -469,7 +462,6 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 						<div className="flex gap-3">
 							<button
 								type="button"
-								autoFocus
 								onClick={() => setConfirmDeleteArea(null)}
 								className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-slate-50 dark:hover:bg-zinc-800"
 							>
