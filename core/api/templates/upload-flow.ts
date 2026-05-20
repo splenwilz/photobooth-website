@@ -108,6 +108,14 @@ export async function buildUpdateUploadPayload<
 
 	const updatePayload: TUpdateRequest = { ...basePayload };
 
+	// Strip any s3_key fields that leaked in via basePayload. They belong
+	// on the wire only when their corresponding file was actually uploaded
+	// in this update; the existing logic re-adds them below from the
+	// presign response.
+	delete updatePayload.template_s3_key;
+	delete updatePayload.preview_s3_key;
+	delete updatePayload.overlay_s3_key;
+
 	if (removeOverlay) {
 		updatePayload.overlay_s3_key = null;
 	}

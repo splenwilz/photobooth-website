@@ -65,6 +65,27 @@ export function TabBar({ counts, active }: TabBarProps) {
 		router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
 	};
 
+	// WAI-ARIA tab pattern: roving tabindex. Inactive tabs have tabIndex=-1
+	// so Tab moves past the whole tablist; ArrowLeft/Right (and Home/End)
+	// move focus between tabs, with the focused tab also becoming active.
+	const handleTabKeyDown = (
+		e: React.KeyboardEvent<HTMLButtonElement>,
+		currentKey: TemplatesTab,
+	) => {
+		const currentIdx = TABS.findIndex((t) => t.key === currentKey);
+		let nextIdx = -1;
+		if (e.key === "ArrowRight") nextIdx = (currentIdx + 1) % TABS.length;
+		else if (e.key === "ArrowLeft")
+			nextIdx = (currentIdx - 1 + TABS.length) % TABS.length;
+		else if (e.key === "Home") nextIdx = 0;
+		else if (e.key === "End") nextIdx = TABS.length - 1;
+		if (nextIdx === -1) return;
+		e.preventDefault();
+		const nextKey = TABS[nextIdx].key;
+		setTab(nextKey);
+		document.getElementById(`${nextKey}-tab`)?.focus();
+	};
+
 	return (
 		<div className="border-b border-[var(--border)]">
 			<nav
@@ -85,6 +106,7 @@ export function TabBar({ counts, active }: TabBarProps) {
 							aria-controls={`${t.key}-panel`}
 							tabIndex={isActive ? 0 : -1}
 							onClick={() => setTab(t.key)}
+							onKeyDown={(e) => handleTabKeyDown(e, t.key)}
 							className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap ${
 								isActive
 									? "border-[#069494] text-[#069494]"

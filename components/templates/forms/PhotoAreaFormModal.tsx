@@ -107,6 +107,10 @@ function PhotoAreaFormModalContent({
 			setValidationError("Width and height must be greater than zero");
 			return;
 		}
+		if (!Number.isInteger(form.photo_index) || form.photo_index < 1) {
+			setValidationError("Photo Index must be a whole number of 1 or greater");
+			return;
+		}
 
 		try {
 			if (editing?.id !== undefined) {
@@ -148,7 +152,7 @@ function PhotoAreaFormModalContent({
 				</div>
 				<form onSubmit={handleSubmit} className="p-6 space-y-4">
 					{displayError && (
-						<div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500">
+						<div role="alert" className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500">
 							{displayError}
 						</div>
 					)}
