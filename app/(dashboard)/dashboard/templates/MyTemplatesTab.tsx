@@ -80,6 +80,12 @@ export function MyTemplatesTab({ onCount }: MyTemplatesTabProps) {
 		onClose: () => setConfirmDelete(null),
 	});
 
+	// Clear any stale mutation error when the modal opens, so a previously
+	// failed delete doesn't leak its error into a fresh confirmation.
+	useEffect(() => {
+		if (confirmDelete !== null) del.reset();
+	}, [confirmDelete, del]);
+
 	const filteredTemplates = useMemo(() => {
 		if (!searchQuery) return templates;
 		const q = searchQuery.toLowerCase();
@@ -161,6 +167,7 @@ export function MyTemplatesTab({ onCount }: MyTemplatesTabProps) {
 					</svg>
 					<input
 						type="text"
+						aria-label="Search templates"
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
 						placeholder="Search templates..."
@@ -421,6 +428,11 @@ export function MyTemplatesTab({ onCount }: MyTemplatesTabProps) {
 								<span className="font-medium text-zinc-900 dark:text-white">{confirmDelete.name}</span>?
 								This action cannot be undone.
 							</p>
+							{del.error && (
+								<div className="p-3 mb-4 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500 text-left">
+									{del.error.message}
+								</div>
+							)}
 							<div className="flex gap-3 justify-center">
 								<button
 									type="button"

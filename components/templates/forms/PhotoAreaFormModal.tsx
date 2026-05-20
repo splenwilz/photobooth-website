@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent, type ReactNode } from "react";
+import { useDialogFocusTrap } from "@/hooks/use-dialog-focus-trap";
 import {
 	useAddPhotoArea,
 	useUpdatePhotoArea,
@@ -87,6 +88,8 @@ function PhotoAreaFormModalContent({
 	const [validationError, setValidationError] = useState<string | null>(null);
 	const displayError = validationError ?? error?.message ?? null;
 
+	const dialogRef = useDialogFocusTrap<HTMLDivElement>({ open: true, onClose });
+
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
 		setValidationError(null);
@@ -122,9 +125,15 @@ function PhotoAreaFormModalContent({
 				onClick={onClose}
 				className="absolute inset-0 bg-black/60 cursor-default"
 			/>
-			<div className="relative w-full max-w-md bg-white dark:bg-[#111111] rounded-2xl shadow-xl overflow-hidden">
+			<div
+				ref={dialogRef}
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby="photo-area-modal-title"
+				className="relative w-full max-w-md bg-white dark:bg-[#111111] rounded-2xl shadow-xl overflow-hidden"
+			>
 				<div className="p-6 border-b border-slate-200 dark:border-zinc-800">
-					<h2 className="text-lg font-bold text-zinc-900 dark:text-white">
+					<h2 id="photo-area-modal-title" className="text-lg font-bold text-zinc-900 dark:text-white">
 						{editing ? "Edit Photo Area" : "Add Photo Area"}
 					</h2>
 				</div>

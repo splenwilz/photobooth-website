@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent, type ReactNode } from "react";
+import { useDialogFocusTrap } from "@/hooks/use-dialog-focus-trap";
 import {
 	useCreateLayout,
 	useUpdateLayout,
@@ -113,6 +114,8 @@ function LayoutFormModalContent({
 	const isPending = create.isPending || update.isPending;
 	const error = create.error || update.error;
 	const displayError = validationError ?? error?.message ?? null;
+
+	const dialogRef = useDialogFocusTrap<HTMLDivElement>({ open: true, onClose });
 
 	const handlePasteLayout = async () => {
 		try {
@@ -230,11 +233,17 @@ function LayoutFormModalContent({
 				onClick={onClose}
 				className="absolute inset-0 bg-black/60 cursor-default"
 			/>
-			<div className="relative w-full max-w-xl bg-white dark:bg-[#111111] rounded-2xl shadow-xl overflow-hidden max-h-[90vh] overflow-y-auto">
+			<div
+				ref={dialogRef}
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby="layout-modal-title"
+				className="relative w-full max-w-xl bg-white dark:bg-[#111111] rounded-2xl shadow-xl overflow-hidden max-h-[90vh] overflow-y-auto"
+			>
 				<div className="p-6 border-b border-slate-200 dark:border-zinc-800 sticky top-0 bg-white dark:bg-[#111111]">
 					<div className="flex items-center justify-between gap-3">
 						<div>
-							<h2 className="text-lg font-bold text-zinc-900 dark:text-white">
+							<h2 id="layout-modal-title" className="text-lg font-bold text-zinc-900 dark:text-white">
 								{editing ? "Edit Layout" : "Create Layout"}
 							</h2>
 							{!isAdmin && (
