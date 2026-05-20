@@ -183,9 +183,10 @@ function LayoutFormModalContent({
 		}
 
 		// Photo areas must have distinct photo_index values within the
-		// 1..N range. The backend keys areas by index, so duplicates collide
-		// and out-of-range values would render against missing slots in a
-		// downstream layout grid. Catch both here before the round-trip.
+		// 1..N range, and positive width/height. The backend keys areas by
+		// index (so duplicates collide), and zero/negative geometry would
+		// render as an invisible or inverted slot in the downstream layout
+		// grid. Catch all three here before the round-trip.
 		if (!editing && form.photo_areas.length > 0) {
 			const count = form.photo_areas.length;
 			const indexes = form.photo_areas.map((a) => a.photo_index);
@@ -201,6 +202,15 @@ function LayoutFormModalContent({
 			if (new Set(indexes).size !== indexes.length) {
 				setValidationError(
 					"Each photo area must have a unique Index. Adjust the duplicates and try again.",
+				);
+				return;
+			}
+			const badGeometry = form.photo_areas.some(
+				(a) => a.width <= 0 || a.height <= 0,
+			);
+			if (badGeometry) {
+				setValidationError(
+					"Each photo area must have positive width and height.",
 				);
 				return;
 			}

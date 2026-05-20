@@ -88,7 +88,6 @@ export function PurchasedTab() {
 				<div className="text-center py-16">
 					<div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
 						<svg
-							aria-label="Select a booth"
 							aria-hidden="true"
 							className="w-8 h-8 text-zinc-400"
 							fill="none"
@@ -147,7 +146,6 @@ export function PurchasedTab() {
 				<div className="text-center py-16">
 					<div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
 						<svg
-							aria-label="Error"
 							aria-hidden="true"
 							className="w-8 h-8 text-red-500"
 							fill="none"
@@ -180,7 +178,6 @@ export function PurchasedTab() {
 				<div className="text-center py-16">
 					<div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
 						<svg
-							aria-label="No Templates"
 							aria-hidden="true"
 							className="w-8 h-8 text-zinc-400"
 							fill="none"
@@ -235,7 +232,6 @@ export function PurchasedTab() {
 										>
 											{downloadingId === purchase.template.id ? (
 												<svg
-													aria-label="Downloading"
 													aria-hidden="true"
 													className="w-4 h-4 animate-spin"
 													fill="none"
@@ -257,7 +253,6 @@ export function PurchasedTab() {
 												</svg>
 											) : (
 												<svg
-													aria-label="Download"
 													aria-hidden="true"
 													className="w-4 h-4"
 													fill="none"
