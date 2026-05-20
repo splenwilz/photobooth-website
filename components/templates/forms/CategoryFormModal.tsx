@@ -83,8 +83,19 @@ function CategoryFormModalContent({
 
 	const dialogRef = useDialogFocusTrap<HTMLDivElement>({ open: true, onClose });
 
+	const [validationError, setValidationError] = useState<string | null>(null);
+	const displayError = validationError ?? error?.message ?? null;
+
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
+		setValidationError(null);
+
+		const trimmedName = form.name.trim();
+		if (!trimmedName) {
+			setValidationError("Category name is required");
+			return;
+		}
+
 		const seasonal = form.is_seasonal_category
 			? {
 					season_start_date: form.season_start_date || undefined,
@@ -96,7 +107,7 @@ function CategoryFormModalContent({
 			: {};
 
 		const adminPayload = {
-			name: form.name,
+			name: trimmedName,
 			description: form.description || undefined,
 			is_active: form.is_active,
 			is_premium: form.is_premium,
@@ -105,7 +116,7 @@ function CategoryFormModalContent({
 			...seasonal,
 		};
 		const mePayload = {
-			name: form.name,
+			name: trimmedName,
 			description: form.description || undefined,
 			is_seasonal_category: form.is_seasonal_category,
 			...seasonal,
@@ -158,9 +169,9 @@ function CategoryFormModalContent({
 					)}
 				</div>
 				<form onSubmit={handleSubmit} className="p-6 space-y-4">
-					{error && (
+					{displayError && (
 						<div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500">
-							{error.message}
+							{displayError}
 						</div>
 					)}
 					<div>

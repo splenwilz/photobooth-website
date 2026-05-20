@@ -54,7 +54,7 @@ function TemplatesPageInner() {
 				)}
 			</div>
 
-			<TabBar counts={counts} />
+			<TabBar counts={counts} active={active} />
 
 			{active === "purchased" && <PurchasedTab />}
 			{active === "mine" && <MyTemplatesTab onCount={onCountMine} />}

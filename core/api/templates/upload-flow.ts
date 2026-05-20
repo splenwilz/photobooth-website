@@ -100,6 +100,12 @@ export async function buildUpdateUploadPayload<
 	basePayload,
 	presignFn,
 }: TemplateUpdateUploadFlowArgs<TUpdateRequest>): Promise<TUpdateRequest> {
+	if (removeOverlay && overlayFile) {
+		throw new Error(
+			"Cannot set both removeOverlay and overlayFile: the requested update is ambiguous. Pass one or the other.",
+		);
+	}
+
 	const updatePayload: TUpdateRequest = { ...basePayload };
 
 	if (removeOverlay) {

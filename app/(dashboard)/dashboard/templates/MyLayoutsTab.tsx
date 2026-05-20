@@ -415,7 +415,7 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 							This will also delete all photo areas in this layout. This action cannot be undone.
 						</p>
 						{delLayout.error && (
-							<div className="p-3 mb-4 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500">
+							<div role="alert" className="p-3 mb-4 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500">
 								{delLayout.error.message}
 							</div>
 						)}
@@ -466,7 +466,7 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 							Are you sure you want to delete this photo area? This action cannot be undone.
 						</p>
 						{delArea.error && (
-							<div className="p-3 mb-4 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500">
+							<div role="alert" className="p-3 mb-4 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500">
 								{delArea.error.message}
 							</div>
 						)}

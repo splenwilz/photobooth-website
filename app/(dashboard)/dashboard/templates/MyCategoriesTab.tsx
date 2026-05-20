@@ -258,7 +258,7 @@ export function MyCategoriesTab({ onCount }: MyCategoriesTabProps) {
 							Are you sure you want to delete this category? This action cannot be undone.
 						</p>
 						{del.error && (
-							<div className="p-3 mb-4 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500">
+							<div role="alert" className="p-3 mb-4 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500">
 								{del.error.message}
 							</div>
 						)}

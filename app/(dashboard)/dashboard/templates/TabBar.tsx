@@ -46,13 +46,13 @@ export function useActiveTab(): TemplatesTab {
 
 interface TabBarProps {
 	counts: Partial<Record<TemplatesTab, number>>;
+	active: TemplatesTab;
 }
 
-export function TabBar({ counts }: TabBarProps) {
+export function TabBar({ counts, active }: TabBarProps) {
 	const router = useRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
-	const active = useActiveTab();
 
 	const setTab = (next: TemplatesTab) => {
 		const params = new URLSearchParams(searchParams.toString());

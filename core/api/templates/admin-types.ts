@@ -115,7 +115,9 @@ export interface AdminTemplate {
   preview_url: string;
   overlay_url: string | null;
   color_config: AdminTemplateColorConfig | null;
-  created_by: string;
+  // Null on non-admin responses (anonymous marketplace / authenticated
+  // non-admin) — redacted to avoid leaking author identity.
+  created_by: string | null;
   created_at: string;
   updated_at: string;
   // Admin-only delete-gate metadata. Null on non-admin responses

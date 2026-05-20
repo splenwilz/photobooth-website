@@ -542,10 +542,11 @@ function TemplateFormModalContent({
 					{isAdmin && (
 						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 							<div>
-								<label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
+								<label htmlFor="template-price" className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
 									Price ($)
 								</label>
 								<input
+									id="template-price"
 									type="text"
 									value={form.price}
 									onChange={(e) =>
@@ -559,10 +560,11 @@ function TemplateFormModalContent({
 								</p>
 							</div>
 							<div>
-								<label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
+								<label htmlFor="template-sort-order" className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
 									Sort Order
 								</label>
 								<NumberInput
+									id="template-sort-order"
 									min={0}
 									value={form.sort_order}
 									onChange={(n) =>
@@ -578,7 +580,7 @@ function TemplateFormModalContent({
 						</div>
 					)}
 					<div>
-						<label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
+						<label htmlFor="template-tags-input" className="block text-sm font-medium mb-2 text-zinc-900 dark:text-white">
 							Tags
 						</label>
 						<div className="flex flex-wrap gap-2 mb-2">
@@ -618,6 +620,7 @@ function TemplateFormModalContent({
 						</div>
 						<div className="flex gap-2">
 							<input
+								id="template-tags-input"
 								type="text"
 								value={tagInput}
 								onChange={(e) => setTagInput(e.target.value)}
