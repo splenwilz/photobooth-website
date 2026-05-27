@@ -6,20 +6,51 @@ export class ApiError extends Error {
     public status: number,
     message: string,
     public originalError?: unknown,
-    public isSessionExpired: boolean = false
+    public isSessionExpired: boolean = false,
+    /**
+     * Parsed `detail` payload when the API returned a structured object
+     * (e.g. the 409 from `DELETE /templates/{id}` carries
+     * `{ can_delete, purchase_count, reason }`). `undefined` when the
+     * response had no JSON body or `detail` was a plain string.
+     */
+    public detail?: unknown
   ) {
     super(message);
     this.name = "ApiError";
   }
 }
 
+interface ParsedErrorBody {
+  message: string;
+  detail?: unknown;
+}
+
 /**
  * Parse error response from API
- * Extracts error message from JSON response (detail or message field)
+ * Extracts error message from JSON response (detail or message field).
+ * When `detail` is a structured object, also returns it for callers that
+ * need the raw payload (e.g. delete-gate metadata on 409).
  */
-async function parseErrorResponse(response: Response): Promise<string> {
+async function parseErrorResponse(response: Response): Promise<ParsedErrorBody> {
+  const errorText = await response.text();
+
+  // Proxy/CDN error pages (ngrok, Cloudflare, etc.) ship HTML bodies. Don't
+  // surface the raw markup to the user — fall back to status text. Detect
+  // via content-type header first, then by leading-`<` heuristic for cases
+  // where the upstream lies about the header.
+  const contentType = (response.headers.get("content-type") || "").toLowerCase();
+  const isHtml =
+    contentType.includes("text/html") ||
+    errorText.trimStart().startsWith("<");
+  if (isHtml) {
+    return {
+      message:
+        response.statusText ||
+        `The server returned an error (status ${response.status}). Please try again.`,
+    };
+  }
+
   try {
-    const errorText = await response.text();
     // Try to parse as JSON
     const errorJson = JSON.parse(errorText);
 
@@ -29,25 +60,39 @@ async function parseErrorResponse(response: Response): Promise<string> {
       const firstError = errorJson[0];
       if (firstError?.msg) {
         // Clean up "Value error, " prefix if present
-        return firstError.msg.replace(/^Value error,\s*/i, '');
+        return { message: firstError.msg.replace(/^Value error,\s*/i, '') };
       }
-      return JSON.stringify(errorJson);
+      return { message: JSON.stringify(errorJson) };
     }
 
     // Handle { detail: [...] } format (FastAPI validation errors)
     if (Array.isArray(errorJson.detail)) {
       const firstError = errorJson.detail[0];
       if (firstError?.msg) {
-        return firstError.msg.replace(/^Value error,\s*/i, '');
+        return { message: firstError.msg.replace(/^Value error,\s*/i, '') };
       }
-      return JSON.stringify(errorJson.detail);
+      return { message: JSON.stringify(errorJson.detail) };
+    }
+
+    // Structured detail object — e.g. 409 delete-gate carries
+    // `{ can_delete: false, purchase_count: 3, reason: "..." }`.
+    // Pull `reason` for display and pass the whole object through
+    // so callers can branch on shape.
+    if (errorJson.detail && typeof errorJson.detail === 'object') {
+      const detailObj = errorJson.detail as Record<string, unknown>;
+      const reason = typeof detailObj.reason === 'string' ? detailObj.reason : undefined;
+      return {
+        message: reason || JSON.stringify(errorJson.detail),
+        detail: errorJson.detail,
+      };
     }
 
     // Extract detail or message field (common API error formats)
-    return errorJson.detail || errorJson.message || errorText;
+    return { message: errorJson.detail || errorJson.message || errorText };
   } catch {
-    // If parsing fails, use status text
-    return response.statusText || "An error occurred";
+    // Body wasn't valid JSON — keep the plain-text body if there was one,
+    // otherwise fall back to the HTTP status text.
+    return { message: errorText || response.statusText || "An error occurred" };
   }
 }
 
@@ -205,14 +250,14 @@ export async function apiClient<T>(url: string, options?: RequestInit): Promise<
       if (isClient) {
         window.location.href = `/signin?redirect=${encodeURIComponent(window.location.pathname)}`
       }
-      const msg = await parseErrorResponse(res.clone())
-      throw new ApiError(401, msg || 'Session expired. Please sign in again.', undefined, true)
+      const parsed = await parseErrorResponse(res.clone())
+      throw new ApiError(401, parsed.message || 'Session expired. Please sign in again.', undefined, true, parsed.detail)
     }
   }
 
   if (!res.ok) {
-    const errorMessage = await parseErrorResponse(res);
-    throw new ApiError(res.status, errorMessage);
+    const parsed = await parseErrorResponse(res);
+    throw new ApiError(res.status, parsed.message, undefined, false, parsed.detail);
   }
 
   if (res.status === 204) {
