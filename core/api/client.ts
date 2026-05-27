@@ -33,6 +33,23 @@ interface ParsedErrorBody {
  */
 async function parseErrorResponse(response: Response): Promise<ParsedErrorBody> {
   const errorText = await response.text();
+
+  // Proxy/CDN error pages (ngrok, Cloudflare, etc.) ship HTML bodies. Don't
+  // surface the raw markup to the user — fall back to status text. Detect
+  // via content-type header first, then by leading-`<` heuristic for cases
+  // where the upstream lies about the header.
+  const contentType = (response.headers.get("content-type") || "").toLowerCase();
+  const isHtml =
+    contentType.includes("text/html") ||
+    errorText.trimStart().startsWith("<");
+  if (isHtml) {
+    return {
+      message:
+        response.statusText ||
+        `The server returned an error (status ${response.status}). Please try again.`,
+    };
+  }
+
   try {
     // Try to parse as JSON
     const errorJson = JSON.parse(errorText);
