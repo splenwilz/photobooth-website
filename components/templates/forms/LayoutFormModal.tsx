@@ -79,6 +79,14 @@ export interface LayoutFormModalProps {
 	onClose: () => void;
 	mode: "admin" | "me";
 	editing: AdminTemplateLayout | null;
+	/**
+	 * Called with the new layout's id when a create succeeds. Used by
+	 * TemplateFormModal to auto-select the newly-created layout in its
+	 * dropdown without making the operator hunt for it. Fires before
+	 * onClose so the parent has the id while the modal is still mounted.
+	 * No-op on updates.
+	 */
+	onCreated?: (layoutId: string) => void;
 }
 
 export function LayoutFormModal(props: LayoutFormModalProps) {
@@ -90,6 +98,7 @@ function LayoutFormModalContent({
 	onClose,
 	mode,
 	editing,
+	onCreated,
 }: LayoutFormModalProps) {
 	const isAdmin = mode === "admin";
 	const [form, setForm] = useState<LayoutFormState>(() =>
@@ -416,11 +425,12 @@ function LayoutFormModalContent({
 					photo_count: form.photo_areas.length,
 					photo_areas: form.photo_areas,
 				};
-				if (isAdmin) {
-					await adminCreate.mutateAsync(adminCreateData);
-				} else {
-					await meCreate.mutateAsync(meCreateData);
-				}
+				const created = isAdmin
+					? await adminCreate.mutateAsync(adminCreateData)
+					: await meCreate.mutateAsync(meCreateData);
+				// Hand the new id back to the opener (e.g., TemplateFormModal)
+				// while the modal is still mounted, before onClose unmounts us.
+				onCreated?.(created.id);
 			}
 			onClose();
 		} catch {
