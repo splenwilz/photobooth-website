@@ -15,6 +15,7 @@ import type {
 	AdminTemplateStatus,
 	AdminTemplateType,
 } from "@/core/api/templates/admin-types";
+import { LayoutFormModal } from "./LayoutFormModal";
 import { NumberInput } from "./NumberInput";
 
 export interface CategoryOption {
@@ -126,9 +127,19 @@ function TemplateFormModalContent({
 		if (!isPending) onClose();
 	};
 
+	// Nested layout-creation modal. The operator may realize partway
+	// through filling out the template that the layout they need doesn't
+	// exist yet; opening LayoutFormModal on top (instead of forcing them
+	// to cancel + navigate + restart) preserves everything they've typed.
+	const [nestedLayoutModalOpen, setNestedLayoutModalOpen] = useState(false);
+
 	const dialogRef = useDialogFocusTrap<HTMLDivElement>({
 		open: true,
 		onClose: guardedClose,
+		// Pause the trap while the nested layout modal is open so a single
+		// Escape press closes only the inner modal (both register
+		// document-level keydown listeners that would otherwise fire).
+		paused: nestedLayoutModalOpen,
 	});
 
 	const availableLayouts = useMemo(() => {
@@ -383,6 +394,60 @@ function TemplateFormModalContent({
 					{formError && (
 						<div role="alert" className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
 							{formError}
+						</div>
+					)}
+					{/*
+					 * Layout-awareness banner. Shows whenever no layout is
+					 * picked yet — independent of how many layouts already
+					 * exist. The point is to prompt the operator: "is the
+					 * layout you want for THIS template in the dropdown?"
+					 * If not, they create it inline without losing typed
+					 * progress. Hides as soon as they pick any layout.
+					 */}
+					{form.layout_id === null && (
+						<div className="p-4 rounded-xl border border-[#069494]/30 bg-[#069494]/5 text-sm text-zinc-700 dark:text-zinc-300 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+							<div className="flex items-start gap-3">
+								<svg
+									className="w-5 h-5 text-[#069494] mt-0.5 shrink-0"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+									strokeWidth={2}
+									aria-hidden="true"
+								>
+									<title>Info</title>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+									/>
+								</svg>
+								<span>
+									Before continuing, make sure the layout you want for this template is in the dropdown below. Don&apos;t see it?
+								</span>
+							</div>
+							<button
+								type="button"
+								onClick={() => setNestedLayoutModalOpen(true)}
+								className="self-start sm:self-center shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#069494] text-white text-xs font-semibold hover:bg-[#176161] transition-colors"
+							>
+								<svg
+									className="w-3.5 h-3.5"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+									strokeWidth={2}
+									aria-hidden="true"
+								>
+									<title>Add</title>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										d="M12 4v16m8-8H4"
+									/>
+								</svg>
+								Create new layout
+							</button>
 						</div>
 					)}
 					<div>
@@ -672,6 +737,26 @@ function TemplateFormModalContent({
 					</button>
 				</div>
 			</div>
+			{/*
+			 * Nested layout-creation modal. Rendered as a sibling of the
+			 * template panel so the two stack at the same z-index level
+			 * (LayoutFormModal carries its own backdrop). DOM order puts
+			 * the layout modal above this one when it's open. On a
+			 * successful create, the new layout id flows back via
+			 * onCreated and auto-selects in the dropdown above — the
+			 * operator's typed name / description / etc. survive
+			 * unchanged because we never unmounted this form.
+			 */}
+			<LayoutFormModal
+				isOpen={nestedLayoutModalOpen}
+				onClose={() => setNestedLayoutModalOpen(false)}
+				mode={mode}
+				editing={null}
+				onCreated={(layoutId) => {
+					setForm((prev) => ({ ...prev, layout_id: layoutId }));
+					setNestedLayoutModalOpen(false);
+				}}
+			/>
 		</div>
 	);
 }
