@@ -8,13 +8,6 @@ const FOCUSABLE_SELECTOR =
 interface Options {
 	open: boolean;
 	onClose: () => void;
-	/**
-	 * Temporarily disable the trap without unmounting. Used when a nested
-	 * dialog opens on top of this one: the inner dialog runs its own trap;
-	 * the outer one pauses so a single Escape press doesn't close both
-	 * modals (both would otherwise process the document-level keydown).
-	 */
-	paused?: boolean;
 }
 
 /**
@@ -29,15 +22,11 @@ interface Options {
  * When `open` flips back to false (or the component unmounts), focus
  * returns to the recorded opener if it's still in the DOM.
  *
- * When `paused` is true, the effect skips registration entirely — useful
- * when a nested dialog is on top and should own focus / Escape.
- *
  * Attach the returned ref to the dialog panel element.
  */
 export function useDialogFocusTrap<T extends HTMLElement = HTMLDivElement>({
 	open,
 	onClose,
-	paused,
 }: Options) {
 	const containerRef = useRef<T | null>(null);
 	// Keep onClose in a ref so we don't tear down the listener on every
@@ -48,7 +37,7 @@ export function useDialogFocusTrap<T extends HTMLElement = HTMLDivElement>({
 	}, [onClose]);
 
 	useEffect(() => {
-		if (!open || paused) return;
+		if (!open) return;
 		const container = containerRef.current;
 		if (!container) return;
 		const opener = document.activeElement as HTMLElement | null;
@@ -100,7 +89,7 @@ export function useDialogFocusTrap<T extends HTMLElement = HTMLDivElement>({
 				opener.focus();
 			}
 		};
-	}, [open, paused]);
+	}, [open]);
 
 	return containerRef;
 }
