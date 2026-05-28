@@ -155,12 +155,15 @@ export async function detectPhotoSlotsFromFile(
 	// Reading order: top-to-bottom, then left-to-right. Two slots count as
 	// "the same row" when their vertical centers overlap; that way a strip
 	// of three side-by-side photos doesn't get out-of-order because of
-	// minor y-pixel differences.
+	// minor y-pixel differences, and a wide slot stacked centered above a
+	// shorter one still ranks above it.
 	slots.sort((a, b) => {
+		const centerA = a.y + a.height / 2;
+		const centerB = b.y + b.height / 2;
 		const sameRow =
-			Math.abs(a.y - b.y) < Math.min(a.height, b.height) / 2;
+			Math.abs(centerA - centerB) < Math.min(a.height, b.height) / 2;
 		if (sameRow) return a.x - b.x;
-		return a.y - b.y;
+		return centerA - centerB;
 	});
 
 	return { imageWidth: width, imageHeight: height, slots };

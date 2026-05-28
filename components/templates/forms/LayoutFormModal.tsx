@@ -4,6 +4,7 @@ import {
 	useEffect,
 	useRef,
 	useState,
+	type ChangeEvent,
 	type FormEvent,
 	type ReactNode,
 } from "react";
@@ -162,7 +163,7 @@ function LayoutFormModalContent({
 	}, []);
 
 	const handleSlotImagePicked = async (
-		e: React.ChangeEvent<HTMLInputElement>,
+		e: ChangeEvent<HTMLInputElement>,
 	) => {
 		const file = e.target.files?.[0];
 		// Reset so picking the same file twice still triggers onChange.
@@ -722,17 +723,29 @@ function LayoutFormModalContent({
 									<button
 										type="button"
 										onClick={() =>
-											setForm((prev) => ({
-												...prev,
-												photo_areas: [
-													...prev.photo_areas,
-													{
-														...DEFAULT_PHOTO_AREA,
-														photo_index: prev.photo_areas.length + 1,
-														_draftId: newDraftId(),
-													},
-												],
-											}))
+											setForm((prev) => {
+												// Use max(existing) + 1 instead of length + 1 so
+												// the new index doesn't collide with surviving
+												// indexes after a middle-row delete (e.g., delete
+												// #2 from [1,2,3] → adding "length+1" yields 3,
+												// which collides with the surviving #3).
+												const nextIndex =
+													prev.photo_areas.reduce(
+														(m, a) => Math.max(m, a.photo_index),
+														0,
+													) + 1;
+												return {
+													...prev,
+													photo_areas: [
+														...prev.photo_areas,
+														{
+															...DEFAULT_PHOTO_AREA,
+															photo_index: nextIndex,
+															_draftId: newDraftId(),
+														},
+													],
+												};
+											})
 										}
 										className="text-xs px-2.5 py-1 rounded-lg bg-[#069494] text-white hover:bg-[#176161]"
 									>

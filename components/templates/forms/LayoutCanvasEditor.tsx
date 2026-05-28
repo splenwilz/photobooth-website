@@ -324,6 +324,17 @@ export function LayoutCanvasEditor({
 		}
 	};
 
+	// Defensive: a 0 width/height would produce NaN percentages below and
+	// an invalid CSS aspectRatio. Bail with a placeholder rather than
+	// silently rendering broken positions.
+	if (imageWidth <= 0 || imageHeight <= 0) {
+		return (
+			<div className="w-full rounded-lg border border-dashed border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-900 px-4 py-8 text-center text-xs text-zinc-400">
+				Set a positive layout width and height to enable the visual editor.
+			</div>
+		);
+	}
+
 	return (
 		<div
 			ref={containerRef}
