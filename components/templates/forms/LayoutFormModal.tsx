@@ -1,7 +1,16 @@
 "use client";
 
-import { useState, type FormEvent, type ReactNode } from "react";
+import {
+	useEffect,
+	useRef,
+	useState,
+	type ChangeEvent,
+	type FormEvent,
+	type ReactNode,
+} from "react";
 import { useDialogFocusTrap } from "@/hooks/use-dialog-focus-trap";
+import { detectPhotoSlotsFromFile } from "@/lib/template-slot-detection";
+import { LayoutCanvasEditor } from "./LayoutCanvasEditor";
 import {
 	useCreateLayout,
 	useUpdateLayout,
@@ -125,6 +134,162 @@ function LayoutFormModalContent({
 		open: true,
 		onClose: guardedClose,
 	});
+
+	// Hidden file input wired to the "Detect from image" button below.
+	const slotImageInputRef = useRef<HTMLInputElement>(null);
+	const [isDetectingSlots, setIsDetectingSlots] = useState(false);
+	// Monotonic detection id so that if the operator picks file B before
+	// file A's detection promise resolves, A's stale result is dropped on
+	// the floor instead of overwriting B's photo_areas.
+	const detectionIdRef = useRef(0);
+	// Object URL of the template image. Used as the visual editor's backdrop
+	// and as the auto-detect source. Held in state because it's purely a
+	// client-side editor aid — layouts don't persist a reference image.
+	const [referenceImageUrl, setReferenceImageUrl] = useState<string | null>(
+		null,
+	);
+	// Ref mirror so the unmount cleanup can revoke the URL without depending
+	// on the latest state.
+	const referenceImageUrlRef = useRef<string | null>(null);
+	useEffect(() => {
+		referenceImageUrlRef.current = referenceImageUrl;
+	}, [referenceImageUrl]);
+	useEffect(() => {
+		return () => {
+			if (referenceImageUrlRef.current) {
+				URL.revokeObjectURL(referenceImageUrlRef.current);
+			}
+		};
+	}, []);
+
+	const handleSlotImagePicked = async (
+		e: ChangeEvent<HTMLInputElement>,
+	) => {
+		const file = e.target.files?.[0];
+		// Reset so picking the same file twice still triggers onChange.
+		e.target.value = "";
+		if (!file || !file.type.startsWith("image/")) return;
+		setValidationError(null);
+		setIsDetectingSlots(true);
+		// Bump the detection id; the awaited block below bails if a newer
+		// detection has superseded ours.
+		detectionIdRef.current += 1;
+		const myDetectionId = detectionIdRef.current;
+		// Replace any prior reference image. Revoke the previous URL to
+		// free the underlying blob.
+		const url = URL.createObjectURL(file);
+		setReferenceImageUrl((prev) => {
+			if (prev) URL.revokeObjectURL(prev);
+			return url;
+		});
+		try {
+			const result = await detectPhotoSlotsFromFile(file);
+			// Race guard: a newer file was picked while we were awaiting.
+			// Drop this result — the newer call will own the form state and
+			// the backdrop image.
+			if (myDetectionId !== detectionIdRef.current) return;
+			if (result.slots.length === 0) {
+				setValidationError(
+					"No transparent photo slots found in this image. The image is loaded as a backdrop — define photo areas manually or upload a PNG with transparent regions.",
+				);
+				// Still adopt the image's dimensions for the layout so the
+				// canvas matches the template's aspect ratio.
+				setForm((prev) => ({
+					...prev,
+					width: result.imageWidth,
+					height: result.imageHeight,
+				}));
+				return;
+			}
+			setForm((prev) => ({
+				...prev,
+				width: result.imageWidth,
+				height: result.imageHeight,
+				photo_count: result.slots.length,
+				photo_areas: result.slots.map((slot, idx) => ({
+					...DEFAULT_PHOTO_AREA,
+					photo_index: idx + 1,
+					x: slot.x,
+					y: slot.y,
+					width: slot.width,
+					height: slot.height,
+					_draftId: newDraftId(),
+				})),
+			}));
+		} catch (err) {
+			// Suppress stale errors too.
+			if (myDetectionId !== detectionIdRef.current) return;
+			setValidationError(
+				err instanceof Error
+					? `Could not read image: ${err.message}`
+					: "Could not read image.",
+			);
+		} finally {
+			if (myDetectionId === detectionIdRef.current) {
+				setIsDetectingSlots(false);
+			}
+		}
+	};
+
+	const handleAreasFromCanvas = (next: PhotoAreaFormData[]) => {
+		setForm((prev) => ({ ...prev, photo_areas: next }));
+	};
+
+	// Tracks the draftId of the most recently duplicated photo area so the
+	// canvas can move focus onto it (matching user expectation: "I just
+	// hit Cmd+D, now I want to drag the copy"). Set by duplicateArea,
+	// cleared by the canvas once focus has been applied.
+	const [pendingFocusDraftId, setPendingFocusDraftId] = useState<string | null>(
+		null,
+	);
+
+	// Clone an existing photo area. The copy is offset by 20px so it lands
+	// just below-right of the original (clamped to the layout's bounds) and
+	// gets a fresh photo_index (max+1) plus a fresh _draftId so React keys
+	// stay stable. Wired to both the per-row "Duplicate" button and the
+	// Cmd/Ctrl+D shortcut in the canvas.
+	const duplicateArea = (idx: number) => {
+		if (!form.photo_areas[idx]) return;
+		// Generate the new draftId here so we can both put it on the new
+		// area inside the setForm closure AND remember it for focus.
+		const newId = newDraftId();
+		setForm((prev) => {
+			const original = prev.photo_areas[idx];
+			if (!original) return prev;
+			const OFFSET = 20;
+			const newX = Math.max(
+				0,
+				Math.min(original.x + OFFSET, prev.width - original.width),
+			);
+			const newY = Math.max(
+				0,
+				Math.min(original.y + OFFSET, prev.height - original.height),
+			);
+			const maxIndex = prev.photo_areas.reduce(
+				(m, a) => Math.max(m, a.photo_index),
+				0,
+			);
+			return {
+				...prev,
+				photo_areas: [
+					...prev.photo_areas,
+					{
+						...original,
+						photo_index: maxIndex + 1,
+						x: newX,
+						y: newY,
+						_draftId: newId,
+					},
+				],
+			};
+		});
+		setPendingFocusDraftId(newId);
+	};
+
+	// "Full-screen mode" — same modal component, swaps sizing classes so the
+	// canvas editor gets the whole viewport. Toggle via the button in the
+	// header.
+	const [isFullscreen, setIsFullscreen] = useState(false);
 
 	const handlePasteLayout = async () => {
 		try {
@@ -273,7 +438,13 @@ function LayoutFormModalContent({
 	};
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+		<div
+			className={
+				isFullscreen
+					? "fixed inset-0 z-50"
+					: "fixed inset-0 z-50 flex items-center justify-center p-4"
+			}
+		>
 			<button
 				type="button"
 				aria-label="Close"
@@ -286,7 +457,11 @@ function LayoutFormModalContent({
 				role="dialog"
 				aria-modal="true"
 				aria-labelledby="layout-modal-title"
-				className="relative w-full max-w-xl bg-white dark:bg-[#111111] rounded-2xl shadow-xl overflow-hidden max-h-[90vh] overflow-y-auto"
+				className={
+					isFullscreen
+						? "relative w-full h-full bg-white dark:bg-[#111111] overflow-y-auto"
+						: "relative w-full max-w-xl bg-white dark:bg-[#111111] rounded-2xl shadow-xl overflow-hidden max-h-[90vh] overflow-y-auto"
+				}
 			>
 				<div className="p-6 border-b border-slate-200 dark:border-zinc-800 sticky top-0 bg-white dark:bg-[#111111]">
 					<div className="flex items-center justify-between gap-3">
@@ -300,12 +475,42 @@ function LayoutFormModalContent({
 								</p>
 							)}
 						</div>
-						{isAdmin && !editing && (
+						<div className="flex items-center gap-2">
+							{isAdmin && !editing && (
+								<button
+									type="button"
+									onClick={handlePasteLayout}
+									className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800"
+									title="Fill the form from a copied layout JSON"
+								>
+									<svg
+										className="w-3.5 h-3.5"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+										strokeWidth={2}
+										aria-hidden="true"
+									>
+										<title>Paste</title>
+										<path
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+										/>
+									</svg>
+									Paste from clipboard
+								</button>
+							)}
 							<button
 								type="button"
-								onClick={handlePasteLayout}
+								onClick={() => setIsFullscreen((v) => !v)}
 								className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800"
-								title="Fill the form from a copied layout JSON"
+								aria-label={isFullscreen ? "Exit full screen" : "Enter full screen"}
+								title={
+									isFullscreen
+										? "Shrink back to modal view"
+										: "Expand to full screen for easier editing"
+								}
 							>
 								<svg
 									className="w-3.5 h-3.5"
@@ -315,16 +520,24 @@ function LayoutFormModalContent({
 									strokeWidth={2}
 									aria-hidden="true"
 								>
-									<title>Paste</title>
-									<path
-										strokeLinecap="round"
-										strokeLinejoin="round"
-										d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-									/>
+									<title>{isFullscreen ? "Exit full screen" : "Full screen"}</title>
+									{isFullscreen ? (
+										<path
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25"
+										/>
+									) : (
+										<path
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"
+										/>
+									)}
 								</svg>
-								Paste from clipboard
+								{isFullscreen ? "Modal view" : "Full screen"}
 							</button>
-						)}
+						</div>
 					</div>
 					{pasteMessage && !editing && isAdmin && (
 						<div
@@ -486,34 +699,81 @@ function LayoutFormModalContent({
 					)}
 					{!editing && (
 						<div>
-							<div className="flex items-center justify-between mb-2">
+							<div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
 								<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
 									Photo Areas ({form.photo_areas.length})
 								</label>
-								<button
-									type="button"
-									onClick={() =>
-										setForm((prev) => ({
-											...prev,
-											photo_areas: [
-												...prev.photo_areas,
-												{
-													...DEFAULT_PHOTO_AREA,
-													photo_index: prev.photo_areas.length + 1,
-													_draftId: newDraftId(),
-												},
-											],
-										}))
-									}
-									className="text-xs px-2.5 py-1 rounded-lg bg-[#069494] text-white hover:bg-[#176161]"
-								>
-									+ Add Photo Area
-								</button>
+								<div className="flex items-center gap-2">
+									<input
+										ref={slotImageInputRef}
+										type="file"
+										accept="image/png,image/webp"
+										className="sr-only"
+										onChange={handleSlotImagePicked}
+									/>
+									<button
+										type="button"
+										onClick={() => slotImageInputRef.current?.click()}
+										disabled={isDetectingSlots}
+										className="text-xs px-2.5 py-1 rounded-lg border border-[#069494]/40 text-[#069494] hover:bg-[#069494]/10 disabled:opacity-50"
+										title="Upload a transparent PNG; we'll auto-detect the photo slots from its transparent regions."
+									>
+										{isDetectingSlots ? "Detecting…" : "Auto-detect from image"}
+									</button>
+									<button
+										type="button"
+										onClick={() =>
+											setForm((prev) => {
+												// Use max(existing) + 1 instead of length + 1 so
+												// the new index doesn't collide with surviving
+												// indexes after a middle-row delete (e.g., delete
+												// #2 from [1,2,3] → adding "length+1" yields 3,
+												// which collides with the surviving #3).
+												const nextIndex =
+													prev.photo_areas.reduce(
+														(m, a) => Math.max(m, a.photo_index),
+														0,
+													) + 1;
+												return {
+													...prev,
+													photo_areas: [
+														...prev.photo_areas,
+														{
+															...DEFAULT_PHOTO_AREA,
+															photo_index: nextIndex,
+															_draftId: newDraftId(),
+														},
+													],
+												};
+											})
+										}
+										className="text-xs px-2.5 py-1 rounded-lg bg-[#069494] text-white hover:bg-[#176161]"
+									>
+										+ Add Photo Area
+									</button>
+								</div>
 							</div>
-							{form.photo_areas.length === 0 && (
+							{form.photo_areas.length === 0 && !referenceImageUrl && (
 								<p className="text-xs text-zinc-400 italic py-3 text-center border border-dashed border-slate-200 dark:border-zinc-700 rounded-lg">
-									No photo areas added yet. Click &quot;+ Add Photo Area&quot; to get started.
+									No photo areas added yet. Use &quot;Auto-detect from image&quot; or &quot;+ Add Photo Area&quot; to get started.
 								</p>
+							)}
+							{(form.photo_areas.length > 0 || referenceImageUrl) && (
+								<div className="mb-4">
+									<LayoutCanvasEditor
+										imageSrc={referenceImageUrl}
+										imageWidth={form.width}
+										imageHeight={form.height}
+										photoAreas={form.photo_areas}
+										onAreasChange={handleAreasFromCanvas}
+										onDuplicate={duplicateArea}
+										pendingFocusDraftId={pendingFocusDraftId}
+										onFocusApplied={() => setPendingFocusDraftId(null)}
+									/>
+									<p className="text-[10px] text-zinc-500 mt-1">
+										Drag to move, corners to resize, the small handle on the top edge to round corners (drag to the middle to make a circle). Hold Shift to snap to 10px. Tab into a rectangle, then arrow keys to nudge (Shift+arrow for 10px), Delete to remove, Cmd/Ctrl+D to duplicate. For heart, petal, or custom cutouts, define a rectangular slot here and mask the visible cutout via the template overlay PNG when creating the template.
+									</p>
+								</div>
 							)}
 							<div className="space-y-3">
 								{form.photo_areas.map((area, idx) => (
@@ -525,20 +785,29 @@ function LayoutFormModalContent({
 											<span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
 												Photo Area #{area.photo_index}
 											</span>
-											<button
-												type="button"
-												onClick={() =>
-													setForm((prev) => ({
-														...prev,
-														photo_areas: prev.photo_areas.filter(
-															(_, i) => i !== idx,
-														),
-													}))
-												}
-												className="text-xs text-red-500 hover:underline"
-											>
-												Remove
-											</button>
+											<div className="flex items-center gap-3">
+												<button
+													type="button"
+													onClick={() => duplicateArea(idx)}
+													className="text-xs text-[#069494] hover:underline"
+												>
+													Duplicate
+												</button>
+												<button
+													type="button"
+													onClick={() =>
+														setForm((prev) => ({
+															...prev,
+															photo_areas: prev.photo_areas.filter(
+																(_, i) => i !== idx,
+															),
+														}))
+													}
+													className="text-xs text-red-500 hover:underline"
+												>
+													Remove
+												</button>
+											</div>
 										</div>
 										<div className="grid grid-cols-4 gap-2">
 											<MiniField label="Index" htmlFor={`pa-${idx}-index`}>
