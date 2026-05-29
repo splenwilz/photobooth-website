@@ -426,11 +426,38 @@ function LayoutFormModalContent({
 		// the wire shape always matches the canonical contract regardless
 		// of intermediate form drift.
 		const canon = CANONICAL_DIMENSIONS[form.product_category_id];
+		const canonW = canon?.width ?? form.width;
+		const canonH = canon?.height ?? form.height;
+		// Scale photo_areas from form-space to canonical-space. After auto-
+		// detect from a non-canonical-sized PNG (e.g., 1206×3606 backdrop
+		// for a 603×1803 Strips layout), form.width is the image's pixel
+		// width and slot coords are in that space; the wire payload sends
+		// canonical width/height, so the slots have to be remapped or the
+		// stored layout is geometrically wrong. When form already matches
+		// canonical (default-init Strips, edit init, manually-typed values)
+		// scaleX = scaleY = 1 and this map is a no-op.
+		const scaleX = form.width > 0 ? canonW / form.width : 1;
+		const scaleY = form.height > 0 ? canonH / form.height : 1;
+		const scaledPhotoAreas = form.photo_areas.map((a) => ({
+			...a,
+			x: Math.max(0, Math.min(canonW, Math.round(a.x * scaleX))),
+			y: Math.max(0, Math.min(canonH, Math.round(a.y * scaleY))),
+			width: Math.max(0, Math.min(canonW, Math.round(a.width * scaleX))),
+			height: Math.max(
+				0,
+				Math.min(canonH, Math.round(a.height * scaleY)),
+			),
+			// Use the smaller axial scale so the radius can't exceed half
+			// the shorter side after the clamp in LayoutCanvasEditor.
+			border_radius: Math.round(
+				a.border_radius * Math.min(scaleX, scaleY),
+			),
+		}));
 		const meUpdateData = {
 			name: trimmedName,
 			description: form.description,
-			width: canon?.width ?? form.width,
-			height: canon?.height ?? form.height,
+			width: canonW,
+			height: canonH,
 			product_category_id: form.product_category_id,
 		};
 		// Admin-only adds is_active and sort_order; the me-side endpoint
@@ -451,13 +478,13 @@ function LayoutFormModalContent({
 			} else {
 				const meCreateData = {
 					...meUpdateData,
-					photo_count: form.photo_areas.length,
-					photo_areas: form.photo_areas,
+					photo_count: scaledPhotoAreas.length,
+					photo_areas: scaledPhotoAreas,
 				};
 				const adminCreateData = {
 					...adminUpdateData,
-					photo_count: form.photo_areas.length,
-					photo_areas: form.photo_areas,
+					photo_count: scaledPhotoAreas.length,
+					photo_areas: scaledPhotoAreas,
 				};
 				const created = isAdmin
 					? await adminCreate.mutateAsync(adminCreateData)
