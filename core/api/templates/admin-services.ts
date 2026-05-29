@@ -213,7 +213,6 @@ export async function getTemplateLayout(
  * Create a new layout (admin)
  */
 export async function createLayout(data: {
-  layout_key: string;
   name: string;
   description?: string;
   width: number;
@@ -245,7 +244,6 @@ export async function createLayout(data: {
 export async function updateLayout(
   id: string,
   data: Partial<{
-    layout_key: string;
     name: string;
     description: string;
     width: number;

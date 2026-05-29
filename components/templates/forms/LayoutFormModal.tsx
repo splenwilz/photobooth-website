@@ -32,7 +32,6 @@ import {
 import { NumberInput } from "./NumberInput";
 
 interface LayoutFormState {
-	layout_key: string;
 	name: string;
 	description: string;
 	width: number;
@@ -44,11 +43,21 @@ interface LayoutFormState {
 	photo_areas: PhotoAreaFormData[];
 }
 
+// Smartphone (id 3) intentionally omitted — the layout API rejects writes
+// for that category with a 422 (no canonical dimensions registered).
 const PRODUCT_CATEGORIES = [
 	{ id: 1, name: "Strips" },
 	{ id: 2, name: "4x6" },
-	{ id: 3, name: "Smartphone" },
 ];
+
+// Canonical printer-media dimensions per product category. The backend
+// validates that every layout write matches these exact pairs and 422s on
+// any mismatch. Form state is always synced to the value for the currently
+// selected category — the operator never types dimensions directly.
+const CANONICAL_DIMENSIONS: Record<number, { width: number; height: number }> = {
+	1: { width: 603, height: 1803 }, // Strips
+	2: { width: 1803, height: 1206 }, // 4x6
+};
 
 const DEFAULT_PHOTO_AREA: PhotoAreaFormData = {
 	photo_index: 1,
@@ -62,11 +71,10 @@ const DEFAULT_PHOTO_AREA: PhotoAreaFormData = {
 };
 
 const DEFAULT_LAYOUT_FORM: LayoutFormState = {
-	layout_key: "",
 	name: "",
 	description: "",
-	width: 603,
-	height: 1803,
+	width: CANONICAL_DIMENSIONS[1].width,
+	height: CANONICAL_DIMENSIONS[1].height,
 	photo_count: 0,
 	product_category_id: 1,
 	is_active: true,
@@ -101,22 +109,28 @@ function LayoutFormModalContent({
 	onCreated,
 }: LayoutFormModalProps) {
 	const isAdmin = mode === "admin";
-	const [form, setForm] = useState<LayoutFormState>(() =>
-		editing
+	const [form, setForm] = useState<LayoutFormState>(() => {
+		// On edit: derive width/height from the canonical pair for the
+		// stored category, not from the row's persisted values. Existing
+		// pre-refactor rows may have non-canonical dimensions; silently
+		// snap them so the form never holds (and never re-submits) a
+		// value the backend will 422 on.
+		const canon =
+			editing && CANONICAL_DIMENSIONS[editing.product_category_id];
+		return editing
 			? {
-					layout_key: editing.layout_key,
 					name: editing.name,
 					description: editing.description ?? "",
-					width: editing.width,
-					height: editing.height,
+					width: canon?.width ?? editing.width,
+					height: canon?.height ?? editing.height,
 					photo_count: editing.photo_count,
 					product_category_id: editing.product_category_id,
 					is_active: editing.is_active,
 					sort_order: editing.sort_order,
 					photo_areas: [],
 				}
-			: DEFAULT_LAYOUT_FORM,
-	);
+			: DEFAULT_LAYOUT_FORM;
+	});
 	const [pasteMessage, setPasteMessage] = useState<{
 		type: "success" | "error";
 		text: string;
@@ -130,6 +144,13 @@ function LayoutFormModalContent({
 	const update = isAdmin ? adminUpdate : meUpdate;
 	const [validationError, setValidationError] = useState<string | null>(null);
 	const isPending = create.isPending || update.isPending;
+	// Pre-refactor rows with an unsupported product_category_id (e.g.,
+	// Smartphone, id 3) are still readable but can't be written — the
+	// category is missing from both the picker and CANONICAL_DIMENSIONS.
+	// Detect this case so we can show a clear migration prompt and block
+	// Save until the operator picks a supported category.
+	const isUnsupportedCategory =
+		!CANONICAL_DIMENSIONS[form.product_category_id];
 	const error = create.error || update.error;
 	const displayError = validationError ?? error?.message ?? null;
 
@@ -147,6 +168,13 @@ function LayoutFormModalContent({
 	// Hidden file input wired to the "Detect from image" button below.
 	const slotImageInputRef = useRef<HTMLInputElement>(null);
 	const [isDetectingSlots, setIsDetectingSlots] = useState(false);
+	// Operator-controllable visibility of the visual canvas. Defaults to
+	// hidden — when there's no reference image, the canvas is just rectangles
+	// on a blank backdrop and the operator is presumably typing values into
+	// the MiniField grid below. We auto-flip to visible the moment a
+	// reference image is picked (see handleSlotImagePicked), since the
+	// canvas-with-backdrop is clearly more useful at that point.
+	const [isCanvasVisible, setIsCanvasVisible] = useState(false);
 	// Monotonic detection id so that if the operator picks file B before
 	// file A's detection promise resolves, A's stale result is dropped on
 	// the floor instead of overwriting B's photo_areas.
@@ -191,6 +219,9 @@ function LayoutFormModalContent({
 			if (prev) URL.revokeObjectURL(prev);
 			return url;
 		});
+		// An uploaded image is the whole reason to look at the canvas —
+		// auto-reveal it even if the operator previously hid it.
+		setIsCanvasVisible(true);
 		try {
 			const result = await detectPhotoSlotsFromFile(file);
 			// Race guard: a newer file was picked while we were awaiting.
@@ -309,12 +340,16 @@ function LayoutFormModalContent({
 			}
 			const text = await navigator.clipboard.readText();
 			const parsed = parseLayoutFromClipboard(text);
+			// Snap pasted dimensions to canonical for the parsed category.
+			// Legacy clipboard payloads may carry non-canonical values that
+			// the backend would now reject on save.
+			const canon =
+				CANONICAL_DIMENSIONS[parsed.product_category_id];
 			setForm({
-				layout_key: parsed.layout_key,
 				name: parsed.name,
 				description: parsed.description,
-				width: parsed.width,
-				height: parsed.height,
+				width: canon?.width ?? parsed.width,
+				height: canon?.height ?? parsed.height,
 				photo_count: parsed.photo_areas.length,
 				product_category_id: parsed.product_category_id,
 				is_active: parsed.is_active,
@@ -324,7 +359,7 @@ function LayoutFormModalContent({
 			const areaCount = parsed.photo_areas.length;
 			setPasteMessage({
 				type: "success",
-				text: `Pasted layout with ${areaCount} photo area${areaCount === 1 ? "" : "s"}.${parsed.layout_key ? " Layout key was copied — change it if you want a new layout in the same environment." : ""}`,
+				text: `Pasted layout with ${areaCount} photo area${areaCount === 1 ? "" : "s"}.`,
 			});
 		} catch (err) {
 			const isPermissionError =
@@ -346,13 +381,8 @@ function LayoutFormModalContent({
 		setValidationError(null);
 
 		const trimmedName = form.name.trim();
-		const trimmedKey = form.layout_key.trim();
 		if (!trimmedName) {
 			setValidationError("Layout name is required");
-			return;
-		}
-		if (!trimmedKey) {
-			setValidationError("Layout key is required");
 			return;
 		}
 
@@ -391,12 +421,16 @@ function LayoutFormModalContent({
 		}
 
 		// User-editable fields shared between admin and me variants.
+		// Width/height are derived from the canonical pair for the selected
+		// category — the form keeps them in sync but we re-derive here so
+		// the wire shape always matches the canonical contract regardless
+		// of intermediate form drift.
+		const canon = CANONICAL_DIMENSIONS[form.product_category_id];
 		const meUpdateData = {
-			layout_key: trimmedKey,
 			name: trimmedName,
 			description: form.description,
-			width: form.width,
-			height: form.height,
+			width: canon?.width ?? form.width,
+			height: canon?.height ?? form.height,
 			product_category_id: form.product_category_id,
 		};
 		// Admin-only adds is_active and sort_order; the me-side endpoint
@@ -569,36 +603,26 @@ function LayoutFormModalContent({
 							{displayError}
 						</div>
 					)}
-					<div className="grid grid-cols-2 gap-4">
-						<div>
-							<label htmlFor="layout-name" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-								Name
-							</label>
-							<input
-								id="layout-name"
-								type="text"
-								value={form.name}
-								onChange={(e) => setForm({ ...form, name: e.target.value })}
-								required
-								className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-							/>
+					{isUnsupportedCategory && (
+						<div
+							role="alert"
+							className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-sm text-amber-700 dark:text-amber-400"
+						>
+							This layout was created for a product category that&apos;s no longer supported (id {form.product_category_id}). Pick Strips or 4x6 from the dropdown below to migrate it, or close without saving.
 						</div>
-						<div>
-							<label htmlFor="layout-key" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-								Layout Key
-							</label>
-							<input
-								id="layout-key"
-								type="text"
-								value={form.layout_key}
-								onChange={(e) =>
-									setForm({ ...form, layout_key: e.target.value })
-								}
-								required
-								placeholder="Strip-3-Shot-Custom"
-								className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-							/>
-						</div>
+					)}
+					<div>
+						<label htmlFor="layout-name" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+							Name
+						</label>
+						<input
+							id="layout-name"
+							type="text"
+							value={form.name}
+							onChange={(e) => setForm({ ...form, name: e.target.value })}
+							required
+							className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
+						/>
 					</div>
 					<div>
 						<label htmlFor="layout-description" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
@@ -614,30 +638,17 @@ function LayoutFormModalContent({
 							className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
 						/>
 					</div>
-					<div className="grid grid-cols-3 gap-4">
+					<div className="grid grid-cols-2 gap-4">
 						<div>
-							<label htmlFor="layout-width" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-								Width (px)
+							<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+								Dimensions
 							</label>
-							<NumberInput
-								id="layout-width"
-								value={form.width}
-								onChange={(n) => setForm({ ...form, width: n })}
-								required
-								className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-							/>
-						</div>
-						<div>
-							<label htmlFor="layout-height" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-								Height (px)
-							</label>
-							<NumberInput
-								id="layout-height"
-								value={form.height}
-								onChange={(n) => setForm({ ...form, height: n })}
-								required
-								className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
-							/>
+							<div className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-zinc-900 dark:text-white">
+								{form.width} × {form.height} px
+							</div>
+							<p className="text-xs text-zinc-500 mt-1">
+								Fixed by the printer media. Changes with the product type.
+							</p>
 						</div>
 						<div>
 							<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
@@ -661,12 +672,19 @@ function LayoutFormModalContent({
 							<select
 								id="layout-product-type"
 								value={form.product_category_id}
-								onChange={(e) =>
+								onChange={(e) => {
+									const nextId = parseInt(e.target.value, 10);
+									// Sync dimensions to the canonical pair so the form
+									// always sends a writeable shape. Backend would 422
+									// otherwise.
+									const canon = CANONICAL_DIMENSIONS[nextId];
 									setForm({
 										...form,
-										product_category_id: parseInt(e.target.value, 10),
-									})
-								}
+										product_category_id: nextId,
+										width: canon?.width ?? form.width,
+										height: canon?.height ?? form.height,
+									});
+								}}
 								className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
 							>
 								{PRODUCT_CATEGORIES.map((cat) => (
@@ -721,6 +739,21 @@ function LayoutFormModalContent({
 										className="sr-only"
 										onChange={handleSlotImagePicked}
 									/>
+									{(form.photo_areas.length > 0 || referenceImageUrl) && (
+										<button
+											type="button"
+											onClick={() => setIsCanvasVisible((v) => !v)}
+											className="text-xs px-2.5 py-1 rounded-lg border border-slate-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800"
+											aria-pressed={isCanvasVisible}
+											title={
+												isCanvasVisible
+													? "Hide the visual canvas below"
+													: "Show the visual canvas below"
+											}
+										>
+											{isCanvasVisible ? "Hide canvas" : "Show canvas"}
+										</button>
+									)}
 									<button
 										type="button"
 										onClick={() => slotImageInputRef.current?.click()}
@@ -768,7 +801,7 @@ function LayoutFormModalContent({
 									No photo areas added yet. Use &quot;Auto-detect from image&quot; or &quot;+ Add Photo Area&quot; to get started.
 								</p>
 							)}
-							{(form.photo_areas.length > 0 || referenceImageUrl) && (
+							{(form.photo_areas.length > 0 || referenceImageUrl) && isCanvasVisible && (
 								<div className="mb-4">
 									<LayoutCanvasEditor
 										imageSrc={referenceImageUrl}
@@ -916,7 +949,7 @@ function LayoutFormModalContent({
 						</button>
 						<button
 							type="submit"
-							disabled={isPending}
+							disabled={isPending || isUnsupportedCategory}
 							className="flex-1 px-4 py-2.5 rounded-lg bg-[#069494] text-white font-medium hover:bg-[#176161] disabled:opacity-50"
 						>
 							{isPending ? "Saving..." : "Save"}

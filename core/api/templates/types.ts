@@ -23,7 +23,6 @@ export interface TemplateCategory {
 
 export interface TemplateLayout {
   id: string;
-  layout_key: string;
   name: string;
   description: string;
   width: number;

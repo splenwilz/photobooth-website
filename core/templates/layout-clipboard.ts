@@ -42,7 +42,6 @@ export const LAYOUT_CLIPBOARD_TYPE = "boothiq.layout/v1";
 
 export type LayoutClipboardPayload = {
   _type: typeof LAYOUT_CLIPBOARD_TYPE;
-  layout_key: string;
   name: string;
   description: string;
   width: number;
@@ -98,7 +97,6 @@ function optionalFiniteNumber(v: unknown, fallback: number): number {
 }
 
 export function serializeLayoutForClipboard(layout: {
-  layout_key: string;
   name: string;
   description: string | null;
   width: number;
@@ -119,7 +117,6 @@ export function serializeLayoutForClipboard(layout: {
 }): string {
   const payload: LayoutClipboardPayload = {
     _type: LAYOUT_CLIPBOARD_TYPE,
-    layout_key: layout.layout_key,
     name: layout.name,
     description: layout.description ?? "",
     width: layout.width,
@@ -191,11 +188,9 @@ export function parseLayoutFromClipboard(text: string): LayoutClipboardPayload {
   );
   return {
     _type: LAYOUT_CLIPBOARD_TYPE,
-    // Trim and collapse to "" if blank, mirroring how `name` is handled.
-    // A whitespace-only key would render as a "valid" key client-side
-    // but fail backend validation; nip it at parse time.
-    layout_key:
-      typeof obj.layout_key === "string" ? obj.layout_key.trim() : "",
+    // Legacy clipboard payloads may still carry `layout_key`. We parse and
+    // discard it silently rather than throw — the field is no longer part
+    // of the layout API contract.
     name: obj.name.trim(),
     description: typeof obj.description === "string" ? obj.description : "",
     width: requireFiniteNumber(obj.width, "width"),

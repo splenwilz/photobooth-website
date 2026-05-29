@@ -28,7 +28,6 @@ export interface CategoryOption {
 export interface LayoutOption {
 	id: string;
 	name: string;
-	layout_key: string;
 	product_category_id: number;
 	photo_count: number;
 	mine?: boolean;
