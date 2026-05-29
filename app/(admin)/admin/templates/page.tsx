@@ -187,7 +187,6 @@ export default function AdminTemplatesPage() {
       layouts.map((l) => ({
         id: l.id,
         name: l.name,
-        layout_key: l.layout_key,
         product_category_id: l.product_category_id,
         photo_count: l.photo_count,
       })),
@@ -1118,7 +1117,7 @@ export default function AdminTemplatesPage() {
                       </button>
                       <div>
                         <p className="font-semibold text-zinc-900 dark:text-white">{layout.name}</p>
-                        <p className="text-sm text-zinc-500">{layout.layout_key}</p>
+                        <p className="text-sm text-zinc-500">{layout.description}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-6">

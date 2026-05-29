@@ -8,7 +8,6 @@ import {
 import type { AdminShapeType } from "@/core/api/templates/admin-types";
 
 const minimalLayout = {
-  layout_key: "strip-3-up",
   name: "Strip 3-up",
   description: "Three rectangular photos.",
   width: 600,
@@ -45,7 +44,6 @@ describe("serializeLayoutForClipboard", () => {
     const json = serializeLayoutForClipboard(minimalLayout);
     const parsed = JSON.parse(json) as LayoutClipboardPayload;
     expect(parsed._type).toBe(LAYOUT_CLIPBOARD_TYPE);
-    expect(parsed.layout_key).toBe("strip-3-up");
     expect(parsed.photo_areas).toHaveLength(2);
     expect(parsed.photo_areas[1].shape_type).toBe("rounded_rectangle");
   });
@@ -77,7 +75,6 @@ describe("parseLayoutFromClipboard", () => {
     });
     expect({ ...parsed, photo_areas: photoAreasNoDrafts }).toEqual({
       _type: LAYOUT_CLIPBOARD_TYPE,
-      layout_key: "strip-3-up",
       name: "Strip 3-up",
       description: "Three rectangular photos.",
       width: 600,
@@ -368,7 +365,6 @@ describe("parseLayoutFromClipboard", () => {
         product_category_id: 1,
       })
     );
-    expect(parsed.layout_key).toBe("");
     expect(parsed.description).toBe("");
     expect(parsed.is_active).toBe(true);
     expect(parsed.sort_order).toBe(0);

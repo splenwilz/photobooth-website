@@ -187,7 +187,7 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 													{isMine ? "Custom" : "Built-in"}
 												</span>
 											</div>
-											<p className="text-sm text-zinc-500">{layout.layout_key}</p>
+											<p className="text-sm text-zinc-500">{layout.description}</p>
 										</div>
 									</div>
 									<div className="flex items-center gap-6">

@@ -57,7 +57,6 @@ export interface AdminPhotoArea {
  */
 export interface AdminTemplateLayout {
   id: string; // UUID
-  layout_key: string;
   name: string;
   description: string;
   width: number;
@@ -269,7 +268,6 @@ export interface AdminCategoryRequest {
  * Layout create request
  */
 export interface AdminLayoutRequest {
-  layout_key: string;
   name: string;
   description?: string;
   width: number;

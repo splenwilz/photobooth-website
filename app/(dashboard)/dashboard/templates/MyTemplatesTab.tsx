@@ -113,7 +113,6 @@ export function MyTemplatesTab({ onCount }: MyTemplatesTabProps) {
 			(layoutsData?.layouts ?? []).map((l) => ({
 				id: l.id,
 				name: l.name,
-				layout_key: l.layout_key,
 				product_category_id: l.product_category_id,
 				photo_count: l.photo_count,
 				mine: l.owner_id !== null,
