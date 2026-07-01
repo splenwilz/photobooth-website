@@ -20,7 +20,7 @@ export type AdminLogoFitMode = "fill" | "fit" | "center";
  * Template Category from backend (seasonal categories)
  */
 export interface AdminTemplateCategory {
-  id: number;
+  id: string; // UUID
   name: string;
   description: string;
   is_active: boolean;
@@ -95,7 +95,7 @@ export interface AdminTemplate {
   id: number;
   name: string;
   description: string;
-  category_id: number;
+  category_id: string; // UUID
   category: AdminTemplateCategory;
   layout_id: string;
   layout: AdminTemplateLayout;
@@ -187,7 +187,7 @@ export interface AdminTemplateCreateRequest {
   overlay_s3_key?: string;
   name: string;
   description?: string;
-  category_id?: number;
+  category_id?: string; // UUID
   layout_id?: string;
   template_type?: AdminTemplateType;
   status?: AdminTemplateStatus;
@@ -214,7 +214,7 @@ export interface AdminTemplateCreateResponse {
 export interface AdminTemplateUpdateRequest {
   name?: string;
   description?: string;
-  category_id?: number;
+  category_id?: string; // UUID
   layout_id?: string;
   template_type?: AdminTemplateType;
   status?: AdminTemplateStatus;
@@ -243,7 +243,7 @@ export interface AdminTemplateDeleteResponse {
 export interface AdminTemplatesQueryParams {
   page?: number;
   per_page?: number;
-  category_id?: number;
+  category_id?: string; // UUID
   layout_id?: string;
   template_type?: AdminTemplateType;
   status?: AdminTemplateStatus;

@@ -6,13 +6,18 @@ import {
 	useDeleteMyLayout,
 	useDeleteMyPhotoArea,
 	useMyLayouts,
+	useMyTemplates,
 } from "@/core/api/templates/me-queries";
 import type {
 	MyPhotoArea,
 	MyTemplateLayout,
 } from "@/core/api/templates/me-types";
+import { AffectedTemplatesList } from "@/components/templates/forms/AffectedTemplatesList";
 import { LayoutFormModal } from "@/components/templates/forms/LayoutFormModal";
 import { PhotoAreaFormModal } from "@/components/templates/forms/PhotoAreaFormModal";
+
+// Page size for the affected-templates preview in the delete-layout dialog.
+const DELETE_PREVIEW_PER_PAGE = 100;
 
 interface MyLayoutsTabProps {
 	onCount?: (count: number) => void;
@@ -32,7 +37,8 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 	const [photoAreaModalLayoutId, setPhotoAreaModalLayoutId] = useState<string | null>(null);
 	const [editingPhotoArea, setEditingPhotoArea] = useState<MyPhotoArea | null>(null);
 	const [expandedLayoutId, setExpandedLayoutId] = useState<string | null>(null);
-	const [confirmDeleteLayoutId, setConfirmDeleteLayoutId] = useState<string | null>(null);
+	const [deleteLayoutTarget, setDeleteLayoutTarget] =
+		useState<MyTemplateLayout | null>(null);
 	const [confirmDeleteArea, setConfirmDeleteArea] = useState<{
 		layoutId: string;
 		photoAreaId: number;
@@ -46,9 +52,22 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 		onCount?.(mineCount);
 	}, [onCount, mineCount]);
 
+	// Fetch the templates filed under the layout being deleted. A layout always
+	// cascades its templates, so this is informational only (no choice).
+	const {
+		data: affectedData,
+		isLoading: affectedLoading,
+		isError: affectedError,
+	} = useMyTemplates(
+		{ layout_id: deleteLayoutTarget?.id, per_page: DELETE_PREVIEW_PER_PAGE },
+		{ enabled: deleteLayoutTarget !== null },
+	);
+	const affectedTemplates = affectedData?.templates ?? [];
+	const affectedTotal = affectedData?.total ?? 0;
+
 	const deleteLayoutDialogRef = useDialogFocusTrap<HTMLDivElement>({
-		open: confirmDeleteLayoutId !== null,
-		onClose: () => setConfirmDeleteLayoutId(null),
+		open: deleteLayoutTarget !== null,
+		onClose: () => setDeleteLayoutTarget(null),
 	});
 	const deleteAreaDialogRef = useDialogFocusTrap<HTMLDivElement>({
 		open: confirmDeleteArea !== null,
@@ -60,8 +79,8 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 
 	// Clear stale mutation errors when each dialog opens.
 	useEffect(() => {
-		if (confirmDeleteLayoutId !== null) resetDelLayout();
-	}, [confirmDeleteLayoutId, resetDelLayout]);
+		if (deleteLayoutTarget !== null) resetDelLayout();
+	}, [deleteLayoutTarget, resetDelLayout]);
 	useEffect(() => {
 		if (confirmDeleteArea !== null) resetDelArea();
 	}, [confirmDeleteArea, resetDelArea]);
@@ -231,7 +250,7 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 												</button>
 												<button
 													type="button"
-													onClick={() => setConfirmDeleteLayoutId(layout.id)}
+													onClick={() => setDeleteLayoutTarget(layout)}
 													className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-zinc-500 hover:text-red-600"
 													aria-label={`Delete ${layout.name}`}
 												>
@@ -397,14 +416,14 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 				editing={editingPhotoArea}
 			/>
 
-			{confirmDeleteLayoutId !== null && (
+			{deleteLayoutTarget !== null && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
 					<button
 						type="button"
 						aria-label="Close"
 						tabIndex={-1}
 						className="absolute inset-0 bg-black/60 cursor-default"
-						onClick={() => setConfirmDeleteLayoutId(null)}
+						onClick={() => setDeleteLayoutTarget(null)}
 					/>
 					<div
 						ref={deleteLayoutDialogRef}
@@ -412,12 +431,29 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 						aria-modal="true"
 						aria-labelledby="delete-layout-title"
 						aria-describedby="delete-layout-desc"
-						className="relative w-full max-w-sm bg-white dark:bg-[#111111] rounded-2xl shadow-xl p-6"
+						className="relative w-full max-w-md bg-white dark:bg-[#111111] rounded-2xl shadow-xl p-6"
 					>
-						<h3 id="delete-layout-title" className="text-lg font-bold text-zinc-900 dark:text-white mb-2">Delete Layout</h3>
+						<h3 id="delete-layout-title" className="text-lg font-bold text-zinc-900 dark:text-white mb-2">
+							Delete &ldquo;{deleteLayoutTarget.name}&rdquo;?
+						</h3>
+
+						{affectedTotal > 0 && (
+							<p className="text-sm text-zinc-500 mb-3">
+								This will also delete its {affectedTotal}{" "}
+								{affectedTotal === 1 ? "template" : "templates"}:
+							</p>
+						)}
+						<AffectedTemplatesList
+							isLoading={affectedLoading}
+							isError={affectedError}
+							templates={affectedTemplates}
+							total={affectedTotal}
+						/>
 						<p id="delete-layout-desc" className="text-sm text-zinc-500 mb-6">
-							This will also delete all photo areas in this layout. This action cannot be undone.
+							This also deletes all photo areas in this layout. This action
+							cannot be undone.
 						</p>
+
 						{delLayout.error && (
 							<div role="alert" className="p-3 mb-4 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500">
 								{delLayout.error.message}
@@ -426,7 +462,7 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 						<div className="flex gap-3">
 							<button
 								type="button"
-								onClick={() => setConfirmDeleteLayoutId(null)}
+								onClick={() => setDeleteLayoutTarget(null)}
 								className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-slate-50 dark:hover:bg-zinc-800"
 							>
 								Cancel
@@ -434,14 +470,14 @@ export function MyLayoutsTab({ onCount }: MyLayoutsTabProps) {
 							<button
 								type="button"
 								onClick={() =>
-									delLayout.mutate(confirmDeleteLayoutId, {
-										onSuccess: () => setConfirmDeleteLayoutId(null),
+									delLayout.mutate(deleteLayoutTarget.id, {
+										onSuccess: () => setDeleteLayoutTarget(null),
 									})
 								}
-								disabled={delLayout.isPending}
+								disabled={delLayout.isPending || affectedLoading}
 								className="flex-1 px-4 py-2.5 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 disabled:opacity-50"
 							>
-								{delLayout.isPending ? "Deleting..." : "Delete"}
+								{delLayout.isPending ? "Deleting..." : "Delete layout"}
 							</button>
 						</div>
 					</div>

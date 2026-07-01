@@ -161,7 +161,7 @@ export async function createCategory(data: {
   season_start_date?: string;
   season_end_date?: string;
   seasonal_priority?: number;
-}): Promise<{ id: number; name: string }> {
+}): Promise<{ id: string; name: string }> {
   return apiClient(`${TEMPLATES_BASE}/categories`, {
     method: "POST",
     body: JSON.stringify(data),
@@ -172,7 +172,7 @@ export async function createCategory(data: {
  * Update a category (admin)
  */
 export async function updateCategory(
-  id: number,
+  id: string,
   data: Partial<{
     name: string;
     description: string;
@@ -184,7 +184,7 @@ export async function updateCategory(
     season_end_date: string;
     seasonal_priority: number;
   }>
-): Promise<{ id: number; name: string }> {
+): Promise<{ id: string; name: string }> {
   return apiClient(`${TEMPLATES_BASE}/categories/${id}`, {
     method: "PATCH",
     body: JSON.stringify(data),
@@ -194,7 +194,7 @@ export async function updateCategory(
 /**
  * Delete a category (admin)
  */
-export async function deleteCategory(id: number): Promise<void> {
+export async function deleteCategory(id: string): Promise<void> {
   return apiClient(`${TEMPLATES_BASE}/categories/${id}`, {
     method: "DELETE",
   });

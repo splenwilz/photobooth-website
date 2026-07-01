@@ -15,7 +15,7 @@ import type {
 } from "@/core/api/templates/me-types";
 import { TemplateFormModal } from "@/components/templates/forms/TemplateFormModal";
 
-type FilterCategory = "all" | number;
+type FilterCategory = "all" | string;
 type FilterTemplateType = "all" | MyTemplateType;
 
 const TEMPLATE_TYPE_OPTIONS: { value: FilterTemplateType; label: string }[] = [
@@ -177,7 +177,7 @@ export function MyTemplatesTab({ onCount }: MyTemplatesTabProps) {
 				<select
 					value={filterCategory}
 					onChange={(e) => {
-						setFilterCategory(e.target.value === "all" ? "all" : Number(e.target.value));
+						setFilterCategory(e.target.value);
 						setPage(1);
 					}}
 					className="px-4 py-3 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
