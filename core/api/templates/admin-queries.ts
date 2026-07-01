@@ -224,7 +224,7 @@ export function useUpdateCategory() {
 			id,
 			data,
 		}: {
-			id: number;
+			id: string;
 			data: Parameters<typeof updateCategory>[1];
 		}) => updateCategory(id, data),
 		onSuccess: () => {
@@ -243,7 +243,7 @@ export function useDeleteCategory() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: (id: number) => deleteCategory(id),
+		mutationFn: (id: string) => deleteCategory(id),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: adminTemplateKeys.categories });
 			// Also nudge the user-side cache so dashboard pickers and lists

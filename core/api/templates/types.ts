@@ -8,7 +8,7 @@
 export type TemplateType = "strip" | "photo_4x6";
 
 export interface TemplateCategory {
-  id: number;
+  id: string; // UUID
   name: string;
   description: string;
   is_active: boolean;
@@ -80,7 +80,7 @@ export interface TemplateListItem {
   // Flat references — full nested objects only on the detail response.
   // All three are nullable to match the backend's `Optional[…]` schema
   // (a template can theoretically have no category and no layout).
-  category_id: number | null;
+  category_id: string | null; // UUID
   layout_id: string | null;
   layout_photo_count: number | null;
 }
@@ -119,7 +119,7 @@ export interface TemplatesResponse {
 export interface TemplatesQueryParams {
   page?: number;
   per_page?: number;
-  category_id?: number;
+  category_id?: string; // UUID
   layout_id?: string;
   template_type?: TemplateType;
   is_featured?: boolean;

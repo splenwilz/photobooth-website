@@ -7,6 +7,7 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ApiError } from "@/core/api/client";
 import {
 	addMyPhotoAreaToLayout,
 	createMyCategory,
@@ -30,12 +31,29 @@ import {
 import type {
 	MyCategoryRequest,
 	MyColorConfigRequest,
+	MyDeleteCategoryMode,
 	MyLayoutRequest,
 	MyTemplateCreateRequest,
 	MyTemplatesQueryParams,
 	MyTemplateUpdateRequest,
 } from "./me-types";
 import { buildUpdateUploadPayload, runTemplateUploadFlow } from "./upload-flow";
+
+/**
+ * Run a DELETE and treat a 404 as success. Per the /me/* contract, a 404 from a
+ * delete means the row is already gone (or never owned by the caller), so the
+ * desired outcome — it's not there — is already true. Swallowing it lets the
+ * mutation's onSuccess run (refresh the list, close the dialog) instead of
+ * surfacing a confusing error. Any non-404 error still propagates.
+ */
+async function deleteTolerating404(run: () => Promise<void>): Promise<void> {
+	try {
+		await run();
+	} catch (e) {
+		if (e instanceof ApiError && e.status === 404) return;
+		throw e;
+	}
+}
 
 export const myTemplateKeys = {
 	all: ["my-templates"] as const,
@@ -52,11 +70,15 @@ export const myTemplateKeys = {
 // TEMPLATES
 // ============================================================================
 
-export function useMyTemplates(params: MyTemplatesQueryParams = {}) {
+export function useMyTemplates(
+	params: MyTemplatesQueryParams = {},
+	options: { enabled?: boolean } = {},
+) {
 	return useQuery({
 		queryKey: myTemplateKeys.list(params),
 		queryFn: () => getMyTemplates(params),
 		staleTime: 60 * 1000,
+		enabled: options.enabled ?? true,
 	});
 }
 
@@ -206,7 +228,7 @@ export function useUpdateMyCategory() {
 			id,
 			data,
 		}: {
-			id: number;
+			id: string;
 			data: Partial<MyCategoryRequest>;
 		}) => updateMyCategory(id, data),
 		onSuccess: () => {
@@ -218,9 +240,13 @@ export function useUpdateMyCategory() {
 export function useDeleteMyCategory() {
 	const queryClient = useQueryClient();
 	return useMutation({
-		mutationFn: (id: number) => deleteMyCategory(id),
+		mutationFn: ({ id, mode }: { id: string; mode?: MyDeleteCategoryMode }) =>
+			deleteTolerating404(() => deleteMyCategory(id, mode)),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: myTemplateKeys.categories });
+			// Templates were either reassigned to "Classic" or deleted, so any
+			// open templates view is now stale.
+			queryClient.invalidateQueries({ queryKey: myTemplateKeys.lists() });
 		},
 	});
 }
@@ -272,9 +298,12 @@ export function useUpdateMyLayout() {
 export function useDeleteMyLayout() {
 	const queryClient = useQueryClient();
 	return useMutation({
-		mutationFn: (id: string) => deleteMyLayout(id),
+		mutationFn: (id: string) => deleteTolerating404(() => deleteMyLayout(id)),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: myTemplateKeys.layouts });
+			// Deleting a layout cascades its templates, so refresh any open
+			// templates view too.
+			queryClient.invalidateQueries({ queryKey: myTemplateKeys.lists() });
 		},
 	});
 }

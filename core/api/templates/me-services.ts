@@ -17,6 +17,7 @@ import type {
 	MyCategoriesResponse,
 	MyCategoryRequest,
 	MyColorConfigRequest,
+	MyDeleteCategoryMode,
 	MyLayoutRequest,
 	MyLayoutsResponse,
 	MyPresignRequest,
@@ -129,7 +130,7 @@ export async function getMyCategories(
 
 export async function createMyCategory(
 	data: MyCategoryRequest,
-): Promise<{ id: number; name: string }> {
+): Promise<{ id: string; name: string }> {
 	return apiClient(`${ME_BASE}/categories`, {
 		method: "POST",
 		body: JSON.stringify(data),
@@ -137,17 +138,27 @@ export async function createMyCategory(
 }
 
 export async function updateMyCategory(
-	id: number,
+	id: string,
 	data: Partial<MyCategoryRequest>,
-): Promise<{ id: number; name: string }> {
+): Promise<{ id: string; name: string }> {
 	return apiClient(`${ME_BASE}/categories/${id}`, {
 		method: "PATCH",
 		body: JSON.stringify(data),
 	});
 }
 
-export async function deleteMyCategory(id: number): Promise<void> {
-	return apiClient(`${ME_BASE}/categories/${id}`, {
+/**
+ * Delete a category and decide the fate of its templates via `mode`:
+ * `reassign_to_classic` (default, no data loss) moves them under the global
+ * "Classic" category; `delete_templates` removes them and their S3 assets too.
+ * 204 on success, 404 if not owned/already gone, 500 only if the server's
+ * Classic fallback is missing (reassign path only).
+ */
+export async function deleteMyCategory(
+	id: string,
+	mode: MyDeleteCategoryMode = "reassign_to_classic",
+): Promise<void> {
+	return apiClient(`${ME_BASE}/categories/${id}?mode=${mode}`, {
 		method: "DELETE",
 	});
 }

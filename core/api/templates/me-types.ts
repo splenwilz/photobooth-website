@@ -81,3 +81,15 @@ export type MyCategoryRequest = Omit<
 >;
 export type MyLayoutRequest = AdminLayoutRequest;
 export type MyColorConfigRequest = AdminColorConfigRequest;
+
+/**
+ * Controls what happens to a category's templates when the category is deleted
+ * (`DELETE /me/categories/{id}?mode=…`):
+ *
+ * - `reassign_to_classic` (default) keeps the templates and moves them to the
+ *   global "Classic" category — no data loss.
+ * - `delete_templates` hard-deletes the templates (and their S3 assets) too.
+ *
+ * Layouts have no equivalent: deleting a layout always cascades its templates.
+ */
+export type MyDeleteCategoryMode = "reassign_to_classic" | "delete_templates";

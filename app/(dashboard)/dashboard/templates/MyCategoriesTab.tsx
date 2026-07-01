@@ -4,10 +4,20 @@ import { useEffect, useState } from "react";
 import {
 	useDeleteMyCategory,
 	useMyCategories,
+	useMyTemplates,
 } from "@/core/api/templates/me-queries";
-import type { MyTemplateCategory } from "@/core/api/templates/me-types";
+import type {
+	MyDeleteCategoryMode,
+	MyTemplateCategory,
+} from "@/core/api/templates/me-types";
+import { AffectedTemplatesList } from "@/components/templates/forms/AffectedTemplatesList";
 import { CategoryFormModal } from "@/components/templates/forms/CategoryFormModal";
 import { useDialogFocusTrap } from "@/hooks/use-dialog-focus-trap";
+
+// Page size for the affected-templates preview in the delete dialog. Large
+// enough that almost every category lists in full; the dialog shows "+N more"
+// past this.
+const DELETE_PREVIEW_PER_PAGE = 100;
 
 interface MyCategoriesTabProps {
 	onCount?: (count: number) => void;
@@ -26,7 +36,13 @@ export function MyCategoriesTab({ onCount }: MyCategoriesTabProps) {
 
 	const [editing, setEditing] = useState<MyTemplateCategory | null>(null);
 	const [isOpen, setIsOpen] = useState(false);
-	const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+	const [deleteTarget, setDeleteTarget] = useState<MyTemplateCategory | null>(
+		null,
+	);
+	// Default to the no-data-loss choice, matching the backend's default mode.
+	const [deleteMode, setDeleteMode] = useState<MyDeleteCategoryMode>(
+		"reassign_to_classic",
+	);
 
 	const categories = data?.categories ?? [];
 	const mineCount = categories.filter((c) => c.owner_id !== null).length;
@@ -37,16 +53,40 @@ export function MyCategoriesTab({ onCount }: MyCategoriesTabProps) {
 		onCount?.(mineCount);
 	}, [onCount, mineCount]);
 
+	// Fetch the templates filed under the category being deleted so the
+	// confirmation can list them and the operator can choose their fate.
+	const {
+		data: affectedData,
+		isLoading: affectedLoading,
+		isError: affectedError,
+	} = useMyTemplates(
+		{ category_id: deleteTarget?.id, per_page: DELETE_PREVIEW_PER_PAGE },
+		{ enabled: deleteTarget !== null },
+	);
+	const affectedTemplates = affectedData?.templates ?? [];
+	const affectedTotal = affectedData?.total ?? 0;
+	// Only treat the category as empty once we've actually checked. On a failed
+	// fetch we don't know the count, so we must NOT claim "no templates" — show
+	// the error note and keep the mode choice available instead.
+	const checkedEmpty = !affectedLoading && !affectedError && affectedTotal === 0;
+
 	const deleteDialogRef = useDialogFocusTrap<HTMLDivElement>({
-		open: confirmDeleteId !== null,
-		onClose: () => setConfirmDeleteId(null),
+		open: deleteTarget !== null,
+		onClose: () => setDeleteTarget(null),
 	});
 
-	// Clear any stale mutation error when the modal opens, so a previously
-	// failed delete doesn't leak its error into a fresh confirmation.
+	// Clear any stale mutation error when the dialog opens, so a previously
+	// failed delete doesn't leak its error into a fresh confirmation. The mode
+	// is reset to the safe default in the open handler (openDelete) rather than
+	// here, to avoid a cascading setState within the effect.
 	useEffect(() => {
-		if (confirmDeleteId !== null) resetDel();
-	}, [confirmDeleteId, resetDel]);
+		if (deleteTarget !== null) resetDel();
+	}, [deleteTarget, resetDel]);
+
+	const openDelete = (c: MyTemplateCategory) => {
+		setDeleteMode("reassign_to_classic");
+		setDeleteTarget(c);
+	};
 
 	const openCreate = () => {
 		setEditing(null);
@@ -190,7 +230,7 @@ export function MyCategoriesTab({ onCount }: MyCategoriesTabProps) {
 													</button>
 													<button
 														type="button"
-														onClick={() => setConfirmDeleteId(category.id)}
+														onClick={() => openDelete(category)}
 														className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-zinc-500 hover:text-red-600"
 														aria-label={`Delete ${category.name}`}
 													>
@@ -236,14 +276,14 @@ export function MyCategoriesTab({ onCount }: MyCategoriesTabProps) {
 				editing={editing}
 			/>
 
-			{confirmDeleteId !== null && (
+			{deleteTarget !== null && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
 					<button
 						type="button"
 						aria-label="Close"
 						tabIndex={-1}
 						className="absolute inset-0 bg-black/60 cursor-default"
-						onClick={() => setConfirmDeleteId(null)}
+						onClick={() => setDeleteTarget(null)}
 					/>
 					<div
 						ref={deleteDialogRef}
@@ -251,12 +291,77 @@ export function MyCategoriesTab({ onCount }: MyCategoriesTabProps) {
 						aria-modal="true"
 						aria-labelledby="delete-category-title"
 						aria-describedby="delete-category-desc"
-						className="relative w-full max-w-sm bg-white dark:bg-[#111111] rounded-2xl shadow-xl p-6"
+						className="relative w-full max-w-md bg-white dark:bg-[#111111] rounded-2xl shadow-xl p-6"
 					>
-						<h3 id="delete-category-title" className="text-lg font-bold text-zinc-900 dark:text-white mb-2">Delete Category</h3>
-						<p id="delete-category-desc" className="text-sm text-zinc-500 mb-6">
-							Are you sure you want to delete this category? This action cannot be undone.
-						</p>
+						<h3 id="delete-category-title" className="text-lg font-bold text-zinc-900 dark:text-white mb-2">
+							Delete &ldquo;{deleteTarget.name}&rdquo;?
+						</h3>
+
+						{checkedEmpty ? (
+							<p id="delete-category-desc" className="text-sm text-zinc-500 mb-6">
+								This category has no templates. Deleting it can&apos;t be undone.
+							</p>
+						) : affectedLoading ? (
+							<p id="delete-category-desc" className="text-sm text-zinc-500 mb-6">
+								Checking the templates in this category…
+							</p>
+						) : (
+							<>
+								<p id="delete-category-desc" className="text-sm text-zinc-500 mb-3">
+									{affectedError
+										? "We couldn't load this category's templates, so we can't list them here. You can still delete the category — choose what should happen to any templates below."
+										: `This category has ${affectedTotal} ${
+												affectedTotal === 1 ? "template" : "templates"
+											}:`}
+								</p>
+								{!affectedError && (
+									<AffectedTemplatesList
+										isLoading={false}
+										isError={false}
+										templates={affectedTemplates}
+										total={affectedTotal}
+									/>
+								)}
+								<fieldset className="mb-4">
+									<legend className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+										What should happen to them?
+									</legend>
+									<div className="space-y-2">
+										<label className="flex items-start gap-2 cursor-pointer text-sm text-zinc-700 dark:text-zinc-300">
+											<input
+												type="radio"
+												name="delete-category-mode"
+												className="mt-0.5 text-[#069494] focus:ring-[#069494]"
+												checked={deleteMode === "reassign_to_classic"}
+												onChange={() => setDeleteMode("reassign_to_classic")}
+											/>
+											<span>
+												Keep them — move to &ldquo;Classic&rdquo;
+												<span className="block text-xs text-zinc-400">
+													Templates stay on your booths under the Classic category.
+												</span>
+											</span>
+										</label>
+										<label className="flex items-start gap-2 cursor-pointer text-sm text-zinc-700 dark:text-zinc-300">
+											<input
+												type="radio"
+												name="delete-category-mode"
+												className="mt-0.5 text-red-600 focus:ring-red-600"
+												checked={deleteMode === "delete_templates"}
+												onChange={() => setDeleteMode("delete_templates")}
+											/>
+											<span>
+												Delete them too
+												<span className="block text-xs text-zinc-400">
+													Permanently removes these templates and their images. Can&apos;t be undone.
+												</span>
+											</span>
+										</label>
+									</div>
+								</fieldset>
+							</>
+						)}
+
 						{del.error && (
 							<div role="alert" className="p-3 mb-4 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500">
 								{del.error.message}
@@ -265,7 +370,7 @@ export function MyCategoriesTab({ onCount }: MyCategoriesTabProps) {
 						<div className="flex gap-3">
 							<button
 								type="button"
-								onClick={() => setConfirmDeleteId(null)}
+								onClick={() => setDeleteTarget(null)}
 								className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-slate-50 dark:hover:bg-zinc-800"
 							>
 								Cancel
@@ -273,14 +378,21 @@ export function MyCategoriesTab({ onCount }: MyCategoriesTabProps) {
 							<button
 								type="button"
 								onClick={() =>
-									del.mutate(confirmDeleteId, {
-										onSuccess: () => setConfirmDeleteId(null),
-									})
+									del.mutate(
+										{
+											id: deleteTarget.id,
+											// A confirmed-empty category shows no choice; both modes are
+											// equivalent there, so send the safe default. Otherwise (has
+											// templates, or the check failed) honor the operator's choice.
+											mode: checkedEmpty ? undefined : deleteMode,
+										},
+										{ onSuccess: () => setDeleteTarget(null) },
+									)
 								}
-								disabled={del.isPending}
+								disabled={del.isPending || affectedLoading}
 								className="flex-1 px-4 py-2.5 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 disabled:opacity-50"
 							>
-								{del.isPending ? "Deleting..." : "Delete"}
+								{del.isPending ? "Deleting..." : "Delete category"}
 							</button>
 						</div>
 					</div>

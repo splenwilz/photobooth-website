@@ -48,7 +48,7 @@ import { PhotoAreaFormModal } from "@/components/templates/forms/PhotoAreaFormMo
 
 type ActiveTab = "templates" | "categories" | "layouts";
 type FilterStatus = "all" | AdminTemplateStatus;
-type FilterCategory = "all" | number;
+type FilterCategory = "all" | string;
 type FilterTemplateType = "all" | AdminTemplateType;
 
 // ============================================================================
@@ -98,7 +98,7 @@ export default function AdminTemplatesPage() {
   // Category state
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<AdminTemplateCategory | null>(null);
-  const [deleteCategoryConfirmId, setDeleteCategoryConfirmId] = useState<number | null>(null);
+  const [deleteCategoryConfirmId, setDeleteCategoryConfirmId] = useState<string | null>(null);
 
   // Layout state
   const [isLayoutModalOpen, setIsLayoutModalOpen] = useState(false);
@@ -291,7 +291,7 @@ export default function AdminTemplatesPage() {
     setIsCategoryModalOpen(true);
   };
 
-  const handleDeleteCategory = async (id: number) => {
+  const handleDeleteCategory = async (id: string) => {
     try {
       await deleteCategoryMutation.mutateAsync(id);
       setDeleteCategoryConfirmId(null);
@@ -630,7 +630,7 @@ export default function AdminTemplatesPage() {
             {/* Category Filter */}
             <select
               value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value === "all" ? "all" : Number(e.target.value))}
+              onChange={(e) => setFilterCategory(e.target.value)}
               className="px-4 py-3 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
             >
               <option value="all">All Categories</option>

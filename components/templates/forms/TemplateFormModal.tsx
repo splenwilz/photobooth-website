@@ -19,7 +19,7 @@ import { LayoutFormModal } from "./LayoutFormModal";
 import { NumberInput } from "./NumberInput";
 
 export interface CategoryOption {
-	id: number;
+	id: string; // UUID
 	name: string;
 	/** True for caller-owned (Custom) rows; false for admin-global (Built-in). */
 	mine?: boolean;
@@ -36,7 +36,7 @@ export interface LayoutOption {
 interface TemplateFormState {
 	name: string;
 	description: string;
-	category_id: number | null;
+	category_id: string | null;
 	layout_id: string | null;
 	template_type: AdminTemplateType;
 	status: AdminTemplateStatus;
@@ -530,7 +530,8 @@ function TemplateFormModalContent({
 								onChange={(e) =>
 									setForm((prev) => ({
 										...prev,
-										category_id: e.target.value ? Number(e.target.value) : null,
+										// category_id is a UUID string; the empty option maps to null.
+										category_id: e.target.value || null,
 									}))
 								}
 								className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
