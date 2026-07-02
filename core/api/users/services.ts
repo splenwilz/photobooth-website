@@ -50,7 +50,9 @@ export async function updateBusinessName(
  * @see DELETE /api/v1/users/{user_id}
  */
 export async function deleteAccount(userId: string): Promise<void> {
-	return apiClient<void>(`/api/v1/users/${userId}`, { method: "DELETE" });
+	return apiClient<void>(`/api/v1/users/${encodeURIComponent(userId)}`, {
+		method: "DELETE",
+	});
 }
 
 /**

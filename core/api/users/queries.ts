@@ -97,8 +97,14 @@ export function useDeleteAccount() {
 				// logout failure is inconsequential — press on with teardown.
 			}
 			if (typeof window !== "undefined") {
-				for (const key of Object.values(TOUR_STORAGE_KEYS)) {
-					localStorage.removeItem(key);
+				try {
+					for (const key of Object.values(TOUR_STORAGE_KEYS)) {
+						localStorage.removeItem(key);
+					}
+				} catch {
+					// Best-effort: localStorage access can throw (blocked storage,
+					// sandboxed contexts). Never let it stop the mandatory cache
+					// wipe + redirect below.
 				}
 			}
 			queryClient.clear();

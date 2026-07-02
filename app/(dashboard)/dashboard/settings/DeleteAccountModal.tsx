@@ -53,10 +53,13 @@ export function DeleteAccountModal({
 		onClose: busy ? () => {} : onClose,
 	});
 
-	// Confirm against the user's email; fall back to the literal word DELETE if
-	// the email somehow isn't available, so the gate is never impossible to pass.
-	const target = email?.trim() ? email.trim() : "DELETE";
-	const matches = confirmText.trim().toLowerCase() === target.toLowerCase();
+	// Confirm against the user's own email. If identity data isn't loaded
+	// (no email/userId), the gate is intentionally impossible to pass — an
+	// irreversible action must not fall back to a generic confirmation string.
+	const target = email?.trim() ?? "";
+	const matches =
+		target.length > 0 &&
+		confirmText.trim().toLowerCase() === target.toLowerCase();
 	const canDelete = !!userId && matches && !busy;
 
 	const handleDelete = () => {
