@@ -13,7 +13,7 @@ import { Suspense, useState } from "react";
 
 import type { AuthUser } from "@/core/api/auth/types";
 import { useBoothList } from "@/core/api/booths";
-import { normalizeAuthUser } from "@/hooks/use-user";
+import { getUserDisplayName, normalizeAuthUser } from "@/hooks/use-user";
 import {
   useBoothSubscription,
   useCreateBoothCheckout,
@@ -159,7 +159,7 @@ function AccountPageContent() {
             </div>
             <div className="flex-1">
               <p className="text-xl font-semibold text-zinc-900 dark:text-white">
-                {user ? `${user.first_name} ${user.last_name}`.trim() : "User"}
+                {getUserDisplayName(user)}
               </p>
               <p className="text-zinc-500">{user?.email ?? ""}</p>
             </div>

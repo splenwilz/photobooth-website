@@ -22,12 +22,13 @@ import {
 import { useBoothCredits } from "@/core/api/credits";
 import { DownloadLogsModal } from "@/components/shared/DownloadLogsModal";
 import { BusinessSettingsModal } from "./BusinessSettingsModal";
+import { DeleteAccountModal } from "./DeleteAccountModal";
 import { ConnectionDetailsModal } from "./ConnectionDetailsModal";
 import { AddCreditsModal } from "./AddCreditsModal";
 import { CreditsHistoryModal } from "./CreditsHistoryModal";
 import type { ProductPricingInfo } from "@/core/api/booths/types";
 import type { AuthUser } from "@/core/api/auth/types";
-import { normalizeAuthUser } from "@/hooks/use-user";
+import { getUserDisplayName, normalizeAuthUser } from "@/hooks/use-user";
 
 interface SettingsItemProps {
   icon: React.ReactNode;
@@ -233,6 +234,7 @@ export default function SettingsPage() {
   const [restartSystemModal, setRestartSystemModal] = useState(false);
   const [deleteBoothModal, setDeleteBoothModal] = useState(false);
   const [logoutModal, setLogoutModal] = useState(false);
+  const [deleteAccountModal, setDeleteAccountModal] = useState(false);
   const [downloadLogsModalOpen, setDownloadLogsModalOpen] = useState(false);
   const [businessSettingsModalOpen, setBusinessSettingsModalOpen] = useState(false);
   // Single discriminated state for the three booth-scoped modals so they
@@ -495,7 +497,7 @@ export default function SettingsPage() {
             {/* User Info */}
             <div className="flex-1">
               <p className="text-lg font-semibold text-zinc-900 dark:text-white">
-                {user ? `${user.first_name} ${user.last_name}`.trim() : "User"}
+                {getUserDisplayName(user)}
               </p>
               <p className="text-sm text-zinc-500">{user?.email ?? ""}</p>
             </div>
@@ -1056,6 +1058,38 @@ export default function SettingsPage() {
         </div>
       </section>
 
+      {/* Danger Zone Section */}
+      <section>
+        <SectionHeader
+          title="Danger Zone"
+          subtitle="Irreversible actions for your account"
+        />
+        <div className="space-y-3">
+          <SettingsItem
+            icon={
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                />
+              </svg>
+            }
+            title="Delete Account"
+            subtitle="Permanently delete your account and all data"
+            destructive
+            disabled={!user?.id}
+            onClick={() => setDeleteAccountModal(true)}
+          />
+        </div>
+      </section>
+
       {/* Confirmation Modals */}
       <ConfirmModal
         isOpen={restartAppModal}
@@ -1117,6 +1151,15 @@ export default function SettingsPage() {
         boothName={selectedBooth?.name}
         onClose={() => setBusinessSettingsModalOpen(false)}
       />
+
+      {/* Delete Account Modal */}
+      {deleteAccountModal && (
+        <DeleteAccountModal
+          userId={user?.id ?? null}
+          email={user?.email ?? null}
+          onClose={() => setDeleteAccountModal(false)}
+        />
+      )}
 
       {/* Connection Details Modal */}
       {openBoothModal === "connection" && (
