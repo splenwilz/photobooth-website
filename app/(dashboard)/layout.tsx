@@ -8,6 +8,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { useBoothList } from "@/core/api/booths";
 import { useAlerts } from "@/core/api/alerts";
 import type { AuthUser } from "@/core/api/auth/types";
+import { getUserDisplayName } from "@/hooks/use-user";
 import { GuidedTour } from "@/components/tour/GuidedTour";
 import { WelcomeBanner } from "@/components/tour/WelcomeBanner";
 import { DASHBOARD_TOUR_STEPS, TOUR_STORAGE_KEYS } from "@/components/tour/tour-steps";
@@ -429,9 +430,7 @@ function DashboardLayoutContent({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm truncate text-zinc-900 dark:text-white">
-                  {user
-                    ? `${user.first_name} ${user.last_name}`.trim()
-                    : "User"}
+                  {getUserDisplayName(user)}
                 </p>
                 <p className="text-xs text-zinc-500 truncate">
                   {user?.email ?? ""}

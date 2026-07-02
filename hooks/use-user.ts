@@ -19,6 +19,28 @@ export function normalizeAuthUser(raw: Record<string, unknown>): AuthUser {
 }
 
 /**
+ * Compose a user's display name from first/last name, tolerating missing parts.
+ *
+ * The `auth_user` cookie can carry a null `first_name`/`last_name` even though
+ * the type says `string`, so a naive `${first} ${last}` renders the literal
+ * text "null" (e.g. "Photobooth null"). This drops empty/null parts and falls
+ * back to "User" when nothing usable remains.
+ */
+export function getUserDisplayName(
+  user:
+    | { first_name?: string | null; last_name?: string | null }
+    | null
+    | undefined,
+): string {
+  if (!user) return "User";
+  const name = [user.first_name, user.last_name]
+    .map((part) => (typeof part === "string" ? part.trim() : ""))
+    .filter((part) => part.length > 0)
+    .join(" ");
+  return name || "User";
+}
+
+/**
  * Get user from auth_user cookie (client-side)
  */
 function getUserFromCookie(): AuthUser | null {

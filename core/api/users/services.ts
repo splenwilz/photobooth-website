@@ -42,6 +42,20 @@ export async function updateBusinessName(
 }
 
 /**
+ * Permanently delete the current user's account and all associated data
+ * (booths, templates, settings). Irreversible. The backend returns 204 No
+ * Content (or 200 with a { message } body); either is treated as success and
+ * this resolves to void. The caller is responsible for tearing down the local
+ * session afterwards (sign out + redirect), mirroring the mobile app.
+ * @see DELETE /api/v1/users/{user_id}
+ */
+export async function deleteAccount(userId: string): Promise<void> {
+	return apiClient<void>(`/api/v1/users/${encodeURIComponent(userId)}`, {
+		method: "DELETE",
+	});
+}
+
+/**
  * Upload or replace the account logo (multipart/form-data).
  * Uses /api/proxy-upload because apiClient hardcodes Content-Type: application/json.
  * @see PUT /api/v1/users/{user_id}/logo
