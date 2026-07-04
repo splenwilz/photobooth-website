@@ -24,16 +24,9 @@ import {
   useBoothCashCollections,
 } from "@/core/api/cash-box";
 import { formatCurrency, formatDateTime } from "@/core/utils/format";
+import { Skeleton } from "./Skeleton";
 
 const PAGE_SIZE = 20;
-
-function Skeleton({ className = "" }: { className?: string }) {
-  return (
-    <div
-      className={`animate-pulse bg-slate-200 dark:bg-zinc-800 rounded ${className}`}
-    />
-  );
-}
 
 const TH_BASE = "px-5 py-3 text-sm font-medium text-zinc-500";
 

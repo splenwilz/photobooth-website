@@ -16,7 +16,14 @@
 /** Shown for missing / invalid values. */
 export const PLACEHOLDER = "—"; // em dash
 
-const currencyFormatter = new Intl.NumberFormat("en-US", {
+// All three formatters use the same explicit `en-US` locale: this is a US-only
+// product (USD is hardcoded throughout the app), so formatting stays consistent
+// and deterministic rather than varying with the runtime's system locale. Note
+// locale ≠ timezone — the date formatter still renders in the *viewer's* local
+// timezone (no `timeZone` option), just with US-English formatting.
+const LOCALE = "en-US";
+
+const currencyFormatter = new Intl.NumberFormat(LOCALE, {
   style: "currency",
   currency: "USD",
 });
@@ -24,7 +31,7 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
 // Explicit component options (not dateStyle/timeStyle) because `timeZoneName`
 // cannot be combined with the *Style shorthands — doing so throws
 // "Invalid option" at construction.
-const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
+const dateTimeFormatter = new Intl.DateTimeFormat(LOCALE, {
   year: "numeric",
   month: "short",
   day: "numeric",
@@ -33,7 +40,7 @@ const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
   timeZoneName: "short",
 });
 
-const relativeTimeFormatter = new Intl.RelativeTimeFormat("en", {
+const relativeTimeFormatter = new Intl.RelativeTimeFormat(LOCALE, {
   numeric: "auto",
 });
 

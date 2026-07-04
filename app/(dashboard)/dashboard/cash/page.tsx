@@ -25,14 +25,7 @@ import { useBoothDetail, useBoothList } from "@/core/api/booths";
 import { ApiError } from "@/core/api/client";
 import { CashBoxCard } from "./CashBoxCard";
 import { CashCollections } from "./CashCollections";
-
-function Skeleton({ className = "" }: { className?: string }) {
-  return (
-    <div
-      className={`animate-pulse bg-slate-200 dark:bg-zinc-800 rounded ${className}`}
-    />
-  );
-}
+import { Skeleton } from "./Skeleton";
 
 export default function CashPage() {
   const searchParams = useSearchParams();
