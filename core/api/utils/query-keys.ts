@@ -35,6 +35,8 @@ export const queryKeys = {
 			['booths', 'transactions', boothId, params] as const,
 		criticalEvents: (boothId: string, params?: { limit?: number; offset?: number }) =>
 			['booths', 'criticalEvents', boothId, params] as const,
+		cashCollections: (boothId: string, params?: { limit?: number; offset?: number }) =>
+			['booths', 'cashCollections', boothId, params] as const,
 	},
 
 	// User profile queries (account-level business settings)
