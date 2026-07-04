@@ -502,6 +502,7 @@ export default function BoothsPage() {
       <AddBoothModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
+        onSubscribe={openSubscribeModal}
       />
 
       {/* Edit Booth Modal — keyed on booth id so state resets per booth */}
