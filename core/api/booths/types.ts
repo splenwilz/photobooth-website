@@ -1,9 +1,14 @@
 /**
  * Booth API Types
- * 
+ *
  * Types for booth creation and management.
  * @see /api/v1/booths endpoint
  */
+
+// Type-only import (erased at compile time; the reciprocal re-export of
+// BoothPaginationParams from cash-box/types is likewise type-only, so this
+// cycle is safe).
+import type { CashBox } from "../cash-box/types";
 
 /**
  * Request body for creating a new booth
@@ -256,6 +261,12 @@ export interface BoothDetailResponse {
   upsale_breakdown: BoothUpsaleBreakdown;
   hardware: BoothHardware;
   system: BoothSystem;
+  /**
+   * Live physical cash-box snapshot. `null` until the booth's first cash-box
+   * heartbeat (older kiosks never send one) — render "not available", not $0.
+   * This is physical money in the machine, NOT revenue (`payment_breakdown`).
+   */
+  cash_box: CashBox | null;
   recent_alerts: BoothDetailAlert[];
   alerts_count: number;
 }

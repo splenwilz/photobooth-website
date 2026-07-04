@@ -137,6 +137,25 @@ const navItems: {
     ),
   },
   {
+    name: "Cash",
+    href: "/dashboard/cash",
+    icon: (
+      <svg
+        className="w-5 h-5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={1.5}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M2.25 8.25h19.5M2.25 9v9.75A2.25 2.25 0 004.5 21h15a2.25 2.25 0 002.25-2.25V9M12 12.75h.008v.008H12v-.008zM6.75 12.75h.008v.008H6.75v-.008zM17.25 12.75h.008v.008h-.008v-.008z"
+        />
+      </svg>
+    ),
+  },
+  {
     name: "Alerts",
     href: "/dashboard/alerts",
     tourId: "nav-alerts",
