@@ -7,7 +7,7 @@
  * Includes sub-tabs for Templates, Categories, and Layouts management.
  */
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import {
   useAdminTemplates,
@@ -37,6 +37,7 @@ import type {
   AdminLayoutsResponse,
   AdminPhotoArea,
 } from "@/core/api/templates/admin-types";
+import { getTemplateLayouts } from "@/core/api/templates/admin-services";
 import { serializeLayoutForClipboard } from "@/core/templates/layout-clipboard";
 import { TemplateFormModal } from "@/components/templates/forms/TemplateFormModal";
 import { CategoryFormModal } from "@/components/templates/forms/CategoryFormModal";
@@ -148,10 +149,16 @@ export default function AdminTemplatesPage() {
   // Scoped copies for the Categories/Layouts sub-tab lists — follow the shared
   // Global/Private switch. Deduped with the global query when in Global mode
   // (identical query key); a second fetch happens only in Private mode.
-  const { data: listCategoriesData, isLoading: listCategoriesLoading } =
-    useTemplateCategories(true, privateOnly);
-  const { data: listLayoutsData, isLoading: listLayoutsLoading } =
-    useTemplateLayouts(true, privateOnly);
+  const {
+    data: listCategoriesData,
+    isLoading: listCategoriesLoading,
+    isFetching: listCategoriesFetching,
+  } = useTemplateCategories(true, privateOnly);
+  const {
+    data: listLayoutsData,
+    isLoading: listLayoutsLoading,
+    isFetching: listLayoutsFetching,
+  } = useTemplateLayouts(true, privateOnly);
 
   // Mutations (only those used directly on this page; form modals own their own)
   const deleteTemplateMutation = useDeleteTemplate();
@@ -169,11 +176,18 @@ export default function AdminTemplatesPage() {
     setPage(1);
   }, [filterCategory, filterStatus, filterTemplateType, privateOnly]);
 
-  // Clear the search when switching ownership scope (Global/Private) so the
-  // box doesn't silently keep applying a stale term to the other set.
+  // Reset scope-dependent UI state when switching ownership scope
+  // (Global/Private): clear the search so a stale term isn't applied to the
+  // other set, drop the last-good snapshot so an errored fetch in the new scope
+  // can't show the other scope's rows, and close any open photo-area editor so
+  // a Global edit can't complete against the Private set.
   useEffect(() => {
     setSearchQuery("");
     setDebouncedSearch("");
+    setLastGood(null);
+    setPhotoAreaModalLayoutId(null);
+    setEditingPhotoAreaState(null);
+    setDeletePhotoAreaConfirm(null);
   }, [privateOnly]);
 
   // Debounce the search box and drive it server-side (covers the whole
@@ -188,11 +202,14 @@ export default function AdminTemplatesPage() {
 
   // Last successful response, so a *failed* refetch (keepPreviousData drops the
   // placeholder on a new-key error) doesn't blank the page — we keep showing the
-  // last-good rows with a non-destructive inline error instead.
-  const lastGoodRef = useRef<AdminTemplatesResponse | null>(null);
-  if (templatesData) lastGoodRef.current = templatesData;
+  // last-good rows with a non-destructive inline error instead. Held in state
+  // (not a ref) so it's read during render idiomatically; reset on scope switch.
+  const [lastGood, setLastGood] = useState<AdminTemplatesResponse | null>(null);
+  useEffect(() => {
+    if (templatesData) setLastGood(templatesData);
+  }, [templatesData]);
   // Single source of truth for everything the Templates tab renders.
-  const shownData = templatesData ?? lastGoodRef.current;
+  const shownData = templatesData ?? lastGood;
   const filteredTemplates = shownData?.templates ?? [];
 
   // Stats (page-scoped counts are labelled as such in the UI).
@@ -399,7 +416,10 @@ export default function AdminTemplatesPage() {
   const syncLayoutPhotoCount = (layoutId: string) => {
     queryClient
       .fetchQuery<AdminLayoutsResponse>({
-        queryKey: [...adminTemplateKeys.layouts, { includeInactive: true, privateOnly: false }],
+        queryKey: [...adminTemplateKeys.layouts, { includeInactive: true, privateOnly }],
+        // Explicit queryFn (matching useTemplateLayouts) so this doesn't rely on
+        // an observer being mounted for the key to borrow one from.
+        queryFn: () => getTemplateLayouts(true, privateOnly),
       })
       .then((fresh) => {
         const freshLayout = fresh.layouts.find((l) => l.id === layoutId);
@@ -1016,7 +1036,10 @@ export default function AdminTemplatesPage() {
 
           {/* Categories Table */}
           {!listCategoriesLoading && (
-            <div className="bg-white dark:bg-[#111111] rounded-2xl border border-slate-200 dark:border-zinc-800 overflow-hidden">
+            <div
+              aria-busy={listCategoriesFetching}
+              className={`bg-white dark:bg-[#111111] rounded-2xl border border-slate-200 dark:border-zinc-800 overflow-hidden transition-opacity ${listCategoriesFetching ? "opacity-60" : "opacity-100"}`}
+            >
               <table className="w-full">
                 <thead className="bg-slate-50 dark:bg-zinc-900">
                   <tr>
@@ -1218,7 +1241,10 @@ export default function AdminTemplatesPage() {
 
           {/* Layouts List */}
           {!listLayoutsLoading && (
-            <div className="space-y-4">
+            <div
+              aria-busy={listLayoutsFetching}
+              className={`space-y-4 transition-opacity ${listLayoutsFetching ? "opacity-60" : "opacity-100"}`}
+            >
               {listLayouts.map((layout) => (
                 <div
                   key={layout.id}
@@ -1325,13 +1351,16 @@ export default function AdminTemplatesPage() {
                     <div className="border-t border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/50 p-4">
                       <div className="flex items-center justify-between mb-4">
                         <h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Photo Areas</h4>
-                        <button
-                          type="button"
-                          onClick={() => openAddPhotoAreaModal(layout.id)}
-                          className="text-sm text-[#069494] hover:underline font-medium"
-                        >
-                          + Add Photo Area
-                        </button>
+                        {/* Private layouts are view-only for moderators — no photo-area CRUD. */}
+                        {!privateOnly && (
+                          <button
+                            type="button"
+                            onClick={() => openAddPhotoAreaModal(layout.id)}
+                            className="text-sm text-[#069494] hover:underline font-medium"
+                          >
+                            + Add Photo Area
+                          </button>
+                        )}
                       </div>
                       {layout.photo_areas && layout.photo_areas.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -1351,7 +1380,7 @@ export default function AdminTemplatesPage() {
                                   <button
                                     type="button"
                                     onClick={() => openEditPhotoAreaModal(layout.id, area)}
-                                    className="p-1 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-[#069494]"
+                                    className={`p-1 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-[#069494] ${privateOnly ? "hidden" : ""}`}
                                     title="Edit photo area"
                                     aria-label={`Edit photo area ${area.photo_index}`}
                                   >
@@ -1362,7 +1391,7 @@ export default function AdminTemplatesPage() {
                                   <button
                                     type="button"
                                     onClick={() => setDeletePhotoAreaConfirm({ layoutId: layout.id, photoAreaId: area.id })}
-                                    className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-zinc-400 hover:text-red-600"
+                                    className={`p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-zinc-400 hover:text-red-600 ${privateOnly ? "hidden" : ""}`}
                                     title="Delete photo area"
                                     aria-label={`Delete photo area ${area.photo_index}`}
                                   >

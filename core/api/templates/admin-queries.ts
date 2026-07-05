@@ -88,6 +88,9 @@ export function useTemplateCategories(includeInactive = true, privateOnly = fals
 		queryKey: [...adminTemplateKeys.categories, { includeInactive, privateOnly }],
 		queryFn: () => getTemplateCategories(includeInactive, privateOnly),
 		staleTime: 5 * 60 * 1000, // 5 minutes (categories don't change often)
+		// Keep the prior list visible on a Global/Private scope switch so the
+		// tab doesn't flash its full skeleton.
+		placeholderData: keepPreviousData,
 	});
 }
 
@@ -99,6 +102,9 @@ export function useTemplateLayouts(includeInactive = true, privateOnly = false) 
 		queryKey: [...adminTemplateKeys.layouts, { includeInactive, privateOnly }],
 		queryFn: () => getTemplateLayouts(includeInactive, privateOnly),
 		staleTime: 5 * 60 * 1000, // 5 minutes (layouts don't change often)
+		// Keep the prior list visible on a Global/Private scope switch so the
+		// tab doesn't flash its full skeleton.
+		placeholderData: keepPreviousData,
 	});
 }
 
