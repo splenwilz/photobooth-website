@@ -4,7 +4,12 @@
  * React Query hooks for admin template management with caching and mutations.
  */
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	keepPreviousData,
+	useMutation,
+	useQuery,
+	useQueryClient,
+} from "@tanstack/react-query";
 import {
 	addPhotoAreaToLayout,
 	broadcastSyncCategories,
@@ -56,6 +61,10 @@ export function useAdminTemplates(params: AdminTemplatesQueryParams = {}) {
 		queryKey: adminTemplateKeys.list(params),
 		queryFn: () => getAdminTemplates(params),
 		staleTime: 60 * 1000, // 1 minute
+		// Keep the previous page/search results visible while the next set loads
+		// so the list never empties or flashes a spinner on a keystroke or page
+		// change; `isPlaceholderData` flags the stale state for a subtle dim.
+		placeholderData: keepPreviousData,
 	});
 }
 

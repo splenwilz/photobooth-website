@@ -7,7 +7,7 @@
  * Includes sub-tabs for Templates, Categories, and Layouts management.
  */
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import Image from "next/image";
 import {
   useAdminTemplates,
@@ -33,6 +33,7 @@ import type {
   AdminTemplateStatus,
   AdminTemplateType,
   AdminTemplatesQueryParams,
+  AdminTemplatesResponse,
   AdminLayoutsResponse,
   AdminPhotoArea,
 } from "@/core/api/templates/admin-types";
@@ -135,8 +136,10 @@ export default function AdminTemplatesPage() {
 
   const queryClient = useQueryClient();
 
-  // Fetch data
-  const { data: templatesData, isLoading: templatesLoading, error: templatesError } = useAdminTemplates(queryParams);
+  // Fetch data. keepPreviousData (in the hook) keeps the prior results visible
+  // while the next set loads — no empty flash, no spinner. `isFetching` drives a
+  // subtle dim; `refetch` powers the inline error retry.
+  const { data: templatesData, isLoading: templatesLoading, error: templatesError, isFetching: templatesIsFetching, refetch: refetchTemplates } = useAdminTemplates(queryParams);
   // Global (unscoped) categories/layouts — power the Templates filter dropdown
   // and the template form modal pickers, which must always offer the global
   // catalog regardless of the moderation scope.
@@ -166,29 +169,42 @@ export default function AdminTemplatesPage() {
     setPage(1);
   }, [filterCategory, filterStatus, filterTemplateType, privateOnly]);
 
+  // Clear the search when switching ownership scope (Global/Private) so the
+  // box doesn't silently keep applying a stale term to the other set.
+  useEffect(() => {
+    setSearchQuery("");
+    setDebouncedSearch("");
+  }, [privateOnly]);
+
   // Debounce the search box and drive it server-side (covers the whole
   // catalog, not just the current page). Resets to page 1 on each new term.
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
       setPage(1);
-    }, 300);
+    }, 200);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Search + filters are applied server-side; render the returned page as-is.
-  const filteredTemplates = templatesData?.templates ?? [];
+  // Last successful response, so a *failed* refetch (keepPreviousData drops the
+  // placeholder on a new-key error) doesn't blank the page — we keep showing the
+  // last-good rows with a non-destructive inline error instead.
+  const lastGoodRef = useRef<AdminTemplatesResponse | null>(null);
+  if (templatesData) lastGoodRef.current = templatesData;
+  // Single source of truth for everything the Templates tab renders.
+  const shownData = templatesData ?? lastGoodRef.current;
+  const filteredTemplates = shownData?.templates ?? [];
 
-  // Stats
+  // Stats (page-scoped counts are labelled as such in the UI).
   const stats = useMemo(() => {
-    const templates = templatesData?.templates || [];
+    const templates = shownData?.templates || [];
     return {
-      total: templatesData?.total || 0,
+      total: shownData?.total || 0,
       active: templates.filter((t) => t.status === "active").length,
       draft: templates.filter((t) => t.status === "draft").length,
       free: templates.filter((t) => parseFloat(t.price) === 0).length,
     };
-  }, [templatesData]);
+  }, [shownData]);
 
   const categories = categoriesData?.categories ?? [];
   const layouts = layoutsData?.layouts ?? [];
@@ -453,7 +469,7 @@ export default function AdminTemplatesPage() {
   // LOADING STATE
   // ============================================================================
 
-  if (templatesLoading && !templatesData && activeTab === "templates") {
+  if (templatesLoading && !shownData && activeTab === "templates") {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center gap-4">
@@ -468,7 +484,9 @@ export default function AdminTemplatesPage() {
   // ERROR STATE
   // ============================================================================
 
-  if (templatesError && activeTab === "templates") {
+  // Full-page error only when we have nothing to show (true first-load failure).
+  // A failed refetch when we still hold last-good rows is handled inline below.
+  if (templatesError && !shownData && activeTab === "templates") {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
@@ -638,15 +656,15 @@ export default function AdminTemplatesPage() {
               <p className="text-2xl font-bold mt-1 text-zinc-900 dark:text-white">{stats.total}</p>
             </div>
             <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
-              <p className="text-sm text-zinc-500">Active</p>
+              <p className="text-sm text-zinc-500">Active <span className="text-xs text-zinc-400">(this page)</span></p>
               <p className="text-2xl font-bold mt-1 text-[#10B981]">{stats.active}</p>
             </div>
             <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
-              <p className="text-sm text-zinc-500">Draft</p>
+              <p className="text-sm text-zinc-500">Draft <span className="text-xs text-zinc-400">(this page)</span></p>
               <p className="text-2xl font-bold mt-1 text-[#069494]">{stats.draft}</p>
             </div>
             <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
-              <p className="text-sm text-zinc-500">Free</p>
+              <p className="text-sm text-zinc-500">Free <span className="text-xs text-zinc-400">(this page)</span></p>
               <p className="text-2xl font-bold mt-1 text-zinc-900 dark:text-white">{stats.free}</p>
             </div>
           </div>
@@ -669,7 +687,8 @@ export default function AdminTemplatesPage() {
                 />
               </svg>
               <input
-                type="text"
+                type="search"
+                aria-label="Search templates"
                 placeholder="Search templates..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -679,6 +698,7 @@ export default function AdminTemplatesPage() {
 
             {/* Category Filter */}
             <select
+              aria-label="Filter by category"
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
               className="px-4 py-3 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
@@ -728,8 +748,41 @@ export default function AdminTemplatesPage() {
             </div>
           </div>
 
-          {/* Templates List */}
-          <div className="space-y-3">
+          {/* Live region — politely announces the settled catalog-wide count to
+              screen readers without moving focus (a11y). Only changes when a
+              fetch starts/ends, so it's not chatty per keystroke. */}
+          <p role="status" aria-live="polite" className="sr-only">
+            {templatesIsFetching
+              ? "Updating templates…"
+              : `${stats.total} template${stats.total === 1 ? "" : "s"}`}
+          </p>
+
+          {/* Non-destructive refetch error — a failed search/pagination keeps the
+              last-good rows and offers a retry instead of blanking the page. */}
+          {templatesError && shownData && (
+            <div
+              role="alert"
+              className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-between gap-4"
+            >
+              <p className="text-sm text-red-500">
+                Couldn&apos;t update the template list. Showing the last results.
+              </p>
+              <button
+                type="button"
+                onClick={() => refetchTemplates()}
+                className="px-3 py-1.5 text-sm rounded-lg bg-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500/30 shrink-0"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {/* Templates List — dims subtly while a fetch is in flight (no spinner,
+              no layout shift); previous rows stay visible via keepPreviousData. */}
+          <div
+            aria-busy={templatesIsFetching}
+            className={`space-y-3 transition-opacity ${templatesIsFetching ? "opacity-60" : "opacity-100"}`}
+          >
             {filteredTemplates.map((template) => (
               <div
                 key={template.id}
@@ -864,32 +917,37 @@ export default function AdminTemplatesPage() {
               </div>
             ))}
 
-            {filteredTemplates.length === 0 && (
+            {/* Only show the empty message once a fetch has settled, so it never
+                flashes before the server's results arrive (keepPreviousData
+                keeps prior rows during the fetch). */}
+            {filteredTemplates.length === 0 && !templatesIsFetching && (
               <div className="p-12 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] text-center">
                 <p className="text-zinc-500 dark:text-zinc-400">No templates found matching your criteria</p>
               </div>
             )}
           </div>
 
-          {/* Pagination */}
-          {templatesData && templatesData.total_pages > 1 && (
+          {/* Pagination — text, buttons, and rows all derive from `shownData`
+              (the data actually on screen), and buttons are disabled mid-fetch so
+              the page number can never disagree with the visible rows. */}
+          {shownData && shownData.total_pages > 1 && (
             <div className="flex items-center justify-between">
               <p className="text-sm text-zinc-500">
-                Page {templatesData.page} of {templatesData.total_pages} ({templatesData.total} total)
+                Page {shownData.page} of {shownData.total_pages} ({shownData.total} total)
               </p>
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
+                  onClick={() => setPage(Math.max(1, shownData.page - 1))}
+                  disabled={shownData.page <= 1 || templatesIsFetching}
                   className="px-4 py-2 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
                 <button
                   type="button"
-                  onClick={() => setPage((p) => Math.min(templatesData.total_pages, p + 1))}
-                  disabled={page >= templatesData.total_pages}
+                  onClick={() => setPage(Math.min(shownData.total_pages, shownData.page + 1))}
+                  disabled={shownData.page >= shownData.total_pages || templatesIsFetching}
                   className="px-4 py-2 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
