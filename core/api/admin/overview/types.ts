@@ -41,8 +41,10 @@ export interface AdminOverviewResponse {
   total_booths: number;
   online_booths: number;
   offline_booths: number;
-  booth_connectivity_percent: number;
-  payment_success_rate: number;
+  // Null when there's no data to compute a rate yet (e.g. no booths / no
+  // payments on a fresh install) — the backend returns null, not 0.
+  booth_connectivity_percent: number | null;
+  payment_success_rate: number | null;
   active_alerts: number;
   top_performing: TopPerformingBooth[];
   revenue_by_plan: PlanRevenue[];

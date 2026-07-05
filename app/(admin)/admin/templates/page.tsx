@@ -33,9 +33,11 @@ import type {
   AdminTemplateStatus,
   AdminTemplateType,
   AdminTemplatesQueryParams,
+  AdminTemplatesResponse,
   AdminLayoutsResponse,
   AdminPhotoArea,
 } from "@/core/api/templates/admin-types";
+import { getTemplateLayouts } from "@/core/api/templates/admin-services";
 import { serializeLayoutForClipboard } from "@/core/templates/layout-clipboard";
 import { TemplateFormModal } from "@/components/templates/forms/TemplateFormModal";
 import { CategoryFormModal } from "@/components/templates/forms/CategoryFormModal";
@@ -82,9 +84,13 @@ export default function AdminTemplatesPage() {
 
   // Template filter and pagination state
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState<FilterCategory>("all");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const [filterTemplateType, setFilterTemplateType] = useState<FilterTemplateType>("all");
+  // Ownership scope: false = global marketplace catalog, true = user-private
+  // moderation set. The two are fetched as separate lists, never mixed.
+  const [privateOnly, setPrivateOnly] = useState(false);
   const [page, setPage] = useState(1);
   const perPage = 20;
 
@@ -123,15 +129,36 @@ export default function AdminTemplatesPage() {
     if (filterCategory !== "all") params.category_id = filterCategory;
     if (filterStatus !== "all") params.status = filterStatus;
     if (filterTemplateType !== "all") params.template_type = filterTemplateType;
+    if (debouncedSearch) params.search = debouncedSearch;
+    // Only send when in the private view; omitting keeps the global default.
+    if (privateOnly) params.private_only = true;
     return params;
-  }, [page, filterCategory, filterStatus, filterTemplateType]);
+  }, [page, filterCategory, filterStatus, filterTemplateType, debouncedSearch, privateOnly]);
 
   const queryClient = useQueryClient();
 
-  // Fetch data
-  const { data: templatesData, isLoading: templatesLoading, error: templatesError } = useAdminTemplates(queryParams);
-  const { data: categoriesData, isLoading: categoriesLoading } = useTemplateCategories();
-  const { data: layoutsData, isLoading: layoutsLoading } = useTemplateLayouts();
+  // Fetch data. keepPreviousData (in the hook) keeps the prior results visible
+  // while the next set loads — no empty flash, no spinner. `isFetching` drives a
+  // subtle dim; `refetch` powers the inline error retry.
+  const { data: templatesData, isLoading: templatesLoading, error: templatesError, isFetching: templatesIsFetching, refetch: refetchTemplates } = useAdminTemplates(queryParams);
+  // Global (unscoped) categories/layouts — power the Templates filter dropdown
+  // and the template form modal pickers, which must always offer the global
+  // catalog regardless of the moderation scope.
+  const { data: categoriesData } = useTemplateCategories();
+  const { data: layoutsData } = useTemplateLayouts();
+  // Scoped copies for the Categories/Layouts sub-tab lists — follow the shared
+  // Global/Private switch. Deduped with the global query when in Global mode
+  // (identical query key); a second fetch happens only in Private mode.
+  const {
+    data: listCategoriesData,
+    isLoading: listCategoriesLoading,
+    isFetching: listCategoriesFetching,
+  } = useTemplateCategories(true, privateOnly);
+  const {
+    data: listLayoutsData,
+    isLoading: listLayoutsLoading,
+    isFetching: listLayoutsFetching,
+  } = useTemplateLayouts(true, privateOnly);
 
   // Mutations (only those used directly on this page; form modals own their own)
   const deleteTemplateMutation = useDeleteTemplate();
@@ -147,35 +174,65 @@ export default function AdminTemplatesPage() {
   // Reset page when filters change
   useEffect(() => {
     setPage(1);
-  }, [filterCategory, filterStatus, filterTemplateType]);
+  }, [filterCategory, filterStatus, filterTemplateType, privateOnly]);
 
-  // Client-side search filtering
-  const filteredTemplates = useMemo(() => {
-    if (!templatesData?.templates) return [];
-    if (!searchQuery) return templatesData.templates;
+  // Reset scope-dependent UI state when switching ownership scope
+  // (Global/Private): clear the search so a stale term isn't applied to the
+  // other set, and close any open photo-area editor so a Global edit can't
+  // complete against the Private set. (The last-good snapshot is scope-tagged,
+  // so it self-invalidates on a scope switch — no explicit reset needed.)
+  useEffect(() => {
+    setSearchQuery("");
+    setDebouncedSearch("");
+    setPhotoAreaModalLayoutId(null);
+    setEditingPhotoAreaState(null);
+    setDeletePhotoAreaConfirm(null);
+  }, [privateOnly]);
 
-    const query = searchQuery.toLowerCase();
-    return templatesData.templates.filter(
-      (template) =>
-        template.name.toLowerCase().includes(query) ||
-        template.description.toLowerCase().includes(query) ||
-        template.tags.toLowerCase().includes(query)
-    );
-  }, [templatesData, searchQuery]);
+  // Debounce the search box and drive it server-side (covers the whole
+  // catalog, not just the current page). Resets to page 1 on each new term.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
-  // Stats
+  // Last successful response, so a *failed* refetch (the placeholder is dropped
+  // on a new-key error) doesn't blank the page — we keep showing the last-good
+  // rows with a non-destructive inline error instead. Tagged with the scope it
+  // belongs to so the fallback can NEVER surface the other catalog's rows.
+  const [lastGood, setLastGood] = useState<{
+    data: AdminTemplatesResponse;
+    privateOnly: boolean;
+  } | null>(null);
+  useEffect(() => {
+    if (templatesData) setLastGood({ data: templatesData, privateOnly });
+  }, [templatesData, privateOnly]);
+  // Single source of truth for everything the Templates tab renders — the
+  // last-good fallback only applies within the current scope.
+  const shownData =
+    templatesData ??
+    (lastGood?.privateOnly === privateOnly ? lastGood.data : null);
+  const filteredTemplates = shownData?.templates ?? [];
+
+  // Stats (page-scoped counts are labelled as such in the UI).
   const stats = useMemo(() => {
-    const templates = templatesData?.templates || [];
+    const templates = shownData?.templates || [];
     return {
-      total: templatesData?.total || 0,
+      total: shownData?.total || 0,
       active: templates.filter((t) => t.status === "active").length,
       draft: templates.filter((t) => t.status === "draft").length,
       free: templates.filter((t) => parseFloat(t.price) === 0).length,
     };
-  }, [templatesData]);
+  }, [shownData]);
 
   const categories = categoriesData?.categories ?? [];
   const layouts = layoutsData?.layouts ?? [];
+  // Scope-aware lists that back the Categories/Layouts sub-tabs (+ their badges).
+  const listCategories = listCategoriesData?.categories ?? [];
+  const listLayouts = listLayoutsData?.layouts ?? [];
 
   // Build the picker options the TemplateFormModal expects.
   const templateModalCategories = useMemo(
@@ -364,7 +421,10 @@ export default function AdminTemplatesPage() {
   const syncLayoutPhotoCount = (layoutId: string) => {
     queryClient
       .fetchQuery<AdminLayoutsResponse>({
-        queryKey: [...adminTemplateKeys.layouts, { includeInactive: true }],
+        queryKey: [...adminTemplateKeys.layouts, { includeInactive: true, privateOnly }],
+        // Explicit queryFn (matching useTemplateLayouts) so this doesn't rely on
+        // an observer being mounted for the key to borrow one from.
+        queryFn: () => getTemplateLayouts(true, privateOnly),
       })
       .then((fresh) => {
         const freshLayout = fresh.layouts.find((l) => l.id === layoutId);
@@ -434,7 +494,7 @@ export default function AdminTemplatesPage() {
   // LOADING STATE
   // ============================================================================
 
-  if (templatesLoading && !templatesData && activeTab === "templates") {
+  if (templatesLoading && !shownData && activeTab === "templates") {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center gap-4">
@@ -449,7 +509,9 @@ export default function AdminTemplatesPage() {
   // ERROR STATE
   // ============================================================================
 
-  if (templatesError && activeTab === "templates") {
+  // Full-page error only when we have nothing to show (true first-load failure).
+  // A failed refetch when we still hold last-good rows is handled inline below.
+  if (templatesError && !shownData && activeTab === "templates") {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
@@ -504,8 +566,8 @@ export default function AdminTemplatesPage() {
         <nav className="-mb-px flex gap-6">
           {[
             { id: "templates" as const, label: "Templates", count: stats.total },
-            { id: "categories" as const, label: "Categories", count: categories.length },
-            { id: "layouts" as const, label: "Layouts", count: layouts.length },
+            { id: "categories" as const, label: "Categories", count: listCategories.length },
+            { id: "layouts" as const, label: "Layouts", count: listLayouts.length },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -530,6 +592,37 @@ export default function AdminTemplatesPage() {
             </button>
           ))}
         </nav>
+      </div>
+
+      {/* Moderation scope — Global marketplace catalog vs the separate
+          user-private set. Applies to all three tabs' lists (Templates,
+          Categories, Layouts); the two sets are never mixed. */}
+      <div className="flex items-center gap-3">
+        <span className="text-sm text-zinc-500">Scope</span>
+        <div
+          className="flex gap-1 p-1 bg-slate-200/50 dark:bg-zinc-800/50 rounded-xl"
+          role="group"
+          aria-label="Ownership scope"
+        >
+          {[
+            { value: false, label: "Global" },
+            { value: true, label: "Private" },
+          ].map((opt) => (
+            <button
+              key={String(opt.value)}
+              type="button"
+              onClick={() => setPrivateOnly(opt.value)}
+              aria-pressed={privateOnly === opt.value}
+              className={`px-3 py-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${
+                privateOnly === opt.value
+                  ? "bg-[#069494] text-white"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Tab Content */}
@@ -588,15 +681,15 @@ export default function AdminTemplatesPage() {
               <p className="text-2xl font-bold mt-1 text-zinc-900 dark:text-white">{stats.total}</p>
             </div>
             <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
-              <p className="text-sm text-zinc-500">Active</p>
+              <p className="text-sm text-zinc-500">Active <span className="text-xs text-zinc-400">(this page)</span></p>
               <p className="text-2xl font-bold mt-1 text-[#10B981]">{stats.active}</p>
             </div>
             <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
-              <p className="text-sm text-zinc-500">Draft</p>
+              <p className="text-sm text-zinc-500">Draft <span className="text-xs text-zinc-400">(this page)</span></p>
               <p className="text-2xl font-bold mt-1 text-[#069494]">{stats.draft}</p>
             </div>
             <div className="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)]">
-              <p className="text-sm text-zinc-500">Free</p>
+              <p className="text-sm text-zinc-500">Free <span className="text-xs text-zinc-400">(this page)</span></p>
               <p className="text-2xl font-bold mt-1 text-zinc-900 dark:text-white">{stats.free}</p>
             </div>
           </div>
@@ -619,7 +712,8 @@ export default function AdminTemplatesPage() {
                 />
               </svg>
               <input
-                type="text"
+                type="search"
+                aria-label="Search templates"
                 placeholder="Search templates..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -629,6 +723,7 @@ export default function AdminTemplatesPage() {
 
             {/* Category Filter */}
             <select
+              aria-label="Filter by category"
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
               className="px-4 py-3 rounded-xl bg-white dark:bg-[#111111] border border-[var(--border)] text-zinc-900 dark:text-white focus:outline-none focus:border-[#069494]"
@@ -678,8 +773,41 @@ export default function AdminTemplatesPage() {
             </div>
           </div>
 
-          {/* Templates List */}
-          <div className="space-y-3">
+          {/* Live region — politely announces the settled catalog-wide count to
+              screen readers without moving focus (a11y). Only changes when a
+              fetch starts/ends, so it's not chatty per keystroke. */}
+          <p role="status" aria-live="polite" className="sr-only">
+            {templatesIsFetching
+              ? "Updating templates…"
+              : `${stats.total} template${stats.total === 1 ? "" : "s"}`}
+          </p>
+
+          {/* Non-destructive refetch error — a failed search/pagination keeps the
+              last-good rows and offers a retry instead of blanking the page. */}
+          {templatesError && shownData && (
+            <div
+              role="alert"
+              className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-between gap-4"
+            >
+              <p className="text-sm text-red-500">
+                Couldn&apos;t update the template list. Showing the last results.
+              </p>
+              <button
+                type="button"
+                onClick={() => refetchTemplates()}
+                className="px-3 py-1.5 text-sm rounded-lg bg-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500/30 shrink-0"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {/* Templates List — dims subtly while a fetch is in flight (no spinner,
+              no layout shift); previous rows stay visible via keepPreviousData. */}
+          <div
+            aria-busy={templatesIsFetching}
+            className={`space-y-3 transition-opacity ${templatesIsFetching ? "opacity-60" : "opacity-100"}`}
+          >
             {filteredTemplates.map((template) => (
               <div
                 key={template.id}
@@ -753,8 +881,26 @@ export default function AdminTemplatesPage() {
                     )}
                   </div>
 
-                  {/* Actions */}
+                  {/* Actions — private templates are view/download-only (they
+                      belong to a user; moderators download to inspect, not
+                      edit/delete). The global catalog keeps edit/delete. */}
                   <div className="flex items-center gap-1">
+                    {privateOnly ? (
+                      <a
+                        href={template.download_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download
+                        className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-[#069494] transition-colors"
+                        aria-label="Download template"
+                        title="Download template"
+                      >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                        </svg>
+                      </a>
+                    ) : (
+                      <>
                     <button
                       type="button"
                       onClick={() => openEditTemplateModal(template)}
@@ -789,37 +935,44 @@ export default function AdminTemplatesPage() {
                         />
                       </svg>
                     </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
             ))}
 
-            {filteredTemplates.length === 0 && (
+            {/* Only show the empty message once a fetch has settled, so it never
+                flashes before the server's results arrive (keepPreviousData
+                keeps prior rows during the fetch). */}
+            {filteredTemplates.length === 0 && !templatesIsFetching && (
               <div className="p-12 rounded-2xl bg-white dark:bg-[#111111] border border-[var(--border)] text-center">
                 <p className="text-zinc-500 dark:text-zinc-400">No templates found matching your criteria</p>
               </div>
             )}
           </div>
 
-          {/* Pagination */}
-          {templatesData && templatesData.total_pages > 1 && (
+          {/* Pagination — text, buttons, and rows all derive from `shownData`
+              (the data actually on screen), and buttons are disabled mid-fetch so
+              the page number can never disagree with the visible rows. */}
+          {shownData && shownData.total_pages > 1 && (
             <div className="flex items-center justify-between">
               <p className="text-sm text-zinc-500">
-                Page {templatesData.page} of {templatesData.total_pages} ({templatesData.total} total)
+                Page {shownData.page} of {shownData.total_pages} ({shownData.total} total)
               </p>
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
+                  onClick={() => setPage(Math.max(1, shownData.page - 1))}
+                  disabled={shownData.page <= 1 || templatesIsFetching}
                   className="px-4 py-2 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
                 <button
                   type="button"
-                  onClick={() => setPage((p) => Math.min(templatesData.total_pages, p + 1))}
-                  disabled={page >= templatesData.total_pages}
+                  onClick={() => setPage(Math.min(shownData.total_pages, shownData.page + 1))}
+                  disabled={shownData.page >= shownData.total_pages || templatesIsFetching}
                   className="px-4 py-2 rounded-xl border border-[var(--border)] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
@@ -878,7 +1031,7 @@ export default function AdminTemplatesPage() {
           </div>
 
           {/* Loading */}
-          {categoriesLoading && (
+          {listCategoriesLoading && (
             <div className="animate-pulse space-y-4">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="h-16 bg-slate-200 dark:bg-zinc-800 rounded-xl" />
@@ -887,8 +1040,11 @@ export default function AdminTemplatesPage() {
           )}
 
           {/* Categories Table */}
-          {!categoriesLoading && (
-            <div className="bg-white dark:bg-[#111111] rounded-2xl border border-slate-200 dark:border-zinc-800 overflow-hidden">
+          {!listCategoriesLoading && (
+            <div
+              aria-busy={listCategoriesFetching}
+              className={`bg-white dark:bg-[#111111] rounded-2xl border border-slate-200 dark:border-zinc-800 overflow-hidden transition-opacity ${listCategoriesFetching ? "opacity-60" : "opacity-100"}`}
+            >
               <table className="w-full">
                 <thead className="bg-slate-50 dark:bg-zinc-900">
                   <tr>
@@ -913,7 +1069,7 @@ export default function AdminTemplatesPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 dark:divide-zinc-800">
-                  {categories.map((category) => (
+                  {listCategories.map((category) => (
                     <tr key={category.id} className="hover:bg-slate-50 dark:hover:bg-zinc-900/50">
                       <td className="px-6 py-4">
                         <div>
@@ -959,7 +1115,7 @@ export default function AdminTemplatesPage() {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => openEditCategoryModal(category)}
-                            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+                            className={`p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 ${privateOnly ? "hidden" : ""}`}
                           >
                             <svg
                               className="w-4 h-4"
@@ -977,7 +1133,7 @@ export default function AdminTemplatesPage() {
                           </button>
                           <button
                             onClick={() => setDeleteCategoryConfirmId(category.id)}
-                            className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-zinc-500 hover:text-red-600"
+                            className={`p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-zinc-500 hover:text-red-600 ${privateOnly ? "hidden" : ""}`}
                           >
                             <svg
                               className="w-4 h-4"
@@ -1000,7 +1156,7 @@ export default function AdminTemplatesPage() {
                 </tbody>
               </table>
 
-              {categories.length === 0 && (
+              {listCategories.length === 0 && (
                 <div className="text-center py-12">
                   <p className="text-zinc-500">No categories found. Create one to get started.</p>
                 </div>
@@ -1080,7 +1236,7 @@ export default function AdminTemplatesPage() {
           </div>
 
           {/* Loading */}
-          {layoutsLoading && (
+          {listLayoutsLoading && (
             <div className="animate-pulse space-y-4">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="h-20 bg-slate-200 dark:bg-zinc-800 rounded-xl" />
@@ -1089,9 +1245,12 @@ export default function AdminTemplatesPage() {
           )}
 
           {/* Layouts List */}
-          {!layoutsLoading && (
-            <div className="space-y-4">
-              {layouts.map((layout) => (
+          {!listLayoutsLoading && (
+            <div
+              aria-busy={listLayoutsFetching}
+              className={`space-y-4 transition-opacity ${listLayoutsFetching ? "opacity-60" : "opacity-100"}`}
+            >
+              {listLayouts.map((layout) => (
                 <div
                   key={layout.id}
                   className="bg-white dark:bg-[#111111] rounded-2xl border border-slate-200 dark:border-zinc-800 overflow-hidden"
@@ -1166,7 +1325,7 @@ export default function AdminTemplatesPage() {
                         </button>
                         <button
                           onClick={() => openEditLayoutModal(layout)}
-                          className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+                          className={`p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 ${privateOnly ? "hidden" : ""}`}
                         >
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path
@@ -1178,7 +1337,7 @@ export default function AdminTemplatesPage() {
                         </button>
                         <button
                           onClick={() => setDeleteLayoutConfirmId(layout.id)}
-                          className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-zinc-500 hover:text-red-600"
+                          className={`p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-zinc-500 hover:text-red-600 ${privateOnly ? "hidden" : ""}`}
                         >
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path
@@ -1197,13 +1356,16 @@ export default function AdminTemplatesPage() {
                     <div className="border-t border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/50 p-4">
                       <div className="flex items-center justify-between mb-4">
                         <h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Photo Areas</h4>
-                        <button
-                          type="button"
-                          onClick={() => openAddPhotoAreaModal(layout.id)}
-                          className="text-sm text-[#069494] hover:underline font-medium"
-                        >
-                          + Add Photo Area
-                        </button>
+                        {/* Private layouts are view-only for moderators — no photo-area CRUD. */}
+                        {!privateOnly && (
+                          <button
+                            type="button"
+                            onClick={() => openAddPhotoAreaModal(layout.id)}
+                            className="text-sm text-[#069494] hover:underline font-medium"
+                          >
+                            + Add Photo Area
+                          </button>
+                        )}
                       </div>
                       {layout.photo_areas && layout.photo_areas.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -1223,7 +1385,7 @@ export default function AdminTemplatesPage() {
                                   <button
                                     type="button"
                                     onClick={() => openEditPhotoAreaModal(layout.id, area)}
-                                    className="p-1 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-[#069494]"
+                                    className={`p-1 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-[#069494] ${privateOnly ? "hidden" : ""}`}
                                     title="Edit photo area"
                                     aria-label={`Edit photo area ${area.photo_index}`}
                                   >
@@ -1234,7 +1396,7 @@ export default function AdminTemplatesPage() {
                                   <button
                                     type="button"
                                     onClick={() => setDeletePhotoAreaConfirm({ layoutId: layout.id, photoAreaId: area.id })}
-                                    className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-zinc-400 hover:text-red-600"
+                                    className={`p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-zinc-400 hover:text-red-600 ${privateOnly ? "hidden" : ""}`}
                                     title="Delete photo area"
                                     aria-label={`Delete photo area ${area.photo_index}`}
                                   >
@@ -1265,7 +1427,7 @@ export default function AdminTemplatesPage() {
                 </div>
               ))}
 
-              {layouts.length === 0 && (
+              {listLayouts.length === 0 && (
                 <div className="text-center py-12 bg-white dark:bg-[#111111] rounded-2xl border border-slate-200 dark:border-zinc-800">
                   <p className="text-zinc-500">No layouts found. Create one to get started.</p>
                 </div>

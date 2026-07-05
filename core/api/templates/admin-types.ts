@@ -247,6 +247,14 @@ export interface AdminTemplatesQueryParams {
   layout_id?: string;
   template_type?: AdminTemplateType;
   status?: AdminTemplateStatus;
+  /** Full-catalog search across name/description/tags (server-side). */
+  search?: string;
+  /**
+   * Moderation scope. When true, returns ONLY user-private templates
+   * (owner_id IS NOT NULL) as a separate set. Omit / false = the global
+   * marketplace catalog only (the backend default). The two are never mixed.
+   */
+  private_only?: boolean;
 }
 
 /**

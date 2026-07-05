@@ -56,6 +56,19 @@ export function useAdminTemplates(params: AdminTemplatesQueryParams = {}) {
 		queryKey: adminTemplateKeys.list(params),
 		queryFn: () => getAdminTemplates(params),
 		staleTime: 60 * 1000, // 1 minute
+		// Keep the previous page/search results visible while the next set loads
+		// (flash-free pagination/search) — but ONLY within the same ownership
+		// scope. On a Global/Private switch, drop the placeholder so the list
+		// shows loading for the new catalog instead of the other scope's rows
+		// (which would render with this scope's row actions).
+		placeholderData: (previousData, previousQuery) => {
+			const prev = previousQuery?.queryKey[2] as
+				| AdminTemplatesQueryParams
+				| undefined;
+			return Boolean(prev?.private_only) === Boolean(params.private_only)
+				? previousData
+				: undefined;
+		},
 	});
 }
 
@@ -74,22 +87,28 @@ export function useAdminTemplate(id: number) {
 /**
  * Hook to fetch template categories
  */
-export function useTemplateCategories(includeInactive = true) {
+export function useTemplateCategories(includeInactive = true, privateOnly = false) {
 	return useQuery({
-		queryKey: [...adminTemplateKeys.categories, { includeInactive }],
-		queryFn: () => getTemplateCategories(includeInactive),
+		queryKey: [...adminTemplateKeys.categories, { includeInactive, privateOnly }],
+		queryFn: () => getTemplateCategories(includeInactive, privateOnly),
 		staleTime: 5 * 60 * 1000, // 5 minutes (categories don't change often)
+		// No keepPreviousData: scope is this query's only key variance, so any
+		// retained data would be the OTHER scope's — show the skeleton on a
+		// Global/Private switch instead of bleeding cross-scope rows.
 	});
 }
 
 /**
  * Hook to fetch template layouts
  */
-export function useTemplateLayouts(includeInactive = true) {
+export function useTemplateLayouts(includeInactive = true, privateOnly = false) {
 	return useQuery({
-		queryKey: [...adminTemplateKeys.layouts, { includeInactive }],
-		queryFn: () => getTemplateLayouts(includeInactive),
+		queryKey: [...adminTemplateKeys.layouts, { includeInactive, privateOnly }],
+		queryFn: () => getTemplateLayouts(includeInactive, privateOnly),
 		staleTime: 5 * 60 * 1000, // 5 minutes (layouts don't change often)
+		// No keepPreviousData: scope is this query's only key variance, so any
+		// retained data would be the OTHER scope's — show the skeleton on a
+		// Global/Private switch instead of bleeding cross-scope rows.
 	});
 }
 
