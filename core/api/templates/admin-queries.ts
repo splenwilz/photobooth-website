@@ -74,10 +74,10 @@ export function useAdminTemplate(id: number) {
 /**
  * Hook to fetch template categories
  */
-export function useTemplateCategories(includeInactive = true) {
+export function useTemplateCategories(includeInactive = true, privateOnly = false) {
 	return useQuery({
-		queryKey: [...adminTemplateKeys.categories, { includeInactive }],
-		queryFn: () => getTemplateCategories(includeInactive),
+		queryKey: [...adminTemplateKeys.categories, { includeInactive, privateOnly }],
+		queryFn: () => getTemplateCategories(includeInactive, privateOnly),
 		staleTime: 5 * 60 * 1000, // 5 minutes (categories don't change often)
 	});
 }
@@ -85,10 +85,10 @@ export function useTemplateCategories(includeInactive = true) {
 /**
  * Hook to fetch template layouts
  */
-export function useTemplateLayouts(includeInactive = true) {
+export function useTemplateLayouts(includeInactive = true, privateOnly = false) {
 	return useQuery({
-		queryKey: [...adminTemplateKeys.layouts, { includeInactive }],
-		queryFn: () => getTemplateLayouts(includeInactive),
+		queryKey: [...adminTemplateKeys.layouts, { includeInactive, privateOnly }],
+		queryFn: () => getTemplateLayouts(includeInactive, privateOnly),
 		staleTime: 5 * 60 * 1000, // 5 minutes (layouts don't change often)
 	});
 }

@@ -62,9 +62,13 @@ export async function getAdminTemplate(id: number): Promise<AdminTemplate> {
  * @param includeInactive - Include inactive categories (admin use)
  */
 export async function getTemplateCategories(
-  includeInactive = true
+  includeInactive = true,
+  privateOnly = false
 ): Promise<AdminCategoriesResponse> {
-  const queryString = buildQueryString({ include_inactive: includeInactive });
+  const queryString = buildQueryString({
+    include_inactive: includeInactive,
+    private_only: privateOnly || undefined,
+  });
   return apiClient<AdminCategoriesResponse>(
     `${TEMPLATES_BASE}/categories${queryString}`
   );
@@ -75,9 +79,13 @@ export async function getTemplateCategories(
  * @param includeInactive - Include inactive layouts
  */
 export async function getTemplateLayouts(
-  includeInactive = true
+  includeInactive = true,
+  privateOnly = false
 ): Promise<AdminLayoutsResponse> {
-  const queryString = buildQueryString({ include_inactive: includeInactive });
+  const queryString = buildQueryString({
+    include_inactive: includeInactive,
+    private_only: privateOnly || undefined,
+  });
   return apiClient<AdminLayoutsResponse>(
     `${TEMPLATES_BASE}/layouts${queryString}`
   );

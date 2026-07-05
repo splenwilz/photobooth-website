@@ -221,10 +221,10 @@ export default function AdminOverviewPage() {
                 </div>
                 <span className="font-medium text-zinc-900 dark:text-white">Booth Connectivity</span>
               </div>
-              <span className="text-sm text-green-500 font-medium">{data.booth_connectivity_percent.toFixed(1)}%</span>
+              <span className="text-sm text-green-500 font-medium">{data.booth_connectivity_percent != null ? `${data.booth_connectivity_percent.toFixed(1)}%` : "—"}</span>
             </div>
             <div className="h-2 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-              <div className="h-full bg-green-500 rounded-full" style={{ width: `${data.booth_connectivity_percent}%` }} />
+              <div className="h-full bg-green-500 rounded-full" style={{ width: `${data.booth_connectivity_percent ?? 0}%` }} />
             </div>
             <p className="text-xs text-zinc-500 mt-1">{formatNumber(data.online_booths)} of {formatNumber(data.total_booths)} booths online</p>
           </div>
@@ -240,10 +240,10 @@ export default function AdminOverviewPage() {
                 </div>
                 <span className="font-medium text-zinc-900 dark:text-white">Payment Success Rate</span>
               </div>
-              <span className="text-sm text-[#069494] font-medium">{data.payment_success_rate.toFixed(1)}%</span>
+              <span className="text-sm text-[#069494] font-medium">{data.payment_success_rate != null ? `${data.payment_success_rate.toFixed(1)}%` : "—"}</span>
             </div>
             <div className="h-2 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-              <div className="h-full bg-[#069494] rounded-full" style={{ width: `${data.payment_success_rate}%` }} />
+              <div className="h-full bg-[#069494] rounded-full" style={{ width: `${data.payment_success_rate ?? 0}%` }} />
             </div>
           </div>
 

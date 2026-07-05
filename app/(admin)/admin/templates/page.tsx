@@ -82,9 +82,13 @@ export default function AdminTemplatesPage() {
 
   // Template filter and pagination state
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState<FilterCategory>("all");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const [filterTemplateType, setFilterTemplateType] = useState<FilterTemplateType>("all");
+  // Ownership scope: false = global marketplace catalog, true = user-private
+  // moderation set. The two are fetched as separate lists, never mixed.
+  const [privateOnly, setPrivateOnly] = useState(false);
   const [page, setPage] = useState(1);
   const perPage = 20;
 
@@ -123,15 +127,28 @@ export default function AdminTemplatesPage() {
     if (filterCategory !== "all") params.category_id = filterCategory;
     if (filterStatus !== "all") params.status = filterStatus;
     if (filterTemplateType !== "all") params.template_type = filterTemplateType;
+    if (debouncedSearch) params.search = debouncedSearch;
+    // Only send when in the private view; omitting keeps the global default.
+    if (privateOnly) params.private_only = true;
     return params;
-  }, [page, filterCategory, filterStatus, filterTemplateType]);
+  }, [page, filterCategory, filterStatus, filterTemplateType, debouncedSearch, privateOnly]);
 
   const queryClient = useQueryClient();
 
   // Fetch data
   const { data: templatesData, isLoading: templatesLoading, error: templatesError } = useAdminTemplates(queryParams);
-  const { data: categoriesData, isLoading: categoriesLoading } = useTemplateCategories();
-  const { data: layoutsData, isLoading: layoutsLoading } = useTemplateLayouts();
+  // Global (unscoped) categories/layouts — power the Templates filter dropdown
+  // and the template form modal pickers, which must always offer the global
+  // catalog regardless of the moderation scope.
+  const { data: categoriesData } = useTemplateCategories();
+  const { data: layoutsData } = useTemplateLayouts();
+  // Scoped copies for the Categories/Layouts sub-tab lists — follow the shared
+  // Global/Private switch. Deduped with the global query when in Global mode
+  // (identical query key); a second fetch happens only in Private mode.
+  const { data: listCategoriesData, isLoading: listCategoriesLoading } =
+    useTemplateCategories(true, privateOnly);
+  const { data: listLayoutsData, isLoading: listLayoutsLoading } =
+    useTemplateLayouts(true, privateOnly);
 
   // Mutations (only those used directly on this page; form modals own their own)
   const deleteTemplateMutation = useDeleteTemplate();
@@ -147,21 +164,20 @@ export default function AdminTemplatesPage() {
   // Reset page when filters change
   useEffect(() => {
     setPage(1);
-  }, [filterCategory, filterStatus, filterTemplateType]);
+  }, [filterCategory, filterStatus, filterTemplateType, privateOnly]);
 
-  // Client-side search filtering
-  const filteredTemplates = useMemo(() => {
-    if (!templatesData?.templates) return [];
-    if (!searchQuery) return templatesData.templates;
+  // Debounce the search box and drive it server-side (covers the whole
+  // catalog, not just the current page). Resets to page 1 on each new term.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
-    const query = searchQuery.toLowerCase();
-    return templatesData.templates.filter(
-      (template) =>
-        template.name.toLowerCase().includes(query) ||
-        template.description.toLowerCase().includes(query) ||
-        template.tags.toLowerCase().includes(query)
-    );
-  }, [templatesData, searchQuery]);
+  // Search + filters are applied server-side; render the returned page as-is.
+  const filteredTemplates = templatesData?.templates ?? [];
 
   // Stats
   const stats = useMemo(() => {
@@ -176,6 +192,9 @@ export default function AdminTemplatesPage() {
 
   const categories = categoriesData?.categories ?? [];
   const layouts = layoutsData?.layouts ?? [];
+  // Scope-aware lists that back the Categories/Layouts sub-tabs (+ their badges).
+  const listCategories = listCategoriesData?.categories ?? [];
+  const listLayouts = listLayoutsData?.layouts ?? [];
 
   // Build the picker options the TemplateFormModal expects.
   const templateModalCategories = useMemo(
@@ -364,7 +383,7 @@ export default function AdminTemplatesPage() {
   const syncLayoutPhotoCount = (layoutId: string) => {
     queryClient
       .fetchQuery<AdminLayoutsResponse>({
-        queryKey: [...adminTemplateKeys.layouts, { includeInactive: true }],
+        queryKey: [...adminTemplateKeys.layouts, { includeInactive: true, privateOnly: false }],
       })
       .then((fresh) => {
         const freshLayout = fresh.layouts.find((l) => l.id === layoutId);
@@ -504,8 +523,8 @@ export default function AdminTemplatesPage() {
         <nav className="-mb-px flex gap-6">
           {[
             { id: "templates" as const, label: "Templates", count: stats.total },
-            { id: "categories" as const, label: "Categories", count: categories.length },
-            { id: "layouts" as const, label: "Layouts", count: layouts.length },
+            { id: "categories" as const, label: "Categories", count: listCategories.length },
+            { id: "layouts" as const, label: "Layouts", count: listLayouts.length },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -530,6 +549,37 @@ export default function AdminTemplatesPage() {
             </button>
           ))}
         </nav>
+      </div>
+
+      {/* Moderation scope — Global marketplace catalog vs the separate
+          user-private set. Applies to all three tabs' lists (Templates,
+          Categories, Layouts); the two sets are never mixed. */}
+      <div className="flex items-center gap-3">
+        <span className="text-sm text-zinc-500">Scope</span>
+        <div
+          className="flex gap-1 p-1 bg-slate-200/50 dark:bg-zinc-800/50 rounded-xl"
+          role="group"
+          aria-label="Ownership scope"
+        >
+          {[
+            { value: false, label: "Global" },
+            { value: true, label: "Private" },
+          ].map((opt) => (
+            <button
+              key={String(opt.value)}
+              type="button"
+              onClick={() => setPrivateOnly(opt.value)}
+              aria-pressed={privateOnly === opt.value}
+              className={`px-3 py-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${
+                privateOnly === opt.value
+                  ? "bg-[#069494] text-white"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Tab Content */}
@@ -878,7 +928,7 @@ export default function AdminTemplatesPage() {
           </div>
 
           {/* Loading */}
-          {categoriesLoading && (
+          {listCategoriesLoading && (
             <div className="animate-pulse space-y-4">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="h-16 bg-slate-200 dark:bg-zinc-800 rounded-xl" />
@@ -887,7 +937,7 @@ export default function AdminTemplatesPage() {
           )}
 
           {/* Categories Table */}
-          {!categoriesLoading && (
+          {!listCategoriesLoading && (
             <div className="bg-white dark:bg-[#111111] rounded-2xl border border-slate-200 dark:border-zinc-800 overflow-hidden">
               <table className="w-full">
                 <thead className="bg-slate-50 dark:bg-zinc-900">
@@ -913,7 +963,7 @@ export default function AdminTemplatesPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 dark:divide-zinc-800">
-                  {categories.map((category) => (
+                  {listCategories.map((category) => (
                     <tr key={category.id} className="hover:bg-slate-50 dark:hover:bg-zinc-900/50">
                       <td className="px-6 py-4">
                         <div>
@@ -1000,7 +1050,7 @@ export default function AdminTemplatesPage() {
                 </tbody>
               </table>
 
-              {categories.length === 0 && (
+              {listCategories.length === 0 && (
                 <div className="text-center py-12">
                   <p className="text-zinc-500">No categories found. Create one to get started.</p>
                 </div>
@@ -1080,7 +1130,7 @@ export default function AdminTemplatesPage() {
           </div>
 
           {/* Loading */}
-          {layoutsLoading && (
+          {listLayoutsLoading && (
             <div className="animate-pulse space-y-4">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="h-20 bg-slate-200 dark:bg-zinc-800 rounded-xl" />
@@ -1089,9 +1139,9 @@ export default function AdminTemplatesPage() {
           )}
 
           {/* Layouts List */}
-          {!layoutsLoading && (
+          {!listLayoutsLoading && (
             <div className="space-y-4">
-              {layouts.map((layout) => (
+              {listLayouts.map((layout) => (
                 <div
                   key={layout.id}
                   className="bg-white dark:bg-[#111111] rounded-2xl border border-slate-200 dark:border-zinc-800 overflow-hidden"
@@ -1265,7 +1315,7 @@ export default function AdminTemplatesPage() {
                 </div>
               ))}
 
-              {layouts.length === 0 && (
+              {listLayouts.length === 0 && (
                 <div className="text-center py-12 bg-white dark:bg-[#111111] rounded-2xl border border-slate-200 dark:border-zinc-800">
                   <p className="text-zinc-500">No layouts found. Create one to get started.</p>
                 </div>
