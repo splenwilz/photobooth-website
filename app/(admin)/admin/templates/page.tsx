@@ -1029,7 +1029,7 @@ export default function AdminTemplatesPage() {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => openEditCategoryModal(category)}
-                            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+                            className={`p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 ${privateOnly ? "hidden" : ""}`}
                           >
                             <svg
                               className="w-4 h-4"
@@ -1047,7 +1047,7 @@ export default function AdminTemplatesPage() {
                           </button>
                           <button
                             onClick={() => setDeleteCategoryConfirmId(category.id)}
-                            className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-zinc-500 hover:text-red-600"
+                            className={`p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-zinc-500 hover:text-red-600 ${privateOnly ? "hidden" : ""}`}
                           >
                             <svg
                               className="w-4 h-4"
@@ -1236,7 +1236,7 @@ export default function AdminTemplatesPage() {
                         </button>
                         <button
                           onClick={() => openEditLayoutModal(layout)}
-                          className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+                          className={`p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 ${privateOnly ? "hidden" : ""}`}
                         >
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path
@@ -1248,7 +1248,7 @@ export default function AdminTemplatesPage() {
                         </button>
                         <button
                           onClick={() => setDeleteLayoutConfirmId(layout.id)}
-                          className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-zinc-500 hover:text-red-600"
+                          className={`p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-zinc-500 hover:text-red-600 ${privateOnly ? "hidden" : ""}`}
                         >
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path
