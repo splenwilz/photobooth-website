@@ -4,12 +4,7 @@
  * React Query hooks for admin template management with caching and mutations.
  */
 
-import {
-	keepPreviousData,
-	useMutation,
-	useQuery,
-	useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
 	addPhotoAreaToLayout,
 	broadcastSyncCategories,
@@ -62,9 +57,18 @@ export function useAdminTemplates(params: AdminTemplatesQueryParams = {}) {
 		queryFn: () => getAdminTemplates(params),
 		staleTime: 60 * 1000, // 1 minute
 		// Keep the previous page/search results visible while the next set loads
-		// so the list never empties or flashes a spinner on a keystroke or page
-		// change; `isPlaceholderData` flags the stale state for a subtle dim.
-		placeholderData: keepPreviousData,
+		// (flash-free pagination/search) — but ONLY within the same ownership
+		// scope. On a Global/Private switch, drop the placeholder so the list
+		// shows loading for the new catalog instead of the other scope's rows
+		// (which would render with this scope's row actions).
+		placeholderData: (previousData, previousQuery) => {
+			const prev = previousQuery?.queryKey[2] as
+				| AdminTemplatesQueryParams
+				| undefined;
+			return Boolean(prev?.private_only) === Boolean(params.private_only)
+				? previousData
+				: undefined;
+		},
 	});
 }
 
@@ -88,9 +92,9 @@ export function useTemplateCategories(includeInactive = true, privateOnly = fals
 		queryKey: [...adminTemplateKeys.categories, { includeInactive, privateOnly }],
 		queryFn: () => getTemplateCategories(includeInactive, privateOnly),
 		staleTime: 5 * 60 * 1000, // 5 minutes (categories don't change often)
-		// Keep the prior list visible on a Global/Private scope switch so the
-		// tab doesn't flash its full skeleton.
-		placeholderData: keepPreviousData,
+		// No keepPreviousData: scope is this query's only key variance, so any
+		// retained data would be the OTHER scope's — show the skeleton on a
+		// Global/Private switch instead of bleeding cross-scope rows.
 	});
 }
 
@@ -102,9 +106,9 @@ export function useTemplateLayouts(includeInactive = true, privateOnly = false) 
 		queryKey: [...adminTemplateKeys.layouts, { includeInactive, privateOnly }],
 		queryFn: () => getTemplateLayouts(includeInactive, privateOnly),
 		staleTime: 5 * 60 * 1000, // 5 minutes (layouts don't change often)
-		// Keep the prior list visible on a Global/Private scope switch so the
-		// tab doesn't flash its full skeleton.
-		placeholderData: keepPreviousData,
+		// No keepPreviousData: scope is this query's only key variance, so any
+		// retained data would be the OTHER scope's — show the skeleton on a
+		// Global/Private switch instead of bleeding cross-scope rows.
 	});
 }
 

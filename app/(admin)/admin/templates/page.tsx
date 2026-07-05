@@ -178,13 +178,12 @@ export default function AdminTemplatesPage() {
 
   // Reset scope-dependent UI state when switching ownership scope
   // (Global/Private): clear the search so a stale term isn't applied to the
-  // other set, drop the last-good snapshot so an errored fetch in the new scope
-  // can't show the other scope's rows, and close any open photo-area editor so
-  // a Global edit can't complete against the Private set.
+  // other set, and close any open photo-area editor so a Global edit can't
+  // complete against the Private set. (The last-good snapshot is scope-tagged,
+  // so it self-invalidates on a scope switch — no explicit reset needed.)
   useEffect(() => {
     setSearchQuery("");
     setDebouncedSearch("");
-    setLastGood(null);
     setPhotoAreaModalLayoutId(null);
     setEditingPhotoAreaState(null);
     setDeletePhotoAreaConfirm(null);
@@ -200,16 +199,22 @@ export default function AdminTemplatesPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Last successful response, so a *failed* refetch (keepPreviousData drops the
-  // placeholder on a new-key error) doesn't blank the page — we keep showing the
-  // last-good rows with a non-destructive inline error instead. Held in state
-  // (not a ref) so it's read during render idiomatically; reset on scope switch.
-  const [lastGood, setLastGood] = useState<AdminTemplatesResponse | null>(null);
+  // Last successful response, so a *failed* refetch (the placeholder is dropped
+  // on a new-key error) doesn't blank the page — we keep showing the last-good
+  // rows with a non-destructive inline error instead. Tagged with the scope it
+  // belongs to so the fallback can NEVER surface the other catalog's rows.
+  const [lastGood, setLastGood] = useState<{
+    data: AdminTemplatesResponse;
+    privateOnly: boolean;
+  } | null>(null);
   useEffect(() => {
-    if (templatesData) setLastGood(templatesData);
-  }, [templatesData]);
-  // Single source of truth for everything the Templates tab renders.
-  const shownData = templatesData ?? lastGood;
+    if (templatesData) setLastGood({ data: templatesData, privateOnly });
+  }, [templatesData, privateOnly]);
+  // Single source of truth for everything the Templates tab renders — the
+  // last-good fallback only applies within the current scope.
+  const shownData =
+    templatesData ??
+    (lastGood?.privateOnly === privateOnly ? lastGood.data : null);
   const filteredTemplates = shownData?.templates ?? [];
 
   // Stats (page-scoped counts are labelled as such in the UI).
