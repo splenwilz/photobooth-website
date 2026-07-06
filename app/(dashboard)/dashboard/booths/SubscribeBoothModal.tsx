@@ -10,7 +10,8 @@
  * renew, versus every month with monthly billing. Initiates Stripe Checkout.
  */
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent, Ref } from "react";
 import { usePricingPlans, createSubscriptionCheckout } from "@/core/api/pricing";
 
 interface SubscribeBoothModalProps {
@@ -42,6 +43,22 @@ export function SubscribeBoothModal({
   // immediately without a setState-in-effect.
   const effectiveSelectedId = singlePlan ? singlePlan.id : selectedPlanId;
 
+  // The Monthly/Annual control only renders in the single-plan branch, so the
+  // multi-plan fallback (no billing UI) must never silently check out annual.
+  const billingIsAnnual = singlePlan ? isAnnual : false;
+
+  // Roving-tabindex keyboard nav for the Monthly/Annual radiogroup.
+  const monthlyRef = useRef<HTMLButtonElement>(null);
+  const annualRef = useRef<HTMLButtonElement>(null);
+  const handleBillingKeyDown = (e: ReactKeyboardEvent<HTMLButtonElement>) => {
+    if (["ArrowDown", "ArrowRight", "ArrowUp", "ArrowLeft"].includes(e.key)) {
+      e.preventDefault();
+      const nextAnnual = !isAnnual; // two options → any arrow moves to the other
+      setIsAnnual(nextAnnual);
+      (nextAnnual ? annualRef : monthlyRef).current?.focus();
+    }
+  };
+
   const handleSubscribe = async () => {
     if (!effectiveSelectedId || !boothId) return;
 
@@ -53,7 +70,7 @@ export function SubscribeBoothModal({
 
     try {
       // Get the appropriate price ID
-      const priceId = isAnnual && plan.stripe_annual_price_id
+      const priceId = billingIsAnnual && plan.stripe_annual_price_id
         ? plan.stripe_annual_price_id
         : plan.stripe_price_id;
 
@@ -73,7 +90,7 @@ export function SubscribeBoothModal({
         booth_id: boothId,
         booth_name: boothName,
         plan_name: plan.name,
-        billing: isAnnual && plan.has_annual_option ? "annual" : "monthly",
+        billing: billingIsAnnual && plan.has_annual_option ? "annual" : "monthly",
       });
       const successUrl =
         `${window.location.origin}/checkout/success` +
@@ -97,7 +114,7 @@ export function SubscribeBoothModal({
 
   if (!isOpen) return null;
 
-  const canSubscribe = !!effectiveSelectedId && !isLoading;
+  const canSubscribe = !!effectiveSelectedId && !!boothId && !isLoading;
   const subscribeLabel =
     singlePlan?.has_annual_option && isAnnual
       ? "Subscribe annually"
@@ -200,18 +217,28 @@ export function SubscribeBoothModal({
                   </p>
 
                   <BillingOption
+                    buttonRef={monthlyRef}
+                    tabIndex={!isAnnual ? 0 : -1}
+                    onKeyDown={handleBillingKeyDown}
                     selected={!isAnnual}
                     onSelect={() => setIsAnnual(false)}
                     label="Monthly"
-                    price={singlePlan.price_display}
+                    price={singlePlan.price_cents === 0 ? "Free" : singlePlan.price_display}
                     note="Renews every month, so the booth needs to get online each month to renew."
                   />
 
                   <BillingOption
+                    buttonRef={annualRef}
+                    tabIndex={isAnnual ? 0 : -1}
+                    onKeyDown={handleBillingKeyDown}
                     selected={isAnnual}
                     onSelect={() => setIsAnnual(true)}
                     label="Annual"
-                    price={singlePlan.annual_price_display ?? singlePlan.price_display}
+                    price={
+                      singlePlan.price_cents === 0
+                        ? "Free"
+                        : (singlePlan.annual_price_display ?? singlePlan.price_display)
+                    }
                     note="Renews once a year, so the booth only needs to get online once a year to renew (not every month)."
                     recommended
                     savings={
@@ -256,7 +283,7 @@ export function SubscribeBoothModal({
                         <p className="text-2xl font-bold text-zinc-900 dark:text-white">
                           {isFree
                             ? "Free"
-                            : isAnnual && plan.has_annual_option && plan.annual_price_display
+                            : billingIsAnnual && plan.has_annual_option && plan.annual_price_display
                               ? plan.annual_price_display
                               : plan.price_display}
                         </p>
@@ -314,6 +341,9 @@ function BillingOption({
   note,
   recommended = false,
   savings = null,
+  buttonRef,
+  tabIndex,
+  onKeyDown,
 }: {
   selected: boolean;
   onSelect: () => void;
@@ -322,12 +352,18 @@ function BillingOption({
   note: string;
   recommended?: boolean;
   savings?: string | null;
+  buttonRef?: Ref<HTMLButtonElement>;
+  tabIndex?: number;
+  onKeyDown?: (e: ReactKeyboardEvent<HTMLButtonElement>) => void;
 }) {
   return (
     <button
+      ref={buttonRef}
       type="button"
       role="radio"
       aria-checked={selected}
+      tabIndex={tabIndex}
+      onKeyDown={onKeyDown}
       onClick={onSelect}
       className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
         selected
