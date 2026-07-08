@@ -7,6 +7,7 @@
  * dependency-free so the geometry is unit-testable.
  */
 
+import { clampNum } from "./canvas-math";
 import type { PhotoAreaFormData } from "./layout-clipboard";
 
 export type AlignOp =
@@ -18,10 +19,6 @@ export type AlignOp =
 	| "bottom";
 
 export type DistributeAxis = "horizontal" | "vertical";
-
-function clampNum(n: number, min: number, max: number): number {
-	return Math.max(min, Math.min(max, n));
-}
 
 function selected(
 	areas: PhotoAreaFormData[],

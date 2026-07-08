@@ -12,9 +12,7 @@
  *  - effectiveScale = baseScale * zoom, where baseScale fits the layout to the viewport.
  */
 
-function clampNum(n: number, min: number, max: number): number {
-	return Math.max(min, Math.min(max, n));
-}
+import { clampNum } from "./canvas-math";
 
 /**
  * Fit-to-viewport scale: the largest scale at which the whole layout fits

@@ -10,8 +10,10 @@
  * `area.x/y/width/height` use — so results are written straight back into form
  * state. The caller supplies `threshold` already converted from display px to
  * image px (i.e. `displayPx / effectiveScale`), which makes snapping tighter as
- * the operator zooms in. Pure and dependency-free so it's unit-testable.
+ * the operator zooms in. Pure so it's unit-testable.
  */
+
+import { clampNum } from "./canvas-math";
 
 export interface SnapRect {
 	x: number;
@@ -28,10 +30,6 @@ export type GuideAxis = "x" | "y";
 export interface SnapGuideLine {
 	axis: GuideAxis;
 	pos: number;
-}
-
-function clampNum(n: number, min: number, max: number): number {
-	return Math.max(min, Math.min(max, n));
 }
 
 /** Candidate vertical guide positions (x coords): canvas + every other area. */

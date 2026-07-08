@@ -343,18 +343,23 @@ export function LayoutCanvasEditor({
 		}
 	}
 
-	// Native, non-passive wheel handler: Ctrl/Cmd + wheel (or trackpad pinch,
-	// which the browser reports with ctrlKey=true) zooms toward the cursor;
-	// a plain two-finger scroll pans. Attached once; reads latest state via ref.
+	// Native, non-passive wheel handler. Pinch / Ctrl / Cmd + wheel (the browser
+	// reports trackpad pinch with ctrlKey=true) zooms toward the cursor. A plain
+	// two-finger scroll pans ONLY when the layout overflows the viewport; at Fit
+	// there's nothing to pan, so we let the wheel through and the modal scrolls
+	// (so the operator can still reach Save/Cancel). Attached once; reads latest
+	// state via ref.
 	useEffect(() => {
 		const el = viewportRef.current;
 		if (!el) return;
 		const onWheel = (e: WheelEvent) => {
 			const st = stateRef.current;
 			if (st.baseScale <= 0) return;
-			e.preventDefault();
-			const rect = el.getBoundingClientRect();
+			const sw = st.imageWidth * st.baseScale * st.zoom;
+			const sh = st.imageHeight * st.baseScale * st.zoom;
 			if (e.ctrlKey || e.metaKey) {
+				e.preventDefault();
+				const rect = el.getBoundingClientRect();
 				const next = zoomToPoint({
 					zoom: st.zoom,
 					panX: st.pan.x,
@@ -372,14 +377,17 @@ export function LayoutCanvasEditor({
 				});
 				setZoom(next.zoom);
 				setPan({ x: next.panX, y: next.panY });
-			} else {
-				const sw = st.imageWidth * st.baseScale * st.zoom;
-				const sh = st.imageHeight * st.baseScale * st.zoom;
-				setPan({
-					x: clampPan(st.pan.x - e.deltaX, sw, st.viewport.w),
-					y: clampPan(st.pan.y - e.deltaY, sh, st.viewport.h),
-				});
+				return;
 			}
+			// Plain scroll: pan only if there's overflow to pan; otherwise let the
+			// event bubble so the modal scrolls normally.
+			const canPanNow = sw > st.viewport.w + 0.5 || sh > st.viewport.h + 0.5;
+			if (!canPanNow) return;
+			e.preventDefault();
+			setPan({
+				x: clampPan(st.pan.x - e.deltaX, sw, st.viewport.w),
+				y: clampPan(st.pan.y - e.deltaY, sh, st.viewport.h),
+			});
 		};
 		el.addEventListener("wheel", onWheel, { passive: false });
 		return () => el.removeEventListener("wheel", onWheel);
