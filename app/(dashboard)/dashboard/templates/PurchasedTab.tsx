@@ -48,7 +48,7 @@ export function PurchasedTab() {
 	const purchases = data?.purchases ?? [];
 	const totalPages = data?.total_pages ?? 1;
 
-	const [downloadingId, setDownloadingId] = useState<number | null>(null);
+	const [downloadingId, setDownloadingId] = useState<string | null>(null);
 	const [downloadError, setDownloadError] = useState<string | null>(null);
 
 	const handleDownload = async (purchase: TemplatePurchase) => {

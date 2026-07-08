@@ -8,8 +8,8 @@ interface CartState {
 
   // Actions
   addItem: (template: TemplateListItem) => void;
-  removeItem: (templateId: number) => void;
-  updateQuantity: (templateId: number, quantity: number) => void;
+  removeItem: (templateId: string) => void;
+  updateQuantity: (templateId: string, quantity: number) => void;
   clearCart: () => void;
   toggleCart: () => void;
   openCart: () => void;
@@ -18,7 +18,7 @@ interface CartState {
   // Computed values (as functions)
   getSubtotal: () => number;
   getItemCount: () => number;
-  isInCart: (templateId: number) => boolean;
+  isInCart: (templateId: string) => boolean;
 }
 
 export const useCartStore = create<CartState>()(
@@ -41,14 +41,14 @@ export const useCartStore = create<CartState>()(
         });
       },
 
-      removeItem: (templateId: number) => {
+      removeItem: (templateId: string) => {
         const { items } = get();
         set({
           items: items.filter((item) => item.template.id !== templateId),
         });
       },
 
-      updateQuantity: (templateId: number, quantity: number) => {
+      updateQuantity: (templateId: string, quantity: number) => {
         const { items } = get();
         if (quantity <= 0) {
           set({
@@ -92,13 +92,20 @@ export const useCartStore = create<CartState>()(
         return items.reduce((count, item) => count + item.quantity, 0);
       },
 
-      isInCart: (templateId: number) => {
+      isInCart: (templateId: string) => {
         const { items } = get();
         return items.some((item) => item.template.id === templateId);
       },
     }),
     {
       name: "boothiq-cart",
+      // Bump on any change to the persisted item shape. v1 drops carts saved
+      // before the template int->UUID migration: those items hold numeric
+      // template ids that no longer exist on the backend, which would break
+      // isInCart matching and fail checkout (UUID expected). Returning empty
+      // items on a version mismatch clears the stale cart cleanly on load.
+      version: 1,
+      migrate: () => ({ items: [] }),
       partialize: (state) => ({ items: state.items }), // Only persist items, not UI state
     }
   )

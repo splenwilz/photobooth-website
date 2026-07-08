@@ -2,7 +2,13 @@
  * Public Template React Query Hooks
  */
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type InfiniteData,
+} from "@tanstack/react-query";
 import {
   getTemplates,
   getTemplateById,
@@ -25,15 +31,15 @@ export const templateKeys = {
   list: (params: TemplatesQueryParams) =>
     [...templateKeys.lists(), params] as const,
   details: () => [...templateKeys.all, "detail"] as const,
-  detail: (id: number) => [...templateKeys.details(), id] as const,
+  detail: (id: string) => [...templateKeys.details(), id] as const,
   slug: (slug: string) => [...templateKeys.all, "slug", slug] as const,
   categories: ["template-categories"] as const,
   layouts: ["template-layouts"] as const,
-  reviews: (templateId: number) =>
+  reviews: (templateId: string) =>
     [...templateKeys.all, "reviews", templateId] as const,
   purchased: (params: { booth_id: string; page?: number; per_page?: number }) =>
     [...templateKeys.all, "purchased", params] as const,
-  ownedFrom: (boothId: string, sortedTemplateIds: readonly number[]) =>
+  ownedFrom: (boothId: string, sortedTemplateIds: readonly string[]) =>
     [...templateKeys.all, "owned-from", boothId, sortedTemplateIds] as const,
 };
 
@@ -45,11 +51,11 @@ export function useTemplates(params: TemplatesQueryParams = {}) {
   });
 }
 
-export function useTemplateById(id: number) {
+export function useTemplateById(id: string) {
   return useQuery({
     queryKey: templateKeys.detail(id),
     queryFn: () => getTemplateById(id),
-    enabled: id > 0,
+    enabled: !!id,
     staleTime: 60 * 1000,
   });
 }
@@ -79,15 +85,30 @@ export function usePublicLayouts() {
   });
 }
 
+/**
+ * Paginated reviews for a template. Uses an infinite query so the modal can
+ * show a small initial batch and reveal the rest with a "Load more" button —
+ * the usability-preferred pattern over pagination or a nested scroll area.
+ */
 export function useTemplateReviews(
-  templateId: number,
-  params: { page?: number; per_page?: number } = {}
+  templateId: string,
+  params: { per_page?: number } = {}
 ) {
-  return useQuery({
-    queryKey: [...templateKeys.reviews(templateId), params],
-    queryFn: () => getTemplateReviews(templateId, params),
-    enabled: templateId > 0,
+  const perPage = params.per_page ?? 10;
+  return useInfiniteQuery({
+    queryKey: [...templateKeys.reviews(templateId), { per_page: perPage }],
+    queryFn: ({ pageParam }) =>
+      getTemplateReviews(templateId, { page: pageParam, per_page: perPage }),
+    enabled: !!templateId,
     staleTime: 60 * 1000,
+    initialPageParam: 1,
+    // Derive the next page from how much we've loaded vs the server total,
+    // not from the echoed `page` field — that way "Load more" can't loop even
+    // if the endpoint mis-reports `page`. Mirrors core/api/credits/queries.ts.
+    getNextPageParam: (lastPage, allPages) => {
+      const loaded = allPages.reduce((sum, p) => sum + p.reviews.length, 0);
+      return loaded < lastPage.total ? allPages.length + 1 : undefined;
+    },
   });
 }
 
@@ -99,36 +120,19 @@ export function useSubmitReview() {
       templateId,
       data,
     }: {
-      templateId: number;
+      templateId: string;
       data: { rating: number; title?: string; comment?: string };
     }) => submitReview(templateId, data),
-    onSuccess: (newReview, { templateId }) => {
-      // Optimistically prepend the new review to the FIRST page only —
-      // prepending to page 2+ would shove a non-page-2 row to the top
-      // and double-count once page 1 next refetches. The QuickViewModal
-      // currently uses default params (single page), so this matches
-      // today's UI; the predicate makes it safe when pagination ships.
-      // Other pages get the new review when they refetch (their
-      // staleTime is 60s, see useTemplateReviews), or via a manual
-      // invalidation from the caller if instant consistency matters.
-      queryClient.setQueriesData<ReviewsResponse>(
-        {
-          queryKey: templateKeys.reviews(templateId),
-          predicate: (q) => {
-            const params = q.queryKey[3] as { page?: number } | undefined;
-            return !params || params.page === undefined || params.page === 1;
-          },
-        },
-        (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            reviews: [newReview, ...old.reviews],
-            total: old.total + 1,
-          };
-        }
-      );
-      // Detail + list views still need a refetch to pick up the new
+    onSuccess: (_newReview, { templateId }) => {
+      // Refetch the (paginated) reviews so the new review shows in the
+      // correct order and per-page counts stay consistent. An optimistic
+      // prepend into an infinite list risks page-boundary duplicates once
+      // pages refetch, so we invalidate instead — the "Review submitted"
+      // banner covers the brief refetch.
+      queryClient.invalidateQueries({
+        queryKey: templateKeys.reviews(templateId),
+      });
+      // Detail + list views also need a refetch to pick up the new
       // review_count / rating_average computed by the backend.
       queryClient.invalidateQueries({
         queryKey: templateKeys.detail(templateId),
@@ -149,23 +153,27 @@ export function useUpdateReview() {
       reviewId,
       data,
     }: {
-      templateId: number;
+      templateId: string;
       reviewId: number;
       data: { rating?: number; title?: string; comment?: string };
     }) => updateReview(templateId, reviewId, data),
     onSuccess: (updatedReview, { templateId }) => {
-      // Replace the existing entry in every cached reviews page. The
-      // PATCH response already has populated identity fields, so the
-      // refetch is unnecessary for the reviews list itself.
-      queryClient.setQueriesData<ReviewsResponse>(
+      // Replace the existing entry across every loaded reviews page. The
+      // PATCH response already has populated identity fields, so no refetch
+      // is needed for the reviews list itself (an in-place swap can't shift
+      // page boundaries the way an insert would).
+      queryClient.setQueriesData<InfiniteData<ReviewsResponse>>(
         { queryKey: templateKeys.reviews(templateId) },
         (old) => {
           if (!old) return old;
           return {
             ...old,
-            reviews: old.reviews.map((r) =>
-              r.id === updatedReview.id ? updatedReview : r
-            ),
+            pages: old.pages.map((page) => ({
+              ...page,
+              reviews: page.reviews.map((r) =>
+                r.id === updatedReview.id ? updatedReview : r
+              ),
+            })),
           };
         }
       );
@@ -187,7 +195,7 @@ export function useDeleteReview() {
       templateId,
       reviewId,
     }: {
-      templateId: number;
+      templateId: string;
       reviewId: number;
     }) => deleteReview(templateId, reviewId),
     onSuccess: (_, { templateId }) => {
@@ -225,9 +233,9 @@ export function usePurchasedTemplates(
  * bought a template in another tab (or via the kiosk), we want the next
  * Pay-button click to reflect that. Network cost is bounded (cart size).
  */
-export function useOwnedFrom(params: { booth_id: string; template_ids: number[] }) {
-  // Sort numerically to keep the cache key stable across cart reorderings.
-  const sortedIds = [...params.template_ids].sort((a, b) => a - b);
+export function useOwnedFrom(params: { booth_id: string; template_ids: string[] }) {
+  // Sort to keep the cache key stable across cart reorderings.
+  const sortedIds = [...params.template_ids].sort();
   return useQuery({
     queryKey: templateKeys.ownedFrom(params.booth_id, sortedIds),
     queryFn: () =>
@@ -244,6 +252,6 @@ export function useOwnedFrom(params: { booth_id: string; template_ids: number[] 
 
 export function useDownloadTemplate() {
   return useMutation({
-    mutationFn: (id: number) => downloadTemplate(id),
+    mutationFn: (id: string) => downloadTemplate(id),
   });
 }

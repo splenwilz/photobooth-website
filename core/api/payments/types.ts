@@ -60,8 +60,8 @@ export type SubscriptionStatus =
  * Line item for template checkout
  */
 export interface TemplateCheckoutLineItem {
-  /** Database template ID */
-  template_id: number;
+  /** Template UUID */
+  template_id: string;
   /** Quantity of this item */
   quantity: number;
 }

@@ -58,7 +58,7 @@ export interface TemplatePhotoArea {
  * shape — no detail-endpoint roundtrip needed.
  */
 export interface TemplateListItem {
-  id: number;
+  id: string; // UUID
   slug: string;
   name: string;
   description: string | null;
@@ -141,7 +141,7 @@ export interface LayoutsResponse {
 
 export interface TemplateReview {
   id: number;
-  template_id: number;
+  template_id: string; // UUID of the template this review is on
   // Display name and avatar are populated server-side from a cached
   // WorkOS lookup (10-min TTL, deduped across reviewers). Both can be
   // null when the WorkOS user has no name/picture set, or when the
@@ -171,7 +171,7 @@ export interface ReviewsResponse {
 // Purchase types
 export interface TemplatePurchase {
   id: number;
-  template_id: number;
+  template_id: string; // UUID
   booth_id: string;
   template: Template;
   quantity: number;
@@ -194,11 +194,11 @@ export interface PurchasesResponse {
 // See POST /api/v1/templates/owned-from.
 export interface OwnedFromRequest {
   booth_id: string;
-  template_ids: number[];
+  template_ids: string[];
 }
 
 export interface OwnedFromResponse {
-  owned_template_ids: number[];
+  owned_template_ids: string[];
 }
 
 // Cart types (client-side only). Cart items are sourced from the catalog
