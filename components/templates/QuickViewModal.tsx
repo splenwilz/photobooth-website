@@ -203,8 +203,14 @@ export function QuickViewModal({ template, isOpen, onClose }: QuickViewModalProp
   const [deletingReviewId, setDeletingReviewId] = useState<number | null>(null);
 
   // Hooks must be called unconditionally
-  const templateId = template?.id ?? 0;
-  const { data: reviewsData, isLoading: reviewsLoading } = useTemplateReviews(templateId);
+  const templateId = template?.id ?? "";
+  const {
+    data: reviewsData,
+    isLoading: reviewsLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useTemplateReviews(templateId);
   const submitReviewMutation = useSubmitReview();
   const updateReviewMutation = useUpdateReview();
   const deleteReviewMutation = useDeleteReview();
@@ -219,8 +225,10 @@ export function QuickViewModal({ template, isOpen, onClose }: QuickViewModalProp
   const isFree = price === 0;
   const rating = parseFloat(template.rating_average) || 0;
   const tags = (template.tags || "").split(",").filter(Boolean);
-  const reviews = reviewsData?.reviews ?? [];
-  const reviewCount = reviewsData?.total ?? template.review_count;
+  // Flatten the paginated pages into a single list; the count comes from
+  // the first page's server total (all pages report the same total).
+  const reviews = reviewsData?.pages.flatMap((p) => p.reviews) ?? [];
+  const reviewCount = reviewsData?.pages[0]?.total ?? template.review_count;
 
   // The current user's own review, if any. Used to hide the
   // Write-a-Review form once they've already submitted.
@@ -532,7 +540,7 @@ export function QuickViewModal({ template, isOpen, onClose }: QuickViewModalProp
                   ))}
                 </div>
               ) : reviews.length > 0 ? (
-                <div className="space-y-3 max-h-64 overflow-y-auto">
+                <div className="space-y-3">
                   {reviews.map((review) => {
                     // Inline edit form
                     if (editingReview?.id === review.id) {
@@ -682,6 +690,16 @@ export function QuickViewModal({ template, isOpen, onClose }: QuickViewModalProp
                       </div>
                     );
                   })}
+                  {hasNextPage && (
+                    <button
+                      type="button"
+                      onClick={() => fetchNextPage()}
+                      disabled={isFetchingNextPage}
+                      className="text-sm font-medium text-[#069494] hover:underline disabled:opacity-50 disabled:no-underline"
+                    >
+                      {isFetchingNextPage ? "Loading..." : "Load more reviews"}
+                    </button>
+                  )}
                 </div>
               ) : (
                 <p className="text-sm text-[var(--muted)] mb-4">

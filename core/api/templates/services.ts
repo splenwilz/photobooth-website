@@ -36,7 +36,7 @@ export async function getTemplates(
   return apiClient<TemplatesResponse>(`${BASE}${qs}`);
 }
 
-export async function getTemplateById(id: number): Promise<Template> {
+export async function getTemplateById(id: string): Promise<Template> {
   return apiClient<Template>(`${BASE}/${id}`);
 }
 
@@ -45,7 +45,7 @@ export async function getTemplateBySlug(slug: string): Promise<Template> {
 }
 
 export async function downloadTemplate(
-  id: number
+  id: string
 ): Promise<{ download_url: string }> {
   return apiClient<{ download_url: string }>(`${BASE}/${id}/download`, {
     method: "POST",
@@ -61,7 +61,7 @@ export async function getLayouts(): Promise<LayoutsResponse> {
 }
 
 export async function getTemplateReviews(
-  templateId: number,
+  templateId: string,
   params: { page?: number; per_page?: number } = {}
 ): Promise<ReviewsResponse> {
   const qs = buildQueryString(params);
@@ -69,7 +69,7 @@ export async function getTemplateReviews(
 }
 
 export async function submitReview(
-  templateId: number,
+  templateId: string,
   data: { rating: number; title?: string; comment?: string }
 ): Promise<TemplateReview> {
   return apiClient<TemplateReview>(`${BASE}/${templateId}/reviews`, {
@@ -79,7 +79,7 @@ export async function submitReview(
 }
 
 export async function updateReview(
-  templateId: number,
+  templateId: string,
   reviewId: number,
   data: { rating?: number; title?: string; comment?: string }
 ): Promise<TemplateReview> {
@@ -93,7 +93,7 @@ export async function updateReview(
 }
 
 export async function deleteReview(
-  templateId: number,
+  templateId: string,
   reviewId: number
 ): Promise<void> {
   return apiClient(`${BASE}/${templateId}/reviews/${reviewId}`, {
