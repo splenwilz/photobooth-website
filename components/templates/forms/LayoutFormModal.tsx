@@ -30,6 +30,11 @@ import {
 	type PhotoAreaFormData,
 } from "@/core/templates/layout-clipboard";
 import { NumberInput } from "./NumberInput";
+import {
+	generatePreset,
+	PRESETS,
+	type PresetKind,
+} from "@/core/templates/canvas-presets";
 
 interface LayoutFormState {
 	name: string;
@@ -273,6 +278,16 @@ function LayoutFormModalContent({
 
 	const handleAreasFromCanvas = (next: PhotoAreaFormData[]) => {
 		setForm((prev) => ({ ...prev, photo_areas: next }));
+	};
+
+	// Quick-start presets: drop in N evenly-spaced slots for the current
+	// canonical dimensions and reveal the canvas so the result is visible.
+	const applyPreset = (kind: PresetKind) => {
+		setForm((prev) => ({
+			...prev,
+			photo_areas: generatePreset(kind, prev.width, prev.height),
+		}));
+		setIsCanvasVisible(true);
 	};
 
 	// Tracks the draftId of the most recently duplicated photo area so the
@@ -823,9 +838,25 @@ function LayoutFormModalContent({
 									</button>
 								</div>
 							</div>
+							{form.photo_areas.length === 0 && (
+								<div className="flex items-center flex-wrap gap-2 mb-2">
+									<span className="text-xs text-zinc-500">Quick start:</span>
+									{PRESETS.map(({ kind, label }) => (
+										<button
+											key={kind}
+											type="button"
+											onClick={() => applyPreset(kind)}
+											title={`Add ${label} evenly-spaced photo slots`}
+											className="text-xs px-2.5 py-1 rounded-lg border border-slate-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800"
+										>
+											{label}
+										</button>
+									))}
+								</div>
+							)}
 							{form.photo_areas.length === 0 && !referenceImageUrl && (
 								<p className="text-xs text-zinc-400 italic py-3 text-center border border-dashed border-slate-200 dark:border-zinc-700 rounded-lg">
-									No photo areas added yet. Use &quot;Auto-detect from image&quot; or &quot;+ Add Photo Area&quot; to get started.
+									No photo areas added yet. Use a Quick start preset, &quot;Auto-detect from image&quot;, or &quot;+ Add Photo Area&quot; to get started.
 								</p>
 							)}
 							{(form.photo_areas.length > 0 || referenceImageUrl) && isCanvasVisible && (
@@ -839,6 +870,7 @@ function LayoutFormModalContent({
 										onDuplicate={duplicateArea}
 										pendingFocusDraftId={pendingFocusDraftId}
 										onFocusApplied={() => setPendingFocusDraftId(null)}
+										fullscreen={isFullscreen}
 									/>
 									<p className="text-[10px] text-zinc-500 mt-1">
 										Drag to move, corners to resize, the small handle on the top edge to round corners (drag to the middle to make a circle). Hold Shift to snap to 10px. Tab into a rectangle, then arrow keys to nudge (Shift+arrow for 10px), Delete to remove, Cmd/Ctrl+D to duplicate. For heart, petal, or custom cutouts, define a rectangular slot here and mask the visible cutout via the template overlay PNG when creating the template.
