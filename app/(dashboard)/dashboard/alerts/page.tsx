@@ -83,6 +83,10 @@ export default function AlertsPage() {
   const summary = data?.summary ?? { critical: 0, warning: 0, info: 0 };
   const totalAlerts = summary.critical + summary.warning + summary.info;
   const unreadCount = alerts.filter((a) => !a.isRead).length;
+  // "Mark all read" is scope-wide (it ignores severity/category filters), so the
+  // filtered unread count doesn't represent what it would mark. Only offer it in
+  // the unfiltered view, where unreadCount reflects the full scope.
+  const filtersActive = filterSeverity !== "all" || filterCategory !== "all";
 
   const markAllRead = useMarkAllAlertsRead();
 
@@ -210,7 +214,7 @@ export default function AlertsPage() {
             {boothName ? `Alerts for ${boothName}` : "Notifications and system alerts"}
           </p>
         </div>
-        {unreadCount > 0 && (
+        {!filtersActive && unreadCount > 0 && (
           <button
             onClick={() => markAllRead.mutate(isAllBooths ? null : selectedBoothId)}
             disabled={markAllRead.isPending}

@@ -99,8 +99,10 @@ export function useMarkAllAlertsRead() {
 		onSuccess: (_data, boothId) => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.alerts.all() });
 			queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.overview() });
-			if (boothId) {
-				// Only this booth's detail carries stale recent_alerts.
+			if (boothId !== null) {
+				// A scoped mark (any non-null booth id): only this booth's detail
+				// carries stale recent_alerts. Matches markAllAlertsRead, which
+				// treats a non-null booth_id as scoped.
 				queryClient.invalidateQueries({
 					queryKey: queryKeys.booths.detail(boothId),
 				});
