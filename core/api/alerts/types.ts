@@ -79,3 +79,20 @@ export interface BoothAlertsParams extends AlertsParams {
 	/** Booth ID (path parameter) */
 	booth_id: string;
 }
+
+/**
+ * Request body for marking all alerts read.
+ * PATCH /api/v1/analytics/alerts/read-all
+ */
+export interface MarkAllAlertsReadRequest {
+	/** Scope: a booth id, or null to mark every booth's alerts read. */
+	booth_id: string | null;
+}
+
+/**
+ * Response from marking all alerts read.
+ */
+export interface MarkAllAlertsReadResponse {
+	/** Number of alerts that were marked read. */
+	updated: number;
+}

@@ -11,7 +11,7 @@
 
 import { useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { useAlerts, useBoothAlerts } from "@/core/api/alerts";
+import { useAlerts, useBoothAlerts, useMarkAllAlertsRead } from "@/core/api/alerts";
 import { useBoothList } from "@/core/api/booths";
 import type { AlertSeverity, AlertCategory } from "@/core/api/alerts/types";
 
@@ -82,6 +82,13 @@ export default function AlertsPage() {
   const alerts = data?.alerts ?? [];
   const summary = data?.summary ?? { critical: 0, warning: 0, info: 0 };
   const totalAlerts = summary.critical + summary.warning + summary.info;
+  const unreadCount = alerts.filter((a) => !a.isRead).length;
+  // "Mark all read" is scope-wide (it ignores severity/category filters), so the
+  // filtered unread count doesn't represent what it would mark. Only offer it in
+  // the unfiltered view, where unreadCount reflects the full scope.
+  const filtersActive = filterSeverity !== "all" || filterCategory !== "all";
+
+  const markAllRead = useMarkAllAlertsRead();
 
   // Get booth name from booth list (cached by layout) for subtitle
   const { data: boothListData } = useBoothList();
@@ -207,9 +214,17 @@ export default function AlertsPage() {
             {boothName ? `Alerts for ${boothName}` : "Notifications and system alerts"}
           </p>
         </div>
-        {totalAlerts > 0 && (
-          <button className="px-4 py-2 text-sm font-medium text-[#069494] border border-[#069494] rounded-xl hover:bg-[#069494]/10 transition-colors">
-            Mark All as Read
+        {!filtersActive && unreadCount > 0 && (
+          <button
+            onClick={() => markAllRead.mutate(isAllBooths ? null : selectedBoothId)}
+            disabled={markAllRead.isPending}
+            className="px-4 py-2 text-sm font-medium text-[#069494] border border-[#069494] rounded-xl hover:bg-[#069494]/10 transition-colors disabled:opacity-50 disabled:cursor-default"
+          >
+            {markAllRead.isPending
+              ? "Marking…"
+              : isAllBooths
+                ? "Mark all read"
+                : "Mark this booth read"}
           </button>
         )}
       </div>
