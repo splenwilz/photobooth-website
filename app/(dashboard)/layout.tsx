@@ -6,7 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useBoothList } from "@/core/api/booths";
-import { useAlerts } from "@/core/api/alerts";
+import { useAlerts, useBoothAlerts } from "@/core/api/alerts";
 import type { AuthUser } from "@/core/api/auth/types";
 import { getUserDisplayName } from "@/hooks/use-user";
 import { GuidedTour } from "@/components/tour/GuidedTour";
@@ -277,9 +277,16 @@ function DashboardLayoutContent({
   const { data: boothListData } = useBoothList();
   const booths = boothListData?.booths ?? [];
 
-  // Fetch alerts for badge count
-  const { data: alertsData } = useAlerts();
-  const alertsCount = alertsData?.alerts?.length ?? 0;
+  // Fetch alerts for the badge — count UNREAD only, scoped to the selected
+  // booth (the whole dashboard, incl. the Alerts page + its "mark read" button,
+  // is booth-scoped via ?booth=). Counting all booths would leave the badge
+  // stuck after marking one booth read.
+  const { data: allAlertsData } = useAlerts(undefined, {
+    enabled: !selectedBoothId,
+  });
+  const { data: boothAlertsData } = useBoothAlerts(selectedBoothId);
+  const alertsData = selectedBoothId ? boothAlertsData : allAlertsData;
+  const alertsCount = alertsData?.alerts?.filter((a) => !a.isRead).length ?? 0;
 
   // Tour state
   const [tourActive, setTourActive] = useState(false);

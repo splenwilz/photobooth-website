@@ -1,8 +1,8 @@
 import type { Alert as AppAlert } from "@/types/photobooth";
 import { mapAlertsApiAlertToAppAlert } from "@/utils/alert-mapping";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "../utils/query-keys";
-import { getAlerts, getBoothAlerts } from "./services";
+import { getAlerts, getBoothAlerts, markAllAlertsRead } from "./services";
 import type { AlertsParams, AlertsSummary, BoothAlertsParams } from "./types";
 
 /**
@@ -77,5 +77,38 @@ export function useBoothAlerts(
 		},
 		enabled: !!boothId,
 		staleTime: 0,
+	});
+}
+
+/**
+ * Hook to mark all alerts read.
+ *
+ * Pass a booth id to scope to one booth, or null for every booth. On success we
+ * refresh the alerts caches (list + booth, used by the sidebar/bell badge) and
+ * the dashboard overview + booth detail, which carry `recent_alerts` shown on
+ * the Overview page. Invalidation is scoped to the marked booth to avoid
+ * refetching every unrelated booth query on a single-booth mark.
+ *
+ * @see PATCH /api/v1/analytics/alerts/read-all
+ */
+export function useMarkAllAlertsRead() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: (boothId: string | null) => markAllAlertsRead(boothId),
+		onSuccess: (_data, boothId) => {
+			queryClient.invalidateQueries({ queryKey: queryKeys.alerts.all() });
+			queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.overview() });
+			if (boothId) {
+				// Only this booth's detail carries stale recent_alerts.
+				queryClient.invalidateQueries({
+					queryKey: queryKeys.booths.detail(boothId),
+				});
+			} else {
+				// All booths were marked; refresh every booth's detail so a
+				// later-opened booth shows fresh recent_alerts.
+				queryClient.invalidateQueries({ queryKey: queryKeys.booths.all() });
+			}
+		},
 	});
 }

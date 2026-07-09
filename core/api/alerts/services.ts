@@ -1,5 +1,11 @@
 import { apiClient } from "../client";
-import type { AlertsParams, AlertsResponse, BoothAlertsParams } from "./types";
+import type {
+	AlertsParams,
+	AlertsResponse,
+	BoothAlertsParams,
+	MarkAllAlertsReadRequest,
+	MarkAllAlertsReadResponse,
+} from "./types";
 
 /**
  * Alerts API Services
@@ -69,3 +75,23 @@ export async function getBoothAlerts(
 	return response;
 }
 
+/**
+ * Mark all alerts read.
+ *
+ * @param boothId - A booth id to scope to, or null to mark every booth's alerts read.
+ * @returns Promise resolving to `{ updated }` — count of alerts marked read.
+ * @see PATCH /api/v1/analytics/alerts/read-all
+ */
+export async function markAllAlertsRead(
+	boothId: string | null,
+): Promise<MarkAllAlertsReadResponse> {
+	return apiClient<MarkAllAlertsReadResponse>(
+		"/api/v1/analytics/alerts/read-all",
+		{
+			method: "PATCH",
+			body: JSON.stringify({
+				booth_id: boothId,
+			} satisfies MarkAllAlertsReadRequest),
+		},
+	);
+}
