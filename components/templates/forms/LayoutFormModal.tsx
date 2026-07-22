@@ -482,6 +482,24 @@ function LayoutFormModalContent({
 				),
 			};
 		});
+		// An area can pass the form-space checks above yet collapse here:
+		// an x/y past the canvas edge (typed or pasted) clamps to the edge
+		// with zero remaining span, and a sliver can round to zero size
+		// under downscale. Reject rather than silently drop: the backend
+		// keys areas by photo_index 1..N, so filtering one out would send
+		// a count that no longer matches the surviving indexes.
+		const collapsed = scaledPhotoAreas.filter(
+			(a) => a.width <= 0 || a.height <= 0,
+		);
+		if (collapsed.length > 0) {
+			const list = collapsed.map((a) => `#${a.photo_index}`).join(", ");
+			setValidationError(
+				collapsed.length === 1
+					? `Photo area ${list} ends up outside the ${canonW}×${canonH} print canvas after scaling. Move or resize it and try again.`
+					: `Photo areas ${list} end up outside the ${canonW}×${canonH} print canvas after scaling. Move or resize them and try again.`,
+			);
+			return;
+		}
 		const meUpdateData = {
 			name: trimmedName,
 			description: form.description,
