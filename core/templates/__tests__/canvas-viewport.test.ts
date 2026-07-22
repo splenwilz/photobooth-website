@@ -8,17 +8,17 @@ import {
 
 describe("computeBaseScale", () => {
 	it("fits by the more constrained axis (letterbox)", () => {
-		// A tall Strips layout (603x1803) in a 500x400 viewport is height-bound.
-		expect(computeBaseScale(500, 400, 603, 1803)).toBeCloseTo(400 / 1803);
-		// A wide 4x6 layout (1803x1206) in the same viewport is width-bound.
-		expect(computeBaseScale(500, 400, 1803, 1206)).toBeCloseTo(500 / 1803);
+		// A tall Strips layout (600x1800) in a 500x400 viewport is height-bound.
+		expect(computeBaseScale(500, 400, 600, 1800)).toBeCloseTo(400 / 1800);
+		// A 4x6 layout (1200x1800) in a short-wide 500x1600 viewport is width-bound.
+		expect(computeBaseScale(500, 1600, 1200, 1800)).toBeCloseTo(500 / 1200);
 	});
 
 	it("returns 0 for unmeasured viewport or degenerate layout", () => {
-		expect(computeBaseScale(0, 400, 603, 1803)).toBe(0);
-		expect(computeBaseScale(500, 0, 603, 1803)).toBe(0);
-		expect(computeBaseScale(500, 400, 0, 1803)).toBe(0);
-		expect(computeBaseScale(500, 400, 603, 0)).toBe(0);
+		expect(computeBaseScale(0, 400, 600, 1800)).toBe(0);
+		expect(computeBaseScale(500, 0, 600, 1800)).toBe(0);
+		expect(computeBaseScale(500, 400, 0, 1800)).toBe(0);
+		expect(computeBaseScale(500, 400, 600, 0)).toBe(0);
 	});
 });
 
