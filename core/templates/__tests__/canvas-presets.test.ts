@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { generatePreset } from "../canvas-presets";
 
-const stripW = 603;
-const stripH = 1803;
+const stripW = 600;
+const stripH = 1800;
 
 describe("generatePreset", () => {
 	it("creates N stacked, in-bounds, 1-indexed slots for an N-up strip", () => {
@@ -29,7 +29,7 @@ describe("generatePreset", () => {
 	});
 
 	it("2x2 produces a 4-slot grid", () => {
-		const slots = generatePreset("2x2", 1803, 1206);
+		const slots = generatePreset("2x2", 1200, 1800);
 		expect(slots).toHaveLength(4);
 		// two distinct columns and two distinct rows
 		expect(new Set(slots.map((s) => s.x)).size).toBe(2);

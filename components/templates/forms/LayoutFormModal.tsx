@@ -60,8 +60,8 @@ const PRODUCT_CATEGORIES = [
 // any mismatch. Form state is always synced to the value for the currently
 // selected category — the operator never types dimensions directly.
 const CANONICAL_DIMENSIONS: Record<number, { width: number; height: number }> = {
-	1: { width: 603, height: 1803 }, // Strips
-	2: { width: 1803, height: 1206 }, // 4x6
+	1: { width: 600, height: 1800 }, // Strips
+	2: { width: 1200, height: 1800 }, // 4x6
 };
 
 const DEFAULT_PHOTO_AREA: PhotoAreaFormData = {
@@ -355,16 +355,17 @@ function LayoutFormModalContent({
 			}
 			const text = await navigator.clipboard.readText();
 			const parsed = parseLayoutFromClipboard(text);
-			// Snap pasted dimensions to canonical for the parsed category.
-			// Legacy clipboard payloads may carry non-canonical values that
-			// the backend would now reject on save.
-			const canon =
-				CANONICAL_DIMENSIONS[parsed.product_category_id];
+			// Keep the payload's own dimensions in form state, even when they
+			// are non-canonical (legacy pre-migration payloads). The photo
+			// areas are authored in that space, and handleSubmit's remap uses
+			// form.width/height as the source space to rescale them into the
+			// canonical pair it always sends. Snapping here would zero out
+			// that remap and submit legacy-space areas unscaled.
 			setForm({
 				name: parsed.name,
 				description: parsed.description,
-				width: canon?.width ?? parsed.width,
-				height: canon?.height ?? parsed.height,
+				width: parsed.width,
+				height: parsed.height,
 				photo_count: parsed.photo_areas.length,
 				product_category_id: parsed.product_category_id,
 				is_active: parsed.is_active,
@@ -372,9 +373,15 @@ function LayoutFormModalContent({
 				photo_areas: parsed.photo_areas,
 			});
 			const areaCount = parsed.photo_areas.length;
+			const canon = CANONICAL_DIMENSIONS[parsed.product_category_id];
+			const isNonCanonical =
+				canon &&
+				(parsed.width !== canon.width || parsed.height !== canon.height);
 			setPasteMessage({
 				type: "success",
-				text: `Pasted layout with ${areaCount} photo area${areaCount === 1 ? "" : "s"}.`,
+				text: isNonCanonical
+					? `Pasted layout with ${areaCount} photo area${areaCount === 1 ? "" : "s"}. Its ${parsed.width}×${parsed.height} dimensions predate the current ${canon.width}×${canon.height} print size, so photo areas will be scaled to fit on save. Double-check the result before relying on it.`
+					: `Pasted layout with ${areaCount} photo area${areaCount === 1 ? "" : "s"}.`,
 			});
 		} catch (err) {
 			const isPermissionError =
@@ -444,8 +451,8 @@ function LayoutFormModalContent({
 		const canonW = canon?.width ?? form.width;
 		const canonH = canon?.height ?? form.height;
 		// Scale photo_areas from form-space to canonical-space. After auto-
-		// detect from a non-canonical-sized PNG (e.g., 1206×3606 backdrop
-		// for a 603×1803 Strips layout), form.width is the image's pixel
+		// detect from a non-canonical-sized PNG (e.g., 1200×3600 backdrop
+		// for a 600×1800 Strips layout), form.width is the image's pixel
 		// width and slot coords are in that space; the wire payload sends
 		// canonical width/height, so the slots have to be remapped or the
 		// stored layout is geometrically wrong. When form already matches
@@ -453,21 +460,46 @@ function LayoutFormModalContent({
 		// scaleX = scaleY = 1 and this map is a no-op.
 		const scaleX = form.width > 0 ? canonW / form.width : 1;
 		const scaleY = form.height > 0 ? canonH / form.height : 1;
-		const scaledPhotoAreas = form.photo_areas.map((a) => ({
-			...a,
-			x: Math.max(0, Math.min(canonW, Math.round(a.x * scaleX))),
-			y: Math.max(0, Math.min(canonH, Math.round(a.y * scaleY))),
-			width: Math.max(0, Math.min(canonW, Math.round(a.width * scaleX))),
-			height: Math.max(
-				0,
-				Math.min(canonH, Math.round(a.height * scaleY)),
-			),
-			// Use the smaller axial scale so the radius can't exceed half
-			// the shorter side after the clamp in LayoutCanvasEditor.
-			border_radius: Math.round(
-				a.border_radius * Math.min(scaleX, scaleY),
-			),
-		}));
+		const scaledPhotoAreas = form.photo_areas.map((a) => {
+			const x = Math.max(0, Math.min(canonW, Math.round(a.x * scaleX)));
+			const y = Math.max(0, Math.min(canonH, Math.round(a.y * scaleY)));
+			return {
+				...a,
+				x,
+				y,
+				// Clamp size to the remaining span, not the full canvas:
+				// x and width round independently, so round(x·s)+round(w·s)
+				// can land 1px past canonW even for in-bounds source geometry.
+				width: Math.max(0, Math.min(canonW - x, Math.round(a.width * scaleX))),
+				height: Math.max(
+					0,
+					Math.min(canonH - y, Math.round(a.height * scaleY)),
+				),
+				// Use the smaller axial scale so the radius can't exceed half
+				// the shorter side after the clamp in LayoutCanvasEditor.
+				border_radius: Math.round(
+					a.border_radius * Math.min(scaleX, scaleY),
+				),
+			};
+		});
+		// An area can pass the form-space checks above yet collapse here:
+		// an x/y past the canvas edge (typed or pasted) clamps to the edge
+		// with zero remaining span, and a sliver can round to zero size
+		// under downscale. Reject rather than silently drop: the backend
+		// keys areas by photo_index 1..N, so filtering one out would send
+		// a count that no longer matches the surviving indexes.
+		const collapsed = scaledPhotoAreas.filter(
+			(a) => a.width <= 0 || a.height <= 0,
+		);
+		if (collapsed.length > 0) {
+			const list = collapsed.map((a) => `#${a.photo_index}`).join(", ");
+			setValidationError(
+				collapsed.length === 1
+					? `Photo area ${list} ends up outside the ${canonW}×${canonH} print canvas after scaling. Move or resize it and try again.`
+					: `Photo areas ${list} end up outside the ${canonW}×${canonH} print canvas after scaling. Move or resize them and try again.`,
+			);
+			return;
+		}
 		const meUpdateData = {
 			name: trimmedName,
 			description: form.description,

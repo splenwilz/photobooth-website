@@ -137,8 +137,8 @@ export default function PhoneUploadPage() {
       <p>The target output dimensions at 300 DPI are:</p>
 
       <ul>
-        <li><strong>4×6 print</strong> → 1803 × 1206 pixels</li>
-        <li><strong>Strip</strong> → 603 × 1803 pixels</li>
+        <li><strong>4×6 print</strong> → 1200 × 1800 pixels</li>
+        <li><strong>Strip</strong> → 600 × 1800 pixels</li>
       </ul>
 
       <p>

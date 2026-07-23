@@ -116,7 +116,7 @@ export default function LayoutsTabPage() {
       <ol>
         <li>Find the <strong>New Layout</strong> (or similar) button.</li>
         <li>Give the layout a <strong>name</strong>. Make it descriptive (e.g. <code>4x6-2-Photo-Heart</code>).</li>
-        <li>Set the <strong>canvas dimensions</strong> in pixels. For prints this should match your target output (e.g. 1803×1206 for a 4×6 at 300 DPI).</li>
+        <li>Set the <strong>canvas dimensions</strong> in pixels. For prints this should match your target output (e.g. 1200×1800 for a 4×6 at 300 DPI).</li>
         <li>
           Add photo areas one at a time:
           <ul>
